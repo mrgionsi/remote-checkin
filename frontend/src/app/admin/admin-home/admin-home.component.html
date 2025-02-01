@@ -1,0 +1,8 @@
+<p-sidebar [(visible)]="visible" [baseZIndex]="10000" [showCloseIcon]="true">
+    <h3>Admin Panel</h3>
+    <p-menu [model]="menuItems"></p-menu>
+</p-sidebar>
+
+<button pButton label="☰ Menu" (click)="toggleSidebar()" class="p-mr-2"></button>
+
+<router-outlet></router-outlet>

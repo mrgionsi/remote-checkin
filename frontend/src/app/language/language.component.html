@@ -1,1 +1,10 @@
-<p>language works!</p>
+<div class="container">
+    <h3>Seleziona la tua lingua</h3>
+    <ul class="language-list">
+        <li *ngFor="let lang of languages" (click)="selectLanguage(lang)"
+            [class.selected]="lang.code === selectedLanguage.code">
+            <span class="flag">{{ lang.flag }}</span>
+            <span class="name">{{ lang.name }}</span>
+        </li>
+    </ul>
+</div>
