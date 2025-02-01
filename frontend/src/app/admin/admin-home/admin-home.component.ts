@@ -6,7 +6,6 @@ import { RippleModule } from 'primeng/ripple';
 import { AvatarModule } from 'primeng/avatar';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
-import { NgModule } from '@angular/core';
 import { SidebarModule } from 'primeng/sidebar';
 import { ButtonModule } from 'primeng/button';
 
@@ -26,6 +25,8 @@ export class AdminHomeComponent {
     this.menuItems = [
       { label: 'Dashboard', icon: 'pi pi-chart-line', routerLink: '/admin/dashboard' },
       { label: 'Add new Reservation', icon: 'pi pi-plus', routerLink: '/admin/create-reservation' },
+      { label: 'Rooms', icon: 'pi pi-warehouse', routerLink: '/admin/rooms' },
+
       { label: 'Settings', icon: 'pi pi-cog', routerLink: '/admin/settings' }
     ];
   }
