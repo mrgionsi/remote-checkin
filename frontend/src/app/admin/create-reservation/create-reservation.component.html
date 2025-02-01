@@ -1,0 +1,66 @@
+<div class="p-fluid">
+    <h2 class="text-center mb-4">Add a Reservation</h2>
+
+    <form [formGroup]="reservationForm" (ngSubmit)="onSubmit()">
+        <!-- Reservation Number Field -->
+        <div class="p-field p-grid align-items-center p-mb-3">
+            <label for="reservationNumber" class="p-col-12 p-md-3 text-right">Reservation Number (From Booking or
+                AirBnB)</label>
+            <div class="p-col-12 p-md-9">
+                <input id="reservationNumber" pInputText formControlName="reservationNumber" type="text"
+                    [class.p-invalid]="reservationForm.get('reservationNumber')?.invalid && reservationForm.get('reservationNumber')?.touched" />
+                <p *ngIf="reservationForm.get('reservationNumber')?.invalid && reservationForm.get('reservationNumber')?.touched"
+                    class="p-error mt-2">
+                    Reservation number is required.
+                </p>
+            </div>
+        </div>
+
+        <!-- Start Date Field -->
+        <div class="p-field p-grid align-items-center p-mb-3">
+            <label for="startDate" class="p-col-12 p-md-3 text-right">Start Date</label>
+            <div class="p-col-12 p-md-9">
+                <p-datepicker id="startDate" formControlName="startDate" [showTime]="true" dateFormat="yy-mm-dd"
+                    [class.p-invalid]="reservationForm.get('startDate')?.invalid && reservationForm.get('startDate')?.touched"></p-datepicker>
+                <p *ngIf="reservationForm.get('startDate')?.invalid && reservationForm.get('startDate')?.touched"
+                    class="p-error mt-2">
+                    Start date is required.
+                </p>
+            </div>
+        </div>
+
+        <!-- End Date Field -->
+        <div class="p-field p-grid align-items-center p-mb-3">
+            <label for="endDate" class="p-col-12 p-md-3 text-right">End Date</label>
+            <div class="p-col-12 p-md-9">
+                <p-datepicker id="endDate" formControlName="endDate" [showTime]="true" dateFormat="yy-mm-dd"
+                    [class.p-invalid]="reservationForm.get('endDate')?.invalid && reservationForm.get('endDate')?.touched"></p-datepicker>
+                <p *ngIf="reservationForm.get('endDate')?.invalid && reservationForm.get('endDate')?.touched"
+                    class="p-error mt-2">
+                    End date is required.
+                </p>
+            </div>
+        </div>
+
+        <!-- Room Name Field -->
+        <div class="p-field p-grid align-items-center p-mb-3">
+            <label for="roomName" class="p-col-12 p-md-3 text-right">Room Name</label>
+            <div class="p-col-12 p-md-9">
+                <p-select id="roomName" formControlName="roomName" [options]="rooms" optionLabel="name"
+                    placeholder="Select a Room"
+                    [class.p-invalid]="reservationForm.get('roomName')?.invalid && reservationForm.get('roomName')?.touched">
+                </p-select>
+                <p *ngIf="reservationForm.get('roomName')?.invalid && reservationForm.get('roomName')?.touched"
+                    class="p-error">
+                    Room name is required.
+                </p>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="text-center">
+            <button pButton label="Create Reservation" type="submit" [disabled]="reservationForm.invalid"
+                class="p-mt-3"></button>
+        </div>
+    </form>
+</div>

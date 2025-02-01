@@ -1,0 +1,46 @@
+.container {
+    width: 400px;
+    margin: auto;
+    text-align: center;
+}
+
+.language-list {
+    list-style: none;
+    padding: 0;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.language-list li {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    cursor: pointer;
+    background: white;
+    border-bottom: 1px solid #ddd;
+    transition: background 0.3s;
+}
+
+.language-list li:last-child {
+    border-bottom: none;
+}
+
+.language-list li:hover {
+    background: #f0f0f0;
+}
+
+.language-list li.selected {
+    background: #42a5f5;
+    color: white;
+}
+
+.flag {
+    font-size: 24px;
+    margin-right: 10px;
+}
+
+.name {
+    flex-grow: 1;
+    text-align: left;
+}

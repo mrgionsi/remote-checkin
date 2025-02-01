@@ -1,0 +1,42 @@
+<!-- dashboard-remote-checkin.component.html -->
+<div class="p-fluid">
+    <h2 class="text-center mb-4">Remote Check-ins Dashboard</h2>
+
+    <!-- Filter/Search -->
+    <div class="p-field p-grid">
+        <label for="search" class="p-col-12 p-md-2">Search</label>
+        <div class="p-col-12 p-md-10">
+            <input id="search" pInputText (ngModel)="searchTerm"
+                placeholder="Search by reservation number or guest name" />
+        </div>
+    </div>
+
+    <!-- Check-in Table -->
+    <p-table [value]="checkIns" [paginator]="true" [rows]="10" [globalFilterFields]="searchTerm"
+        responsiveLayout="scroll">
+        <ng-template pTemplate="header">
+            <tr>
+                <th>Reservation Number</th>
+                <th>Guest Name</th>
+                <th>Room</th>
+                <th>Check-in Date</th>
+                <th>Status</th>
+            </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-checkIn>
+            <tr>
+                <td>{{ checkIn.reservationNumber }}</td>
+                <td>{{ checkIn.guestName }}</td>
+                <td>{{ checkIn.room }}</td>
+                <td>{{ checkIn.checkInDate | date: 'short' }}</td>
+                <td>
+                    <p-tag [value]="checkIn.status" [severity]="getStatusSeverity(checkIn.status)"></p-tag>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>
+
+<!-- dashboard-remote-checkin.component.html -->
+<p-chart type="line" [data]="checkInData" [options]="chartOptions"></p-chart>
