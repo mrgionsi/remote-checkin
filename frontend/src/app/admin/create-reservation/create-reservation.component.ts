@@ -46,6 +46,10 @@ export class CreateReservationComponent implements OnInit {
   onSubmit(): void {
     if (this.reservationForm.valid) {
       const reservation = this.reservationForm.value;
+      console.log(reservation)
+
+      reservation.startDate = reservation.startDate.toISOString().split('T')[0];
+      reservation.endDate = reservation.endDate.toISOString().split('T')[0];
 
       // Create an observer object
       const observer = {
