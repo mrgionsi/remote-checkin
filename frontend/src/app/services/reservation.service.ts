@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root', // Service is available throughout the app
 })
 export class ReservationService {
-  private apiUrl = 'https://your-api-endpoint/reservations';  // Replace with your actual API URL
+  private apiUrl = 'http://localhost:5000/api/v1/reservations';  // Replace with your actual API URL
 
   constructor(private http: HttpClient) { }
 
