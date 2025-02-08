@@ -5,11 +5,15 @@ import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { ChartModule } from 'primeng/chart';
 import { ChartOptions } from 'chart.js';
+import { Toast, ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 
 @Component({
   selector: 'app-dashboard',
-  imports: [ChartModule, TableModule, InputTextModule, TagModule, CommonModule],
+  imports: [ToastModule, Toast, ChartModule, TableModule, InputTextModule, TagModule, CommonModule],
+  providers: [MessageService],
+  host: { ngSkipHydration: 'true' },
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
@@ -37,7 +41,10 @@ export class DashboardComponent implements OnInit {
 
   searchTerm: any;
 
-  constructor() { }
+  constructor(private messageService: MessageService,
+  ) {
+
+  }
 
 
   getStatusSeverity(status: string) {
@@ -51,11 +58,26 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-
+  reservationData: any;
   checkInData: any;
   chartOptions: ChartOptions | undefined;
 
   ngOnInit(): void {
+    this.messageService.add({ severity: 'info', summary: 'Info', detail: 'Message Content' });
+
+    // Check if the state contains the reservation data
+    /*     const state = history.state['reservation'];
+        console.log(state)
+    
+        if (state) {
+          // Parse the state if it's available
+          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Reservation created', life: 3000 });
+    
+        } else {
+          console.log('No reservation data passed');
+        } */
+
+
 
     this.checkInData = {
       labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'], // Example months
