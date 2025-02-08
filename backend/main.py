@@ -4,7 +4,7 @@ from flask_cors import CORS
 from database import engine, Base
 from routes.room_routes import room_bp
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins="http://localhost:4200")  # Change this to match your frontend URL
 
 # Simulating an in-memory "database"
 reservations = []
