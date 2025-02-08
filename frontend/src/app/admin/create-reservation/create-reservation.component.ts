@@ -57,7 +57,7 @@ export class CreateReservationComponent implements OnInit {
     if (this.reservationForm.valid) {
       const reservation = this.reservationForm.value;
       console.log(reservation)
-
+      reservation.roomName = reservation.roomName['name']
       reservation.startDate = reservation.startDate.toISOString().split('T')[0];
       reservation.endDate = reservation.endDate.toISOString().split('T')[0];
 
@@ -65,7 +65,7 @@ export class CreateReservationComponent implements OnInit {
       const observer = {
         next: (response: any) => {
           console.log('Reservation created successfully', response);
-          this.router.navigate(['/success']);
+          this.router.navigate(['/admin/dashboard']);
         },
         error: (error: any) => {
           console.error('Error creating reservation', error);
