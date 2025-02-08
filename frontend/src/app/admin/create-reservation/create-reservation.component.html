@@ -46,7 +46,7 @@
         <div class="p-field p-grid align-items-center p-mb-3">
             <label for="roomName" class="p-col-12 p-md-3 text-right">Room Name</label>
             <div class="p-col-12 p-md-9">
-                <p-select id="roomName" formControlName="roomName" [options]="rooms" optionLabel="name"
+                <p-select id="roomSelect" formControlName="roomName" [options]="rooms" optionLabel="name"
                     placeholder="Select a Room"
                     [class.p-invalid]="reservationForm.get('roomName')?.invalid && reservationForm.get('roomName')?.touched">
                 </p-select>
@@ -54,6 +54,10 @@
                     class="p-error">
                     Room name is required.
                 </p>
+                <!-- Error Message -->
+                <div *ngIf="reservationForm.errors?.['dateRangeInvalid']">
+                    <p style="color: red;">Start date cannot be later than the end date.</p>
+                </div>
             </div>
         </div>
 
