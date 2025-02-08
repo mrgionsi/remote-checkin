@@ -54,6 +54,10 @@
                     class="p-error">
                     Room name is required.
                 </p>
+                <!-- Error Message -->
+                <div *ngIf="reservationForm.errors?.['dateRangeInvalid']">
+                    <p style="color: red;">Start date cannot be later than the end date.</p>
+                </div>
             </div>
         </div>
 
