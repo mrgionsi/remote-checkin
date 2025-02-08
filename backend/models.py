@@ -6,9 +6,9 @@ class Room(Base):
     __tablename__ = "room"
     
     id = Column(BigInteger, Sequence("room_id_seq"), primary_key=True, index=True)
-    name = Column(String)
-    capacity = Column(Integer)
-    id_structure = Column(BigInteger, ForeignKey("structure.id"))
+    name = Column(String, nullable=False)
+    capacity = Column(Integer, nullable=False)
+    id_structure = Column(BigInteger, ForeignKey("structure.id"), nullable=False)
 
     structure = relationship("Structure", back_populates="rooms")
 
@@ -19,6 +19,7 @@ class Room(Base):
                 "capacity": self.capacity,
                 "id_structure": self.id_structure,
             }
+            
 class AdminStructure(Base):
     __tablename__ = "admin_structure"
 

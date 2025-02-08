@@ -1,11 +1,12 @@
 from flask import Flask, request, jsonify
 from datetime import datetime
 from flask_cors import CORS
-from database import SessionLocal
+from database import engine, Base, SessionLocal
+from routes.room_routes import room_bp
 from models import Reservation, ClientReservations, Room, Client
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins="http://localhost:4200")  # Change this to match your frontend URL
 
 # Simulating an in-memory "database"
 reservations = []
@@ -87,6 +88,13 @@ def create_reservation():
 @app.route('/api/v1/reservations', methods=['GET'])
 def get_reservations():
     return jsonify({"reservations": reservations.to_dict()})
+
+
+# Create database tables
+Base.metadata.create_all(bind=engine)
+
+# Register blueprints
+app.register_blueprint(room_bp)
 
 if __name__ == '__main__':
     app.run(debug=True)
