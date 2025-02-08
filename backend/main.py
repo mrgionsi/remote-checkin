@@ -1,7 +1,8 @@
 from flask import Flask, request, jsonify
 from datetime import datetime
 from flask_cors import CORS
-
+from database import engine, Base
+from routes.room_routes import room_bp
 app = Flask(__name__)
 CORS(app)
 
@@ -46,6 +47,13 @@ def create_reservation():
 @app.route('/api/v1/reservations', methods=['GET'])
 def get_reservations():
     return jsonify({"reservations": reservations})
+
+
+# Create database tables
+Base.metadata.create_all(bind=engine)
+
+# Register blueprints
+app.register_blueprint(room_bp)
 
 if __name__ == '__main__':
     app.run(debug=True)
