@@ -13,16 +13,21 @@ jobs:
         python-version: ["3.10", "3.11", "3.13"]
     steps:
     - uses: actions/checkout@v4
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r backend/requirements.txt
         pip install pylint
-        cd backend
+
+    - name: Set PYTHONPATH
+      run: echo "PYTHONPATH=$PWD/backend" >> $GITHUB_ENV  # Adds backend/ to PYTHONPATH
+
     - name: Analysing the code with pylint
       run: |
-        pylint $(git ls-files '*.py')
+        pylint $(git ls-files 'backend/*.py')
