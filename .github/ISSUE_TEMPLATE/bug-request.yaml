@@ -1,9 +1,8 @@
 ---
-name: 🐞 Bug Report (wandb web app)
-description: Use this template to report a bug in the wandb web app.
-title: "[Bug-App]: "
+name: 🐞 Bug Report 
+description: Use this template to report a bug in the Remote Checkin app
+title: "[Bug]: "
 labels:
-  - "a:app"
   - "ty:bug"
 
 body:
@@ -11,7 +10,7 @@ body:
     attributes:
       value: >
         **Thanks :heart: for taking the time to fill out this bug report!** We kindly ask that you search to see if an
-        issue [already exists](https://github.com/wandb/wandb/issues?q=is%3Aissue+sort%3Acreated-desc+) for the bug you
+        issue [already exists](https://github.com/mrgionsi/remote-checkin/issues) for the bug you
         encountered.
 
   - type: textarea
