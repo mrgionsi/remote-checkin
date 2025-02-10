@@ -115,13 +115,13 @@ def create_reservation():
 @app.route('/api/v1/reservations', methods=['GET'])
 def get_reservations():
     """
-    Return a JSON response with all room reservations.
+    Return a JSON response containing the global reservations list.
     
-    This function retrieves all reservations and returns them in a JSON format. The reservations are expected to support
-    conversion to a dictionary via the to_dict() method, and the resulting dictionary is returned under the key "reservations".
+    This function returns the global reservations list wrapped in a JSON response. The reservations are
+    returned under the key "reservations".
     
     Returns:
-        flask.Response: A JSON response object containing the reservations in a dictionary format.
+        flask.Response: A JSON response object containing the global reservations list.
     """
     return jsonify({"reservations": reservations.to_dict()})
 
