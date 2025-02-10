@@ -10,8 +10,8 @@ It supports operations such as creating new reservations and listing all reserva
 
 from datetime import datetime
 from flask import Blueprint, request, jsonify
-from backend.database import SessionLocal
-from ..models import Reservation, Room
+from database import SessionLocal
+from models import Reservation, Room
 
 # Create a blueprint for reservations
 reservation_bp = Blueprint("reservations", __name__, url_prefix="/api/v1")

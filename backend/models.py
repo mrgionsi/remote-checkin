@@ -7,7 +7,7 @@ including Room, Client, Reservation, and others.
 
 from sqlalchemy import Column, Integer, BigInteger, String, Date, ForeignKey, Sequence
 from sqlalchemy.orm import relationship
-from backend.database import Base
+from database import Base
 
 
 class Room(Base):
