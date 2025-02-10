@@ -13,6 +13,17 @@ class Room(Base):
     structure = relationship("Structure", back_populates="rooms")
 
     def to_dict(self):
+            """
+            Return a dictionary representation of the Room instance.
+            
+            The returned dictionary includes:
+                - "id" (int): The unique identifier of the room.
+                - "name" (str): The name of the room (non-nullable).
+                - "capacity" (int): The maximum capacity of the room (non-nullable).
+                - "id_structure" (int): The identifier of the associated structure (non-nullable).
+            
+            This method is primarily used for serializing the room instance to JSON or for similar data transfer purposes.
+            """
             return {
                 "id": self.id,
                 "name": self.name,
