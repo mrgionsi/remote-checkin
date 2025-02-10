@@ -4,14 +4,13 @@ Main module for the remote check-in system.
 This module initializes the Flask app, sets up database tables,
 and registers blueprints for routing.
 """
-import sys
-import os
-sys.path.append(os.path.join(os.path.dirname(__file__), 'backend'))
+
 from flask import Flask
 from flask_cors import CORS
-from database import engine, Base  # Adjust the path based on your project structure
 from routes.room_routes import room_bp
 from routes.reservation_routes import reservation_bp  # Adjust the path as needed
+from database import engine, Base  # Adjust the path based on your project structure
+
 
 app = Flask(__name__)
 CORS(app, origins="http://localhost:4200")  # Change this to match your frontend URL

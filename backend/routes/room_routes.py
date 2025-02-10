@@ -14,8 +14,8 @@ Each route interacts with the database to perform the necessary actions related 
 """
 
 from flask import Blueprint, request, jsonify
-from database import get_db  # Use absolute import
 from models import Room
+from database import get_db  # Use absolute import
 
 room_bp = Blueprint("room", __name__, url_prefix="/api/v1")
 
