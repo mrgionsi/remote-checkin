@@ -222,7 +222,6 @@ class User(Base):
             "id": self.id,
             "name": self.name,
             "surname": self.surname,
-            "password": self.password,
             "username": self.username,
             "id_role": self.id_role,
         }
