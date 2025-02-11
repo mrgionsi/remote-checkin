@@ -146,26 +146,40 @@ def get_reservations_by_structure(structure_id):
     
     
 @reservation_bp.route("/reservations/monthly/<int:structure_id>", methods=["GET"])
-def get_reservationPerMonth(structure_id):
+def get_reservations_per_month(structure_id):
+    """
+    Get monthly reservation counts for a specific structure.
+
+    Args:
+        structure_id (int): The ID of the structure to get reservation counts for.
+
+    Returns:
+        flask.Response: List of dictionaries containing month names and reservation counts.
+    """
     db = SessionLocal()
-    # Create base months with 0
-    months = {i: 0 for i in range(1, 13)}
+    try:
+        # Create base months with 0
+        months = {i: 0 for i in range(1, 13)}
 
-    # Query reservations grouped by month
-    results = (
-        db.query(
-            func.extract("month", Reservation.start_date).label("month"),
-            func.count(Reservation.id).label("total_reservations"),
+        # Query reservations grouped by month for the specific structure
+        results = (
+            db.query(
+                func.extract('month', Reservation.start_date).label('month'),
+                func.count(Reservation.id).label('total_reservations')
+            )
+            .join(Room)
+            .filter(Room.id_structure == structure_id)
+            .group_by(func.extract('month', Reservation.start_date))
+            .all()
         )
-        .group_by(func.extract("month", Reservation.start_date))
-        .all()
-    )
 
-    # Update the dictionary with actual values
-    for month, total in results:
-        months[int(month)] = total
+        # Update the dictionary with actual values
+        for month, total in results:
+            months[int(month)] = total
 
-    return [{"month": calendar.month_name[m], "total_reservations": count} for m, count in months.items()]
-
-    
-    db.close()
+        return jsonify([
+            {"month": calendar.month_name[m], "total_reservations": count}
+            for m, count in months.items()
+        ])
+    finally:
+        db.close()
