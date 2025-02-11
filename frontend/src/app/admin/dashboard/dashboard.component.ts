@@ -109,6 +109,3 @@ export class DashboardComponent implements OnInit {
 
 }
 
-function ViewChild(arg0: string): (target: DashboardComponent, propertyKey: "dt") => void {
-  throw new Error('Function not implemented.');
-}
