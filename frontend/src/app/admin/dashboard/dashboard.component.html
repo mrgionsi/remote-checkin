@@ -4,57 +4,36 @@
     <h2 class="text-center mb-4">Remote Check-ins Dashboard</h2>
 
     <!-- Filter/Search -->
-    <!--     <div class="p-field p-grid">
+    <div class="p-field p-grid">
         <label for="search" class="p-col-12 p-md-2">Search</label>
         <div class="p-col-12 p-md-10">
             <input id="search" pInputText (ngModel)="searchTerm"
                 placeholder="Search by reservation number or guest name" />
         </div>
-    </div> -->
+    </div>
 
     <!-- Check-in Table -->
-    <!-- @ts-ignore -->
-    <p-table #dt2 [value]="reservations" [paginator]="true" [rows]="10" dataKey="id_reference"
-        [globalFilterFields]="['id_reference','room_name','status']" responsiveLayout="scroll">
-        <ng-template #caption>
-            <div class="flex">
-                <p-iconfield iconPosition="left" class="ml-auto">
-                    <p-inputicon>
-                        <i class="pi pi-search"></i>
-                    </p-inputicon>
-
-                    <input pInputText type="text" (input)="dt2.filterGlobal($any($event.target).value, 'contains')"
-                        placeholder="Global Search" />
-                </p-iconfield>
-            </div>
-        </ng-template>
+    <p-table [value]="checkIns" [paginator]="true" [rows]="10" [globalFilterFields]="searchTerm"
+        responsiveLayout="scroll">
         <ng-template pTemplate="header">
             <tr>
                 <th>Reservation Number</th>
                 <th>Guest Name</th>
                 <th>Room</th>
                 <th>Check-in Date</th>
-                <th>Check-out Date</th>
                 <th>Status</th>
             </tr>
         </ng-template>
 
-        <ng-template pTemplate="body" let-reservation>
+        <ng-template pTemplate="body" let-checkIn>
             <tr>
-                <td>{{ reservation.id_reference }}</td>
-                <td>Io<!-- {{ reservation.guestName }} --></td>
-                <td>{{ reservation.room_name }}</td>
-                <td>{{ reservation.start_date }}</td>
-                <td>{{ reservation.end_date }}</td>
-
+                <td>{{ checkIn.reservationNumber }}</td>
+                <td>{{ checkIn.guestName }}</td>
+                <td>{{ checkIn.room }}</td>
+                <td>{{ checkIn.checkInDate | date: 'short' }}</td>
                 <td>
-                    <p-tag [value]="reservation.status" [severity]="getStatusSeverity(reservation.status)"></p-tag>
+                    <p-tag [value]="checkIn.status" [severity]="getStatusSeverity(checkIn.status)"></p-tag>
                 </td>
-            </tr>
-        </ng-template>
-        <ng-template #emptymessage>
-            <tr>
-                <td colspan="7">No data found.</td>
             </tr>
         </ng-template>
     </p-table>
