@@ -16,7 +16,7 @@ app = Flask(__name__)
 CORS(app, origins="http://localhost:4200")  # Change this to match your frontend URL
 
 # Create database tables
-Base.metadata.create_all(bind=engine)
+#Base.metadata.create_all(bind=engine)
 
 # Register blueprints
 app.register_blueprint(room_bp)
