@@ -176,7 +176,18 @@ class Reservation(Base):
     start_date = Column(Date)
     end_date = Column(Date)
     id_room = Column(BigInteger, ForeignKey("room.id"))
-    status = Column(String)
+    status = Column(String, default='Pending')
+
+    def to_dict(self):
+        """Return a dictionary representation of the Reservation instance."""
+        return {
+            "id": self.id,
+            "id_reference": self.id_reference,
+            "start_date": self.start_date,
+            "end_date": self.end_date,
+            "id_room": self.id_room,
+            "status": self.status,
+        }
 
     room = relationship("Room")
     clients = relationship(
