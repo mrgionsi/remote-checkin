@@ -176,6 +176,7 @@ class Reservation(Base):
     start_date = Column(Date)
     end_date = Column(Date)
     id_room = Column(BigInteger, ForeignKey("room.id"))
+    status = Column(String)
 
     room = relationship("Room")
     clients = relationship(
@@ -260,3 +261,21 @@ class Structure(Base):
 
     def __repr__(self):
         return f"<Structure(id={self.id}, name={self.name}, city={self.city})>"
+
+class StructureReservationsView(Base):
+    """
+    Represents the PostgreSQL view for structure-room-reservation.
+    This is a read-only model.
+    """
+    __tablename__ = "structure_reservations"
+
+    structure_id = Column(BigInteger)
+    structure_name = Column(String)
+    reservation_id = Column(BigInteger, primary_key=True)
+    id_reference = Column(String)
+    start_date = Column(Date)
+    end_date = Column(Date)
+    room_id = Column(BigInteger)
+    room_name = Column(String)
+    status = Column(String)
+
