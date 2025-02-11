@@ -114,7 +114,16 @@ def get_reservations():
 
 
 @reservation_bp.route("/reservations/<int:structure_id>", methods=["GET"])
-def get_reservationsByStructure(structure_id):
+def get_reservations_by_structure(structure_id):
+    """
+    Get all reservations for a specific structure.
+
+    Args:
+        structure_id (int): The ID of the structure to get reservations for.
+
+    Returns:
+        flask.Response: JSON array containing reservation details.
+    """
     db = SessionLocal()
     reservations = (
         db.query(StructureReservationsView)
@@ -122,7 +131,6 @@ def get_reservationsByStructure(structure_id):
         .all()
     )
     db.close()
-    
     return jsonify([{
         "structure_id": r.structure_id,
         "structure_name": r.structure_name,
