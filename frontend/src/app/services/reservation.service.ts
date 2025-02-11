@@ -14,12 +14,4 @@ export class ReservationService {
   createReservation(reservation: any): Observable<any> {
     return this.http.post(this.apiUrl, reservation);
   }
-
-  getReservationByStructureId(id: number): Observable<any> {
-    return this.http.get(this.apiUrl + '/' + id)
-  }
-
-  getMonthlyReservation(id_structure: number): Observable<any> {
-    return this.http.get(this.apiUrl + '/monthly/' + id_structure)
-  }
 }
