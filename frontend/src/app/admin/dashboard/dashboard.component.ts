@@ -7,11 +7,14 @@ import { ChartModule } from 'primeng/chart';
 import { ChartOptions } from 'chart.js';
 import { Toast, ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { ReservationService } from '../../services/reservation.service';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
 
 
 @Component({
   selector: 'app-dashboard',
-  imports: [ToastModule, Toast, ChartModule, TableModule, InputTextModule, TagModule, CommonModule],
+  imports: [ToastModule, IconFieldModule, InputIconModule, Toast, ChartModule, TableModule, InputTextModule, TagModule, CommonModule],
   providers: [MessageService],
   host: { ngSkipHydration: 'true' },
   templateUrl: './dashboard.component.html',
@@ -21,31 +24,15 @@ export class DashboardComponent implements OnInit {
   options: any;
 
   // Example remote check-ins data
-  checkIns: any[] = [
-    {
-      reservationNumber: '12345',
-      guestName: 'John Doe',
-      room: 'SPA',
-      checkInDate: new Date('2025-02-01T10:00:00'),
-      status: 'Completed'
-    },
-    {
-      reservationNumber: '12346',
-      guestName: 'Jane Smith',
-      room: 'Giungla',
-      checkInDate: new Date('2025-02-02T12:00:00'),
-      status: 'Pending'
-    },
-    // Add more check-ins as needed
-  ];
-
+  reservations: any[] = [];
+  monthly_reservatvion: any[] = [];
   searchTerm: any;
 
   constructor(private messageService: MessageService,
+    private reservationService: ReservationService
   ) {
 
   }
-
 
   getStatusSeverity(status: string) {
     switch (status) {
@@ -63,29 +50,48 @@ export class DashboardComponent implements OnInit {
   chartOptions: ChartOptions | undefined;
 
   ngOnInit(): void {
-    this.messageService.add({ severity: 'info', summary: 'Info', detail: 'Message Content' });
 
-    // Check if the state contains the reservation data
-    /*     const state = history.state['reservation'];
-        console.log(state)
-    
-        if (state) {
-          // Parse the state if it's available
-          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Reservation created', life: 3000 });
-    
-        } else {
-          console.log('No reservation data passed');
-        } */
+    this.messageService.add({ severity: 'info', summary: 'Info', detail: 'Message Content' });
+    this.reservationService.getReservationByStructureId(1).subscribe({
+      next: (reservations) => {
+        console.log('Reservations:', reservations);
+        this.reservations = reservations;
+        // Handle the response data here
+      },
+      error: (error) => {
+        console.error('Error fetching reservations:', error);
+        // Handle the error here (e.g., show a message to the user)
+      },
+      complete: () => {
+        console.log('Reservation fetch completed.');
+        // Optional: Handle completion logic
+      }
+    });
+    this.reservationService.getMonthlyReservation(1).subscribe({
+      next: (monthly_reserv) => {
+        console.log('Reservations:', monthly_reserv);
+        // Handle the response data here
+        this.monthly_reservatvion = monthly_reserv.map((item: { total_reservations: any; }) => item.total_reservations);
+      },
+      error: (error) => {
+        console.error('Error fetching reservations:', error);
+        // Handle the error here (e.g., show a message to the user)
+      },
+      complete: () => {
+        console.log('Reservation fetch completed.');
+        // Optional: Handle completion logic
+      }
+    });
 
 
 
     this.checkInData = {
-      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'], // Example months
+      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'August', 'Sept', 'Oct', 'Nov', 'Dec'], // Example months
       datasets: [
         {
           label: 'Check-ins',
-          data: [5, 10, 7, 15, 12], // Example check-ins data
-          fill: false,
+          data: this.monthly_reservatvion,
+          fill: true,
           borderColor: '#42A5F5',
           tension: 0.1
         }
@@ -101,4 +107,8 @@ export class DashboardComponent implements OnInit {
     };
   }
 
+}
+
+function ViewChild(arg0: string): (target: DashboardComponent, propertyKey: "dt") => void {
+  throw new Error('Function not implemented.');
 }

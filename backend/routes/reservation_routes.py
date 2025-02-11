@@ -8,9 +8,11 @@ This module defines the routes and logic for creating and retrieving reservation
 It supports operations such as creating new reservations and listing all reservations.
 """
 
+import calendar
 from datetime import datetime
 from flask import Blueprint, request, jsonify
-from models import Reservation, Room
+from sqlalchemy import func
+from models import Reservation, Room, StructureReservationsView
 from database import SessionLocal
 
 # Create a blueprint for reservations
@@ -109,3 +111,53 @@ def get_reservations():
     # Here, you can modify this to use your actual database retrieval logic
     reservations = []  # You may need to query your reservations table here
     return jsonify({"reservations": reservations})
+
+
+@reservation_bp.route("/reservations/<int:structure_id>", methods=["GET"])
+def get_reservationsByStructure(structure_id):
+    db = SessionLocal()
+    reservations = (
+        db.query(StructureReservationsView)
+        .filter(StructureReservationsView.structure_id == structure_id)
+        .all()
+    )
+    db.close()
+    
+    return jsonify([{
+        "structure_id": r.structure_id,
+        "structure_name": r.structure_name,
+        "reservation_id": r.reservation_id,
+        "id_reference": r.id_reference,
+        "start_date": r.start_date.isoformat(),
+        "end_date": r.end_date.isoformat(),
+        "room_id": r.room_id,
+        "status": r.status,
+        "room_name": r.room_name
+    } for r in reservations])
+    
+    
+    
+@reservation_bp.route("/reservations/monthly/<int:structure_id>", methods=["GET"])
+def get_reservationPerMonth(structure_id):
+    db = SessionLocal()
+    # Create base months with 0
+    months = {i: 0 for i in range(1, 13)}
+
+    # Query reservations grouped by month
+    results = (
+        db.query(
+            func.extract("month", Reservation.start_date).label("month"),
+            func.count(Reservation.id).label("total_reservations"),
+        )
+        .group_by(func.extract("month", Reservation.start_date))
+        .all()
+    )
+
+    # Update the dictionary with actual values
+    for month, total in results:
+        months[int(month)] = total
+
+    return [{"month": calendar.month_name[m], "total_reservations": count} for m, count in months.items()]
+
+    
+    db.close()
