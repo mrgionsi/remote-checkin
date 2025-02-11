@@ -176,6 +176,18 @@ class Reservation(Base):
     start_date = Column(Date)
     end_date = Column(Date)
     id_room = Column(BigInteger, ForeignKey("room.id"))
+    status = Column(String, default='Pending')
+
+    def to_dict(self):
+        """Return a dictionary representation of the Reservation instance."""
+        return {
+            "id": self.id,
+            "id_reference": self.id_reference,
+            "start_date": self.start_date,
+            "end_date": self.end_date,
+            "id_room": self.id_room,
+            "status": self.status,
+        }
 
     room = relationship("Room")
     clients = relationship(
@@ -260,3 +272,21 @@ class Structure(Base):
 
     def __repr__(self):
         return f"<Structure(id={self.id}, name={self.name}, city={self.city})>"
+
+class StructureReservationsView(Base):
+    """
+    Represents the PostgreSQL view for structure-room-reservation.
+    This is a read-only model.
+    """
+    __tablename__ = "structure_reservations"
+
+    structure_id = Column(BigInteger)
+    structure_name = Column(String)
+    reservation_id = Column(BigInteger, primary_key=True)
+    id_reference = Column(String)
+    start_date = Column(Date)
+    end_date = Column(Date)
+    room_id = Column(BigInteger)
+    room_name = Column(String)
+    status = Column(String)
+
