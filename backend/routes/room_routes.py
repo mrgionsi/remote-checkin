@@ -14,6 +14,7 @@ Each route interacts with the database to perform the necessary actions related 
 """
 
 from flask import Blueprint, request, jsonify
+#pylint: disable=E0611,E0401
 from models import Room
 from database import get_db  # Use absolute import
 

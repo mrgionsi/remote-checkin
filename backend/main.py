@@ -4,12 +4,12 @@ Main module for the remote check-in system.
 This module initializes the Flask app, sets up database tables,
 and registers blueprints for routing.
 """
+#pylint: disable=C0303,E0401
 
 from flask import Flask
 from flask_cors import CORS
 from routes.room_routes import room_bp
 from routes.reservation_routes import reservation_bp  # Adjust the path as needed
-from database import engine, Base  # Adjust the path based on your project structure
 
 
 app = Flask(__name__)
