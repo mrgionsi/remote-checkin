@@ -1,5 +1,5 @@
 # routes/reservation_routes.py
-# pylint: disable=C0301
+# pylint: disable=C0301,E0611,E0401
 
 """
 Reservation Routes for handling reservation-related requests in the system.
@@ -12,7 +12,9 @@ import calendar
 from datetime import datetime
 from flask import Blueprint, request, jsonify
 from sqlalchemy import func
+from sqlalchemy.sql import extract
 from models import Reservation, Room, StructureReservationsView
+
 from database import SessionLocal
 
 # Create a blueprint for reservations
@@ -142,9 +144,7 @@ def get_reservations_by_structure(structure_id):
         "status": r.status,
         "room_name": r.room_name
     } for r in reservations])
-    
-    
-    
+
 @reservation_bp.route("/reservations/monthly/<int:structure_id>", methods=["GET"])
 def get_reservations_per_month(structure_id):
     """
@@ -162,14 +162,15 @@ def get_reservations_per_month(structure_id):
         months = {i: 0 for i in range(1, 13)}
 
         # Query reservations grouped by month for the specific structure
+        #pylint: disable=E1102
         results = (
             db.query(
-                func.extract('month', Reservation.start_date).label('month'),
-                func.count(Reservation.id).label('total_reservations')
+                extract("month", Reservation.start_date).label("month"),
+                func.count(Reservation.id).label("total_reservations"),
             )
             .join(Room)
             .filter(Room.id_structure == structure_id)
-            .group_by(func.extract('month', Reservation.start_date))
+            .group_by(extract("month", Reservation.start_date))
             .all()
         )
 
