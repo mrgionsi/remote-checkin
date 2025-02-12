@@ -5,8 +5,11 @@ This module defines the SQLAlchemy models used for the application's database,
 including Room, Client, Reservation, and others.
 """
 
+from datetime import date
 from sqlalchemy import Column, Integer, BigInteger, String, Date, ForeignKey, Sequence
 from sqlalchemy.orm import relationship
+#pylint: disable=C0303
+#pylint: disable=E0611
 from database import Base
 
 
@@ -178,16 +181,7 @@ class Reservation(Base):
     id_room = Column(BigInteger, ForeignKey("room.id"))
     status = Column(String, default='Pending')
 
-    def to_dict(self):
-        """Return a dictionary representation of the Reservation instance."""
-        return {
-            "id": self.id,
-            "id_reference": self.id_reference,
-            "start_date": self.start_date,
-            "end_date": self.end_date,
-            "id_room": self.id_room,
-            "status": self.status,
-        }
+
 
     room = relationship("Room")
     clients = relationship(
@@ -202,6 +196,7 @@ class Reservation(Base):
             "start_date": self.start_date,
             "end_date": self.end_date,
             "id_room": self.id_room,
+            "status": self.status,
         }
 
     def __repr__(self):
@@ -290,3 +285,25 @@ class StructureReservationsView(Base):
     room_name = Column(String)
     status = Column(String)
 
+    def to_dict(self)-> dict[str, str | int | date]:
+        """Return a dictionary representation of the StructureReservationsView instance."""
+        return {
+            "structure_id": self.structure_id,
+            "structure_name": self.structure_name,
+            "reservation_id": self.reservation_id,
+            "id_reference": self.id_reference,
+            "start_date": self.start_date,
+            "end_date": self.end_date,
+            "room_id": self.room_id,
+            "room_name": self.room_name,
+            "status": self.status,
+        }
+
+    def __repr__(self):
+        return (
+            f"<StructureReservationsView(structure_id={self.structure_id}, "
+            f"structure_name='{self.structure_name}', reservation_id={self.reservation_id}, "
+            f"id_reference='{self.id_reference}', start_date={self.start_date}, "
+            f"end_date={self.end_date}, room_id={self.room_id}, room_name='{self.room_name}', "
+            f"status='{self.status}')>"
+        )
