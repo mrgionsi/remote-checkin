@@ -4,7 +4,7 @@ from flask import Flask
 from sqlalchemy import text
 from routes.reservation_routes import reservation_bp
 from database import engine, Base, SessionLocal
-from models import AdminStructure, Client, ClientReservations, Reservation, Role, Room, Structure, StructureReservationsView, User
+from models import AdminStructure, Client, ClientReservations, Reservation, Role, Room, Structure, User
 # pylint: disable=all
 
 
@@ -35,7 +35,6 @@ def init_db():
     db.query(ClientReservations).delete()
     db.query(Reservation).delete()
     db.query(Room).delete()
-    """db.query(StructureReservationsView).delete()"""
     # Remove data from base tables
     db.query(Structure).delete()
     db.query(Client).delete()
@@ -126,10 +125,9 @@ def test_get_reservations(client):
 def test_get_reservation_per_month(client, init_db):
     structure = init_db.query(Structure).first()
     room = init_db.query(Room).first()
-
     reservations = [
-        Reservation(id_reference="RES1001", start_date="2025-01-10", end_date="2025-01-15", id_room=room.id, status="Pending"),
-        Reservation(id_reference="RES1002", start_date="2025-02-05", end_date="2025-02-10", id_room=room.id, status="Pending"),
+       Reservation(id_reference="RES1001", start_date="2025-01-10", end_date="2025-01-15", id_room=room.id, status="Pending"),
+       Reservation(id_reference="RES1002", start_date="2025-02-05", end_date="2025-02-10", id_room=room.id, status="Pending"),
     ]
     init_db.add_all(reservations)
     init_db.commit()
@@ -210,3 +208,12 @@ def test_get_reservations_per_month_invalid_structure_id(client, init_db):
     data = response.get_json()
     assert data["message"] == "Structure not found"  # Ensure the message matches the error returned
 
+    """Test when no reservations exist for a structure."""
+    """ _, structure_id = init_db  # DB is clean from fixture """
+
+    response = client.get("/api/v1/reservations/monthly/1")
+    assert response.status_code == 200
+
+    data = response.get_json()
+    assert len(data) == 12  # 12 months
+    assert all(month["total_reservations"] == 0 for month in data)  # No reservations, so all months should be 0
