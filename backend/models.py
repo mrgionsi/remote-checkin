@@ -5,6 +5,7 @@ This module defines the SQLAlchemy models used for the application's database,
 including Room, Client, Reservation, and others.
 """
 
+from datetime import date
 from sqlalchemy import Column, Integer, BigInteger, String, Date, ForeignKey, Sequence
 from sqlalchemy.orm import relationship
 #pylint: disable=C0303
@@ -284,7 +285,7 @@ class StructureReservationsView(Base):
     room_name = Column(String)
     status = Column(String)
 
-    def to_dict(self):
+    def to_dict(self)-> dict[str, str | int | date]:
         """Return a dictionary representation of the StructureReservationsView instance."""
         return {
             "structure_id": self.structure_id,
