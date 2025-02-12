@@ -7,8 +7,6 @@ CREATE TABLE "public"."admin_structure" (
     CONSTRAINT "admin_structure_pkey" PRIMARY KEY ("id_user", "id_structure")
 ) WITH (oids = false);
 
-INSERT INTO "admin_structure" ("id_user", "id_structure") VALUES
-(1,	1);
 
 DROP TABLE IF EXISTS "client";
 CREATE TABLE "public"."client" (
@@ -54,19 +52,6 @@ CREATE TABLE "public"."reservation" (
 
 CREATE INDEX "ix_reservation_id" ON "public"."reservation" USING btree ("id");
 
-INSERT INTO "reservation" ("id", "id_reference", "start_date", "end_date", "id_room", "status") VALUES
-(1,	'1234',	'2025-02-11',	'2025-02-12',	1,	'Pending'),
-(2,	'REF1001',	'2025-01-01',	'2025-01-03',	1,	'Pending'),
-(3,	'REF1002',	'2025-01-05',	'2025-01-07',	2,	'Pending'),
-(4,	'REF1003',	'2025-01-10',	'2025-01-12',	3,	'Pending'),
-(5,	'REF1004',	'2025-01-15',	'2025-01-17',	1,	'Pending'),
-(6,	'REF1005',	'2025-01-20',	'2025-01-22',	2,	'Pending'),
-(7,	'REF1006',	'2025-01-25',	'2025-01-27',	3,	'Pending'),
-(8,	'REF1007',	'2025-01-30',	'2025-02-01',	1,	'Pending'),
-(9,	'REF1008',	'2025-02-02',	'2025-02-04',	2,	'Pending'),
-(10,	'REF1009',	'2025-02-06',	'2025-02-08',	3,	'Pending'),
-(11,	'REF1010',	'2025-02-09',	'2025-02-11',	1,	'Pending'),
-(12,	'REF1011',	'2025-02-11',	'2025-02-13',	2,	'Pending');
 
 DROP TABLE IF EXISTS "role";
 CREATE TABLE "public"."role" (
@@ -75,14 +60,13 @@ CREATE TABLE "public"."role" (
     CONSTRAINT "role_pkey" PRIMARY KEY ("id")
 ) WITH (oids = false);
 
-INSERT INTO "role" ("id", "name") VALUES
-(1,	'user'),
-(2,	'admin'),
-(3,	'superuser');
 
 DROP TABLE IF EXISTS "room";
+DROP SEQUENCE IF EXISTS room_id_seq;
+CREATE SEQUENCE room_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1;
+
 CREATE TABLE "public"."room" (
-    "id" bigint NOT NULL,
+    "id" bigint DEFAULT nextval('room_id_seq') NOT NULL,
     "name" character varying NOT NULL,
     "capacity" integer NOT NULL,
     "id_structure" bigint NOT NULL,
@@ -91,10 +75,6 @@ CREATE TABLE "public"."room" (
 
 CREATE INDEX "ix_room_id" ON "public"."room" USING btree ("id");
 
-INSERT INTO "room" ("id", "name", "capacity", "id_structure") VALUES
-(1,	'SPA',	2,	1),
-(2,	'Giungla',	4,	1),
-(3,	'Savana',	2,	1);
 
 DROP TABLE IF EXISTS "structure";
 CREATE TABLE "public"."structure" (
@@ -108,7 +88,7 @@ CREATE TABLE "public"."structure" (
 CREATE INDEX "ix_structure_id" ON "public"."structure" USING btree ("id");
 
 INSERT INTO "structure" ("id", "name", "street", "city") VALUES
-(1,	'B&B Chapeau',	'Via Torrino 14',	'Casagiove');
+(1,	'Test Structure',	'Test Street',	'Test City');
 
 DROP VIEW IF EXISTS "structure_reservations";
 CREATE TABLE "structure_reservations" ("structure_id" bigint, "structure_name" character varying, "reservation_id" bigint, "id_reference" character varying(500), "start_date" date, "end_date" date, "status" text, "room_id" bigint, "room_name" character varying);
@@ -127,8 +107,6 @@ CREATE TABLE "public"."user" (
 
 CREATE INDEX "ix_user_id" ON "public"."user" USING btree ("id");
 
-INSERT INTO "user" ("id", "name", "surname", "password", "username", "id_role") VALUES
-(1,	'Giovanni',	'Pasquariello',	'password',	'gionsi',	3);
 
 ALTER TABLE ONLY "public"."admin_structure" ADD CONSTRAINT "admin_structure_id_structure_fkey" FOREIGN KEY (id_structure) REFERENCES structure(id) NOT DEFERRABLE;
 ALTER TABLE ONLY "public"."admin_structure" ADD CONSTRAINT "admin_structure_id_user_fkey" FOREIGN KEY (id_user) REFERENCES "user"(id) NOT DEFERRABLE;
@@ -156,4 +134,4 @@ CREATE VIEW "structure_reservations" AS SELECT s.id AS structure_id,
      JOIN room rm ON ((r.id_room = rm.id)))
      JOIN structure s ON ((rm.id_structure = s.id)));
 
--- 2025-02-11 19:39:46.455727+00
+-- 2025-02-12 19:02:46.734116+00
