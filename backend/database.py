@@ -7,6 +7,7 @@ engine creation, and a context manager for database operations.
 from contextlib import contextmanager  # Standard library import
 from sqlalchemy import create_engine  # Third-party imports
 from sqlalchemy.orm import sessionmaker, declarative_base  # Third-party imports
+#pylint: disable=E0401
 from config import Config  # Adjust the path based on your project structure
 #pylint: disable=C0301
 
