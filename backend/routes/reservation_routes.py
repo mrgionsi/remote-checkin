@@ -13,7 +13,7 @@ from datetime import datetime
 from flask import Blueprint, request, jsonify
 from sqlalchemy import func
 from sqlalchemy.sql import extract
-from models import Reservation, Room, StructureReservationsView
+from models import Reservation, Room, Structure, StructureReservationsView
 
 from database import SessionLocal
 
@@ -154,15 +154,20 @@ def get_reservations_per_month(structure_id):
         structure_id (int): The ID of the structure to get reservation counts for.
 
     Returns:
-        flask.Response: List of dictionaries containing month names and reservation counts.
+        flask.Response: List of dictionaries containing month names and reservation counts, or an empty array if no reservations or structure doesn't exist.
     """
     db = SessionLocal()
     try:
+        # Check if the structure exists
+        structure = db.query(Structure).filter(Structure.id == structure_id).first()
+        if not structure:
+            return jsonify({"message": "Structure not found"}), 404
+
+
         # Create base months with 0
         months = {i: 0 for i in range(1, 13)}
 
         # Query reservations grouped by month for the specific structure
-        #pylint: disable=E1102
         results = (
             db.query(
                 extract("month", Reservation.start_date).label("month"),
@@ -178,9 +183,11 @@ def get_reservations_per_month(structure_id):
         for month, total in results:
             months[int(month)] = total
 
+        # Return results with months and their respective reservation count
         return jsonify([
             {"month": calendar.month_name[m], "total_reservations": count}
             for m, count in months.items()
-        ])
+        ]), 200
+
     finally:
         db.close()

@@ -1,10 +1,10 @@
-from datetime import date
+from datetime import datetime
 import pytest
 from flask import Flask
 from sqlalchemy import text
 from routes.reservation_routes import reservation_bp
 from database import engine, Base, SessionLocal
-from models import Reservation, Room, Structure
+from models import AdminStructure, Client, ClientReservations, Reservation, Role, Room, Structure, StructureReservationsView, User
 # pylint: disable=all
 
 
@@ -25,21 +25,33 @@ def client(app):
 
 @pytest.fixture
 def init_db():
-    """Ensure a clean database before each test."""
+    """Ensure a clean database before each test by removing existing data."""
     db = SessionLocal()
-    db.execute(text("DROP VIEW IF EXISTS structure_reservations CASCADE;"))
-    db.execute(text("TRUNCATE TABLE reservation RESTART IDENTITY CASCADE;"))
-    db.execute(text("TRUNCATE TABLE room RESTART IDENTITY CASCADE;"))
-    db.execute(text("TRUNCATE TABLE structure RESTART IDENTITY CASCADE;"))
+    db.execute(text('DROP VIEW IF EXISTS structure_reservations;'))  # Use CASCADE to remove dependent objects
+
+    # Remove data from dependent tables first
+    db.query(AdminStructure).delete()    
+    db.query(User).delete()
+    db.query(ClientReservations).delete()
+    db.query(Reservation).delete()
+    db.query(Room).delete()
+    """db.query(StructureReservationsView).delete()"""
+    # Remove data from base tables
+    db.query(Structure).delete()
+    db.query(Client).delete()
+    db.query(Role).delete()
+
     db.commit()
 
-    # Create test structure
-    structure = Structure(name="Test Structure", street="Test Street", city="Test City")
+
+    # Create a test structure
+    structure = Structure(id='1',name="Test Structure", street="Test Street", city="Test City")
     db.add(structure)
     db.commit()
+    db.flush()
     db.refresh(structure)
 
-    # Create test room
+    # Create a test room
     room = Room(name="Test Room", capacity=2, id_structure=structure.id)
     db.add(room)
     db.commit()
@@ -48,7 +60,6 @@ def init_db():
     yield db  # Provide initialized DB to tests
 
     db.close()
-
 
 
 def test_create_reservation(client, init_db):
@@ -127,8 +138,6 @@ def test_get_reservation_per_month(client, init_db):
     assert response.status_code == 200
     data = response.get_json()
 
-    print("DEBUG API RESPONSE:", data)  # Add this for debugging
-
     # Check that only the inserted reservations exist
     expected_counts = {
         "January": 1,
@@ -147,3 +156,66 @@ def test_get_reservation_per_month(client, init_db):
 
     for entry in data:
         assert entry["total_reservations"] == expected_counts[entry["month"]], f"Mismatch in {entry['month']}: {entry['total_reservations']}"
+
+
+
+def test_get_reservations_per_month_basic(client, init_db):
+    """Test normal reservation retrieval per month."""
+    db = init_db
+    structure_id = db.query(Structure).first().id
+
+    # Add reservations for different months
+    room = db.query(Room).first()
+    reservation1 = Reservation(
+        id_reference="RES1", start_date=datetime(2024, 1, 10), end_date=datetime(2024, 1, 15), id_room=room.id
+    )
+    reservation2 = Reservation(
+        id_reference="RES2", start_date=datetime(2024, 2, 5), end_date=datetime(2024, 2, 10), id_room=room.id
+    )
+
+    db.add_all([reservation1, reservation2])
+    db.commit()
+
+    response = client.get(f"/api/v1/reservations/monthly/{structure_id}")
+    
+    assert response.status_code == 200
+    data = response.get_json()
+    assert isinstance(data, list)
+    assert len(data) == 12  # 12 months
+    assert any(item['month'] == 'January' and item['total_reservations'] == 1 for item in data)
+    assert any(item['month'] == 'February' and item['total_reservations'] == 1 for item in data)
+
+
+def test_get_reservations_per_month_no_reservations(client, init_db):
+    """Test the scenario where there are no reservations for the structure."""
+    db = init_db
+    structure_id = db.query(Structure).first().id
+
+    response = client.get(f"/api/v1/reservations/monthly/{structure_id}")
+    
+    assert response.status_code == 200
+    data = response.get_json()
+    assert isinstance(data, list)
+    assert len(data) == 12  # 12 months
+    assert all(item['total_reservations'] == 0 for item in data)
+
+
+def test_get_reservations_per_month_invalid_structure_id(client, init_db):
+    """Test the scenario where an invalid structure_id is provided."""
+    invalid_structure_id = 9999  # Assuming this structure ID doesn't exist
+
+    response = client.get(f"/api/v1/reservations/monthly/{invalid_structure_id}")
+    
+    assert response.status_code == 404
+    data = response.get_json()
+    assert data["message"] == "Structure not found"  # Ensure the message matches the error returned
+
+    """Test when no reservations exist for a structure."""
+    """ _, structure_id = init_db  # DB is clean from fixture """
+
+    response = client.get(f"/api/v1/reservations/monthly/1")
+    assert response.status_code == 200
+
+    data = response.get_json()
+    assert len(data) == 12  # 12 months
+    assert all(month["total_reservations"] == 0 for month in data)  # No reservations, so all months should be 0
