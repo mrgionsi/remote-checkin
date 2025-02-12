@@ -168,6 +168,7 @@ def get_reservations_per_month(structure_id):
         months = {i: 0 for i in range(1, 13)}
 
         # Query reservations grouped by month for the specific structure
+        # pylint: disable=E1102
         results = (
             db.query(
                 extract("month", Reservation.start_date).label("month"),
