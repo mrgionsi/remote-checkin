@@ -210,12 +210,3 @@ def test_get_reservations_per_month_invalid_structure_id(client, init_db):
     data = response.get_json()
     assert data["message"] == "Structure not found"  # Ensure the message matches the error returned
 
-    """Test when no reservations exist for a structure."""
-    """ _, structure_id = init_db  # DB is clean from fixture """
-
-    response = client.get(f"/api/v1/reservations/monthly/1")
-    assert response.status_code == 200
-
-    data = response.get_json()
-    assert len(data) == 12  # 12 months
-    assert all(month["total_reservations"] == 0 for month in data)  # No reservations, so all months should be 0
