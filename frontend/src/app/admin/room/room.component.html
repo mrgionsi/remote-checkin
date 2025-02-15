@@ -1,5 +1,6 @@
 <div class="card">
-    <p-table [value]="rooms" [tableStyle]="{ 'min-width': '50rem' }">
+    <p-toast />
+    <p-table [value]="rooms" dataKey="id" editMode="row" [tableStyle]="{ 'min-width': '50rem' }">
         <ng-template #header>
             <tr>
                 <th>ID</th>
@@ -9,41 +10,46 @@
                 <th>Actions</th>
             </tr>
         </ng-template>
-        <ng-template #body let-room>
-            <tr>
+        <ng-template #body let-room let-editing="editing" let-ri="rowIndex">
+            <tr [pEditableRow]="room">
                 <td>{{ room.id }}</td>
-                <td>{{ room.name }}</td>
-                <td>B&B Chapeau</td>
-                <td>{{ room.capacity }}</td>
                 <td>
-                    <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-sm p-button-info"
-                        (click)="editRoom(room)"></button>
-                    <button pButton icon="pi pi-trash" class="p-button-rounded p-button-sm p-button-danger"
-                        (click)="confirmDelete(room)"></button>
+                    <p-cellEditor>
+                        <ng-template #input>
+                            <input pInputText type="text" [(ngModel)]="room.name" />
+                        </ng-template>
+                        <ng-template #output>
+                            {{room.name}}
+                        </ng-template>
+                    </p-cellEditor>
+                </td>
+                <td>B&B Chapeau</td>
+                <td>
+                    <p-cellEditor>
+                        <ng-template #input>
+                            <input pInputText type="number" [(ngModel)]="room.capacity" />
+                        </ng-template>
+                        <ng-template #output>
+                            {{room.capacity}}
+                        </ng-template>
+                    </p-cellEditor>
+                </td>
+                <td>
+                    <div class="flex items-center justify-center gap-2">
+                        <button *ngIf="!editing" pButton pRipple type="button" pInitEditableRow icon="pi pi-pencil"
+                            (click)="onRowEditInit(room)" text rounded severity="secondary"></button>
+                        <button *ngIf="!editing" pButton type="button" icon="pi pi-trash"
+                            (click)="onRowDelete(room,ri,$event)" text rounded severity="secondary"></button>
+                        <button *ngIf="editing" pButton pRipple type="button" pSaveEditableRow icon="pi pi-check"
+                            (click)="onRowEditSave(room)" text rounded severity="secondary"></button>
+                        <button *ngIf="editing" pButton pRipple type="button" pCancelEditableRow icon="pi pi-times"
+                            (click)="onRowEditCancel(room, ri)" text rounded severity="secondary"></button>
+                    </div>
                 </td>
             </tr>
         </ng-template>
     </p-table>
 </div>
 
-<!-- Edit Dialog -->
-<p-dialog [(visible)]="editDialogVisible" [header]="'Edit Room'" [modal]="true" [closable]="false">
-    <div class="p-fluid">
-        <div class="p-field">
-            <label for="roomName">Name</label>
-            <input pInputText id="roomName" [(ngModel)]="selectedRoom.name">
-        </div>
-        <div class="p-field">
-            <label for="roomCapacity">Capienza</label>
-            <input pInputText id="roomCapacity" type="number" [(ngModel)]="selectedRoom.capacity">
-        </div>
-    </div>
-    <p-footer>
-        <button pButton label="Cancel" icon="pi pi-times" class="p-button-text"
-            (click)="editDialogVisible = false"></button>
-        <button pButton label="Save" icon="pi pi-check" class="p-button-primary" (click)="saveEdit()"></button>
-    </p-footer>
-</p-dialog>
-
-<!-- Delete Confirmation -->
-<p-confirmDialog></p-confirmDialog>
+<p-toast />
+<p-confirmdialog />

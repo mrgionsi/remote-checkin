@@ -1,13 +1,16 @@
-import { AfterViewInit, Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { TableModule } from 'primeng/table';
-import { ConfirmationService } from 'primeng/api';
 import { RoomService } from '../../services/room.service';
-import { DialogModule } from 'primeng/dialog'; // Import DialogModule
-import { ConfirmDialogModule } from 'primeng/confirmdialog'; // Import DialogModule
-
+import { DialogModule } from 'primeng/dialog';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button'; // Required for buttons in the dialog
 import { InputTextModule } from 'primeng/inputtext'; // Required for input fields
 import { FormsModule } from '@angular/forms'; // Required for [(ngModel)]
+import { CommonModule } from '@angular/common';
+import { ToastModule } from 'primeng/toast';
+import { TagModule } from 'primeng/tag';
+import { SelectModule } from 'primeng/select';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 
 @Component({
@@ -15,20 +18,28 @@ import { FormsModule } from '@angular/forms'; // Required for [(ngModel)]
   imports: [TableModule, DialogModule,
     ButtonModule,
     InputTextModule,
+    SelectModule,
+    TagModule,
+    CommonModule,
+    ToastModule,
     ConfirmDialogModule,
     FormsModule],
   templateUrl: './room.component.html',
   styleUrl: './room.component.scss',
-  providers: [ConfirmationService]
+  providers: [MessageService, ConfirmationService]
 })
-export class RoomComponent implements AfterViewInit {
+export class RoomComponent implements OnInit {
 
-  constructor(private confirmationService: ConfirmationService,
+  constructor(private messageService: MessageService,
+    private confirmationService: ConfirmationService,
     private roomService: RoomService) { }
+
+  clonedProducts: { [s: string]: any } = {};
+
   rooms: any;
   editDialogVisible = false;
   selectedRoom: any = {};
-  ngAfterViewInit(): void {
+  ngOnInit(): void {
     this.roomService.getRooms().subscribe({
       next: (value) => {
         console.log(value)
@@ -37,27 +48,53 @@ export class RoomComponent implements AfterViewInit {
     }
     )
   }
-  editRoom(room: any) {
-    this.selectedRoom = { ...room }; // Clone object to avoid modifying original data before save
-    this.editDialogVisible = true;
+  onRowEditInit(room: any) {
+    this.clonedProducts[room.id as string] = { ...room };
   }
 
-  saveEdit() {
-    const index = this.rooms.findIndex((r: any) => r.id === this.selectedRoom.id);
-    if (index !== -1) {
-      this.rooms[index] = { ...this.selectedRoom };
-    }
-    this.editDialogVisible = false;
+  onRowEditSave(room: any) {
+
   }
 
-  confirmDelete(room: any) {
+  onRowEditCancel(room: any, index: number) {
+    this.rooms[index] = this.clonedProducts[room.id as string];
+    delete this.clonedProducts[room.id as string];
+  }
+
+  onRowDelete(room: any, index: number, event: Event) {
+
     this.confirmationService.confirm({
-      message: `Are you sure you want to delete ${room.name}?`,
-      header: 'Confirm Deletion',
-      icon: 'pi pi-exclamation-triangle',
+      target: event.target as EventTarget,
+      message: 'Do you want to delete this record?',
+      header: 'Danger Zone',
+      icon: 'pi pi-info-circle',
+      rejectLabel: 'Cancel',
+      rejectButtonProps: {
+        label: 'Cancel',
+        severity: 'secondary',
+        outlined: true,
+      },
+      acceptButtonProps: {
+        label: 'Delete',
+        severity: 'danger',
+      },
+
       accept: () => {
-        this.rooms = this.rooms.filter((r: any) => r.id !== room.id);
-      }
+        this.rooms[index] = this.clonedProducts[room.id as string];
+        delete this.clonedProducts[room.id as string];
+
+        this.messageService.add({ severity: 'info', summary: 'Confirmed', detail: 'Record deleted' });
+
+      },
+      reject: () => {
+      },
     });
+
+
+
+
   }
+
+
+
 }
