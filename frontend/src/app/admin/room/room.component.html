@@ -3,10 +3,10 @@
     <p-table [value]="rooms" dataKey="id" editMode="row" [tableStyle]="{ 'min-width': '50rem' }">
         <ng-template #header>
             <tr>
-                <th>ID</th>
-                <th>Name</th>
+                <th pSortableColumn="id">ID <p-sortIcon field="id" /></th>
+                <th pSortableColumn="name">Name <p-sortIcon field="name" /></th>
                 <th>Struttura</th>
-                <th>Capienza</th>
+                <th pSortableColumn="capacity">Capienza <p-sortIcon field="capacity" /></th>
                 <th>Actions</th>
             </tr>
         </ng-template>
