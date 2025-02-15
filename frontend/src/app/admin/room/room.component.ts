@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { TableModule } from 'primeng/table';
 import { RoomService } from '../../services/room.service';
-import { DialogModule } from 'primeng/dialog';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button'; // Required for buttons in the dialog
 import { InputTextModule } from 'primeng/inputtext'; // Required for input fields
@@ -11,11 +10,12 @@ import { ToastModule } from 'primeng/toast';
 import { TagModule } from 'primeng/tag';
 import { SelectModule } from 'primeng/select';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { Dialog } from 'primeng/dialog';
 
 
 @Component({
   selector: 'app-room',
-  imports: [TableModule, DialogModule,
+  imports: [TableModule,
     ButtonModule,
     InputTextModule,
     SelectModule,
@@ -23,6 +23,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
     CommonModule,
     ToastModule,
     ConfirmDialogModule,
+    Dialog,
     FormsModule],
   templateUrl: './room.component.html',
   styleUrl: './room.component.scss',
@@ -30,15 +31,21 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 })
 export class RoomComponent implements OnInit {
 
+  clonedProducts: { [s: string]: any } = {};
+  add_room_visible: boolean = false;
+  new_room: any = { name: '', capacity: '' };
+  rooms: any;
+  editDialogVisible = false;
+  selectedRoom: any = {};
+
+
+
+
   constructor(private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private roomService: RoomService) { }
 
-  clonedProducts: { [s: string]: any } = {};
 
-  rooms: any;
-  editDialogVisible = false;
-  selectedRoom: any = {};
   ngOnInit(): void {
     this.roomService.getRooms().subscribe({
       next: (value) => {
@@ -89,12 +96,20 @@ export class RoomComponent implements OnInit {
       reject: () => {
       },
     });
-
-
-
+  }
+  showDialogCreateRoom() {
+    this.add_room_visible = true;
 
   }
 
+  addRoom() {
+    this.add_room_visible = false;
 
+    this.messageService.add({ severity: 'info', summary: 'Confirmed', detail: 'New Room ' + this.new_room.name + ' added.' });
+    this.rooms.push(this.new_room);
+    this.new_room = { name: '', capacity: '' };
+    this.messageService.add({ severity: 'warn', summary: 'Failed', detail: 'Error adding new room. Please try again or contact your administrator.' });
+
+  }
 
 }

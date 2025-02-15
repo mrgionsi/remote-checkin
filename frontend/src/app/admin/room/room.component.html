@@ -1,5 +1,8 @@
 <div class="card">
-    <p-toast />
+    <div class="btn-right mb-2">
+        <p-button class="" label="Create Room" icon="pi pi-plus" severity="info"
+            (click)="showDialogCreateRoom()"></p-button>
+    </div>
     <p-table [value]="rooms" dataKey="id" editMode="row" [tableStyle]="{ 'min-width': '50rem' }">
         <ng-template #header>
             <tr>
@@ -53,3 +56,21 @@
 
 <p-toast />
 <p-confirmdialog />
+
+
+<p-dialog header="Add Room" [modal]="true" [(visible)]="add_room_visible" [style]="{ width: '25rem' }">
+    <!--     <span class="p-text-secondary block mb-8">Add new room</span>
+ -->
+    <div class="flex items-center gap-4 mb-4">
+        <label for="name" class="font-semibold w-24">Room name</label>
+        <input pInputText id="name" class="flex-auto" autocomplete="off" [(ngModel)]="new_room.name" />
+    </div>
+    <div class="flex items-center gap-4 mb-8">
+        <label for="capacity" class="font-semibold w-24">Capacity</label>
+        <input pInputText id="capacity" class="flex-auto" autocomplete="off" [(ngModel)]="new_room.capacity" />
+    </div>
+    <div class="flex justify-end gap-2 mt-2">
+        <p-button label="Cancel" severity="secondary" (click)="add_room_visible = false" />
+        <p-button label="Save" (click)="addRoom()" />
+    </div>
+</p-dialog>
