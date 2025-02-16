@@ -8,6 +8,7 @@ It defines the following endpoints:
 - POST /api/v1/rooms: Adds a new room to the database.
 - GET /api/v1/rooms: Retrieves a list of rooms for a fixed structure (currently structure ID 1).
 - GET /api/v1/rooms/<room_id>: Retrieves a specific room by its unique identifier.
+- PUT /api/v1/rooms/<room_id>: Updates an existing room's details.
 - DELETE /api/v1/rooms/<room_id>: Deletes a room from the database by its unique identifier.
 
 Each route interacts with the database to perform the necessary actions related to rooms.
@@ -15,7 +16,7 @@ Each route interacts with the database to perform the necessary actions related 
 
 from flask import Blueprint, request, jsonify
 #pylint: disable=E0611,E0401
-from models import Room
+from models import Room, Structure
 from database import get_db  # Use absolute import
 
 room_bp = Blueprint("room", __name__, url_prefix="/api/v1")
@@ -119,6 +120,54 @@ def get_room(room_id):
         if room:
             return jsonify(room.to_dict())
         return jsonify({"error": "Room not found"}), 404
+
+
+# Update a room
+@room_bp.route("/rooms/<int:room_id>", methods=["PUT"])
+def update_room(room_id):
+    """
+    Update an existing room's details.
+    
+    Finds a room by room_id and updates its fields if provided in the request JSON.
+    If the room does not exist, returns a 404 error.
+    
+    Parameters:
+        room_id (int): The unique identifier of the room to update.
+    
+    Returns:
+        flask.Response: JSON response with updated room details (200) or an error message (404).
+    """
+    with get_db() as db:
+        room = db.query(Room).filter(Room.id == room_id).first()
+
+        if not room:
+            return jsonify({"error": "Room not found"}), 404
+
+        data = request.get_json()
+        # Validate input data
+        if "name" in data and not data["name"].strip():
+            return jsonify({"error": "Room name cannot be empty"}), 400
+        if "capacity" in data:
+            try:
+                capacity = int(data["capacity"])
+                if capacity <= 0:
+                    return jsonify({"error": "Capacity must be a positive number"}), 400
+            except ValueError:
+                return jsonify({"error": "Invalid capacity value"}), 400
+        if "id_structure" in data:
+            structure = db.query(Structure).filter(Structure.id == data["id_structure"]).first()
+            if not structure:
+                return jsonify({"error": "Invalid structure ID"}), 400
+
+        if "name" in data:
+            room.name = data["name"]
+        if "capacity" in data:
+            room.capacity = data["capacity"]
+        if "id_structure" in data:
+            room.id_structure = data["id_structure"]
+
+        db.commit()
+        return jsonify(room.to_dict()), 200
 
 
 # Delete a room

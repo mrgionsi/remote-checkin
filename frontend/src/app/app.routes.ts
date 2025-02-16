@@ -4,6 +4,7 @@ import { RemoteCheckinComponent } from './remote-checkin/remote-checkin.componen
 import { DashboardComponent } from './admin/dashboard/dashboard.component';
 import { CreateReservationComponent } from './admin/create-reservation/create-reservation.component';
 import { AdminHomeComponent } from './admin/admin-home/admin-home.component';
+import { RoomComponent } from './admin/room/room.component';
 
 export const routes: Routes = [
     { path: '', component: LanguageComponent },
@@ -13,6 +14,7 @@ export const routes: Routes = [
         component: AdminHomeComponent, // Acts as the parent
         children: [
             { path: 'dashboard', component: DashboardComponent },
+            { path: 'rooms', component: RoomComponent },
             { path: 'create-reservation', component: CreateReservationComponent },
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 
