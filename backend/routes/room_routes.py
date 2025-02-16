@@ -144,6 +144,21 @@ def update_room(room_id):
             return jsonify({"error": "Room not found"}), 404
 
         data = request.get_json()
+        # Validate input data
+        if "name" in data and not data["name"].strip():
+            return jsonify({"error": "Room name cannot be empty"}), 400
+        if "capacity" in data:
+            try:
+                capacity = int(data["capacity"])
+                if capacity <= 0:
+                    return jsonify({"error": "Capacity must be a positive number"}), 400
+            except ValueError:
+                return jsonify({"error": "Invalid capacity value"}), 400
+        if "id_structure" in data:
+            structure = db.query(Structure).filter(Structure.id == data["id_structure"]).first()
+            if not structure:
+                return jsonify({"error": "Invalid structure ID"}), 400
+
         if "name" in data:
             room.name = data["name"]
         if "capacity" in data:
