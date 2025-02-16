@@ -106,8 +106,7 @@ export class RoomComponent implements OnInit {
         this.roomService.deleteRoom(room.id).subscribe({
           next: (value) => {
             console.log(value);
-            this.rooms[index] = this.clonedProducts[room.id as string];
-            delete this.clonedProducts[room.id as string];
+            this.rooms.splice(index, 1);
 
             this.messageService.add({ severity: 'info', summary: 'Confirmed', detail: value.message });
 
