@@ -42,7 +42,7 @@ export class RoomComponent implements OnInit {
 
 
   constructor(private messageService: MessageService,
-    private confirmationService: ConfirmationService,
+    public confirmationService: ConfirmationService,
     private roomService: RoomService) { }
 
 
@@ -51,6 +51,11 @@ export class RoomComponent implements OnInit {
       next: (value) => {
         console.log(value)
         this.rooms = value
+      },
+      error: (msg) => {
+        console.error("Failed to fetch rooms")
+        this.messageService.add({ severity: 'warn', summary: 'Failed', detail: 'Getting rooms. Please try again or contact your administrator.' });
+
       }
     }
     )
