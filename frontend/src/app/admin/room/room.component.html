@@ -1,0 +1,78 @@
+<div class="card">
+    <div class="btn-right mb-2">
+        <p-button class="" label="Create Room" icon="pi pi-plus" severity="info"
+            (click)="showDialogCreateRoom()"></p-button>
+    </div>
+    <p-table [value]="rooms" dataKey="id" editMode="row" [tableStyle]="{ 'min-width': '50rem' }">
+        <ng-template #header>
+            <tr>
+                <th pSortableColumn="id">ID <p-sortIcon field="id" /></th>
+                <th pSortableColumn="name">Name <p-sortIcon field="name" /></th>
+                <th>Struttura</th>
+                <th pSortableColumn="capacity">Capienza <p-sortIcon field="capacity" /></th>
+                <th>Actions</th>
+            </tr>
+        </ng-template>
+        <ng-template #body let-room let-editing="editing" let-ri="rowIndex">
+            <tr [pEditableRow]="room">
+                <td>{{ room.id }}</td>
+                <td>
+                    <p-cellEditor>
+                        <ng-template #input>
+                            <input pInputText type="text" [(ngModel)]="room.name" />
+                        </ng-template>
+                        <ng-template #output>
+                            {{room.name}}
+                        </ng-template>
+                    </p-cellEditor>
+                </td>
+                <td>B&B Chapeau</td>
+                <td>
+                    <p-cellEditor>
+                        <ng-template #input>
+                            <input pInputText type="number" [(ngModel)]="room.capacity" />
+                        </ng-template>
+                        <ng-template #output>
+                            {{room.capacity}}
+                        </ng-template>
+                    </p-cellEditor>
+                </td>
+                <td>
+                    <div class="flex items-center justify-center gap-2">
+                        <button *ngIf="!editing" pButton pRipple type="button" pInitEditableRow icon="pi pi-pencil"
+                            (click)="onRowEditInit(room)" text rounded severity="secondary"></button>
+                        <button *ngIf="!editing" pButton type="button" icon="pi pi-trash"
+                            (click)="onRowDelete(room,ri,$event)" text rounded severity="secondary"></button>
+                        <button *ngIf="editing" pButton pRipple type="button" pSaveEditableRow icon="pi pi-check"
+                            (click)="onRowEditSave(room)" text rounded severity="secondary"></button>
+                        <button *ngIf="editing" pButton pRipple type="button" pCancelEditableRow icon="pi pi-times"
+                            (click)="onRowEditCancel(room, ri)" text rounded severity="secondary"></button>
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>
+
+<p-toast />
+<p-confirmdialog />
+
+
+<p-dialog header="Add Room" [modal]="true" [(visible)]="add_room_visible" [style]="{ width: '25rem' }">
+    <!--     <span class="p-text-secondary block mb-8">Add new room</span>
+ -->
+    <div class="flex items-center gap-4 mb-4">
+        <label for="name" class="font-semibold w-24">Room name</label>
+        <input pInputText id="name" class="flex-auto" autocomplete="off" [(ngModel)]="new_room.name" required
+            minlength="1" maxlength="100" />
+    </div>
+    <div class="flex items-center gap-4 mb-8">
+        <label for="capacity" class="font-semibold w-24">Capacity</label>
+        <input pInputText id="capacity" class="flex-auto" type="number" autocomplete="off"
+            [(ngModel)]="new_room.capacity" required min="1" max="999" />
+    </div>
+    <div class="flex justify-end gap-2 mt-2">
+        <p-button label="Cancel" severity="secondary" (click)="add_room_visible = false" />
+        <p-button label="Save" (click)="addRoom()" />
+    </div>
+</p-dialog>

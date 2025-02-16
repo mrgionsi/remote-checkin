@@ -174,3 +174,5 @@ cython_debug/
 /frontend/.angular
 backend/report.xml
 report.xml
+.DS_Store
+frontend/package-lock.json
