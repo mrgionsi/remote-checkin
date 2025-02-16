@@ -33,7 +33,7 @@ export class RoomComponent implements OnInit {
 
   clonedProducts: { [s: string]: any } = {};
   add_room_visible: boolean = false;
-  new_room: any = { name: '', capacity: '' };
+  new_room: any = { name: '', capacity: '', id_structure: 1 };
   rooms: any;
   editDialogVisible = false;
   selectedRoom: any = {};
@@ -60,7 +60,17 @@ export class RoomComponent implements OnInit {
   }
 
   onRowEditSave(room: any) {
-
+    var _ = this;
+    this.roomService.editRoom(room).subscribe({
+      next: (val) => {
+        console.log(val)
+        _.messageService.add({ severity: 'info', summary: 'Confirmed', detail: 'Edited Room ' + this.new_room.name + ' added.' });
+      },
+      error: (error) => {
+        console.error('Error editing reservations:', error);
+        _.messageService.add({ severity: 'warn', summary: 'Failed', detail: 'Error editing room. Please try again or contact your administrator.' });
+      },
+    })
   }
 
   onRowEditCancel(room: any, index: number) {
@@ -87,10 +97,21 @@ export class RoomComponent implements OnInit {
       },
 
       accept: () => {
-        this.rooms[index] = this.clonedProducts[room.id as string];
-        delete this.clonedProducts[room.id as string];
+        var _ = this;
+        this.roomService.deleteRoom(room.id).subscribe({
+          next: (value) => {
+            console.log(value);
+            this.rooms[index] = this.clonedProducts[room.id as string];
+            delete this.clonedProducts[room.id as string];
 
-        this.messageService.add({ severity: 'info', summary: 'Confirmed', detail: 'Record deleted' });
+            this.messageService.add({ severity: 'info', summary: 'Confirmed', detail: value.message });
+
+          },
+          error: (error) => {
+            console.error('Error deleting reservations:', error);
+            _.messageService.add({ severity: 'warn', summary: 'Failed', detail: 'Error deleting new room. Please try again or contact your administrator.' });
+          },
+        })
 
       },
       reject: () => {
@@ -104,11 +125,18 @@ export class RoomComponent implements OnInit {
 
   addRoom() {
     this.add_room_visible = false;
-
-    this.messageService.add({ severity: 'info', summary: 'Confirmed', detail: 'New Room ' + this.new_room.name + ' added.' });
-    this.rooms.push(this.new_room);
-    this.new_room = { name: '', capacity: '' };
-    this.messageService.add({ severity: 'warn', summary: 'Failed', detail: 'Error adding new room. Please try again or contact your administrator.' });
+    var _ = this;
+    this.roomService.addRoom(this.new_room).subscribe({
+      next: (val) => {
+        _.messageService.add({ severity: 'info', summary: 'Confirmed', detail: 'New Room ' + this.new_room.name + ' added.' });
+        _.rooms.push(val);
+        _.new_room = { name: '', capacity: '' };
+      },
+      error: (error) => {
+        console.error('Error adding reservations:', error);
+        _.messageService.add({ severity: 'warn', summary: 'Failed', detail: 'Error adding new room. Please try again or contact your administrator.' });
+      },
+    })
 
   }
 

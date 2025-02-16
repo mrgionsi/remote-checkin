@@ -17,4 +17,14 @@ export class RoomService {
   getRooms(): Observable<any[]> {
     return this.http.get<any[]>(this.apiUrl);
   }
+
+  addRoom(room: any): Observable<any> {
+    return this.http.post<any[]>(this.apiUrl, room);
+  }
+  editRoom(room: any): Observable<any> {
+    return this.http.put<any[]>(this.apiUrl + '/' + room.id, room);
+  }
+  deleteRoom(idRoom: number): Observable<any> {
+    return this.http.delete(this.apiUrl + '/' + idRoom);
+  }
 }
