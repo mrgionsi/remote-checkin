@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-remote-checkin',
@@ -10,10 +10,19 @@ import { ActivatedRoute } from '@angular/router';
 export class RemoteCheckinComponent implements OnInit {
 
   languageCode: string | null = '';
-
-  constructor(private route: ActivatedRoute) { }
+  reservationId: string | null = '';
+  constructor(private route: ActivatedRoute, private router: Router) { }
 
   ngOnInit() {
     this.languageCode = this.route.snapshot.paramMap.get('code');
+    this.route.params.subscribe(params => {
+      if (!params['id']) {
+        this.router.navigate(['/reservation-check', params['code']]);
+      } else {
+        this.reservationId = this.route.snapshot.paramMap.get('id');
+
+      }
+
+    });
   }
 }
