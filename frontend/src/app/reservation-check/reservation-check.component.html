@@ -1,0 +1,13 @@
+<div class="flex justify-center items-center min-h-screen">
+    <div class="w-full max-w-xl p-6 bg-white rounded-2xl shadow-lg">
+        <p class="text-gray-500 text-lg mb-4">Inserisci il codice di prenotazione</p>
+        <input type="text" placeholder="Codice prenotazione" pInputText [(ngModel)]="reservationId"
+            class="w-full p-inputtext-lg" />
+
+        <div class="mt-4 flex justify-center">
+            <p-button label="VAI AL CHECK-IN" icon="pi pi-arrow-right" class="p-button-primary p-button-lg rounded-2xl"
+                (click)="goToCheckIn()" [disabled]="!reservationId.trim()">
+            </p-button>
+        </div>
+    </div>
+</div>

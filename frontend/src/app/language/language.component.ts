@@ -26,7 +26,7 @@ export class LanguageComponent {
     { name: 'Chinese', code: 'zh', flag: '🇨🇳' }
   ];
 
-  selectedLanguage: Language = this.languages[1]; // Default to Italian
+  selectedLanguage: Language = { name: '', code: '', flag: '' };
 
 
   constructor(private router: Router) { }
