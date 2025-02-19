@@ -16,10 +16,13 @@ export class ReservationService {
   }
 
   getReservationByStructureId(id: number): Observable<any> {
-    return this.http.get(this.apiUrl + '/' + id)
+    return this.http.get(this.apiUrl + '/structure/' + id)
   }
 
   getMonthlyReservation(id_structure: number): Observable<any> {
     return this.http.get(this.apiUrl + '/monthly/' + id_structure)
+  }
+  getReservationById(id_structure: number): Observable<any> {
+    return this.http.get(this.apiUrl + '/' + id_structure)
   }
 }

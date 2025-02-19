@@ -11,7 +11,7 @@ It supports operations such as creating new reservations and listing all reserva
 import calendar
 from datetime import datetime
 from flask import Blueprint, request, jsonify
-from sqlalchemy import func
+from sqlalchemy import String, func
 from sqlalchemy.sql import extract
 from models import Reservation, Room, Structure, StructureReservationsView
 
@@ -115,7 +115,7 @@ def get_reservations():
     return jsonify({"reservations": reservations})
 
 
-@reservation_bp.route("/reservations/<int:structure_id>", methods=["GET"])
+@reservation_bp.route("/reservations/structure/<structure_id>", methods=["GET"])
 def get_reservations_by_structure(structure_id):
     """
     Get all reservations for a specific structure.
@@ -145,6 +145,35 @@ def get_reservations_by_structure(structure_id):
         "room_name": r.room_name
     } for r in reservations])
 
+
+
+@reservation_bp.route("/reservations/<int:reservation_id>", methods=["GET"])
+def get_reservations_by_id(reservation_id):
+    """
+    Get specific reservation
+
+    Args:
+        reservation_id (int): The ID of the reservation.
+
+    Returns:
+        flask.Response: JSON containing reservation details or a 404 error if not found.
+    """
+    db = SessionLocal()
+    reservationID = str(reservation_id)
+    reservation = (
+        db.query(Reservation)
+        .filter(Reservation.id_reference == reservationID)
+        .first()
+    )
+    db.close()
+
+    if not reservation:
+        return jsonify({"error": "Reservation not found"}), 404
+
+    return reservation.to_dict()
+
+
+    
 @reservation_bp.route("/reservations/monthly/<int:structure_id>", methods=["GET"])
 def get_reservations_per_month(structure_id):
     """
