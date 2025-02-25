@@ -1,0 +1,20 @@
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 1rem;
+}
+
+.p-error {
+    color: #f44336;
+    font-size: 12px;
+}
+
+.p-button {
+    width: 150px;
+}
+
+.flex-custom {
+    display: flex !important;
+    justify-content: end !important;
+}

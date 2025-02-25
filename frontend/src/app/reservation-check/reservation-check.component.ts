@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
@@ -15,7 +15,7 @@ import { ToastModule } from 'primeng/toast';
   styleUrl: './reservation-check.component.scss',
   providers: [MessageService]
 })
-export class ReservationCheckComponent {
+export class ReservationCheckComponent implements OnInit {
   reservationId: string = '';
   languageCode: string = '';
 
@@ -28,6 +28,7 @@ export class ReservationCheckComponent {
     // Fetch the language code from the URL
     this.route.params.subscribe(params => {
       this.languageCode = params['code'] || 'en'; // Default to 'en' if missing
+
     });
   }
   goToCheckIn() {
@@ -36,8 +37,14 @@ export class ReservationCheckComponent {
     this.reservationService.getReservationById(Number(this.reservationId)).subscribe({
       next: (val) => {
         console.log(val);
-        if (this.reservationId.trim()) {
-          this.router.navigate([`/${this.reservationId}/remote-checkin/${this.languageCode}`]);
+        console.log('Reservation ID:', this.reservationId);
+        console.log('Language Code:', this.languageCode);
+
+        if (!this.reservationId || !this.languageCode) {
+          console.error('Missing values! Cannot navigate.');
+        } else {
+          var url = 'remote-checkin';
+          this.router.navigate([this.reservationId, url, this.languageCode]);
         }
       },
       error: (error) => {
