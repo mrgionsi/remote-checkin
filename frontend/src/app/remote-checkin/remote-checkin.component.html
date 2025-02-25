@@ -1,6 +1,144 @@
-<div class="container">
-    <h2>You selected: {{ languageCode }}</h2>
-    <h2>Your reservationId: {{ reservationId }}</h2>
+<div class="card justify-center">
+    <p-stepper [value]="1" class="basis-[80rem]">
+        <p-step-list>
+            <p-step [value]="1">Client Information</p-step>
+            <p-step [value]="2">Upload Images</p-step>
+            <p-step [value]="3">Confirm</p-step>
+        </p-step-list>
+        <p-step-panels>
+            <p-step-panel [value]="1">
+                <ng-template #content let-activateCallback="activateCallback">
+                    <div class="flex flex-col h-48">
+                        <div class="flex-auto justify-center items-center font-medium">
+                            <p-card header="Client Information">
+                                <form [formGroup]="clientForm" class="p-fluid">
+                                    <div class="grid">
+                                        <!-- Column 1 -->
+                                        <div class="col-12 md:col-6">
+                                            <div class="field">
+                                                <label for="name">Name</label>
+                                                <input pInputText id="name" formControlName="name"
+                                                    placeholder="Enter Name" />
+                                            </div>
+                                            <div class="field">
+                                                <label for="surname">Surname</label>
+                                                <input pInputText id="surname" formControlName="surname"
+                                                    placeholder="Enter Surname" />
+                                            </div>
+                                            <div class="field">
+                                                <label for="birthday">Birthday</label>
+                                                <p-datePicker id="birthday" formControlName="birthday" showIcon
+                                                    dateFormat="dd/mm/yy"></p-datePicker>
+                                            </div>
+                                            <div class="field">
+                                                <label for="street">Street</label>
+                                                <input pInputText id="street" formControlName="street"
+                                                    placeholder="Street Address" />
+                                            </div>
+                                            <div class="field">
+                                                <label for="city">City</label>
+                                                <input pInputText id="city" formControlName="city" placeholder="City" />
+                                            </div>
+                                            <div class="field">
+                                                <label for="cap">CAP</label>
+                                                <input pInputText id="cap" formControlName="cap"
+                                                    placeholder="5-digit CAP" />
+                                                <small
+                                                    *ngIf="clientForm.get('cap')?.invalid && clientForm.get('cap')?.touched"
+                                                    class="p-error">
+                                                    CAP must be 5 digits
+                                                </small>
+                                            </div>
+                                        </div>
 
-    <a routerLink="/">Go Back</a>
+                                        <!-- Column 2 -->
+                                        <div class="col-12 md:col-6">
+                                            <div class="field">
+                                                <label for="province">Province</label>
+                                                <input pInputText id="province" formControlName="province"
+                                                    placeholder="Province" />
+                                            </div>
+                                            <div class="field">
+                                                <label for="number_city">City Number</label>
+                                                <input pInputText id="number_city" formControlName="number_city"
+                                                    placeholder="City Number" />
+                                            </div>
+                                            <div class="field">
+                                                <label for="telephone">Telephone</label>
+                                                <input pInputText id="telephone" formControlName="telephone"
+                                                    placeholder="Phone Number" />
+                                            </div>
+                                            <div class="field">
+                                                <label for="document_type">Document Type</label>
+                                                <p-select id="document_type" formControlName="document_type"
+                                                    [options]="documentTypes" placeholder="Select Document Type"
+                                                    class="w-16rem"></p-select>
+                                            </div>
+                                            <div class="field">
+                                                <label for="document_number">Document Number</label>
+                                                <input pInputText id="document_number" formControlName="document_number"
+                                                    placeholder="Document Number" />
+                                            </div>
+                                            <div class="field">
+                                                <label for="cf">CF (Tax Code)</label>
+                                                <input pInputText id="cf" formControlName="cf"
+                                                    placeholder="Tax Code (16 chars)" />
+                                                <small
+                                                    *ngIf="clientForm.get('cf')?.invalid && clientForm.get('cf')?.touched"
+                                                    class="p-error">
+                                                    CF must be 16 alphanumeric characters
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex justify-content-end">
+                                        <!--                    <p-button type="submit" label="Submit" [disabled]="clientForm.invalid"
+                                            icon="pi pi-check"></p-button> -->
+                                    </div>
+                                </form>
+                            </p-card>
+                        </div>
+
+                    </div>
+                    <div class="flex  pt-6 justify-content-end">
+                        <!-- [disabled]="clientForm.invalid"  -->
+                        <p-button label="Next" icon="pi pi-arrow-right" iconPos="right"
+                            (onClick)="activateCallback(2)" />
+                    </div>
+                </ng-template>
+            </p-step-panel>
+
+            <p-step-panel [value]="2">
+                <ng-template #content let-activateCallback="activateCallback">
+                    <div class="flex flex-col h-48">
+                        <div class="flex-auto flex justify-center items-center font-medium">
+                            Content II
+                        </div>
+                    </div>
+                    <div class="flex pt-6 justify-between">
+                        <p-button label="Back" severity="secondary" icon="pi pi-arrow-left"
+                            (onClick)="activateCallback(1)" />
+                        <p-button label="Next" icon="pi pi-arrow-right" iconPos="right"
+                            (onClick)="activateCallback(3)" />
+                    </div>
+                </ng-template>
+            </p-step-panel>
+
+            <p-step-panel [value]="3">
+                <ng-template #content let-activateCallback="activateCallback">
+                    <div class="flex flex-col h-48">
+                        <div
+                            class="border-2 border-dashed border-surface-200 dark:border-surface-700 rounded bg-surface-50 dark:bg-surface-950 flex-auto flex justify-center items-center font-medium">
+                            Content III
+                        </div>
+                    </div>
+                    <div class="flex pt-6 justify-start">
+                        <p-button label="Back" icon="pi pi-arrow-left" iconPos="right"
+                            (onClick)="activateCallback(2)" />
+                    </div>
+                </ng-template>
+            </p-step-panel>
+        </p-step-panels>
+    </p-stepper>
 </div>

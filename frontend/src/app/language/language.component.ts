@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 interface Language {
   name: string;
@@ -29,11 +29,25 @@ export class LanguageComponent {
   selectedLanguage: Language = { name: '', code: '', flag: '' };
 
 
-  constructor(private router: Router) { }
+  constructor(private router: Router, private route: ActivatedRoute) { }
 
   selectLanguage(lang: Language) {
     this.selectedLanguage = lang;
-    this.router.navigate(['/remote-checkin', lang.code]); // Navigate to new page
+
+    this.route.params.subscribe(params => {
+      const reservationId = params['id']; // Extract the ID
+
+      if (!reservationId) {
+        if (this.selectedLanguage) {
+          this.router.navigate(['/reservation-check', this.selectedLanguage.code]);
+        } else {
+          console.error('Both id and code are missing from route params!');
+        }
+      } else {
+        this.router.navigate([`${reservationId}/remote-checkin`, lang.code]); // Navigate safely
+      }
+    });
   }
+
 
 }
