@@ -59,6 +59,7 @@ def create_reservation():
             id_reference=data["reservationNumber"],
             start_date=start_date,
             end_date=end_date,
+            name_reference = data["nameReference"],
             id_room=room.id,
         )
 
@@ -142,6 +143,7 @@ def get_reservations_by_structure(structure_id):
         "end_date": r.end_date.isoformat(),
         "room_id": r.room_id,
         "status": r.status,
+        "name_reference": r.name_reference,
         "room_name": r.room_name
     } for r in reservations])
 
