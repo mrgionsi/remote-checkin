@@ -58,13 +58,14 @@ CREATE TABLE "public"."reservation" (
     "end_date" date,
     "id_room" bigint,
     "status" text DEFAULT 'Pending',
+    "name_reference" text DEFAULT 'Not available',
     CONSTRAINT "reservation_pkey" PRIMARY KEY ("id")
 ) WITH (oids = false);
 
 CREATE INDEX "ix_reservation_id" ON "public"."reservation" USING btree ("id");
 
-INSERT INTO "reservation" ("id", "id_reference", "start_date", "end_date", "id_room", "status") VALUES
-(1,	'1234',	'2025-02-14',	'2025-02-15',	2,	'Pending');
+INSERT INTO "reservation" ("id", "id_reference", "start_date", "end_date", "id_room", "status", "name_reference") VALUES
+(1,	'1234',	'2025-02-14',	'2025-02-15',	2,	'Pending',	'Giovanni Pasquariello');
 
 DROP TABLE IF EXISTS "role";
 CREATE TABLE "public"."role" (
@@ -109,7 +110,7 @@ INSERT INTO "structure" ("id", "name", "street", "city") VALUES
 (1,	'B&B Chapeau',	'Via Torrino 14',	'Casagiove');
 
 DROP VIEW IF EXISTS "structure_reservations";
-CREATE TABLE "structure_reservations" ("structure_id" bigint, "structure_name" character varying, "reservation_id" bigint, "id_reference" character varying(500), "start_date" date, "end_date" date, "status" text, "room_id" bigint, "room_name" character varying);
+CREATE TABLE "structure_reservations" ("structure_id" bigint, "structure_name" character varying, "reservation_id" bigint, "id_reference" character varying(500), "name_reference" text, "start_date" date, "end_date" date, "status" text, "room_id" bigint, "room_name" character varying);
 
 
 DROP TABLE IF EXISTS "user";
@@ -143,6 +144,7 @@ CREATE VIEW "structure_reservations" AS SELECT s.id AS structure_id,
     s.name AS structure_name,
     r.id AS reservation_id,
     r.id_reference,
+    r.name_reference,
     r.start_date,
     r.end_date,
     r.status,
@@ -152,4 +154,4 @@ CREATE VIEW "structure_reservations" AS SELECT s.id AS structure_id,
      JOIN room rm ON ((r.id_room = rm.id)))
      JOIN structure s ON ((rm.id_structure = s.id)));
 
--- 2025-02-26 19:20:56.549798+00
+-- 2025-02-26 20:58:24.579873+00
