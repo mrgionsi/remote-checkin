@@ -1,9 +1,12 @@
-<div class="card justify-center">
+<div class="card flex justify-center">
+    <p-toast></p-toast>
+</div>
+<div class="card justify-center" *ngIf="!showConfirmationDialog">
     <p-stepper [value]="1" class="basis-[80rem]">
         <p-step-list>
             <p-step [value]="1">Client Information</p-step>
-            <p-step [value]="2">Upload Images</p-step>
-            <p-step [value]="3">Confirm</p-step>
+            <p-step [disabled]="clientForm.invalid" [value]="2">Upload Images</p-step>
+            <p-step [disabled]="uploadForm.invalid" [value]="3">Confirm Data</p-step>
         </p-step-list>
         <p-step-panels>
             <p-step-panel [value]="1">
@@ -112,27 +115,81 @@
             <p-step-panel [value]="2">
                 <ng-template #content let-activateCallback="activateCallback">
                     <div class="flex flex-col h-48">
-                        <div class="flex-auto flex justify-center items-center font-medium">
-                            Content II
+                        <div class="flex-auto justify-center items-center font-medium">
+                            <app-upload-identity (formDataEmitter)="handleFormData($event)"></app-upload-identity>
                         </div>
                     </div>
-                    <div class="flex pt-6 justify-between">
+                    <div class="flex justify-space-between w-full pt-6">
                         <p-button label="Back" severity="secondary" icon="pi pi-arrow-left"
                             (onClick)="activateCallback(1)" />
-                        <p-button label="Next" icon="pi pi-arrow-right" iconPos="right"
+
+                        <p-button label="Next" icon="pi pi-arrow-right" iconPos="right" [disabled]="uploadForm.invalid"
                             (onClick)="activateCallback(3)" />
                     </div>
+
+
                 </ng-template>
             </p-step-panel>
 
             <p-step-panel [value]="3">
                 <ng-template #content let-activateCallback="activateCallback">
-                    <div class="flex flex-col h-48">
-                        <div
-                            class="border-2 border-dashed border-surface-200 dark:border-surface-700 rounded bg-surface-50 dark:bg-surface-950 flex-auto flex justify-center items-center font-medium">
-                            Content III
+                    <div class="grid">
+                        <!-- Form Recap Section -->
+                        <div class="col-6">
+                            <p-card header="Form Details">
+                                <div class="form-recap p-3">
+                                    <p><strong>Reservation ID:</strong> {{ reservationId }}
+                                    </p>
+                                    <p><strong>Name:</strong> {{ clientForm.get('name')?.value }}</p>
+                                    <p><strong>Surname:</strong> {{ clientForm.get('surname')?.value }}</p>
+                                    <p><strong>Birthday:</strong> {{ clientForm.get('birthday')?.value | date }}</p>
+                                    <p><strong>Street:</strong> {{ clientForm.get('street')?.value }}</p>
+                                    <p><strong>City:</strong> {{ clientForm.get('city')?.value }}</p>
+                                    <p><strong>Province:</strong> {{ clientForm.get('province')?.value }}</p>
+                                    <p><strong>CAP:</strong> {{ clientForm.get('cap')?.value }}</p>
+                                    <p><strong>Telephone:</strong> {{ clientForm.get('telephone')?.value }}</p>
+                                    <p><strong>Document Type:</strong> {{ clientForm.get('document_type')?.value }}</p>
+                                    <p><strong>Document Number:</strong> {{ clientForm.get('document_number')?.value }}
+                                    </p>
+                                    <p><strong>CF (Codice Fiscale):</strong> {{ clientForm.get('cf')?.value }}</p>
+                                </div>
+                            </p-card>
+                        </div>
+
+                        <!-- Image Upload Section -->
+                        <div class="col-6">
+                            <p-card header="Uploaded Images" class="">
+                                <div class="image-upload-section p-3" class="flex flex-col items-center">
+                                    <div *ngIf="uploadForm.get('frontImage')?.value['objectURL']" class="pt-3 pr-3">
+                                        <p> <strong>Front Image:</strong></p>
+                                        <img [src]="uploadForm.get('frontImage')?.value['objectURL']" alt="Front Image"
+                                            class="image-preview w-32 h-32 object-cover rounded-md shadow-md border border-gray-300">
+                                    </div>
+
+                                    <div *ngIf="uploadForm?.get('backImage')?.value['objectURL']" class="pt-3 pr-3">
+                                        <p> <strong>Back Image:</strong></p>
+                                        <img [src]="uploadForm.get('backImage')?.value['objectURL']" alt="Back Image"
+                                            class="image-preview w-32 h-32 object-cover rounded-md shadow-md border border-gray-300">
+                                    </div>
+
+                                    <div *ngIf="uploadForm?.get('selfie')?.value['objectURL']" class="pt-3">
+                                        <p> <strong>Selfie:</strong></p>
+                                        <img [src]="uploadForm.get('selfie')?.value['objectURL']" alt="Selfie Image"
+                                            class="image-preview w-32 h-32 object-cover rounded-md shadow-md border border-gray-300">
+                                    </div>
+                                </div>
+                            </p-card>
                         </div>
                     </div>
+
+                    <!-- Submit Button Section - Centered -->
+                    <div class="flex justify-center pt-4 w-full">
+                        <p-button label="Submit" icon="pi pi-check" class="p-button-lg"
+                            (click)="uploadReservationData()"></p-button>
+                    </div>
+
+
+
                     <div class="flex pt-6 justify-start">
                         <p-button label="Back" icon="pi pi-arrow-left" iconPos="right"
                             (onClick)="activateCallback(2)" />
@@ -142,3 +199,11 @@
         </p-step-panels>
     </p-stepper>
 </div>
+
+
+<p-dialog [(visible)]="showConfirmationDialog" modal header="Confirmation Sent" [style]="{ width: '400px' }">
+    <p>Your confirmation has been sent. You will receive an email shortly.</p>
+    <ng-template pTemplate="footer">
+        <button pButton label="OK" icon="pi pi-check" (click)="closeDialog()"></button>
+    </ng-template>
+</p-dialog>

@@ -6,11 +6,11 @@ import { provideClientHydration } from '@angular/platform-browser';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeng/themes/aura';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withFetch, withInterceptorsFromDi } from '@angular/common/http';
 
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideAnimationsAsync(), provideHttpClient(withInterceptorsFromDi()),
+  providers: [provideAnimationsAsync(), provideHttpClient(withInterceptorsFromDi(), withFetch()),
   providePrimeNG({
     theme: {
       preset: Aura,

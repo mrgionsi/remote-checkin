@@ -10,6 +10,7 @@ from flask import Flask
 from flask_cors import CORS
 from routes.room_routes import room_bp
 from routes.reservation_routes import reservation_bp  # Adjust the path as needed
+from routes.upload_reservation_routes import upload_bp  # Adjust the path as needed
 
 
 app = Flask(__name__)
@@ -21,6 +22,7 @@ CORS(app, origins="http://localhost:4200")  # Change this to match your frontend
 # Register blueprints
 app.register_blueprint(room_bp)
 app.register_blueprint(reservation_bp)  # Register the reservation blueprint
+app.register_blueprint(upload_bp)
 
 
 @app.route("/")

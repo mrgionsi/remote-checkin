@@ -1,0 +1,49 @@
+<p-card header="Identity Document Upload">
+    <form [formGroup]="uploadForm" class="p-fluid">
+        <div class="grid">
+            <div class="col-12 md:col-4">
+                <div class="field">
+                    <label for="frontImage">Front Side</label>
+
+                    <p-fileupload name="frontImage" (onSelect)="onFileSelect($event, 'frontImage')" accept="image/*"
+                        mode="basic"></p-fileupload>
+                </div>
+                <div *ngIf="uploadForm.get('frontImage')?.value?.objectURL" class="pt-3">
+                    <p> <strong>Front Image:</strong></p>
+                    <img [src]="uploadForm.get('frontImage')?.value?.objectURL" alt="Front Image"
+                        class="image-preview w-32 h-32 object-cover rounded-md shadow-md border border-gray-300">
+                </div>
+            </div>
+
+            <div class="col-12 md:col-4">
+                <div class="field">
+                    <label for="backImage">Back Side</label>
+                    <p-fileupload name="backImage" (onSelect)="onFileSelect($event, 'backImage')" accept="image/*"
+                        mode="basic"></p-fileupload>
+                </div>
+                <div *ngIf="uploadForm?.get('backImage')?.value?.objectURL" class="pt-3">
+                    <p> <strong>Back Image:</strong></p>
+                    <img [src]="uploadForm.get('backImage')?.value?.objectURL" alt="Back Image"
+                        class="image-preview w-32 h-32 object-cover rounded-md shadow-md border border-gray-300">
+                </div>
+            </div>
+
+            <div class="col-12 md:col-4">
+                <div class="field">
+                    <label for="selfie">Selfie with Document</label>
+                    <p-fileupload name="selfie" (onSelect)="onFileSelect($event, 'selfie')" accept="image/*"
+                        mode="basic"></p-fileupload>
+                </div>
+                <div *ngIf="uploadForm?.get('selfie')?.value?.objectURL" class="pt-3">
+                    <p> <strong>Selfie:</strong></p>
+                    <img [src]="uploadForm.get('selfie')?.value?.objectURL" alt="Selfie Image"
+                        class="image-preview w-32 h-32 object-cover rounded-md shadow-md border border-gray-300">
+                </div>
+            </div>
+        </div>
+
+        <!--      <div class="flex justify-content-end">
+            <p-button type="submit" label="Submit" [disabled]="uploadForm.invalid" icon="pi pi-check"></p-button>
+        </div> -->
+    </form>
+</p-card>
