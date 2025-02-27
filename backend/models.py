@@ -135,6 +135,7 @@ class Client(Base):
     telephone = Column(String)
     document_number = Column(String)
     cf = Column(String)
+    document_type = Column(String)
 
     reservations = relationship(
         "Reservation", secondary="client_reservations", back_populates="clients"
@@ -154,6 +155,7 @@ class Client(Base):
             "cap": self.cap,
             "telephone": self.telephone,
             "document_number": self.document_number,
+            "document_type": self.document_type,
             "cf": self.cf,
         }
 
