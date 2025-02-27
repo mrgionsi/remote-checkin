@@ -3,3 +3,7 @@
 init-hook='import sys; sys.path.append("backend")'
 [MESSAGES CONTROL]
 disable=E1101
+
+
+[FORMAT]
+max-line-length=200

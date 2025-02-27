@@ -1,3 +1,22 @@
+"""
+file_utils.py
+
+This module provides utility functions for working with files. It includes operations like reading, writing,
+file validation, and other file manipulation tasks required in the application.
+
+Functions:
+    - function_name_1: Description of function.
+    - function_name_2: Description of function.
+    - ...
+    
+Usage Example:
+    >>> from backend.utils.file_utils import function_name_1
+    >>> result = function_name_1('file_path')
+    >>> print(result)
+
+Note: Ensure that the required file permissions and paths are correctly set for all operations.
+"""
+
 import os
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
