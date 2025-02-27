@@ -93,6 +93,8 @@ export class RemoteCheckinComponent implements OnInit {
   }
 
   uploadReservationData() {
+    console.log("uploadReservationData called");  // For debugging
+
     if (this.uploadForm.invalid || this.clientForm.invalid) {
       this.messageService.add({ severity: 'error', summary: 'Error', detail: 'All fields and images are required' });
       return;
