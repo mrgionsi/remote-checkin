@@ -1,3 +1,21 @@
+"""
+OCR utility functions for document validation.
+
+This module provides functions for validating documents by extracting text using Optical Character Recognition (OCR).
+It uses the Tesseract OCR engine and OpenCV for image processing.
+
+Functions:
+    - validate_document(image_path: str) -> tuple:
+        Extracts text from an image and validates if the document contains sufficient text.
+        Returns a tuple containing a boolean value indicating the validity of the document
+        and a string with either the extracted text or an error message.
+
+Dependencies:
+    - OpenCV (cv2) for image manipulation.
+    - Pytesseract for optical character recognition (OCR).
+
+"""
+
 import cv2
 import pytesseract
 
