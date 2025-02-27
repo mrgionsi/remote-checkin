@@ -25,6 +25,7 @@ CREATE TABLE "public"."client" (
     "telephone" character varying,
     "document_number" character varying,
     "cf" character varying,
+    "document_type" text,
     CONSTRAINT "client_pkey" PRIMARY KEY ("id")
 ) WITH (oids = false);
 
@@ -32,9 +33,10 @@ CREATE INDEX "client_cf" ON "public"."client" USING btree ("cf");
 
 CREATE INDEX "ix_client_id" ON "public"."client" USING btree ("id");
 
-INSERT INTO "client" ("id", "name", "surname", "birthday", "street", "number_city", "city", "province", "cap", "telephone", "document_number", "cf") VALUES
-(8,	'Giovanni',	'Pasquariello',	'2025-02-04',	'via corsica 17',	'17',	'Recale',	'CE',	'81020',	'3454526037',	'CAA4F3432',	'PSQGNN96M08B963J'),
-(9,	'Giovanni',	'Pasquariello',	'2025-02-02',	'via corsica 17',	'17',	'Recale',	'CE',	'81020',	'3454526037',	'CAA4F3432',	'PSQGNN96M08B963A');
+INSERT INTO "client" ("id", "name", "surname", "birthday", "street", "number_city", "city", "province", "cap", "telephone", "document_number", "cf", "document_type") VALUES
+(8,	'Giovanni',	'Pasquariello',	'2025-02-04',	'via corsica 17',	'17',	'Recale',	'CE',	'81020',	'3454526037',	'CAA4F3432',	'PSQGNN96M08B963J',	NULL),
+(9,	'Giovanni',	'Pasquariello',	'2025-02-02',	'via corsica 17',	'17',	'Recale',	'CE',	'81020',	'3454526037',	'CAA4F3432',	'PSQGNN96M08B963A',	NULL),
+(10,	'John',	'Doe',	'1990-01-01',	'123 Main St',	NULL,	'Test City',	'Test Province',	'12345',	'1234567890',	'ABC123456',	'JHNDOE90A01X123Y',	'ID');
 
 DROP TABLE IF EXISTS "client_reservations";
 CREATE TABLE "public"."client_reservations" (
@@ -43,9 +45,6 @@ CREATE TABLE "public"."client_reservations" (
     CONSTRAINT "client_reservations_pkey" PRIMARY KEY ("id_reservation", "id_client")
 ) WITH (oids = false);
 
-INSERT INTO "client_reservations" ("id_reservation", "id_client") VALUES
-(1,	8),
-(1,	9);
 
 DROP TABLE IF EXISTS "reservation";
 DROP SEQUENCE IF EXISTS reservation_id_seq;
@@ -64,8 +63,6 @@ CREATE TABLE "public"."reservation" (
 
 CREATE INDEX "ix_reservation_id" ON "public"."reservation" USING btree ("id");
 
-INSERT INTO "reservation" ("id", "id_reference", "start_date", "end_date", "id_room", "status", "name_reference") VALUES
-(1,	'1234',	'2025-02-14',	'2025-02-15',	2,	'Pending',	'Giovanni Pasquariello');
 
 DROP TABLE IF EXISTS "role";
 CREATE TABLE "public"."role" (
@@ -89,10 +86,6 @@ CREATE TABLE "public"."room" (
 
 CREATE INDEX "ix_room_id" ON "public"."room" USING btree ("id");
 
-INSERT INTO "room" ("id", "name", "capacity", "id_structure") VALUES
-(2,	'Giungla',	4,	1),
-(3,	'Savana',	2,	1),
-(1,	'SPA',	2,	1);
 
 DROP TABLE IF EXISTS "structure";
 CREATE TABLE "public"."structure" (
@@ -105,9 +98,6 @@ CREATE TABLE "public"."structure" (
 
 CREATE INDEX "ix_structure_id" ON "public"."structure" USING btree ("id");
 
-INSERT INTO "structure" ("id", "name", "street", "city") VALUES
-(2,	'B&B Chapeau',	'Via Torrino 14',	'Casagiove'),
-(1,	'B&B Chapeau',	'Via Torrino 14',	'Casagiove');
 
 DROP VIEW IF EXISTS "structure_reservations";
 CREATE TABLE "structure_reservations" ("structure_id" bigint, "structure_name" character varying, "reservation_id" bigint, "id_reference" character varying(500), "name_reference" text, "start_date" date, "end_date" date, "status" text, "room_id" bigint, "room_name" character varying);
@@ -154,4 +144,4 @@ CREATE VIEW "structure_reservations" AS SELECT s.id AS structure_id,
      JOIN room rm ON ((r.id_room = rm.id)))
      JOIN structure s ON ((rm.id_structure = s.id)));
 
--- 2025-02-26 20:58:24.579873+00
+-- 2025-02-27 21:35:22.04679+00
