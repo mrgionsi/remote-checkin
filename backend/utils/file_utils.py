@@ -51,8 +51,22 @@ def save_file(file, folder, filename):
         filename (str): The name of the file to be saved.
     
     Returns:
-        str: The path to the saved file.
+        str: The path to the saved file on success, None on failure.
+    
+    Raises:
+        OSError: If the folder doesn't exist or cannot be created.
+        IOError: If the file cannot be saved.
     """
-    filepath = os.path.join(folder, filename)
-    file.save(filepath)
-    return filepath
+    try:
+        # Ensure target folder exists
+        os.makedirs(folder, exist_ok=True)
+        
+        # Sanitize filename (additional security)
+        safe_filename = os.path.basename(filename)
+        
+        filepath = os.path.join(folder, safe_filename)
+        file.save(filepath)
+        return filepath
+    except (OSError, IOError) as e:
+        print(f"Error saving file: {e}")
+        return None
