@@ -1,5 +1,5 @@
 # routes/reservation_routes.py
-# pylint: disable=C0301,E0611,E0401
+# pylint: disable=C0301,E0611,E0401,W0718,
 
 """
 Reservation Routes for handling reservation-related requests in the system.
