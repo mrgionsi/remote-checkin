@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 interface Language {
   name: string;
@@ -25,16 +27,21 @@ export class LanguageComponent {
     { name: 'Russian', code: 'ru', flag: '🇷🇺' },
     { name: 'Chinese', code: 'zh', flag: '🇨🇳' }
   ];
+  private destroy$ = new Subject<void>();
 
   selectedLanguage: Language = { name: '', code: '', flag: '' };
 
 
   constructor(private router: Router, private route: ActivatedRoute) { }
 
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
   selectLanguage(lang: Language) {
     this.selectedLanguage = lang;
 
-    this.route.params.subscribe(params => {
+    this.route.params.pipe(takeUntil(this.destroy$)).subscribe(params => {
       const reservationId = params['id']; // Extract the ID
 
       if (!reservationId) {
