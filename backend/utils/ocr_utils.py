@@ -15,6 +15,8 @@ Dependencies:
     - Pytesseract for optical character recognition (OCR).
 
 """
+# pylint: disable=C0301,E0611,E0401,W0718,
+
 
 import cv2
 import pytesseract
@@ -39,8 +41,8 @@ def validate_document(image_path):
     # Convert to grayscale for better OCR accuracy
     try:
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    except cv2.error:
-        return False, "Error: Failed to process image. Invalid format or corrupted file."
+    except Exception as e:  # More generic
+        return False, f"Error: Failed to process image. {str(e)}"
     # Extract text using OCR
     try:
         text = pytesseract.image_to_string(gray)

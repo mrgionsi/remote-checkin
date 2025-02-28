@@ -38,7 +38,6 @@ def allowed_file(filename):
         # Check for directory traversal attempts
     if os.path.basename(filename) != filename:
         return False
-    
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def save_file(file, folder, filename):
@@ -60,10 +59,9 @@ def save_file(file, folder, filename):
     try:
         # Ensure target folder exists
         os.makedirs(folder, exist_ok=True)
-        
         # Sanitize filename (additional security)
         safe_filename = os.path.basename(filename)
-        
+
         filepath = os.path.join(folder, safe_filename)
         file.save(filepath)
         return filepath
