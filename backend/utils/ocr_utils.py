@@ -36,8 +36,11 @@ def validate_document(image_path):
         return False, "Error: Could not load image. File may be corrupted or unsupported format."
 
     # Convert to grayscale for better OCR accuracy
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
+    # Convert to grayscale for better OCR accuracy
+    try:
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    except cv2.error:
+        return False, "Error: Failed to process image. Invalid format or corrupted file."
     # Extract text using OCR
     try:
         text = pytesseract.image_to_string(gray)
