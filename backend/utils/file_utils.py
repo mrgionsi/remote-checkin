@@ -16,7 +16,7 @@ Usage Example:
 
 Note: Ensure that the required file permissions and paths are correctly set for all operations.
 """
-
+#pylint: disable=E0611,E0401,W0719,C0301
 import os
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
