@@ -161,19 +161,22 @@ def get_reservations_by_id(reservation_id):
         flask.Response: JSON containing reservation details or a 404 error if not found.
     """
     db = SessionLocal()
-    reservationid = str(reservation_id)
-    reservation = (
-        db.query(Reservation)
-        .filter(Reservation.id_reference == reservationid)
-        .first()
-    )
-    db.close()
+    try:
+        reservationid = str(reservation_id)
+        reservation = (
+            db.query(Reservation)
+            .filter(Reservation.id_reference == reservationid)
+            .first()
+        )
 
-    if not reservation:
-        return jsonify({"error": "Reservation not found"}), 404
+        if not reservation:
+            return jsonify({"error": "Reservation not found"}), 404
 
-    return reservation.to_dict()
-
+        return jsonify(reservation.to_dict())
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        db.close()
 
 @reservation_bp.route("/reservations/monthly/<int:structure_id>", methods=["GET"])
 def get_reservations_per_month(structure_id):
