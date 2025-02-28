@@ -77,14 +77,21 @@ def add_or_update_client(form_data, client=None):
                 # Update existing client
                 for key, value in form_data.items():
                     if hasattr(client, key) and key != 'reservationId':
-                        setattr(client, key, value if key != 'birthday' else datetime.strptime(value, "%Y-%m-%d"))
-
+                      if key == 'birthday':
+                          try:
+                              value = datetime.strptime(value, "%Y-%m-%d")
+                          except ValueError:
+                              raise ValueError(f"Invalid date format for birthday: {value}") from None
+                      setattr(client, key, value)
                 db.commit()  # Commit the updates
                 db.refresh(client)  # Refresh to get the latest values
 
             else:
                 # Create new client
-                form_data['birthday'] = datetime.strptime(form_data['birthday'], "%Y-%m-%d")
+                try:
+                    form_data['birthday'] = datetime.strptime(form_data['birthday'], "%Y-%m-%d")
+                except ValueError as e:
+                    raise ValueError(f"Invalid date format for birthday: {form_data.get('birthday')}") from e
                 client = Client(**form_data)
                 db.add(client)  # Add new client to the session
                 db.commit()  # Commit to save the new client
