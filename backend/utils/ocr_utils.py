@@ -39,6 +39,8 @@ def validate_document(image_path):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     # Extract text using OCR
-    text = pytesseract.image_to_string(gray)
-
+    try:
+        text = pytesseract.image_to_string(gray)
+    except pytesseract.TesseractError as e:
+        return False, f"OCR processing error: {str(e)}"
     return (True, text) if len(text.strip()) > 10 else (False, "No valid text detected")
