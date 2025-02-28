@@ -35,6 +35,10 @@ def allowed_file(filename):
     Returns:
         bool: True if file extension is allowed, False otherwise.
     """
+        # Check for directory traversal attempts
+    if os.path.basename(filename) != filename:
+        return False
+    
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def save_file(file, folder, filename):
