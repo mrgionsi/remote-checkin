@@ -5,8 +5,11 @@
                 <div class="field">
                     <label for="frontImage">Front Side</label>
 
-                    <p-fileupload name="frontImage" (onSelect)="onFileSelect($event, 'frontImage')" accept="image/*"
-                        mode="basic"></p-fileupload>
+                    <p-fileupload name="frontImage" (onSelect)="onFileSelect($event, 'frontImage')"
+                        accept="image/jpeg,image/png,image/gif" [maxFileSize]="5000000"
+                        mode="basic" [showUploadButton]="false"
+                        [invalidFileSizeMessageSummary]="'File size exceeds 5MB'"
+                        invalidFileTypeMessageSummary="Only images are allowed"></p-fileupload>
                 </div>
                 <div *ngIf="uploadForm.get('frontImage')?.value?.objectURL" class="pt-3">
                     <p> <strong>Front Image:</strong></p>
