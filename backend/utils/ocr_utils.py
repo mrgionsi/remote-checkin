@@ -15,7 +15,7 @@ Dependencies:
     - Pytesseract for optical character recognition (OCR).
 
 """
-# pylint: disable=C0301,E0611,E0401,W0718,
+# pylint: disable=C0301,E0611,E0401,W0718,E1101
 
 
 import cv2
