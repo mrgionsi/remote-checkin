@@ -162,19 +162,18 @@ def get_reservations_by_id(reservation_id):
     """
     db = SessionLocal()
     try:
-        reservationid = str(reservation_id)
         reservation = (
             db.query(Reservation)
-            .filter(Reservation.id_reference == reservationid)
+            .filter(Reservation.id == reservation_id)
             .first()
         )
 
         if not reservation:
-            return jsonify({"error": "Reservation not found"}), 404
+            return jsonify({"error": f"Reservation with ID {reservation_id} not found"}), 404
 
         return jsonify(reservation.to_dict())
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": f"Error retrieving reservation: {str(e)}"}), 500
     finally:
         db.close()
 
