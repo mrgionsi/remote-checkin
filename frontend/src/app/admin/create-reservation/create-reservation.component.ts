@@ -33,6 +33,7 @@ export class CreateReservationComponent implements OnInit {
       startDate: ['', Validators.required],
       endDate: ['', Validators.required],
       roomName: ['', Validators.required],
+      nameReference: ['', Validators.required], // New field added
     }, { validators: dateRangeValidator }
     )
   }

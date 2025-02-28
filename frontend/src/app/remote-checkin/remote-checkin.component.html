@@ -1,4 +1,209 @@
-<div class="container">
-    <h2>You selected: {{ languageCode }}</h2>
-    <a routerLink="/">Go Back</a>
+<div class="card flex justify-center">
+    <p-toast></p-toast>
 </div>
+<div class="card justify-center" *ngIf="!showConfirmationDialog">
+    <p-stepper [value]="1" class="basis-[80rem]">
+        <p-step-list>
+            <p-step [value]="1">Client Information</p-step>
+            <p-step [disabled]="clientForm.invalid" [value]="2">Upload Images</p-step>
+            <p-step [disabled]="uploadForm.invalid" [value]="3">Confirm Data</p-step>
+        </p-step-list>
+        <p-step-panels>
+            <p-step-panel [value]="1">
+                <ng-template #content let-activateCallback="activateCallback">
+                    <div class="flex flex-col h-48">
+                        <div class="flex-auto justify-center items-center font-medium">
+                            <p-card header="Client Information">
+                                <form [formGroup]="clientForm" class="p-fluid">
+                                    <div class="grid">
+                                        <!-- Column 1 -->
+                                        <div class="col-12 md:col-6">
+                                            <div class="field">
+                                                <label for="name">Name</label>
+                                                <input pInputText id="name" formControlName="name"
+                                                    placeholder="Enter Name" />
+                                            </div>
+                                            <div class="field">
+                                                <label for="surname">Surname</label>
+                                                <input pInputText id="surname" formControlName="surname"
+                                                    placeholder="Enter Surname" />
+                                            </div>
+                                            <div class="field">
+                                                <label for="birthday">Birthday</label>
+                                                <p-datePicker id="birthday" formControlName="birthday" showIcon
+                                                    dateFormat="dd/mm/yy"></p-datePicker>
+                                            </div>
+                                            <div class="field">
+                                                <label for="street">Street</label>
+                                                <input pInputText id="street" formControlName="street"
+                                                    placeholder="Street Address" />
+                                            </div>
+                                            <div class="field">
+                                                <label for="city">City</label>
+                                                <input pInputText id="city" formControlName="city" placeholder="City" />
+                                            </div>
+                                            <div class="field">
+                                                <label for="cap">CAP</label>
+                                                <input pInputText id="cap" formControlName="cap"
+                                                    placeholder="5-digit CAP" />
+                                                <small
+                                                    *ngIf="clientForm.get('cap')?.invalid && clientForm.get('cap')?.touched"
+                                                    class="p-error">
+                                                    CAP must be 5 digits
+                                                </small>
+                                            </div>
+                                        </div>
+
+                                        <!-- Column 2 -->
+                                        <div class="col-12 md:col-6">
+                                            <div class="field">
+                                                <label for="province">Province</label>
+                                                <input pInputText id="province" formControlName="province"
+                                                    placeholder="Province" />
+                                            </div>
+                                            <div class="field">
+                                                <label for="number_city">City Number</label>
+                                                <input pInputText id="number_city" formControlName="number_city"
+                                                    placeholder="City Number" />
+                                            </div>
+                                            <div class="field">
+                                                <label for="telephone">Telephone</label>
+                                                <input pInputText id="telephone" formControlName="telephone"
+                                                    placeholder="Phone Number" />
+                                            </div>
+                                            <div class="field">
+                                                <label for="document_type">Document Type</label>
+                                                <p-select id="document_type" formControlName="document_type"
+                                                    [options]="documentTypes" placeholder="Select Document Type"
+                                                    class="w-16rem"></p-select>
+                                            </div>
+                                            <div class="field">
+                                                <label for="document_number">Document Number</label>
+                                                <input pInputText id="document_number" formControlName="document_number"
+                                                    placeholder="Document Number" />
+                                            </div>
+                                            <div class="field">
+                                                <label for="cf">CF (Tax Code)</label>
+                                                <input pInputText id="cf" formControlName="cf"
+                                                    placeholder="Tax Code (16 chars)" />
+                                                <small
+                                                    *ngIf="clientForm.get('cf')?.invalid && clientForm.get('cf')?.touched"
+                                                    class="p-error">
+                                                    CF must be 16 alphanumeric characters
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex justify-content-end">
+                                        <!--                    <p-button type="submit" label="Submit" [disabled]="clientForm.invalid"
+                                            icon="pi pi-check"></p-button> -->
+                                    </div>
+                                </form>
+                            </p-card>
+                        </div>
+
+                    </div>
+                    <div class="flex  pt-6 justify-content-end">
+                        <!-- [disabled]="clientForm.invalid"  -->
+                        <p-button label="Next" icon="pi pi-arrow-right" iconPos="right"
+                            (onClick)="activateCallback(2)" />
+                    </div>
+                </ng-template>
+            </p-step-panel>
+
+            <p-step-panel [value]="2">
+                <ng-template #content let-activateCallback="activateCallback">
+                    <div class="flex flex-col h-48">
+                        <div class="flex-auto justify-center items-center font-medium">
+                            <app-upload-identity (formDataEmitter)="handleFormData($event)"></app-upload-identity>
+                        </div>
+                    </div>
+                    <div class="flex justify-space-between w-full pt-6">
+                        <p-button label="Back" severity="secondary" icon="pi pi-arrow-left"
+                            (onClick)="activateCallback(1)" />
+
+                        <p-button label="Next" icon="pi pi-arrow-right" iconPos="right" [disabled]="uploadForm.invalid"
+                            (onClick)="activateCallback(3)" />
+                    </div>
+
+
+                </ng-template>
+            </p-step-panel>
+
+            <p-step-panel [value]="3">
+                <ng-template #content let-activateCallback="activateCallback">
+                    <div class="grid">
+                        <!-- Form Recap Section -->
+                        <div class="col-6">
+                            <p-card header="Form Details">
+                                <div class="form-recap p-3">
+                                    <p><strong>Reservation ID:</strong> {{ reservationId }}
+                                    </p>
+                                    <p><strong>Name:</strong> {{ clientForm.get('name')?.value }}</p>
+                                    <p><strong>Surname:</strong> {{ clientForm.get('surname')?.value }}</p>
+                                    <p><strong>Birthday:</strong> {{ clientForm.get('birthday')?.value | date }}</p>
+                                    <p><strong>Street:</strong> {{ clientForm.get('street')?.value }}</p>
+                                    <p><strong>City:</strong> {{ clientForm.get('city')?.value }}</p>
+                                    <p><strong>Province:</strong> {{ clientForm.get('province')?.value }}</p>
+                                    <p><strong>CAP:</strong> {{ clientForm.get('cap')?.value }}</p>
+                                    <p><strong>Telephone:</strong> {{ clientForm.get('telephone')?.value }}</p>
+                                    <p><strong>Document Type:</strong> {{ clientForm.get('document_type')?.value }}</p>
+                                    <p><strong>Document Number:</strong> {{ clientForm.get('document_number')?.value }}
+                                    </p>
+                                    <p><strong>CF (Codice Fiscale):</strong> {{ clientForm.get('cf')?.value }}</p>
+                                </div>
+                            </p-card>
+                        </div>
+
+                        <!-- Image Upload Section -->
+                        <div class="col-6">
+                            <p-card header="Uploaded Images" class="">
+                                <div class="image-upload-section p-3" class="flex flex-col items-center">
+                                    <div *ngIf="uploadForm.get('frontImage')?.value['objectURL']" class="pt-3 pr-3">
+                                        <p> <strong>Front Image:</strong></p>
+                                        <img [src]="uploadForm.get('frontImage')?.value['objectURL']" alt="Front Image"
+                                            class="image-preview w-32 h-32 object-cover rounded-md shadow-md border border-gray-300">
+                                    </div>
+
+                                    <div *ngIf="uploadForm?.get('backImage')?.value['objectURL']" class="pt-3 pr-3">
+                                        <p> <strong>Back Image:</strong></p>
+                                        <img [src]="uploadForm.get('backImage')?.value['objectURL']" alt="Back Image"
+                                            class="image-preview w-32 h-32 object-cover rounded-md shadow-md border border-gray-300">
+                                    </div>
+
+                                    <div *ngIf="uploadForm?.get('selfie')?.value['objectURL']" class="pt-3">
+                                        <p> <strong>Selfie:</strong></p>
+                                        <img [src]="uploadForm.get('selfie')?.value['objectURL']" alt="Selfie Image"
+                                            class="image-preview w-32 h-32 object-cover rounded-md shadow-md border border-gray-300">
+                                    </div>
+                                </div>
+                            </p-card>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button Section - Centered -->
+                    <div class="flex justify-center pt-4 w-full">
+                        <p-button label="Submit" icon="pi pi-check" class="p-button-lg"
+                            (click)="uploadReservationData()"></p-button>
+                    </div>
+
+
+
+                    <div class="flex pt-6 justify-start">
+                        <p-button label="Back" icon="pi pi-arrow-left" iconPos="right"
+                            (onClick)="activateCallback(2)" />
+                    </div>
+                </ng-template>
+            </p-step-panel>
+        </p-step-panels>
+    </p-stepper>
+</div>
+
+
+<p-dialog [(visible)]="showConfirmationDialog" modal header="Confirmation Sent" [style]="{ width: '400px' }">
+    <p>Your confirmation has been sent. You will receive an email shortly.</p>
+    <ng-template pTemplate="footer">
+        <button pButton label="OK" icon="pi pi-check" (click)="closeDialog()"></button>
+    </ng-template>
+</p-dialog>

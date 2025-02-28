@@ -1,0 +1,77 @@
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 1rem;
+}
+
+.p-error {
+    color: #f44336;
+    font-size: 12px;
+}
+
+.p-button {
+    width: 150px;
+}
+
+.flex-custom {
+    display: flex !important;
+    justify-content: end !important;
+}
+
+
+/* Style for the recap and uploaded images sections */
+.form-recap {
+    padding: 15px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.image-upload-section {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px;
+}
+
+.image-preview {
+    max-width: 100%;
+    max-height: 200px;
+    object-fit: cover;
+    margin-top: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.submit-button {
+    margin-top: 20px;
+    width: 100%;
+}
+
+/* PrimeNG Card Component Styling */
+p-card {
+    margin-bottom: 20px;
+}
+
+/* Small spacing between each section */
+p-card .p-card-body {
+    padding: 20px;
+}
+
+/* Styling for the title of each section */
+p-card header {
+    background-color: #f5f5f5;
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    padding: 15px;
+    border-radius: 5px 5px 0 0;
+}
+
+.justify-space-between {
+    justify-content: space-between;
+}
+
+.justify-center {
+    justify-content: center;
+}

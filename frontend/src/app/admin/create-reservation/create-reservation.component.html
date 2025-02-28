@@ -42,6 +42,19 @@
             </div>
         </div>
 
+        <!-- Name Reference Field (New Field) -->
+        <div class="p-field p-grid align-items-center p-mb-3">
+            <label for="nameReference" class="p-col-12 p-md-3 text-right">Reference Name</label>
+            <div class="p-col-12 p-md-9">
+                <input id="nameReference" pInputText formControlName="nameReference" type="text"
+                    [class.p-invalid]="reservationForm.get('nameReference')?.invalid && reservationForm.get('nameReference')?.touched" />
+                <p *ngIf="reservationForm.get('nameReference')?.invalid && reservationForm.get('nameReference')?.touched"
+                    class="p-error mt-2">
+                    Reference name is required.
+                </p>
+            </div>
+        </div>
+
         <!-- Room Name Field -->
         <div class="p-field p-grid align-items-center p-mb-3">
             <label for="roomName" class="p-col-12 p-md-3 text-right">Room Name</label>
