@@ -1,3 +1,4 @@
+#pylint: disable=E0611,E0401,W0719,C0301
 """
 db_utils.py
 
@@ -20,7 +21,6 @@ Note:
     - The functions rely on the SQLAlchemy ORM for interacting with the database.
     - Make sure the `Client`, `Reservation`, and `ClientReservations` models are properly defined in the application.
 """
-#pylint: disable=E0611,E0401,W0719,C0301
 
 from datetime import datetime
 from models import Client, ClientReservations, Reservation
