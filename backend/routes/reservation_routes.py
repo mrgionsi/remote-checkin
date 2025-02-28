@@ -1,5 +1,5 @@
 # routes/reservation_routes.py
-# pylint: disable=C0301,E0611,E0401
+# pylint: disable=C0301,E0611,E0401,W0718,
 
 """
 Reservation Routes for handling reservation-related requests in the system.
@@ -11,7 +11,7 @@ It supports operations such as creating new reservations and listing all reserva
 import calendar
 from datetime import datetime
 from flask import Blueprint, request, jsonify
-from sqlalchemy import func
+from sqlalchemy import  func
 from sqlalchemy.sql import extract
 from models import Reservation, Room, Structure, StructureReservationsView
 
@@ -59,6 +59,7 @@ def create_reservation():
             id_reference=data["reservationNumber"],
             start_date=start_date,
             end_date=end_date,
+            name_reference = data["nameReference"],
             id_room=room.id,
         )
 
@@ -115,7 +116,7 @@ def get_reservations():
     return jsonify({"reservations": reservations})
 
 
-@reservation_bp.route("/reservations/<int:structure_id>", methods=["GET"])
+@reservation_bp.route("/reservations/structure/<structure_id>", methods=["GET"])
 def get_reservations_by_structure(structure_id):
     """
     Get all reservations for a specific structure.
@@ -142,8 +143,39 @@ def get_reservations_by_structure(structure_id):
         "end_date": r.end_date.isoformat(),
         "room_id": r.room_id,
         "status": r.status,
+        "name_reference": r.name_reference,
         "room_name": r.room_name
     } for r in reservations])
+
+
+
+@reservation_bp.route("/reservations/<int:reservation_id>", methods=["GET"])
+def get_reservations_by_id(reservation_id):
+    """
+    Get specific reservation
+
+    Args:
+        reservation_id (int): The ID of the reservation.
+
+    Returns:
+        flask.Response: JSON containing reservation details or a 404 error if not found.
+    """
+    db = SessionLocal()
+    try:
+        reservation = (
+            db.query(Reservation)
+            .filter(Reservation.id == reservation_id)
+            .first()
+        )
+
+        if not reservation:
+            return jsonify({"error": f"Reservation with ID {reservation_id} not found"}), 404
+
+        return jsonify(reservation.to_dict())
+    except Exception as e:
+        return jsonify({"error": f"Error retrieving reservation: {str(e)}"}), 500
+    finally:
+        db.close()
 
 @reservation_bp.route("/reservations/monthly/<int:structure_id>", methods=["GET"])
 def get_reservations_per_month(structure_id):

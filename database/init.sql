@@ -1,4 +1,4 @@
--- Adminer 4.8.1 PostgreSQL 17.2 (Debian 17.2-1.pgdg120+1) dump
+-- Adminer 4.8.1 PostgreSQL 17.3 (Debian 17.3-1.pgdg120+1) dump
 
 DROP TABLE IF EXISTS "admin_structure";
 CREATE TABLE "public"."admin_structure" (
@@ -9,8 +9,11 @@ CREATE TABLE "public"."admin_structure" (
 
 
 DROP TABLE IF EXISTS "client";
+DROP SEQUENCE IF EXISTS client_id_seq;
+CREATE SEQUENCE client_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1;
+
 CREATE TABLE "public"."client" (
-    "id" bigint NOT NULL,
+    "id" bigint DEFAULT nextval('client_id_seq') NOT NULL,
     "name" character varying,
     "surname" character varying,
     "birthday" date,
@@ -22,11 +25,18 @@ CREATE TABLE "public"."client" (
     "telephone" character varying,
     "document_number" character varying,
     "cf" character varying,
+    "document_type" text,
     CONSTRAINT "client_pkey" PRIMARY KEY ("id")
 ) WITH (oids = false);
 
+CREATE INDEX "client_cf" ON "public"."client" USING btree ("cf");
+
 CREATE INDEX "ix_client_id" ON "public"."client" USING btree ("id");
 
+INSERT INTO "client" ("id", "name", "surname", "birthday", "street", "number_city", "city", "province", "cap", "telephone", "document_number", "cf", "document_type") VALUES
+(8,	'Giovanni',	'Pasquariello',	'2025-02-04',	'via corsica 17',	'17',	'Recale',	'CE',	'81020',	'3454526037',	'CAA4F3432',	'PSQGNN96M08B963J',	NULL),
+(9,	'Giovanni',	'Pasquariello',	'2025-02-02',	'via corsica 17',	'17',	'Recale',	'CE',	'81020',	'3454526037',	'CAA4F3432',	'PSQGNN96M08B963A',	NULL),
+(10,	'John',	'Doe',	'1990-01-01',	'123 Main St',	NULL,	'Test City',	'Test Province',	'12345',	'1234567890',	'ABC123456',	'JHNDOE90A01X123Y',	'ID');
 
 DROP TABLE IF EXISTS "client_reservations";
 CREATE TABLE "public"."client_reservations" (
@@ -47,6 +57,7 @@ CREATE TABLE "public"."reservation" (
     "end_date" date,
     "id_room" bigint,
     "status" text DEFAULT 'Pending',
+    "name_reference" text DEFAULT 'Not available',
     CONSTRAINT "reservation_pkey" PRIMARY KEY ("id")
 ) WITH (oids = false);
 
@@ -87,11 +98,9 @@ CREATE TABLE "public"."structure" (
 
 CREATE INDEX "ix_structure_id" ON "public"."structure" USING btree ("id");
 
-INSERT INTO "structure" ("id", "name", "street", "city") VALUES
-(1,	'Test Structure',	'Test Street',	'Test City');
 
 DROP VIEW IF EXISTS "structure_reservations";
-CREATE TABLE "structure_reservations" ("structure_id" bigint, "structure_name" character varying, "reservation_id" bigint, "id_reference" character varying(500), "start_date" date, "end_date" date, "status" text, "room_id" bigint, "room_name" character varying);
+CREATE TABLE "structure_reservations" ("structure_id" bigint, "structure_name" character varying, "reservation_id" bigint, "id_reference" character varying(500), "name_reference" text, "start_date" date, "end_date" date, "status" text, "room_id" bigint, "room_name" character varying);
 
 
 DROP TABLE IF EXISTS "user";
@@ -125,6 +134,7 @@ CREATE VIEW "structure_reservations" AS SELECT s.id AS structure_id,
     s.name AS structure_name,
     r.id AS reservation_id,
     r.id_reference,
+    r.name_reference,
     r.start_date,
     r.end_date,
     r.status,
@@ -134,4 +144,4 @@ CREATE VIEW "structure_reservations" AS SELECT s.id AS structure_id,
      JOIN room rm ON ((r.id_room = rm.id)))
      JOIN structure s ON ((rm.id_structure = s.id)));
 
--- 2025-02-12 19:02:46.734116+00
+-- 2025-02-27 21:35:22.04679+00

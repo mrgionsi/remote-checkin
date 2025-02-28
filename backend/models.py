@@ -135,6 +135,7 @@ class Client(Base):
     telephone = Column(String)
     document_number = Column(String)
     cf = Column(String)
+    document_type = Column(String)
 
     reservations = relationship(
         "Reservation", secondary="client_reservations", back_populates="clients"
@@ -154,6 +155,7 @@ class Client(Base):
             "cap": self.cap,
             "telephone": self.telephone,
             "document_number": self.document_number,
+            "document_type": self.document_type,
             "cf": self.cf,
         }
 
@@ -180,7 +182,7 @@ class Reservation(Base):
     end_date = Column(Date)
     id_room = Column(BigInteger, ForeignKey("room.id"))
     status = Column(String, default='Pending')
-
+    name_reference = Column(String, default='Not available')
 
 
     room = relationship("Room")
@@ -197,6 +199,7 @@ class Reservation(Base):
             "end_date": self.end_date,
             "id_room": self.id_room,
             "status": self.status,
+            "name_reference": self.name_reference
         }
 
     def __repr__(self):
@@ -284,6 +287,7 @@ class StructureReservationsView(Base):
     room_id = Column(BigInteger)
     room_name = Column(String)
     status = Column(String)
+    name_reference = Column(String)
 
     def to_dict(self)-> dict[str, str | int | date]:
         """Return a dictionary representation of the StructureReservationsView instance."""
