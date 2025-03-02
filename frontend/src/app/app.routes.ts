@@ -6,6 +6,7 @@ import { CreateReservationComponent } from './admin/create-reservation/create-re
 import { AdminHomeComponent } from './admin/admin-home/admin-home.component';
 import { RoomComponent } from './admin/room/room.component';
 import { ReservationCheckComponent } from './reservation-check/reservation-check.component';
+import { DetailReservationComponent } from './detail-reservation/detail-reservation.component';
 
 export const routes: Routes = [
     { path: '', component: LanguageComponent },
@@ -20,6 +21,7 @@ export const routes: Routes = [
         children: [
             { path: 'dashboard', component: DashboardComponent },
             { path: 'rooms', component: RoomComponent },
+            { path: 'reservation-details/:id_reservation', component: DetailReservationComponent },
             { path: 'create-reservation', component: CreateReservationComponent },
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 
