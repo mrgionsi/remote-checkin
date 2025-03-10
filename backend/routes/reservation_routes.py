@@ -224,3 +224,54 @@ def get_reservations_per_month(structure_id):
 
     finally:
         db.close()
+
+
+@reservation_bp.route("/reservations/<int:reservation_id>/status", methods=["PUT"])
+def update_reservation_status(reservation_id):
+    """
+    Update the status of a reservation.
+
+    Args:
+        reservation_id (int): The ID of the reservation to update.
+
+    Returns:
+        flask.Response: JSON containing updated reservation details or an error message.
+    """
+    data = request.get_json()
+    allowed_statuses = {"Approved", "Pending", "Declined", "Sent back to customer"}
+
+    if "status" not in data:
+        return jsonify({"error": "Missing 'status' field"}), 400
+
+    new_status = data["status"]
+
+    if new_status not in allowed_statuses:
+        return jsonify({"error": f"Invalid status. Allowed values: {', '.join(allowed_statuses)}"}), 400
+
+    db = SessionLocal()
+    try:
+        reservation = db.query(Reservation).filter(Reservation.id == str(reservation_id)).first()
+
+        if not reservation:
+            return jsonify({"error": f"Reservation with ID {reservation_id} not found"}), 404
+
+        reservation.status = new_status
+        db.commit()
+
+        return jsonify({
+            "message": "Reservation status updated successfully",
+            "reservation": {
+                "id": reservation.id,
+                "reservationNumber": reservation.id_reference,
+                "status": reservation.status,
+                "startDate": reservation.start_date.strftime("%Y-%m-%d"),
+                "endDate": reservation.end_date.strftime("%Y-%m-%d"),
+                "roomName": reservation.room.to_dict(),
+            }
+        }), 200
+
+    except Exception as e:
+        db.rollback()
+        return jsonify({"error": f"Error updating reservation status: {str(e)}"}), 500
+    finally:
+        db.close()
