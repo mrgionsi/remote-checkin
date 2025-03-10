@@ -181,7 +181,7 @@ class Reservation(Base):
     start_date = Column(Date)
     end_date = Column(Date)
     id_room = Column(BigInteger, ForeignKey("room.id"))
-    status = Column(String, default='Pending')
+    status = Column(String, default='Pending') #Approved, Pending, Declined, Sent back to customer
     name_reference = Column(String, default='Not available')
 
 

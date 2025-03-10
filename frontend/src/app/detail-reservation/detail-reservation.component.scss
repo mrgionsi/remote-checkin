@@ -8,3 +8,24 @@
     border-radius: 50%;
     object-fit: cover;
 }
+
+.reservation-actions {
+    display: flex;
+    justify-content: flex-end;
+    /* Align buttons to the right */
+    gap: 10px;
+    margin-top: 15px;
+}
+
+/* Ensure the Decline button is more visible */
+.custom-decline-button {
+    background-color: #dc3545 !important;
+    /* Bootstrap red color */
+    border-color: #dc3545 !important;
+}
+
+.custom-decline-button:hover {
+    background-color: #c82333 !important;
+    /* Darker red on hover */
+    border-color: #bd2130 !important;
+}

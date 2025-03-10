@@ -10,10 +10,11 @@ import { ClientReservationService } from '../services/client-reservation.service
 import { DialogService } from 'primeng/dynamicdialog';
 import { environment } from '../../environments/environments';
 import { PersonDetailDialogComponent } from '../person-detail-dialog/person-detail-dialog.component';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-detail-reservation',
-  imports: [ToastModule, CommonModule, TableModule, CardModule],
+  imports: [ToastModule, CommonModule, TableModule, CardModule, ButtonModule],
   templateUrl: './detail-reservation.component.html',
   styleUrl: './detail-reservation.component.scss',
   providers: [MessageService, DialogService]
@@ -22,7 +23,7 @@ import { PersonDetailDialogComponent } from '../person-detail-dialog/person-deta
 export class DetailReservationComponent implements OnInit {
   people: any[] = [];
   reservation_details: any;
-
+  reservationId: any;
   constructor(private reservationService: ReservationService,
     private messageService: MessageService,
     private route: ActivatedRoute,
@@ -36,7 +37,8 @@ export class DetailReservationComponent implements OnInit {
     this.route.params.subscribe(params => {
       reservationId = params['id_reservation']; // Default to 'en' if missing
 
-      console.log(reservationId)
+      console.log(reservationId);
+      this.reservationId = reservationId;
       this.reservationService.getReservationById(reservationId).subscribe({
         next: (resp) => {
           this.reservation_details = resp;
@@ -97,5 +99,79 @@ export class DetailReservationComponent implements OnInit {
     });
   }
 
+  approveReservation(reservation: any) {
+    this.reservationService.updateReservationStatus(reservation.id, "Approved").subscribe({
+      next: (response) => {
+        console.log('Status updated successfully:', response);
+        // Display success message using PrimeNG MessageService
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Reservation Approved',
+          detail: `Reservation ${response.reservation.id_reference} has been approved.`
+        });
+      },
+      error: (error) => {
+        console.error('Error updating status:', error);
+        // Display error message if something goes wrong
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: `Failed to update the reservation status. Please try again.`
+        });
+      }
+    });
 
+  }
+
+  declineReservation(reservation: any) {
+    this.reservationService.updateReservationStatus(reservation.id, "Declined").subscribe({
+      next: (response) => {
+        console.log('Status updated successfully:', response);
+        // Display success message using PrimeNG MessageService
+        this.messageService.add({ severity: 'error', summary: 'Reservation Declined', detail: `Reservation ${reservation.id_reference} has been declined.` });
+      },
+      error: (error) => {
+        console.error('Error updating status:', error);
+        // Display error message if something goes wrong
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: `Failed to update the reservation status. Please try again.`
+        });
+      }
+    });
+    // Call API to decline reservation
+  }
+
+  // Get the class for status to apply background color or styles
+  getStatusClass(status: string): string {
+    switch (status) {
+      case 'Approved':
+        return 'status-approved';
+      case 'Pending':
+        return 'status-pending';
+      case 'Declined':
+        return 'status-declined';
+      case 'Sent back to customer':
+        return 'status-sent-back';
+      default:
+        return '';
+    }
+  }
+
+  // Get the icon for status to display different icons for each status
+  getStatusIcon(status: string): string {
+    switch (status) {
+      case 'Approved':
+        return 'pi pi-check-circle';  // PrimeNG check circle icon
+      case 'Pending':
+        return 'pi pi-clock';  // PrimeNG clock icon
+      case 'Declined':
+        return 'pi pi-times-circle';  // PrimeNG times circle icon
+      case 'Sent back to customer':
+        return 'pi pi-arrow-left';  // PrimeNG left arrow icon
+      default:
+        return '';
+    }
+  }
 }
