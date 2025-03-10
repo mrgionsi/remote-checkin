@@ -185,7 +185,7 @@ class Reservation(Base):
     name_reference = Column(String, default='Not available')
 
 
-    room = relationship("Room")
+    room = relationship("Room", lazy="joined")
     clients = relationship(
         "Client", secondary="client_reservations", back_populates="reservations"
     )
@@ -197,7 +197,7 @@ class Reservation(Base):
             "id_reference": self.id_reference,
             "start_date": self.start_date,
             "end_date": self.end_date,
-            "id_room": self.id_room,
+            "room": self.room.to_dict() if self.room else None,  # Include full room details
             "status": self.status,
             "name_reference": self.name_reference
         }
