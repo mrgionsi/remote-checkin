@@ -151,7 +151,7 @@ export class DetailReservationComponent implements OnInit {
       next: (response) => {
         console.log('Status updated successfully:', response);
         // Display success message using PrimeNG MessageService
-        this.messageService.add({ severity: 'warn', summary: 'Reservation sent back to the customer', detail: `Reservation ${reservation.id_reference} has been declined.` });
+        this.messageService.add({ severity: 'warn', summary: 'Reservation sent back to customer', detail: `Reservation ${reservation.id_reference} has been declined.` });
         this.refreshStatus("Sent back to customer");
 
       },
@@ -202,6 +202,7 @@ export class DetailReservationComponent implements OnInit {
 
   refreshStatus(new_status: string) {
     this.reservation_details.status = new_status;
-
   }
+
+
 }
