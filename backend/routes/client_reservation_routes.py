@@ -1,6 +1,46 @@
+# pylint: disable=C0301,E0611,E0401,W0718,
+
+"""
+Client Reservations API Blueprint
+
+This module defines a Flask Blueprint (`client_reservation_bp`) that handles operations related to 
+clients and their reservations, including retrieving client details and managing uploaded images.
+
+Endpoints:
+-----------
+1. GET /api/v1/reservations/<int:reservation_id>/clients
+   - Retrieves all clients associated with a given reservation ID.
+   - Returns a list of client details in JSON format.
+   - Returns 404 if no clients are found.
+
+2. POST /api/v1/reservations/<int:reservation_id>/client-images
+   - Checks for the existence of a client's identity images (front, back, selfie) for a reservation.
+   - Requires `name`, `surname`, `cf` (Codice Fiscale), and `reservationId` in the request body.
+   - Returns URLs to existing images or indicates missing images.
+
+3. GET /api/v1/images/<int:reservation_id>/<path:filename>
+   - Serves client identity images from the `uploads/` directory.
+   - Returns the requested image if it exists, or a 404 error if not found.
+
+Configuration:
+--------------
+- `UPLOAD_FOLDER`: Directory where client identity images are stored (`uploads/`).
+
+Dependencies:
+-------------
+- Flask (`Blueprint`, `jsonify`, `request`, `send_from_directory`)
+- SQLAlchemy (`SessionLocal`)
+- Models: `Client`, `ClientReservations`
+- OS module for file path operations.
+
+Usage:
+------
+- Include this blueprint in a Flask app to manage client reservations and identity images.
+
+"""
+
 import os
 from flask import Blueprint, jsonify, request, send_from_directory
-from sqlalchemy.orm import joinedload
 from database import SessionLocal
 from models import Client, ClientReservations
 
@@ -57,7 +97,6 @@ def check_images(reservation_id):
         - JSON response with image URLs or error message.
     """
     data = request.get_json()
-    
     name = data.get("name")
     surname = data.get("surname")
     cf = data.get("cf")
@@ -66,7 +105,7 @@ def check_images(reservation_id):
         return jsonify({"error": "Missing required fields"}), 400
 
     folder_path = os.path.join(UPLOAD_FOLDER, str(reservation_id))
-    
+
     if not os.path.exists(folder_path):
         return jsonify({"error": f"Folder for reservation {reservation_id} not found"}), 404
 
@@ -105,13 +144,12 @@ def get_image(reservation_id, filename):
         - 404 error if the file does not exist.
     """
     folder_path = os.path.join(UPLOAD_FOLDER, str(reservation_id))
-    
+
     if not os.path.exists(folder_path):
         return jsonify({"error": "Reservation folder not found"}), 404
-    
+
     file_path = os.path.join(folder_path, filename)
-    
+
     if not os.path.exists(file_path):
         return jsonify({"error": "Image not found"}), 404
-
     return send_from_directory(folder_path, filename)
