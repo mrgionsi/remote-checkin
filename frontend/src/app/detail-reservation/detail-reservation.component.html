@@ -28,7 +28,7 @@
                 (click)="approveReservation(reservation_details)"></p-button>
             <p-button label="Decline" icon="pi pi-times" severity="danger" class="p-button-danger custom-decline-button"
                 (click)="declineReservation(reservation_details)"></p-button>
-            <p-button label="Send Back to the Client" icon="pi pi-undo" severity="warn"
+            <p-button label="Send back to the customer" icon="pi pi-undo" severity="info"
                 class="p-button-warning custom-send-back-button"
                 (click)="sendBackToClient(reservation_details)"></p-button>
         </div>
@@ -63,6 +63,7 @@
                 <i *ngIf="person.hasMissingImages" class="pi pi-exclamation-triangle text-danger"
                     title="Missing Images"></i>
                 <i *ngIf="!person.hasMissingImages" class="pi pi-check-circle text-success" title="Complete"></i>
+
             </td>
             <td>
                 <img *ngIf="person.images?.front" [src]="person.images?.front" alt="Front Image" width="50"
