@@ -9,13 +9,14 @@
             <div><strong>ID Reference:</strong> {{ reservation_details?.id_reference }}</div>
             <div><strong>Room:</strong> {{ reservation_details?.room.name }}</div>
             <div><strong>Start Date:</strong> {{ reservation_details?.start_date | date:'dd-MM-yyyy' }}</div>
-            <div>
+            <div class="status-container">
                 <strong>Status:</strong>
-                <span [ngClass]="getStatusClass(reservation_details?.status)">
-                    <i [class]="getStatusIcon(reservation_details?.status)" style="margin-right: 8px;"></i>
+                <span class="status-badge" [ngClass]="getStatusClass(reservation_details?.status)">
+                    <i [class]="getStatusIcon(reservation_details?.status)"></i>
                     {{ reservation_details?.status }}
                 </span>
             </div>
+
 
             <div><strong>End Date:</strong> {{ reservation_details?.end_date | date:'dd-MM-yyyy'}}</div>
             <div><strong>Guest:</strong> {{ reservation_details?.name_reference }}</div>
@@ -27,6 +28,9 @@
                 (click)="approveReservation(reservation_details)"></p-button>
             <p-button label="Decline" icon="pi pi-times" severity="danger" class="p-button-danger custom-decline-button"
                 (click)="declineReservation(reservation_details)"></p-button>
+            <p-button label="Send Back to the Client" icon="pi pi-undo" severity="warn"
+                class="p-button-warning custom-send-back-button"
+                (click)="sendBackToClient(reservation_details)"></p-button>
         </div>
     </ng-template>
 </p-card>

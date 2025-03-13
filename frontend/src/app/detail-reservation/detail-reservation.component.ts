@@ -104,6 +104,7 @@ export class DetailReservationComponent implements OnInit {
       next: (response) => {
         console.log('Status updated successfully:', response);
         // Display success message using PrimeNG MessageService
+        this.refreshStatus("Approved");
         this.messageService.add({
           severity: 'success',
           summary: 'Reservation Approved',
@@ -129,6 +130,30 @@ export class DetailReservationComponent implements OnInit {
         console.log('Status updated successfully:', response);
         // Display success message using PrimeNG MessageService
         this.messageService.add({ severity: 'error', summary: 'Reservation Declined', detail: `Reservation ${reservation.id_reference} has been declined.` });
+        this.refreshStatus("Declined");
+
+      },
+      error: (error) => {
+        console.error('Error updating status:', error);
+        // Display error message if something goes wrong
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: `Failed to update the reservation status. Please try again.`
+        });
+      }
+    });
+    // Call API to decline reservation
+  }
+
+  sendBackToClient(reservation: any) {
+    this.reservationService.updateReservationStatus(reservation.id, "Sent back to customer").subscribe({
+      next: (response) => {
+        console.log('Status updated successfully:', response);
+        // Display success message using PrimeNG MessageService
+        this.messageService.add({ severity: 'warn', summary: 'Reservation sent back to the customer', detail: `Reservation ${reservation.id_reference} has been declined.` });
+        this.refreshStatus("Sent back to customer");
+
       },
       error: (error) => {
         console.error('Error updating status:', error);
@@ -173,5 +198,10 @@ export class DetailReservationComponent implements OnInit {
       default:
         return '';
     }
+  }
+
+  refreshStatus(new_status: string) {
+    this.reservation_details.status = new_status;
+
   }
 }
