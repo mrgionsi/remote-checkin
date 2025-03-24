@@ -103,14 +103,39 @@ def check_images(reservation_id):
 
     if not all([name, surname, cf, reservation_id]):
         return jsonify({"error": "Missing required fields"}), 400
+    # Verify client belongs to this reservation
+    db = SessionLocal()
+    try:
+        client_exists = db.query(Client).join(
+            ClientReservations, Client.id == ClientReservations.id_client
+        ).filter(
+            ClientReservations.id_reservation == reservation_id,
+            Client.name == name,
+            Client.surname == surname,
+            Client.cf == cf
+        ).first()
+        
+        if not client_exists:
+            return jsonify({"error": "Client not associated with this reservation"}), 404
+    finally:
+        db.close()
+        
 
     folder_path = os.path.join(UPLOAD_FOLDER, str(reservation_id))
 
     if not os.path.exists(folder_path):
         return jsonify({"error": f"Folder for reservation {reservation_id} not found"}), 404
 
+
+
+
     # Expected filenames
-    file_base = f"{name}-{surname}-{cf}"
+# Use sanitized versions of name, surname, and CF to prevent path traversal
+    sanitized_name = "".join(c for c in name if c.isalnum() or c in [' ', '-', '_']).strip()
+    sanitized_surname = "".join(c for c in surname if c.isalnum() or c in [' ', '-', '_']).strip()
+    sanitized_cf = "".join(c for c in cf if c.isalnum()).strip()
+    file_base = f"{sanitized_name}-{sanitized_surname}-{sanitized_cf}"
+
     file_names = {
         "back_image": f"{file_base}-backimage.jpg",
         "front_image": f"{file_base}-frontimage.jpg",
@@ -122,7 +147,7 @@ def check_images(reservation_id):
     for key, file_name in file_names.items():
         file_path = os.path.join(folder_path, file_name)
         if os.path.exists(file_path):
-            result[key] = f"/api/v1/images/{reservation_id}/{file_name}"  # API URL for fetching the image
+           result[key] = f"/api/v1/images/{reservation_id}/{file_name}"
         else:
             result[key] = None  # File not found
 
