@@ -1,0 +1,142 @@
+.dialog-content {
+    display: flex;
+    gap: 20px;
+}
+
+.images-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.large-image {
+    width: 100%;
+    max-width: 250px;
+    height: auto;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 5px;
+}
+
+.info-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 16px;
+}
+
+/* Ensures the fullscreen image fits within the dialog */
+.img {
+    object-fit: contain;
+    width: 33vw;
+    display: block;
+    margin: auto;
+    margin-bottom: 3em;
+}
+
+.dialog-container {
+    height: 75vh;
+    overflow: hidden;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    /* Align content at the top */
+}
+
+.dialog-images {
+    width: 60vw;
+    overflow-y: auto;
+    /* Enables scrolling if images exceed height */
+    max-height: 70vh;
+    /* Set a max height to trigger scrolling */
+    padding-right: 10px;
+    /* Add space between columns */
+}
+
+.dialog-details {
+    width: 30vw;
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    background: white;
+    /* Ensure it doesn’t get transparent */
+    padding: 10px;
+    /* Optional: Adds a separator */
+}
+
+.zoomable-image img {
+    max-width: 100%;
+    height: auto;
+    cursor: pointer;
+}
+
+.image-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.button-group {
+    display: flex;
+    gap: 8px;
+}
+
+.rounded-image {
+    border-radius: 10px;
+    border: 2px solid #ddd;
+}
+
+.dialog-details {
+    position: sticky;
+    top: 10px;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.shadow-2 {
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.details-card {
+    max-height: 70vh;
+    overflow-y: auto;
+    width: 100%;
+    max-width: 400px;
+    margin: auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 5em;
+}
+
+.details-grid {
+    display: grid;
+    gap: 10px;
+    padding: 10px;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    border-radius: 5px;
+    background: #f9f9f9;
+}
+
+.detail-item:nth-child(even) {
+    background: #f0f0f0;
+}
+
+.pi {
+    color: #007bff;
+    font-size: 1.2em;
+}

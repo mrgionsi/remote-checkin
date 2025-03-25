@@ -10,6 +10,7 @@ import { MessageService } from 'primeng/api';
 import { ReservationService } from '../../services/reservation.service';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -29,16 +30,21 @@ export class DashboardComponent implements OnInit {
   searchTerm: any;
 
   constructor(private messageService: MessageService,
-    private reservationService: ReservationService
+    private reservationService: ReservationService,
+    private router: Router
   ) {
 
   }
 
   getStatusSeverity(status: string) {
     switch (status) {
-      case 'Completed':
+      case 'Approved':
         return 'success';
       case 'Pending':
+        return 'warn'; // You can also use 'info' or 'secondary', depending on your use case
+      case 'Declined':
+        return 'danger'; // You can also use 'info' or 'secondary', depending on your use case
+      case 'Sent back to customer':
         return 'warn'; // You can also use 'info' or 'secondary', depending on your use case
       default:
         return 'info'; // Default severity if status doesn't match
@@ -49,6 +55,12 @@ export class DashboardComponent implements OnInit {
   checkInData: any;
   chartOptions: ChartOptions | undefined;
 
+  navigateToDetails(event: any): void {
+    const reservation = event.data;  // 'data' contains the selected row object
+    if (reservation?.id_reference) {
+      this.router.navigate([`/admin/reservation-details/${reservation.id_reference}`]);
+    }
+  }
   ngOnInit(): void {
 
     this.messageService.add({ severity: 'info', summary: 'Info', detail: 'Message Content' });
