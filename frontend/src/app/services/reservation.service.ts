@@ -11,18 +11,30 @@ export class ReservationService {
 
   constructor(private http: HttpClient) { }
 
+  // Method to create a reservation
   createReservation(reservation: any): Observable<any> {
     return this.http.post(this.apiUrl, reservation);
   }
 
+  // Method to get reservations by structure ID
   getReservationByStructureId(id: number): Observable<any> {
-    return this.http.get(this.apiUrl + '/structure/' + id)
+    return this.http.get(`${this.apiUrl}/structure/${id}`);
   }
 
+  // Method to get monthly reservations for a structure
   getMonthlyReservation(id_structure: number): Observable<any> {
-    return this.http.get(this.apiUrl + '/monthly/' + id_structure)
+    return this.http.get(`${this.apiUrl}/monthly/${id_structure}`);
   }
+
+  // Method to get a reservation by its ID
   getReservationById(id_structure: number): Observable<any> {
-    return this.http.get(this.apiUrl + '/' + id_structure)
+    return this.http.get(`${this.apiUrl}/${id_structure}`);
+  }
+
+  // Method to update reservation status (Approved, Pending, Declined, Sent back to customer)
+  updateReservationStatus(reservationId: number, status: string): Observable<any> {
+    const url = `${this.apiUrl}/${reservationId}/status`; // URL for updating status
+    const body = { status };  // Status field to be updated
+    return this.http.put(url, body);  // Send PUT request to the backend API
   }
 }

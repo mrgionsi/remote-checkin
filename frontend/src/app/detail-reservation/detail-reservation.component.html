@@ -1,0 +1,94 @@
+<p-toast></p-toast>
+
+<p-card>
+    <ng-template pTemplate="title">
+        <i class="pi pi-calendar"></i> Reservation Details
+    </ng-template>
+    <ng-template pTemplate="content">
+        <div class="details-grid">
+            <div><strong>ID Reference:</strong> {{ reservation_details?.id_reference }}</div>
+            <div><strong>Room:</strong> {{ reservation_details?.room.name }}</div>
+            <div><strong>Start Date:</strong> {{ reservation_details?.start_date | date:'dd-MM-yyyy' }}</div>
+            <div class="status-container">
+                <strong>Status:</strong>
+                <span class="status-badge" [ngClass]="getStatusClass(reservation_details?.status)">
+                    <i [class]="getStatusIcon(reservation_details?.status)"></i>
+                    {{ reservation_details?.status }}
+                </span>
+            </div>
+
+
+            <div><strong>End Date:</strong> {{ reservation_details?.end_date | date:'dd-MM-yyyy'}}</div>
+            <div><strong>Guest:</strong> {{ reservation_details?.name_reference }}</div>
+        </div>
+
+        <!-- Buttons aligned to the right -->
+        <div class="reservation-actions">
+            <p-button label="Approve" icon="pi pi-check" class="p-button-success"
+                (click)="approveReservation(reservation_details)"></p-button>
+            <p-button label="Decline" icon="pi pi-times" severity="danger" class="p-button-danger custom-decline-button"
+                (click)="declineReservation(reservation_details)"></p-button>
+            <p-button label="Send back to the customer" icon="pi pi-undo" severity="info"
+                class="p-button-warning custom-send-back-button"
+                (click)="sendBackToClient(reservation_details)"></p-button>
+        </div>
+    </ng-template>
+</p-card>
+
+
+<h3>People Associated with this Reservation</h3>
+<p-table [value]="people" responsiveLayout="scroll">
+    <ng-template pTemplate="header">
+        <tr>
+            <th>Status</th>
+            <th>Front Photo</th>
+            <th>Back Photo</th>
+            <th>Selfie Photo</th>
+            <th>Name</th>
+            <th>Surname</th>
+            <th>Birthday</th>
+            <th>Street</th>
+            <th>City</th>
+            <th>Province</th>
+            <th>CAP</th>
+            <th>Telephone</th>
+            <th>Document Number</th>
+            <th>CF</th>
+            <th>Document Type</th>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-person>
+        <tr (click)="openDetails(person)" style="cursor: pointer;">
+            <td>
+                <i *ngIf="person.hasMissingImages" class="pi pi-exclamation-triangle text-danger"
+                    title="Missing Images"></i>
+                <i *ngIf="!person.hasMissingImages" class="pi pi-check-circle text-success" title="Complete"></i>
+
+            </td>
+            <td>
+                <img *ngIf="person.images?.front" [src]="person.images?.front" alt="Front Image" width="50"
+                    height="50" />
+                <span *ngIf="!person.images?.front">Not Found</span>
+            </td>
+            <td>
+                <img *ngIf="person.images?.back" [src]="person.images?.back" alt="Back Image" width="50" height="50" />
+                <span *ngIf="!person.images?.back">Not Found</span>
+            </td>
+            <td>
+                <img *ngIf="person.images?.selfie" [src]="person.images?.selfie" alt="Selfie" width="50" height="50" />
+                <span *ngIf="!person.images?.selfie">Not Found</span>
+            </td>
+            <td>{{ person.name }}</td>
+            <td>{{ person.surname }}</td>
+            <td>{{ person.birthday | date:'dd-MM-yyyy' }}</td>
+            <td>{{ person.street }}</td>
+            <td>{{ person.city }}</td>
+            <td>{{ person.province }}</td>
+            <td>{{ person.cap }}</td>
+            <td>{{ person.telephone }}</td>
+            <td>{{ person.document_number }}</td>
+            <td>{{ person.cf }}</td>
+            <td>{{ person.document_type }}</td>
+        </tr>
+    </ng-template>
+</p-table>
