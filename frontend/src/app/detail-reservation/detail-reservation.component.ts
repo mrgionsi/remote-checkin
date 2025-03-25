@@ -11,6 +11,7 @@ import { DialogService } from 'primeng/dynamicdialog';
 import { environment } from '../../environments/environments';
 import { PersonDetailDialogComponent } from '../person-detail-dialog/person-detail-dialog.component';
 import { ButtonModule } from 'primeng/button';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-detail-reservation',
@@ -21,6 +22,7 @@ import { ButtonModule } from 'primeng/button';
 
 })
 export class DetailReservationComponent implements OnInit {
+  private subscriptions: Subscription[] = [];
   people: any[] = [];
   reservation_details: any;
   reservationId: any;
@@ -32,58 +34,64 @@ export class DetailReservationComponent implements OnInit {
   ) {
 
   }
+  ngOnDestroy(): void {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+  }
+
   ngOnInit(): void {
     var reservationId: number;
-    this.route.params.subscribe(params => {
-      reservationId = params['id_reservation']; // Default to 'en' if missing
+    this.subscriptions.push(
+      this.route.params.subscribe(params => {
+        reservationId = params['id_reservation']; // Default to 'en' if missing
 
-      console.log(reservationId);
-      this.reservationId = reservationId;
-      this.reservationService.getReservationById(reservationId).subscribe({
-        next: (resp) => {
-          this.reservation_details = resp;
-          console.log(this.reservation_details);
-          this.client_reservationService.getClientByReservationId(this.reservation_details.id).subscribe({
-            next: (r) => {
-              this.people = r;
-              this.people.forEach(person => {
-                this.client_reservationService.getUserPhoto(reservationId, person.name, person.surname, person.cf).subscribe({
-                  next: (person_photo: any) => {
-                    console.log(person_photo)
-                    person.images = [];
-                    person.images.back = person_photo.back_image ? environment.apiBaseUrl + person_photo?.back_image : null;
-                    person.images.front = person_photo.front_image ? environment.apiBaseUrl + person_photo?.front_image : null;
-                    person.images.selfie = person_photo.selfie ? environment.apiBaseUrl + person_photo?.selfie : null;
-                    person.hasMissingImages = !person_photo.back_image || !person_photo.front_image || !person_photo.selfie;
+        console.log(reservationId);
+        this.reservationId = reservationId;
+        this.reservationService.getReservationById(reservationId).subscribe({
+          next: (resp) => {
+            this.reservation_details = resp;
+            console.log(this.reservation_details);
+            this.client_reservationService.getClientByReservationId(this.reservation_details.id).subscribe({
+              next: (r) => {
+                this.people = r;
+                this.people.forEach(person => {
+                  this.client_reservationService.getUserPhoto(reservationId, person.name, person.surname, person.cf).subscribe({
+                    next: (person_photo: any) => {
+                      console.log(person_photo)
+                      person.images = [];
+                      person.images.back = person_photo.back_image ? environment.apiBaseUrl + person_photo?.back_image : null;
+                      person.images.front = person_photo.front_image ? environment.apiBaseUrl + person_photo?.front_image : null;
+                      person.images.selfie = person_photo.selfie ? environment.apiBaseUrl + person_photo?.selfie : null;
+                      person.hasMissingImages = !person_photo.back_image || !person_photo.front_image || !person_photo.selfie;
 
-                    console.log(person)
-                  },
-                  error: (error: any) => {
-                    this.messageService.add({ severity: 'warn', summary: 'Error', detail: 'Error fetching client photo for ' + person.name + ' ' + person.surname + ', please try again.' });
-                    person.hasMissingImages = true; // Assume missing if API request fails
+                      console.log(person)
+                    },
+                    error: (error: any) => {
+                      this.messageService.add({ severity: 'warn', summary: 'Error', detail: 'Error fetching client photo for ' + person.name + ' ' + person.surname + ', please try again.' });
+                      person.hasMissingImages = true; // Assume missing if API request fails
 
-                  }
+                    }
+                  })
                 })
-              })
-            },
-            error: (err) => {
-              this.messageService.add({ severity: 'warn', summary: 'Error', detail: 'Error fetching client details.' });
+              },
+              error: (err) => {
+                this.messageService.add({ severity: 'warn', summary: 'Error', detail: 'Error fetching client details.' });
+              }
+            })
+          },
+          error: (error) => {
+            console.log(error);
+            switch (error.status) {
+              case 404:
+                this.messageService.add({ severity: 'warn', summary: 'Error', detail: 'Reservation not found.' });
+                break;
+              default:
+                this.messageService.add({ severity: 'warn', summary: 'Error', detail: 'Error fetching reservation details.' });
             }
-          })
-        },
-        error: (error) => {
-          console.log(error);
-          switch (error.status) {
-            case 404:
-              this.messageService.add({ severity: 'warn', summary: 'Error', detail: 'Reservation not found.' });
-              break;
-            default:
-              this.messageService.add({ severity: 'warn', summary: 'Error', detail: 'Error fetching reservation details.' });
-          }
 
-        }
+          }
+        })
       })
-    });
+    );
   }
 
 
