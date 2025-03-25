@@ -1,0 +1,15 @@
+name: Deploy Flask and Angular via Portainer
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  deploy:
+    name: Trigger Portainer Deployment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Invoke Portainer Webhook
+        run: |
+          curl -X POST "${{ secrets.PORTAINER_WEBHOOK_URL }}"
