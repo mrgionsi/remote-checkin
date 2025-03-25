@@ -41,7 +41,7 @@ jobs:
       - name: Run tests
         run: |
           source venv/bin/activate
-          pytest backend/tests
+          python -m pytest tests
 
   build-angular:
     name: Build Angular Frontend
