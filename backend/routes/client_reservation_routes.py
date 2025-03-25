@@ -1,4 +1,4 @@
-# pylint: disable=C0301,E0611,E0401,W0718,
+# pylint: disable=C0301,E0611,E0401,W0718,R0914
 
 """
 Client Reservations API Blueprint
@@ -114,12 +114,10 @@ def check_images(reservation_id):
             Client.surname == surname,
             Client.cf == cf
         ).first()
-        
         if not client_exists:
             return jsonify({"error": "Client not associated with this reservation"}), 404
     finally:
         db.close()
-        
 
     folder_path = os.path.join(UPLOAD_FOLDER, str(reservation_id))
 
@@ -130,7 +128,7 @@ def check_images(reservation_id):
 
 
     # Expected filenames
-# Use sanitized versions of name, surname, and CF to prevent path traversal
+    # Use sanitized versions of name, surname, and CF to prevent path traversal
     sanitized_name = "".join(c for c in name if c.isalnum() or c in [' ', '-', '_']).strip()
     sanitized_surname = "".join(c for c in surname if c.isalnum() or c in [' ', '-', '_']).strip()
     sanitized_cf = "".join(c for c in cf if c.isalnum()).strip()
@@ -147,7 +145,7 @@ def check_images(reservation_id):
     for key, file_name in file_names.items():
         file_path = os.path.join(folder_path, file_name)
         if os.path.exists(file_path):
-           result[key] = f"/api/v1/images/{reservation_id}/{file_name}"
+            result[key] = f"/api/v1/images/{reservation_id}/{file_name}"
         else:
             result[key] = None  # File not found
 
