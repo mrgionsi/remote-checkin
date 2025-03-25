@@ -1,5 +1,7 @@
 FROM python:3.11
 
+LABEL org.opencontainers.image.source https://github.com/mrgionsi/remote-checkin
+
 WORKDIR /app
 COPY . /app
 
