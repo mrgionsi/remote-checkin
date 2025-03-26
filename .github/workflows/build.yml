@@ -12,6 +12,14 @@ jobs:
   build-flask:
     name: Build Flask Backend
     runs-on: ubuntu-latest
+    environment: pre-prod  # Specify the GitHub Environment to use its secrets
+    env:
+        DB_HOST: ${{ secrets.DB_HOST }}
+        DB_NAME: ${{ secrets.DB_NAME }}
+        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        DB_PORT: ${{ secrets.DB_PORT }}
+        DB_USER: ${{ secrets.DB_USER }}
+        DATABASE_URL: postgresql://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@${{ secrets.DB_HOST }}:${{ secrets.DB_PORT }}/${{ secrets.DB_NAME }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -19,7 +27,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: '3.13'
 
       - name: Cache Python dependencies
         uses: actions/cache@v4
@@ -32,6 +40,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m venv venv
+          echo $DB_PORT
           source venv/bin/activate
           pip install --upgrade pip
           pip install -r backend/requirements.txt
