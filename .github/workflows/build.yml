@@ -13,13 +13,6 @@ jobs:
     name: Build Flask Backend
     runs-on: ubuntu-latest
     environment: pre-prod  # Specify the GitHub Environment to use its secrets
-    env:
-        DB_HOST: ${{ secrets.DB_HOST }}
-        DB_NAME: ${{ secrets.DB_NAME }}
-        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        DB_PORT: ${{ secrets.DB_PORT }}
-        DB_USER: ${{ secrets.DB_USER }}
-        DATABASE_URL: postgresql://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@${{ secrets.DB_HOST }}:${{ secrets.DB_PORT }}/${{ secrets.DB_NAME }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

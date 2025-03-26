@@ -1,4 +1,4 @@
-name: Deploy Flask and Angular via Portainer
+name: Deploy Flask and Angular via Portainer in pre-prod environment
 
 on:
   push:
