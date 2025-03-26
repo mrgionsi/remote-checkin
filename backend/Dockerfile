@@ -1,11 +1,15 @@
-FROM python:3.11
+FROM python:3.13
 
 LABEL org.opencontainers.image.source https://github.com/mrgionsi/remote-checkin
 
-WORKDIR /app
-COPY . /app
+WORKDIR /usr/src/app
+COPY . /
 
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:8000", "wsgi:app"]
+
+ENV GUNICORN_CMD_ARGS="--bind=0.0.0.0 --chdir=/usr/src/app"
+
+
+CMD [ "gunicorn", "application:app" ]
