@@ -109,16 +109,16 @@ jobs:
 
       - name: Build and tag Flask Docker image
         run: |
-          docker build -t ghcr.io/${{ github.repository }}/flask-app:${{ env.TAG }} -f backend/Dockerfile backend/
+          docker build -t ghcr.io/${{ github.repository }}/remote-checkin-be:${{ env.TAG }} -f backend/Dockerfile backend/
 
       - name: Build and tag Angular Docker image
         run: |
-          docker build -t ghcr.io/${{ github.repository }}/angular-app:${{ env.TAG }} -f frontend/Dockerfile frontend/
+          docker build -t ghcr.io/${{ github.repository }}/remote-checkin-fe:${{ env.TAG }} -f frontend/Dockerfile frontend/
 
       - name: Push Flask Docker image
         run: |
-          docker push ghcr.io/${{ github.repository }}/flask-app:${{ env.TAG }}
+          docker push ghcr.io/${{ github.repository }}/remote-checkin-be:${{ env.TAG }}
 
       - name: Push Angular Docker image
         run: |
-          docker push ghcr.io/${{ github.repository }}/angular-app:${{ env.TAG }}
+          docker push ghcr.io/${{ github.repository }}/remote-checkin-fe:${{ env.TAG }}
