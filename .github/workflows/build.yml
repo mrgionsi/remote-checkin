@@ -3,7 +3,7 @@ name: Build Flask and Angular with Docker
 on:
   push:
     branches:
-      - feat/ci-implementation
+      - dev
   pull_request:
     branches:
       - dev
