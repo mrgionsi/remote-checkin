@@ -4,7 +4,7 @@ LABEL org.opencontainers.image.source=https://github.com/mrgionsi/remote-checkin
 
 WORKDIR /usr/src/app
 COPY . .
-RUN apk add --no-cache mesa-gl
+RUN apt-get update && apt-get install -y libgl1 libglib2.0-0
 
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
