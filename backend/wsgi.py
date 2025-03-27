@@ -1,7 +1,7 @@
 """
 WSGI entry point for the Flask application.
 """
-#pylint: disable=C0303,E0401
+#pylint: disable=E0401  # Import error for 'main' occurs during CI but works in runtime
 
 from main import app
 

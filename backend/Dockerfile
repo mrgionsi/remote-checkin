@@ -3,11 +3,20 @@ FROM python:3.13
 LABEL org.opencontainers.image.source=https://github.com/mrgionsi/remote-checkin
 
 WORKDIR /usr/src/app
-COPY . .
+COPY requirements.txt .
+
 RUN apt-get update && apt-get install -y libgl1 libglib2.0-0
 
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
+
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
+COPY . . 
+RUN chown -R appuser:appuser /usr/src/app
+
+USER appuser
+
 ENV GUNICORN_CMD_ARGS="--bind=0.0.0.0 --chdir=/usr/src/app"
 
 EXPOSE 8000
