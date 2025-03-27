@@ -7,6 +7,7 @@ on:
 
 jobs:
   deploy:
+    environment: pre-prod  # Specify the GitHub Environment to use its secrets
     name: Trigger Portainer Deployment
     runs-on: ubuntu-latest
     steps:
