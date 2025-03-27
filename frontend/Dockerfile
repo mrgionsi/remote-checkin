@@ -11,10 +11,7 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # Copy Angular build output
 COPY dist/remote-checkin/browser /usr/share/nginx/html
 
-# Change ownership to the non-root user
 
-# Switch to non-root user
-USER nginx
 
 # Expose the default HTTP port
 EXPOSE 80
