@@ -1,0 +1,124 @@
+name: Build Flask and Angular with Docker
+
+on:
+  push:
+    branches:
+      - feat/ci-implementation
+  pull_request:
+    branches:
+      - dev
+
+jobs:
+  build-flask:
+    name: Build Flask Backend
+    runs-on: ubuntu-latest
+    environment: pre-prod  # Specify the GitHub Environment to use its secrets
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('backend/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m venv venv
+          echo $DB_PORT
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+  build-angular:
+    name: Build Angular Frontend
+    runs-on: ubuntu-latest
+    needs: build-flask
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Cache Node.js dependencies
+        uses: actions/cache@v4
+        with:
+          path: frontend/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('frontend/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Build Angular app
+        run: |
+          cd frontend
+          npm run build -- --configuration=preproduction
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: angular-dist
+          path: frontend/dist/
+
+  build-and-push-docker:
+    name: Build and Push Docker Images
+    runs-on: ubuntu-latest
+    needs: [build-flask, build-angular]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download Angular build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: angular-dist
+          path: frontend/dist/
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        with:
+            registry: ghcr.io
+            username: mrgionsi
+            password: ${{ secrets.GHCR_PAT }}
+
+      - name: Set Docker image tag
+        id: docker_tag
+        run: |
+          if [[ "${{ github.ref_name }}" == "main" ]]; then
+            echo "TAG=latest" >> $GITHUB_ENV
+          elif [[ "${{ github.ref_name }}" == "dev" ]]; then
+            echo "TAG=alpha" >> $GITHUB_ENV
+          else
+            echo "TAG=beta" >> $GITHUB_ENV
+          fi
+
+      - name: Build and tag Flask Docker image
+        run: |
+          docker build -t ghcr.io/${{ github.repository }}/remote-checkin-be:${{ env.TAG }} -f backend/Dockerfile backend/
+
+      - name: Build and tag Angular Docker image
+        run: |
+          docker build -t ghcr.io/${{ github.repository }}/remote-checkin-fe:${{ env.TAG }} -f frontend/Dockerfile frontend/
+
+      - name: Push Flask Docker image
+        run: |
+          docker push ghcr.io/${{ github.repository }}/remote-checkin-be:${{ env.TAG }}
+
+      - name: Push Angular Docker image
+        run: |
+          docker push ghcr.io/${{ github.repository }}/remote-checkin-fe:${{ env.TAG }}

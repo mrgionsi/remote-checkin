@@ -1,0 +1,16 @@
+name: Deploy Flask and Angular via Portainer in pre-prod environment
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  deploy:
+    environment: pre-prod  # Specify the GitHub Environment to use its secrets
+    name: Trigger Portainer Deployment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Invoke Portainer Webhook
+        run: |
+          curl -X POST "${{ secrets.PORTAINER_WEBHOOK_URL }}"
