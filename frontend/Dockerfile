@@ -1,11 +1,25 @@
+# Use the official Nginx Alpine image
 FROM nginx:alpine
 
-LABEL org.opencontainers.image.source=https://github.com/mrgionsi/remote-checkin
+LABEL org.opencontainers.image.source="https://github.com/mrgionsi/remote-checkin"
 
+# Create a non-root user and group
+RUN addgroup -S nginxgroup && adduser -S nginxuser -G nginxgroup
+
+# Copy the custom Nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-
+# Copy Angular build output
 COPY dist/remote-checkin/browser /usr/share/nginx/html
 
+# Change ownership to the non-root user
+RUN chown -R nginxuser:nginxgroup /usr/share/nginx/html
+
+# Switch to non-root user
+USER nginxuser
+
+# Expose the default HTTP port
 EXPOSE 80
+
+# Start Nginx
 CMD ["nginx", "-g", "daemon off;"]
