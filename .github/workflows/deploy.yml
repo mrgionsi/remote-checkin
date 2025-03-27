@@ -2,7 +2,7 @@ name: Deploy Flask and Angular via Portainer in pre-prod environment
 
 on:
   workflow_run:
-    workflows: ["Build Flask and Angular"]  # Make it run AFTER build.yml
+    workflows: ["Build Flask and Angular with Docker"]  # Make it run AFTER build.yml
     branches:
       - dev
     types:
