@@ -1,16 +1,19 @@
 name: Deploy Flask and Angular via Portainer in pre-prod environment
 
 on:
-  push:
+  workflow_run:
+    workflows: ["Build Flask and Angular"]  # Make it run AFTER build.yml
     branches:
       - dev
+    types:
+      - completed  # Ensures it only triggers when the build workflow completes
 
 jobs:
   deploy:
-    environment: pre-prod  # Specify the GitHub Environment to use its secrets
+    environment: pre-prod  # Uses GitHub Environment secrets
     name: Trigger Portainer Deployment
     runs-on: ubuntu-latest
     steps:
       - name: Invoke Portainer Webhook
         run: |
-          curl -X POST "${{ secrets.PORTAINER_WEBHOOK_URL }}"
+          curl -X POST "${{ secrets.PORTAINER_WEBHOOK_URL }}" 
