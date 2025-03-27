@@ -1,11 +1,9 @@
-from io import BytesIO
 import pytest
-import os
 from flask import Flask
 from sqlalchemy import text
 from routes.upload_reservation_routes import upload_bp
 from database import engine, Base, SessionLocal
-from models import Client, Reservation, ClientReservations
+from models import Reservation
 
 # Disable pylint warnings
 # pylint: disable=all
