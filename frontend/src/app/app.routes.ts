@@ -14,11 +14,11 @@ export const routes: Routes = [
     { path: 'reservation-check/:code', component: ReservationCheckComponent }, // Check reservation
     { path: ':id/remote-checkin/:code', component: RemoteCheckinComponent }, // Dynamic check-in with reservation ID
     { path: 'remote-checkin/:code', redirectTo: 'reservation-check/:code', pathMatch: 'full' }, // Redirect if no ID
+    { path: 'admin', redirectTo: 'admin/dashboard', pathMatch: 'full' }, // Add this redirect
 
     {
         path: 'admin',
         component: AdminHomeComponent, // Acts as the parent,
-        redirectTo: 'dashboard',
         children: [
             { path: 'dashboard', component: DashboardComponent },
             { path: 'rooms', component: RoomComponent },
