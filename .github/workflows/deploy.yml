@@ -51,16 +51,20 @@ jobs:
           fi
 
       - name: Create folder and debug
-        run: |
-          ls -larth
-          mkdir dist
-          mkdir dist/remote-checkin
-          mv remote-checkin dist/remote-checkin/
+        run: ls -larth
+
+      - name: Create folder and debug2
+        run: mkdir -p dist/remote-checkin
+
+      - name: Create folder and debug3
+        run: mv remote-checkin dist/remote-checkin/
+
+      - name: Create folder and debug4
+        run: ls -larth dist/remote-checkin/
+          
 
       - name: Build and tag Flask Docker image
         run: |
-          ls -larth
-          ls -larth dist/remote-checkin
           docker build -t ghcr.io/${{ github.repository }}/remote-checkin-be:${{ env.TAG }} -f backend/Dockerfile backend/
 
       - name: Build and tag Angular Docker image
