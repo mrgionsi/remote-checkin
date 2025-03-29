@@ -52,16 +52,19 @@ jobs:
           fi
 
       - name: Create folder and debug
-        run: ls -larth
+        run: ls -larth frontend
 
+      - name: Create folder and debug5
+        run: ls -larth frontend/dist/remote-checkin/
+          
       - name: Create folder and debug2
-        run: mkdir -p dist/remote-checkin
+        run: mkdir -p frontend/dist/remote-checkin
 
       - name: Create folder and debug3
-        run: mv remote-checkin dist/
+        run: mv frontend/remote-checkin dist/
 
       - name: Create folder and debug4
-        run: ls -larth dist/remote-checkin/
+        run: ls -larth frontend/dist/remote-checkin/
           
 
       - name: Build and tag Flask Docker image
