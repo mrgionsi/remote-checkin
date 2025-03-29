@@ -16,7 +16,7 @@ jobs:
   build-flask:
     name: Build Flask Backend
     runs-on: ubuntu-latest
-    environment: pre-prod  # Specify the GitHub Environment to use its secrets
+    environment: pre-prod
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -37,7 +37,6 @@ jobs:
       - name: Install dependencies
         run: |
           python -m venv venv
-          echo $DB_PORT
           source venv/bin/activate
           pip install --upgrade pip
           pip install -r backend/requirements.txt
@@ -73,8 +72,9 @@ jobs:
           cd frontend
           npm run build -- --configuration=preproduction
 
-      - name: Upload build artifacts
+      - name: Upload Angular build artifact
         uses: actions/upload-artifact@v4
         with:
           name: angular-dist
           path: frontend/dist/
+          retention-days: 7  # Keeps artifact for 7 days
