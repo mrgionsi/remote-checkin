@@ -54,7 +54,7 @@ jobs:
         run: |
           ls -larth
           mkdir dist
-          unzip angular-dist dist/
+          mv remote-checkin dist/
           docker build -t ghcr.io/${{ github.repository }}/remote-checkin-be:${{ env.TAG }} -f backend/Dockerfile backend/
 
       - name: Build and tag Angular Docker image
