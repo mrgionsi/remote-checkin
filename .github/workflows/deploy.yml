@@ -1,17 +1,16 @@
 name: Deploy Docker Images
 
 on:
-  push
-#  workflow_run:
-#    workflows: ["Build Flask and Angular with Docker"]
-#    types:
-#      - completed
-#  pull_request:
-#    branches:
-#      - dev  # Only trigger when PR is merged into dev
-#    types:
-#      - closed  # Trigger only when PR is merged
-#  workflow_dispatch:
+  workflow_run:
+    workflows: ["Build Flask and Angular with Docker"]
+    types:
+      - completed
+  pull_request:
+    branches:
+      - dev  # Only trigger when PR is merged into dev
+    types:
+      - closed  # Trigger only when PR is merged
+  workflow_dispatch:
 
 jobs:
   compile:
@@ -19,7 +18,7 @@ jobs:
     uses: ./.github/workflows/build.yml
 
   deploy-images:
-#    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true
     name: Build and Push Docker Images
     runs-on: ubuntu-latest
     needs: compile
@@ -51,18 +50,12 @@ jobs:
             echo "TAG=alpha" >> $GITHUB_ENV
           fi
 
-      - name: Create folder and debug
-        run: ls -larth frontend
           
-      - name: Create folder and debug2
+      - name: Create folder
         run: mkdir -p frontend/dist/remote-checkin
 
-      - name: Create folder and debug3
+      - name: Move artifact folder 
         run: mv remote-checkin frontend/dist/
-
-      - name: Create folder and debug4
-        run: ls -larth frontend/dist/remote-checkin/
-          
 
       - name: Build and tag Flask Docker image
         run: |
