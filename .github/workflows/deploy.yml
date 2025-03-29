@@ -50,18 +50,12 @@ jobs:
             echo "TAG=alpha" >> $GITHUB_ENV
           fi
 
-      - name: Create folder and debug
-        run: ls -larth
-
-      - name: Create folder and debug2
-        run: mkdir -p dist/remote-checkin
-
-      - name: Create folder and debug3
-        run: mv remote-checkin dist/
-
-      - name: Create folder and debug4
-        run: ls -larth dist/remote-checkin/
           
+      - name: Create folder
+        run: mkdir -p frontend/dist/remote-checkin
+
+      - name: Move artifact folder 
+        run: mv remote-checkin frontend/dist/
 
       - name: Build and tag Flask Docker image
         run: |
@@ -69,6 +63,7 @@ jobs:
 
       - name: Build and tag Angular Docker image
         run: |
+          pwd
           docker build -t ghcr.io/${{ github.repository }}/remote-checkin-fe:${{ env.TAG }} -f frontend/Dockerfile frontend/
 
       - name: Push Flask Docker image
