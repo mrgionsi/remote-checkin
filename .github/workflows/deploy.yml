@@ -10,8 +10,13 @@ on:
       - dev  # Only trigger when PR is merged into dev
     types:
       - closed  # Trigger only when PR is merged
+  workflow_dispatch:
 
 jobs:
+  compile:
+    # Reuse the compile workflow (can even point to another repo, see the docs)
+    uses: ./.github/workflows/build.yml
+
   deploy-images:
     if: github.event.pull_request.merged == true
     name: Build and Push Docker Images
@@ -24,8 +29,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: angular-dist
-          run-id: ${{ github.event.workflow_run.id }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+#          run-id: ${{ github.event.workflow_run.id }}
+#          github-token: ${{ secrets.GITHUB_TOKEN }}
 
 
       - name: Log in to GitHub Container Registry
