@@ -5,9 +5,11 @@ on:
     branches:
       - dev
   pull_request:
-    branches:
-      - dev
-
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - closed  # Used for checking merges
 jobs:
   build-flask:
     name: Build Flask Backend
@@ -76,6 +78,7 @@ jobs:
           path: frontend/dist/
 
   build-and-push-docker:
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'dev'
     name: Build and Push Docker Images
     runs-on: ubuntu-latest
     needs: [build-flask, build-angular]
