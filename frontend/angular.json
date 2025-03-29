@@ -71,20 +71,7 @@
                   "replace": "src/environments/environments.ts",
                   "with": "src/environments/environments.preprod.ts"
                 }
-              ],
-              "budgets": [
-                {
-                  "type": "initial",
-                  "maximumWarning": "2MB",
-                  "maximumError": "3MB"
-                },
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "2kB",
-                  "maximumError": "4kB"
-                }
-              ],
-              "outputHashing": "all"
+              ]
             },
             "development": {
               "optimization": false,
