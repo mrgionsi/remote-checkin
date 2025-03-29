@@ -17,7 +17,8 @@ export const routes: Routes = [
 
     {
         path: 'admin',
-        component: AdminHomeComponent, // Acts as the parent
+        component: AdminHomeComponent, // Acts as the parent,
+        redirectTo: 'dashboard',
         children: [
             { path: 'dashboard', component: DashboardComponent },
             { path: 'rooms', component: RoomComponent },
