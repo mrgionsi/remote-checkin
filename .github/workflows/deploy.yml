@@ -58,7 +58,7 @@ jobs:
         run: mkdir -p frontend/dist/remote-checkin
 
       - name: Create folder and debug3
-        run: mv frontend/remote-checkin dist/
+        run: mv remote-checkin frontend/dist/
 
       - name: Create folder and debug4
         run: ls -larth frontend/dist/remote-checkin/
