@@ -9,7 +9,7 @@ LABEL org.opencontainers.image.source="https://github.com/mrgionsi/remote-checki
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy Angular build output
-COPY dist/remote-checkin/browser /usr/share/nginx/html
+COPY ./dist/remote-checkin/browser /usr/share/nginx/html
 
 
 
