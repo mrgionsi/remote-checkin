@@ -52,6 +52,9 @@ jobs:
 
       - name: Build and tag Flask Docker image
         run: |
+          ls -larth
+          mkdir dist
+          unzip angular-dist dist/
           docker build -t ghcr.io/${{ github.repository }}/remote-checkin-be:${{ env.TAG }} -f backend/Dockerfile backend/
 
       - name: Build and tag Angular Docker image
