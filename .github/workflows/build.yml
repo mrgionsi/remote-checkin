@@ -9,7 +9,7 @@ on:
       - opened
       - synchronize
       - reopened
-      - closed  # Used for checking merges
+#      - closed  # Used for checking merges
   workflow_dispatch:  # Allow manual or automated re-execution
 
 jobs:
