@@ -1,14 +1,72 @@
-name: Deploy Flask and Angular via Portainer in pre-prod environment
+name: Deploy Docker Images
 
 on:
-  workflow_run:
-    workflows: ["Build Flask and Angular with Docker"]  # Make it run AFTER build.yml
-    branches:
-      - dev
+  pull_request:
     types:
-      - completed  # Ensures it only triggers when the build workflow completes
+      - closed  # Trigger when PR is merged or closed
 
 jobs:
+  trigger-build:
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'dev'
+    name: Re-execute Build Workflow
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger build workflow
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: Build Flask and Angular with Docker
+          ref: dev
+
+  deploy-images:
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'dev'
+    needs: trigger-build
+    name: Build and Push Docker Images
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download Angular build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: angular-dist
+          path: frontend/dist/
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_PAT }}
+
+      - name: Set Docker image tag
+        id: docker_tag
+        run: |
+          if [[ "${{ github.ref_name }}" == "main" ]]; then
+            echo "TAG=latest" >> $GITHUB_ENV
+          elif [[ "${{ github.ref_name }}" == "dev" ]]; then
+            echo "TAG=alpha" >> $GITHUB_ENV
+          else
+            echo "TAG=beta" >> $GITHUB_ENV
+          fi
+
+      - name: Build and tag Flask Docker image
+        run: |
+          docker build -t ghcr.io/${{ github.repository }}/remote-checkin-be:${{ env.TAG }} -f backend/Dockerfile backend/
+
+      - name: Build and tag Angular Docker image
+        run: |
+          docker build -t ghcr.io/${{ github.repository }}/remote-checkin-fe:${{ env.TAG }} -f frontend/Dockerfile frontend/
+
+      - name: Push Flask Docker image
+        run: |
+          docker push ghcr.io/${{ github.repository }}/remote-checkin-be:${{ env.TAG }}
+
+      - name: Push Angular Docker image
+        run: |
+          docker push ghcr.io/${{ github.repository }}/remote-checkin-fe:${{ env.TAG }}
+
+
   deploy:
     environment: pre-prod  # Uses GitHub Environment secrets
     name: Trigger Portainer Deployment

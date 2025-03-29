@@ -10,6 +10,8 @@ on:
       - synchronize
       - reopened
       - closed  # Used for checking merges
+  workflow_dispatch:  # Allow manual or automated re-execution
+
 jobs:
   build-flask:
     name: Build Flask Backend
@@ -76,52 +78,3 @@ jobs:
         with:
           name: angular-dist
           path: frontend/dist/
-
-  build-and-push-docker:
-    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'dev'
-    name: Build and Push Docker Images
-    runs-on: ubuntu-latest
-    needs: [build-flask, build-angular]
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Download Angular build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: angular-dist
-          path: frontend/dist/
-
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
-        with:
-            registry: ghcr.io
-            username: mrgionsi
-            password: ${{ secrets.GHCR_PAT }}
-
-      - name: Set Docker image tag
-        id: docker_tag
-        run: |
-          if [[ "${{ github.ref_name }}" == "main" ]]; then
-            echo "TAG=latest" >> $GITHUB_ENV
-          elif [[ "${{ github.ref_name }}" == "dev" ]]; then
-            echo "TAG=alpha" >> $GITHUB_ENV
-          else
-            echo "TAG=beta" >> $GITHUB_ENV
-          fi
-
-      - name: Build and tag Flask Docker image
-        run: |
-          docker build -t ghcr.io/${{ github.repository }}/remote-checkin-be:${{ env.TAG }} -f backend/Dockerfile backend/
-
-      - name: Build and tag Angular Docker image
-        run: |
-          docker build -t ghcr.io/${{ github.repository }}/remote-checkin-fe:${{ env.TAG }} -f frontend/Dockerfile frontend/
-
-      - name: Push Flask Docker image
-        run: |
-          docker push ghcr.io/${{ github.repository }}/remote-checkin-be:${{ env.TAG }}
-
-      - name: Push Angular Docker image
-        run: |
-          docker push ghcr.io/${{ github.repository }}/remote-checkin-fe:${{ env.TAG }}
