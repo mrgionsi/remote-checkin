@@ -18,6 +18,7 @@ import { Inject, PLATFORM_ID } from '@angular/core';
   selector: 'app-dashboard',
   imports: [ToastModule, IconFieldModule, InputIconModule, Toast, ChartModule, TableModule, InputTextModule, TagModule, CommonModule],
   providers: [MessageService],
+  host: { ngSkipHydration: 'true' },
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
