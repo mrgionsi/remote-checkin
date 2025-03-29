@@ -11,6 +11,7 @@ on:
       - reopened
 #      - closed  # Used for checking merges
   workflow_dispatch:  # Allow manual or automated re-execution
+  workflow_call:
 
 jobs:
   build-flask:
