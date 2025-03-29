@@ -1,25 +1,17 @@
 name: Deploy Docker Images
 
 on:
+  workflow_run:
+    workflows: ["Build Flask and Angular with Docker"]
+    types:
+      - completed
   pull_request:
     types:
-      - closed  # Trigger when PR is merged or closed
+      - closed  # Trigger when PR is merged
 
 jobs:
-#  trigger-build:
-#    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'dev'
-#    name: Re-execute Build Workflow
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Trigger build workflow
-#        uses: benc-uk/workflow-dispatch@v1
-#        with:
-#          workflow: Build Flask and Angular with Docker
-#          ref: dev
-
   deploy-images:
     if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'dev'
-#    needs: trigger-build
     name: Build and Push Docker Images
     runs-on: ubuntu-latest
     steps:
@@ -66,12 +58,12 @@ jobs:
         run: |
           docker push ghcr.io/${{ github.repository }}/remote-checkin-fe:${{ env.TAG }}
 
-
   deploy:
-    environment: pre-prod  # Uses GitHub Environment secrets
+    environment: pre-prod
     name: Trigger Portainer Deployment
     runs-on: ubuntu-latest
+    needs: deploy-images
     steps:
       - name: Invoke Portainer Webhook
         run: |
-          curl -X POST "${{ secrets.PORTAINER_WEBHOOK_URL }}" 
+          curl -X POST "${{ secrets.PORTAINER_WEBHOOK_URL }}"
