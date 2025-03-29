@@ -24,8 +24,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: angular-dist
-          run-id: ${{ github.event.workflow_run.id }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+#          run-id: ${{ github.event.workflow_run.id }}
+#          github-token: ${{ secrets.GITHUB_TOKEN }}
 
 
       - name: Log in to GitHub Container Registry
