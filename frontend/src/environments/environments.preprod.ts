@@ -1,4 +1,4 @@
 export const environment = {
-    production: true,
+    production: false,
     apiBaseUrl: 'https://remote-checkin-be.gionsihome.duckdns.org'  // Example API URL for production
 };
