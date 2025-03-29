@@ -6,20 +6,20 @@ on:
       - closed  # Trigger when PR is merged or closed
 
 jobs:
-  trigger-build:
-    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'dev'
-    name: Re-execute Build Workflow
-    runs-on: ubuntu-latest
-    steps:
-      - name: Trigger build workflow
-        uses: benc-uk/workflow-dispatch@v1
-        with:
-          workflow: Build Flask and Angular with Docker
-          ref: dev
+#  trigger-build:
+#    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'dev'
+#    name: Re-execute Build Workflow
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Trigger build workflow
+#        uses: benc-uk/workflow-dispatch@v1
+#        with:
+#          workflow: Build Flask and Angular with Docker
+#          ref: dev
 
   deploy-images:
     if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'dev'
-    needs: trigger-build
+#    needs: trigger-build
     name: Build and Push Docker Images
     runs-on: ubuntu-latest
     steps:
