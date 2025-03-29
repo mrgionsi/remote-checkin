@@ -11,7 +11,8 @@ import { TagModule } from 'primeng/tag';
 import { SelectModule } from 'primeng/select';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { Dialog } from 'primeng/dialog';
-
+import { isPlatformBrowser } from '@angular/common';
+import { Inject, PLATFORM_ID } from '@angular/core';
 
 @Component({
   selector: 'app-room',
@@ -43,22 +44,24 @@ export class RoomComponent implements OnInit {
 
   constructor(private messageService: MessageService,
     public confirmationService: ConfirmationService,
-    private roomService: RoomService) { }
+    private roomService: RoomService,
+    @Inject(PLATFORM_ID) private platformId: object) { }
 
 
   ngOnInit(): void {
-    this.roomService.getRooms().subscribe({
-      next: (value) => {
-        console.log(value)
-        this.rooms = value
-      },
-      error: (msg) => {
-        console.error("Failed to fetch rooms")
-        this.messageService.add({ severity: 'warn', summary: 'Failed', detail: 'Getting rooms. Please try again or contact your administrator.' });
+    if (isPlatformBrowser(this.platformId)) {
+      this.roomService.getRooms().subscribe({
+        next: (value) => {
+          console.log(value)
+          this.rooms = value
+        },
+        error: (msg) => {
+          console.error("Failed to fetch rooms")
+          this.messageService.add({ severity: 'warn', summary: 'Failed', detail: 'Getting rooms. Please try again or contact your administrator.' });
 
-      }
+        }
+      })
     }
-    )
   }
   onRowEditInit(room: any) {
     this.clonedProducts[room.id as string] = { ...room };
