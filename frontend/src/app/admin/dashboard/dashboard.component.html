@@ -3,14 +3,7 @@
 <div class="p-fluid">
     <h2 class="text-center mb-4">Remote Check-ins Dashboard</h2>
 
-    <!-- Filter/Search -->
-    <!--     <div class="p-field p-grid">
-        <label for="search" class="p-col-12 p-md-2">Search</label>
-        <div class="p-col-12 p-md-10">
-            <input id="search" pInputText (ngModel)="searchTerm"
-                placeholder="Search by reservation number or guest name" />
-        </div>
-    </div> -->
+
 
     <!-- Check-in Table -->
     <!-- @ts-ignore -->
@@ -31,12 +24,12 @@
         </ng-template>
         <ng-template pTemplate="header">
             <tr>
-                <th>Reservation Number</th>
-                <th>Guest Name</th>
-                <th>Room</th>
-                <th>Check-in Date</th>
-                <th>Check-out Date</th>
-                <th>Status</th>
+                <th scope="col">Reservation Number</th>
+                <th scope="col">Guest Name</th>
+                <th scope="col">Room</th>
+                <th scope="col">Check-in Date</th>
+                <th scope="col">Check-out Date</th>
+                <th scope="col">Status</th>
             </tr>
         </ng-template>
 

@@ -1,5 +1,5 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { InputTextModule } from 'primeng/inputtext';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
@@ -11,7 +11,6 @@ import { ReservationService } from '../../services/reservation.service';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { Router } from '@angular/router';
-import { Inject, PLATFORM_ID } from '@angular/core';
 
 
 @Component({
@@ -29,8 +28,11 @@ export class DashboardComponent implements OnInit {
   reservations: any[] = [];
   monthly_reservatvion: any[] = [];
   searchTerm: any;
+  reservationData: any;
+  checkInData: any;
+  chartOptions: ChartOptions | undefined;
 
-  constructor(private messageService: MessageService,
+  constructor(
     private reservationService: ReservationService,
     private router: Router,
     @Inject(PLATFORM_ID) private platformId: object,
@@ -54,9 +56,7 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  reservationData: any;
-  checkInData: any;
-  chartOptions: ChartOptions | undefined;
+
 
   navigateToDetails(event: any): void {
     const reservation = event.data;  // 'data' contains the selected row object
@@ -66,7 +66,6 @@ export class DashboardComponent implements OnInit {
   }
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
-
       this.reservationService.getReservationByStructureId(1).subscribe({
         next: (reservations) => {
           console.log('Reservations:', reservations);
@@ -87,6 +86,26 @@ export class DashboardComponent implements OnInit {
           console.log('Reservations:', monthly_reserv);
           // Handle the response data here
           this.monthly_reservatvion = monthly_reserv.map((item: { total_reservations: any; }) => item.total_reservations);
+          this.checkInData = {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'August', 'Sept', 'Oct', 'Nov', 'Dec'], // Example months
+            datasets: [
+              {
+                label: 'Check-ins',
+                data: this.monthly_reservatvion,
+                fill: true,
+                borderColor: '#42A5F5',
+                tension: 0.1
+              }
+            ]
+          };
+
+          this.chartOptions = {
+            responsive: true,
+            scales: {
+              x: { title: { display: true, text: 'Month' } },
+              y: { title: { display: true, text: 'Check-ins' } }
+            }
+          };
         },
         error: (error) => {
           console.error('Error fetching reservations:', error);
@@ -100,26 +119,7 @@ export class DashboardComponent implements OnInit {
 
 
 
-      this.checkInData = {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'August', 'Sept', 'Oct', 'Nov', 'Dec'], // Example months
-        datasets: [
-          {
-            label: 'Check-ins',
-            data: this.monthly_reservatvion,
-            fill: true,
-            borderColor: '#42A5F5',
-            tension: 0.1
-          }
-        ]
-      };
 
-      this.chartOptions = {
-        responsive: true,
-        scales: {
-          x: { title: { display: true, text: 'Month' } },
-          y: { title: { display: true, text: 'Check-ins' } }
-        }
-      };
     }
   }
 }

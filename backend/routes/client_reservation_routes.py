@@ -41,7 +41,7 @@ Usage:
 
 import os
 from flask import Blueprint, jsonify, request, send_from_directory
-from models import Client, ClientReservations
+from models import Client, ClientReservations, Reservation
 from database import SessionLocal
 
 # Blueprint setup
@@ -82,8 +82,8 @@ def get_clients_by_reservation(reservation_id):
 
 UPLOAD_FOLDER = "uploads/"  # Base directory for uploaded images
 
-@client_reservation_bp.route("/reservations/<int:reservation_id>/client-images", methods=["POST"])
-def check_images(reservation_id):
+@client_reservation_bp.route("/reservations/<int:reservation_id_reference>/client-images", methods=["POST"])
+def check_images(reservation_id_reference):
     """
     Check if images exist for a given client and reservation ID.
 
@@ -101,15 +101,16 @@ def check_images(reservation_id):
     surname = data.get("surname")
     cf = data.get("cf")
 
-    if not all([name, surname, cf, reservation_id]):
+    if not all([name, surname, cf, reservation_id_reference]):
         return jsonify({"error": "Missing required fields"}), 400
     # Verify client belongs to this reservation
     db = SessionLocal()
     try:
+        id_reservation = db.query(Reservation.id).filter(Reservation.id_reference == str(reservation_id_reference))
         client_exists = db.query(Client).join(
             ClientReservations, Client.id == ClientReservations.id_client
         ).filter(
-            ClientReservations.id_reservation == reservation_id,
+            ClientReservations.id_reservation == id_reservation,
             Client.name == name,
             Client.surname == surname,
             Client.cf == cf
@@ -118,13 +119,10 @@ def check_images(reservation_id):
             return jsonify({"error": "Client not associated with this reservation"}), 404
     finally:
         db.close()
-
-    folder_path = os.path.join(UPLOAD_FOLDER, str(reservation_id))
+    folder_path = os.path.join(UPLOAD_FOLDER, str(reservation_id_reference))
 
     if not os.path.exists(folder_path):
-        return jsonify({"error": f"Folder for reservation {reservation_id} not found"}), 404
-
-
+        return jsonify({"error": f"Folder for reservation {reservation_id_reference} not found"}), 404
 
 
     # Expected filenames
@@ -145,7 +143,7 @@ def check_images(reservation_id):
     for key, file_name in file_names.items():
         file_path = os.path.join(folder_path, file_name)
         if os.path.exists(file_path):
-            result[key] = f"/api/v1/images/{reservation_id}/{file_name}"
+            result[key] = f"/api/v1/images/{reservation_id_reference}/{file_name}"
         else:
             result[key] = None  # File not found
 
