@@ -6,6 +6,7 @@ and registers blueprints for routing.
 """
 #pylint: disable=C0303,E0401
 
+import os
 from flask import Flask
 from flask_cors import CORS
 from routes.room_routes import room_bp
@@ -15,7 +16,13 @@ from routes.client_reservation_routes import client_reservation_bp  # Adjust the
 
 
 app = Flask(__name__)
-CORS(app, origins="http://localhost:4200")  # Change this to match your frontend URL
+allowed_origins = os.getenv("ALLOWED_CORS", "http://localhost:4200").split(",")
+CORS(app,
+     origins=allowed_origins,
+     supports_credentials=True,
+     methods=["GET", "POST", "PUT", "DELETE"],
+     allow_headers=["Content-Type", "Authorization"],
+     expose_headers=["Content-Type", "Authorization"])
 
 # Create database tables
 #Base.metadata.create_all(bind=engine)
