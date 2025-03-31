@@ -14,7 +14,7 @@ on:
 
 jobs:
   compile:
-    # Reuse the compile workflow (can even point to another repo, see the docs)
+    # Reuse the compile workflow
     uses: ./.github/workflows/build.yml
 
   deploy-images:
