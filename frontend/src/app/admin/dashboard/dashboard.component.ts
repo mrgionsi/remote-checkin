@@ -65,7 +65,6 @@ export class DashboardComponent implements OnInit {
     }
   }
   ngOnInit(): void {
-    console.log(this.platformId)
     if (isPlatformBrowser(this.platformId)) {
       this.reservationService.getReservationByStructureId(1).subscribe({
         next: (reservations) => {
