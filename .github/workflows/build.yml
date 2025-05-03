@@ -3,7 +3,7 @@ name: Build Flask and Angular with Docker
 on:
   push:
     branches:
-      - '!dev'
+      - 'dev'
   pull_request:
     types:
       - opened
