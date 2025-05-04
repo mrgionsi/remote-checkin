@@ -1,39 +1,53 @@
 <p-toast></p-toast>
 
-<p-card>
+<p-card class="mb-4">
     <ng-template pTemplate="title">
         <i class="pi pi-calendar"></i> Reservation Details
     </ng-template>
     <ng-template pTemplate="content">
         <div class="details-grid">
             <div><strong>ID Reference:</strong> {{ reservation_details?.id_reference }}</div>
-            <div><strong>Room:</strong> {{ reservation_details?.room.name }}</div>
+            <div *ngIf="reservation_details.rooms"><strong>Room:</strong> {{ reservation_details?.room.name }}</div>
             <div><strong>Start Date:</strong> {{ reservation_details?.start_date | date:'dd-MM-yyyy' }}</div>
+            <div><strong>End Date:</strong> {{ reservation_details?.end_date | date:'dd-MM-yyyy' }}</div>
+            <div><strong>Guest:</strong> {{ reservation_details?.name_reference }}</div>
             <div class="status-container">
                 <strong>Status:</strong>
-                <span class="status-badge" [ngClass]="getStatusClass(reservation_details?.status)">
-                    <i [class]="getStatusIcon(reservation_details?.status)"></i>
-                    {{ reservation_details?.status }}
-                </span>
+                <p-select [options]="statusOptions" [(ngModel)]="reservation_status" optionLabel="label" dataKey="value"
+                    (onChange)="onStatusChange($event.value)" styleClass="status-dropdown w-full sm:w-16rem"
+                    [showClear]="false">
+                    <ng-template pTemplate="item" let-option>
+                        <div class="flex align-items-center">
+                            <i [class]="option.icon" class="mr-2"></i>
+                            {{ option.label }}
+                        </div>
+                    </ng-template>
+                </p-select>
             </div>
 
 
-            <div><strong>End Date:</strong> {{ reservation_details?.end_date | date:'dd-MM-yyyy'}}</div>
-            <div><strong>Guest:</strong> {{ reservation_details?.name_reference }}</div>
         </div>
 
-        <!-- Buttons aligned to the right -->
-        <div class="reservation-actions">
+        <!-- Actions row -->
+        <div class="reservation-actions mt-3 flex flex-wrap gap-2 justify-end">
+            <p-button label="Edit" icon="pi pi-pencil" class="p-button-sm text-white" (click)="editReservation()">
+            </p-button>
+
+            <p-button label="Remove" icon="pi pi-trash" class="p-button-sm text-white" severity="danger"
+                (click)="removeReservation()">
+            </p-button>
+        </div>
+
+        <!-- 
             <p-button label="Approve" icon="pi pi-check" class="p-button-success"
                 (click)="approveReservation(reservation_details)"></p-button>
-            <p-button label="Decline" icon="pi pi-times" severity="danger" class="p-button-danger custom-decline-button"
+            <p-button label="Decline" icon="pi pi-times" class="p-button-danger"
                 (click)="declineReservation(reservation_details)"></p-button>
-            <p-button label="Send back to the customer" icon="pi pi-undo" severity="info"
-                class="p-button-warning custom-send-back-button"
-                (click)="sendBackToClient(reservation_details)"></p-button>
-        </div>
+            <p-button label="Send back to Customer" icon="pi pi-undo" class="p-button-warning"
+                (click)="sendBackToClient(reservation_details)"></p-button> -->
     </ng-template>
 </p-card>
+
 
 
 <h3>People Associated with this Reservation</h3>
