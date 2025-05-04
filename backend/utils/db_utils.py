@@ -92,6 +92,8 @@ def add_or_update_client(form_data, client=None):
                     form_data['birthday'] = datetime.strptime(form_data['birthday'], "%Y-%m-%d")
                 except ValueError as e:
                     raise ValueError(f"Invalid date format for birthday: {form_data.get('birthday')}") from e
+                form_data.pop('reservationId', None)  # Remove if present
+                print(form_data)
                 client = Client(**form_data)
                 db.add(client)  # Add new client to the session
                 db.commit()  # Commit to save the new client
