@@ -125,7 +125,7 @@
             <td>{{ person.telephone }}</td>
             <td>{{ person.document_number }}</td>
             <td>{{ person.cf }}</td>
-            <td>{{ person.document_type }}</td>
+            <td>{{ person.document_type | documentTypeLabel }}</td>
         </tr>
     </ng-template>
 </p-table>
