@@ -13,12 +13,14 @@ import { PersonDetailDialogComponent } from '../person-detail-dialog/person-deta
 import { ButtonModule } from 'primeng/button';
 import { Subscription } from 'rxjs';
 import { SelectModule } from 'primeng/select';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DocumentTypeLabelPipe } from "../pipes/document-type-label.pipe";
+import { DatePickerModule } from 'primeng/datepicker';
+import { DateShortPipe } from "../pipes/date-short.pipe";
 
 @Component({
   selector: 'app-detail-reservation',
-  imports: [ToastModule, CommonModule, TableModule, CardModule, ButtonModule, FormsModule, SelectModule, DocumentTypeLabelPipe],
+  imports: [ToastModule, CommonModule, TableModule, CardModule, ButtonModule, FormsModule, SelectModule, DocumentTypeLabelPipe, DatePickerModule, ReactiveFormsModule, DateShortPipe],
   templateUrl: './detail-reservation.component.html',
   styleUrl: './detail-reservation.component.scss',
   providers: [MessageService, DialogService]
@@ -35,6 +37,8 @@ export class DetailReservationComponent implements OnInit {
     { label: 'Declined', value: 'Declined', icon: 'pi pi-times-circle' },
     { label: 'Sent back to customer', value: 'Sent back to customer', icon: 'pi pi-arrow-left' }
   ];
+  editMode = false;
+  form: FormGroup;
 
 
   constructor(private reservationService: ReservationService,
@@ -42,7 +46,16 @@ export class DetailReservationComponent implements OnInit {
     private route: ActivatedRoute,
     private client_reservationService: ClientReservationService,
     private dialogService: DialogService,
+    private fb: FormBuilder,
   ) {
+    this.form = this.fb.group({
+      id_reference: [this.reservation_details?.id_reference, Validators.required],
+      room_name: [this.reservation_details?.room?.name],
+      start_date: [this.reservation_details?.start_date, Validators.required],
+      end_date: [this.reservation_details?.end_date, Validators.required],
+      name_reference: [this.reservation_details?.name_reference, Validators.required],
+      status: [this.reservation_details?.status],
+    });
   }
   ngOnDestroy(): void {
     this.subscriptions.forEach(sub => sub.unsubscribe());
@@ -59,7 +72,7 @@ export class DetailReservationComponent implements OnInit {
       this.reservationService.getReservationById(reservationId).subscribe({
         next: (resp) => {
           this.reservation_details = resp;
-          //console.log("Resp", resp.status);
+          console.log("Resp", resp);
           this.reservation_status = _.statusOptions.find(option => option.value === resp.status)
 
           this.client_reservationService.getClientByReservationId(this.reservation_details.id).subscribe({
@@ -111,13 +124,34 @@ export class DetailReservationComponent implements OnInit {
   }
 
 
+
   editReservation() {
-    // Navigate to edit page or open dialog
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Edit Reservation',
-      detail: 'Edit reservation feature not yet implemented.'
+    this.editMode = true;
+    this.form.patchValue({
+      id_reference: this.reservation_details.id_reference,
+      room_name: this.reservation_details['room']['name'] || '',
+      start_date: this.reservation_details.start_date,
+      end_date: this.reservation_details.end_date,
+      name_reference: this.reservation_details.name_reference,
+      status: this.reservation_details.status,
     });
+
+  }
+
+  saveReservation() {
+    if (this.form.valid) {
+      this.editMode = false;
+      this.form.get('start_date')?.setValue(this.reservation_details.start_date instanceof Date ? this.reservation_details.start_date.toISOString().split('T')[0] : this.reservation_details.start_date)
+
+      this.reservation_details = { ...this.form.value };
+      // Optionally persist data to backend
+      console.log(this.reservation_details)
+
+    }
+  }
+
+  cancelEdit() {
+    this.editMode = false;
   }
 
   removeReservation() {
