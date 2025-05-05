@@ -5,27 +5,50 @@
         <i class="pi pi-calendar"></i> Reservation Details
     </ng-template>
     <ng-template pTemplate="content">
-        <div class="details-grid">
-            <div><strong>ID Reference:</strong> {{ reservation_details?.id_reference }}</div>
-            <div *ngIf="reservation_details.rooms"><strong>Room:</strong> {{ reservation_details?.room.name }}</div>
-            <div><strong>Start Date:</strong> {{ reservation_details?.start_date | date:'dd-MM-yyyy' }}</div>
-            <div><strong>End Date:</strong> {{ reservation_details?.end_date | date:'dd-MM-yyyy' }}</div>
-            <div><strong>Guest:</strong> {{ reservation_details?.name_reference }}</div>
-            <div class="status-container">
-                <strong>Status:</strong>
-                <p-select [options]="statusOptions" [(ngModel)]="reservation_status" optionLabel="label" dataKey="value"
-                    (onChange)="onStatusChange($event.value)" styleClass="status-dropdown w-full sm:w-16rem"
-                    [showClear]="false">
-                    <ng-template pTemplate="item" let-option>
-                        <div class="flex align-items-center">
-                            <i [class]="option.icon" class="mr-2"></i>
-                            {{ option.label }}
-                        </div>
-                    </ng-template>
-                </p-select>
+
+        <div class="p-4 surface-card shadow-2 border-round-lg text-900 text-sm">
+            <div class="grid formgrid p-fluid">
+
+                <div class="field col-12 md:col-6">
+                    <label class="font-bold text-600">ID Reference:</label>
+                    <div>{{ reservation_details?.id_reference }}</div>
+                </div>
+
+                <div class="field col-12 md:col-6" *ngIf="reservation_details.rooms">
+                    <label class="font-bold text-600">Room:</label>
+                    <div>{{ reservation_details?.room.name }}</div>
+                </div>
+
+                <div class="field col-12 md:col-6">
+                    <label class="font-bold text-600">Start Date:</label>
+                    <div>{{ reservation_details?.start_date | date:'dd-MM-yyyy' }}</div>
+                </div>
+
+                <div class="field col-12 md:col-6">
+                    <label class="font-bold text-600">End Date:</label>
+                    <div>{{ reservation_details?.end_date | date:'dd-MM-yyyy' }}</div>
+                </div>
+
+                <div class="field col-12">
+                    <label class="font-bold text-600">Guest:</label>
+                    <div>{{ reservation_details?.name_reference }}</div>
+                </div>
+
+                <div class="field col-12 md:col-3">
+                    <label class="font-bold text-600 mb-2">Status:</label>
+                    <p-select [options]="statusOptions" [(ngModel)]="reservation_status" optionLabel="label"
+                        dataKey="value" (onChange)="onStatusChange($event.value)" styleClass="w-full"
+                        [showClear]="false">
+                        <ng-template pTemplate="item" let-option>
+                            <div class="flex align-items-center">
+                                <i [class]="option.icon" class="mr-2"></i>
+                                {{ option.label }}
+                            </div>
+                        </ng-template>
+                    </p-select>
+                </div>
+
             </div>
-
-
         </div>
 
         <!-- Actions row -->
