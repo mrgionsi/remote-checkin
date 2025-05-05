@@ -13,10 +13,11 @@ import { PersonDetailDialogComponent } from '../person-detail-dialog/person-deta
 import { ButtonModule } from 'primeng/button';
 import { Subscription } from 'rxjs';
 import { SelectModule } from 'primeng/select';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DocumentTypeLabelPipe } from "../pipes/document-type-label.pipe";
 import { DatePickerModule } from 'primeng/datepicker';
 import { DateShortPipe } from "../pipes/date-short.pipe";
+import { RoomService } from '../services/room.service';
 
 @Component({
   selector: 'app-detail-reservation',
@@ -39,6 +40,8 @@ export class DetailReservationComponent implements OnInit {
     { label: 'Pending', value: 'Pending', icon: 'pi pi-clock' },
 
   ];
+
+  roomList: any;
   editMode = false;
   form: FormGroup;
 
@@ -49,20 +52,32 @@ export class DetailReservationComponent implements OnInit {
     private client_reservationService: ClientReservationService,
     private dialogService: DialogService,
     private fb: FormBuilder,
+    private reservation_service: ReservationService,
+    private roomService: RoomService
   ) {
     this.form = this.fb.group({
       id_reference: [this.reservation_details?.id_reference, Validators.required],
-      room_name: [this.reservation_details?.room?.name],
+      room: [this.reservation_details?.room],
       start_date: [this.reservation_details?.start_date, Validators.required],
       end_date: [this.reservation_details?.end_date, Validators.required],
       name_reference: [this.reservation_details?.name_reference, Validators.required],
       status: [this.reservation_details?.status],
-    });
+    }, { validators: this.dateRangeValidator });
   }
+
   ngOnDestroy(): void {
     this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 
+  dateRangeValidator(group: AbstractControl): { [key: string]: any } | null {
+    const start = group.get('start_date')?.value;
+    const end = group.get('end_date')?.value;
+
+    if (start && end && new Date(start) > new Date(end)) {
+      return { endDateBeforeStartDate: true };
+    }
+    return null;
+  }
 
   ngOnInit(): void {
     var reservationId: number;
@@ -121,6 +136,18 @@ export class DetailReservationComponent implements OnInit {
 
         }
       })
+
+      this.roomService.getRooms().subscribe({
+        next: (value) => {
+          console.log(value)
+          this.roomList = value;
+        },
+        error: (msg) => {
+          console.error("Failed to fetch rooms")
+          //this.messageService.add({ severity: 'warn', summary: 'Failed', detail: 'Getting rooms. Please try again or contact your administrator.' });
+
+        }
+      })
     })
 
   }
@@ -128,10 +155,11 @@ export class DetailReservationComponent implements OnInit {
 
 
   editReservation() {
+
     this.editMode = true;
     this.form.patchValue({
       id_reference: this.reservation_details.id_reference,
-      room_name: this.reservation_details['room']['name'] || '',
+      room: this.reservation_details['room'],
       start_date: this.reservation_details.start_date,
       end_date: this.reservation_details.end_date,
       name_reference: this.reservation_details.name_reference,
@@ -142,18 +170,51 @@ export class DetailReservationComponent implements OnInit {
 
   saveReservation() {
     if (this.form.valid) {
+      var reservationId = this.reservation_details.id;
       this.editMode = false;
-      this.form.get('start_date')?.setValue(this.reservation_details.start_date instanceof Date ? this.reservation_details.start_date.toISOString().split('T')[0] : this.reservation_details.start_date)
-
       this.reservation_details = { ...this.form.value };
+      // Create Date object from start_date
+      this.reservation_details.id = reservationId;
+      const endDate = new Date(this.form.value.end_date);
+
+      // Set time to 03:00:00
+      endDate.setHours(3, 0, 0, 0);
+
+      // Convert to the correct format (GMT)
+      this.reservation_details.end_date = endDate.toUTCString();
+      const startDate = new Date(this.form.value.end_date);
+
+      // Set time to 03:00:00
+      startDate.setHours(3, 0, 0, 0);
+      this.reservation_details.start_date = startDate.toUTCString();
+
       // Optionally persist data to backend
       console.log(this.reservation_details)
-
+      this.reservation_service.updateReservation(this.reservation_details, reservationId).subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Deleted',
+            detail: 'Reservation has been successfully updated.'
+          });
+          // Redirect to reservations list or dashboard
+        },
+        error: (error: any) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to update the reservation.'
+          });
+          console.log(error)
+        }
+      });
     }
   }
 
+
   cancelEdit() {
     this.editMode = false;
+    this.form.reset();
   }
 
   removeReservation() {
@@ -178,6 +239,12 @@ export class DetailReservationComponent implements OnInit {
     }
   }
 
+  formatDateOnly(date: Date): string {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are 0-based
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
 
   openDetails(person: any) {
     this.dialogService.open(PersonDetailDialogComponent, {

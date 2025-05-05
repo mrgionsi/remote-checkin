@@ -20,7 +20,7 @@ allowed_origins = os.getenv("ALLOWED_CORS", "http://localhost:4200").split(",")
 CORS(app,
      origins=allowed_origins,
      supports_credentials=True,
-     methods=["GET", "POST", "PUT", "DELETE"],
+     methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
      allow_headers=["Content-Type", "Authorization"],
      expose_headers=["Content-Type", "Authorization"])
 
