@@ -98,6 +98,63 @@ def create_reservation():
     finally:
         session.close()
 
+@reservation_bp.route("/reservations/<int:reservation_id>", methods=["PATCH"])
+def update_reservation(reservation_id):
+    """
+    Update an existing reservation with provided fields.
+
+    Args:
+        reservation_id (int): The ID of the reservation to update.
+
+    Returns:
+        flask.Response: JSON containing updated reservation details or an error message.
+    """
+    data = request.get_json()
+
+    db = SessionLocal()
+    try:
+        reservation = db.query(Reservation).filter(Reservation.id == reservation_id).first()
+
+        if not reservation:
+            return jsonify({"error": f"Reservation with ID {reservation_id} not found"}), 404
+
+        # Optional updates
+        if "start_date" in data:
+            reservation.start_date = datetime.strptime(data["start_date"], "%a, %d %b %Y %H:%M:%S GMT")
+        if "end_date" in data:
+            reservation.end_date = datetime.strptime(data["end_date"], "%a, %d %b %Y %H:%M:%S GMT")
+        if "name_reference" in data:
+            reservation.name_reference = data["name_reference"]
+        if "name_reference" in data:
+            reservation.id_reference = data["id_reference"]
+        if "status" in data:
+            reservation.status = data["status"]
+        if "room" in data and isinstance(data["room"], dict) and "id" in data["room"]:
+            room = db.query(Room).filter(Room.id == data["room"]["id"]).first()
+            if not room:
+                return jsonify({"error": "Room not found"}), 404
+            reservation.id_room = room.id
+
+        db.commit()
+
+        return jsonify({
+            "message": "Reservation updated successfully",
+            "reservation": {
+                "id": reservation.id,
+                "reservationNumber": reservation.id_reference,
+                "status": reservation.status,
+                "startDate": reservation.start_date.strftime("%Y-%m-%d"),
+                "endDate": reservation.end_date.strftime("%Y-%m-%d"),
+                "name_reference": reservation.name_reference,
+                "roomName": reservation.room.to_dict(),
+            }
+        }), 200
+
+    except Exception as e:
+        db.rollback()
+        return jsonify({"error": f"Error updating reservation: {str(e)}"}), 500
+    finally:
+        db.close()
 
 @reservation_bp.route("/reservations", methods=["GET"])
 def get_reservations():

@@ -19,7 +19,16 @@
                 <div [formGroup]="form" class="field col-12 md:col-6" *ngIf="reservation_details['room']">
                     <label class="font-bold text-600">Room:</label>
                     <div *ngIf="!editMode">{{ reservation_details?.room.name }}</div>
-                    <input *ngIf="editMode" type="text" class="p-inputtext w-full" formControlName="room_name" />
+                    <div *ngIf="editMode">
+                        <p-select [options]="roomList" formControlName="room" optionLabel="name" dataKey="id"
+                            styleClass="w-full" [showClear]="false">
+                            <ng-template pTemplate="item" let-option>
+                                <div class="flex align-items-center">
+                                    {{ option.name }}
+                                </div>
+                            </ng-template>
+                        </p-select>
+                    </div>
                 </div>
 
                 <!-- Start Date -->
@@ -38,16 +47,20 @@
                     <p-datepicker *ngIf="editMode" formControlName="end_date" showIcon inputId="end_date"
                         placeholder="{{reservation_details?.end_date | dateShort}}" dateFormat="dd/mm/yy"
                         class="w-full"></p-datepicker>
+                    <p *ngIf="form.errors?.['endDateBeforeStartDate'] && form.get('end_date')?.touched" class="p-error">
+                        End date must be after start date.
+                    </p>
+
                 </div>
 
                 <!-- Guest -->
-                <div [formGroup]="form" class="field col-12">
+                <div [formGroup]="form" class="field col-12 md:col-6">
                     <label class="font-bold text-600">Guest:</label>
                     <div *ngIf="!editMode">{{ reservation_details?.name_reference }}</div>
                     <input *ngIf="editMode" type="text" class="p-inputtext w-full" formControlName="name_reference" />
                 </div>
 
-                <div class="field col-12 md:col-3">
+                <div class="field col-12 md:col-6">
                     <label class="font-bold text-600 mb-2">Status:</label>
                     <p-select [options]="statusOptions" [(ngModel)]="reservation_status" optionLabel="label"
                         dataKey="value" (onChange)="onStatusChange($event.value)" styleClass="w-full"
@@ -70,7 +83,7 @@
             </p-button>
 
             <p-button *ngIf="editMode" label="Save" icon="pi pi-check" class="p-button-sm text-white"
-                (click)="saveReservation()" severity="success">
+                (click)="saveReservation()" severity="success" [disabled]="form.invalid">
             </p-button>
 
             <p-button *ngIf="editMode" label="Cancel" icon="pi pi-times" class="p-button-sm text-white"

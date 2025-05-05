@@ -16,6 +16,11 @@ export class ReservationService {
     return this.http.post(this.apiUrl, reservation);
   }
 
+  // Method to update a reservation
+  updateReservation(reservation: any, reservationId: number): Observable<any> {
+    return this.http.patch(this.apiUrl + '/' + reservationId, reservation);
+  }
+
   // Method to get reservations by structure ID
   getReservationByStructureId(id: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/structure/${id}`);
