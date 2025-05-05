@@ -14,10 +14,11 @@ import { ButtonModule } from 'primeng/button';
 import { Subscription } from 'rxjs';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
+import { DocumentTypeLabelPipe } from "../pipes/document-type-label.pipe";
 
 @Component({
   selector: 'app-detail-reservation',
-  imports: [ToastModule, CommonModule, TableModule, CardModule, ButtonModule, FormsModule, SelectModule],
+  imports: [ToastModule, CommonModule, TableModule, CardModule, ButtonModule, FormsModule, SelectModule, DocumentTypeLabelPipe],
   templateUrl: './detail-reservation.component.html',
   styleUrl: './detail-reservation.component.scss',
   providers: [MessageService, DialogService]
