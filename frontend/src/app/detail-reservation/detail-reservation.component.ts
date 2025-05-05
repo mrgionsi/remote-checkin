@@ -35,7 +35,9 @@ export class DetailReservationComponent implements OnInit {
   statusOptions = [
     { label: 'Approved', value: 'Approved', icon: 'pi pi-check-circle' },
     { label: 'Declined', value: 'Declined', icon: 'pi pi-times-circle' },
-    { label: 'Sent back to customer', value: 'Sent back to customer', icon: 'pi pi-arrow-left' }
+    { label: 'Sent back to customer', value: 'Sent back to customer', icon: 'pi pi-arrow-left' },
+    { label: 'Pending', value: 'Pending', icon: 'pi pi-clock' },
+
   ];
   editMode = false;
   form: FormGroup;
