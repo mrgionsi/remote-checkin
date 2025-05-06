@@ -187,7 +187,7 @@ export class DetailReservationComponent implements OnInit {
 
       // Convert to the correct format (GMT)
       this.reservation_details.end_date = endDate.toUTCString();
-      const startDate = new Date(this.form.value.end_date);
+      const startDate = new Date(this.form.value.start_date);
 
       // Set time to 03:00:00
       startDate.setHours(3, 0, 0, 0);
