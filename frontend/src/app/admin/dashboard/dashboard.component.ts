@@ -60,8 +60,9 @@ export class DashboardComponent implements OnInit {
 
   navigateToDetails(event: any): void {
     const reservation = event.data;  // 'data' contains the selected row object
-    if (reservation?.id_reference) {
-      this.router.navigate([`/admin/reservation-details/${reservation.id_reference}`]);
+    console.log(reservation)
+    if (reservation?.reservation_id) {
+      this.router.navigate([`/admin/reservation-details/${reservation.reservation_id}`]);
     }
   }
   ngOnInit(): void {
