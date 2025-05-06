@@ -251,7 +251,7 @@ def get_reservations_by_id(reservation_id):
     try:
         reservation = (
             db.query(Reservation)
-            .filter(Reservation.id_reference == str(reservation_id))
+            .filter(Reservation.id == str(reservation_id))
             .first()
         )
 
