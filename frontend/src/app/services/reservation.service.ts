@@ -45,6 +45,5 @@ export class ReservationService {
 
   deleteReservation(reservationId: number) {
     return this.http.delete(this.apiUrl + '/' + reservationId);
-
   }
 }
