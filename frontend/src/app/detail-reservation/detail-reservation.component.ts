@@ -18,13 +18,16 @@ import { DocumentTypeLabelPipe } from "../pipes/document-type-label.pipe";
 import { DatePickerModule } from 'primeng/datepicker';
 import { DateShortPipe } from "../pipes/date-short.pipe";
 import { RoomService } from '../services/room.service';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ConfirmationService } from 'primeng/api';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-detail-reservation',
-  imports: [ToastModule, CommonModule, TableModule, CardModule, ButtonModule, FormsModule, SelectModule, DocumentTypeLabelPipe, DatePickerModule, ReactiveFormsModule, DateShortPipe],
+  imports: [ToastModule, CommonModule, TableModule, ConfirmDialogModule, CardModule, ButtonModule, FormsModule, SelectModule, DocumentTypeLabelPipe, DatePickerModule, ReactiveFormsModule, DateShortPipe],
   templateUrl: './detail-reservation.component.html',
   styleUrl: './detail-reservation.component.scss',
-  providers: [MessageService, DialogService]
+  providers: [MessageService, DialogService, ConfirmationService]
 
 })
 export class DetailReservationComponent implements OnInit {
@@ -53,7 +56,9 @@ export class DetailReservationComponent implements OnInit {
     private dialogService: DialogService,
     private fb: FormBuilder,
     private reservation_service: ReservationService,
-    private roomService: RoomService
+    private roomService: RoomService,
+    private confirmationService: ConfirmationService,
+    private router: Router
   ) {
     this.form = this.fb.group({
       id_reference: [this.reservation_details?.id_reference, Validators.required],
@@ -217,27 +222,7 @@ export class DetailReservationComponent implements OnInit {
     this.form.reset();
   }
 
-  removeReservation() {
-    if (confirm('Are you sure you want to remove this reservation?')) {
-      this.reservationService.deleteReservation(this.reservationId).subscribe({
-        next: () => {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Deleted',
-            detail: 'Reservation has been successfully removed.'
-          });
-          // Redirect to reservations list or dashboard
-        },
-        error: (error: any) => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Failed to remove the reservation.'
-          });
-        }
-      });
-    }
-  }
+
 
   formatDateOnly(date: Date): string {
     const year = date.getFullYear();
@@ -257,113 +242,33 @@ export class DetailReservationComponent implements OnInit {
       contentStyle: { 'max-height': '99vh', 'overflow-y': 'auto' }, // Allow content to scroll if it overflows
     });
   }
-  /* 
-    approveReservation(reservation: any) {
-      this.reservationService.updateReservationStatus(reservation.id, "Approved").subscribe({
-        next: (response) => {
-          console.log('Status updated successfully:', response);
-          // Display success message using PrimeNG MessageService
-          this.refreshStatus("Approved");
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Reservation Approved',
-            detail: `Reservation ${response.reservation.id_reference} has been approved.`
-          });
-        },
-        error: (error) => {
-          console.error('Error updating status:', error);
-          // Display error message if something goes wrong
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: `Failed to update the reservation status. Please try again.`
-          });
-        }
-      });
-  
-    } */
-  /* 
-    declineReservation(reservation: any) {
-      this.reservationService.updateReservationStatus(reservation.id, "Declined").subscribe({
-        next: (response) => {
-          console.log('Status updated successfully:', response);
-          // Display success message using PrimeNG MessageService
-          this.messageService.add({ severity: 'error', summary: 'Reservation Declined', detail: `Reservation ${reservation.id_reference} has been declined.` });
-          this.refreshStatus("Declined");
-  
-        },
-        error: (error) => {
-          console.error('Error updating status:', error);
-          // Display error message if something goes wrong
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: `Failed to update the reservation status. Please try again.`
-          });
-        }
-      });
-      // Call API to decline reservation
-    } */
 
-  /*   sendBackToClient(reservation: any) {
-      this.reservationService.updateReservationStatus(reservation.id, "Sent back to customer").subscribe({
-        next: (response) => {
-          console.log('Status updated successfully:', response);
-          // Display success message using PrimeNG MessageService
-          this.messageService.add({ severity: 'warn', summary: 'Reservation sent back to customer', detail: `Reservation ${reservation.id_reference} has been sent back to the customer.` });
-          this.refreshStatus("Sent back to customer");
-  
-        },
-        error: (error) => {
-          console.error('Error updating status:', error);
-          // Display error message if something goes wrong
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: `Failed to update the reservation status. Please try again.`
-          });
-        }
-      });
-      // Call API to decline reservation
-    } */
-
-  /*   // Get the class for status to apply background color or styles
-    getStatusClass(status: string): string {
-      switch (status) {
-        case 'Approved':
-          return 'status-approved';
-        case 'Pending':
-          return 'status-pending';
-        case 'Declined':
-          return 'status-declined';
-        case 'Sent back to customer':
-          return 'status-sent-back';
-        default:
-          return '';
+  confirmDeleteReservation() {
+    this.confirmationService.confirm({
+      message: 'Are you sure you want to delete this reservation?',
+      header: 'Confirm Delete',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this.removeReservation(); // actually call API
       }
-    } */
+    });
+  }
 
-  /*  // Get the icon for status to display different icons for each status
-   getStatusIcon(status: string): string {
-     switch (status) {
-       case 'Approved':
-         return 'pi pi-check-circle';  // PrimeNG check circle icon
-       case 'Pending':
-         return 'pi pi-clock';  // PrimeNG clock icon
-       case 'Declined':
-         return 'pi pi-times-circle';  // PrimeNG times circle icon
-       case 'Sent back to customer':
-         return 'pi pi-arrow-left';  // PrimeNG left arrow icon
-       default:
-         return '';
-     }
-   }
-  */
-  /*   refreshStatus(new_status: string) {
-      this.reservation_details.status = new_status;
-    } */
-
-
+  removeReservation() {
+    const reservationId = this.reservation_details.id;
+    this.reservationService.deleteReservation(reservationId).subscribe({
+      next: () => {
+        this.messageService.add({ severity: 'success', summary: 'Deleted', detail: 'Reservation deleted' });
+        setTimeout(() => {
+          this.router.navigate(['/admin/dashboard']);
+        }, 1000);
+      },
+      error: (err) => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Deletion failed' });
+        console.error('Delete error', err);
+      }
+    });
+  }
   onStatusChange(newStatus: any) {
     if (!this.reservation_details?.id) return;
     console.log(newStatus)
