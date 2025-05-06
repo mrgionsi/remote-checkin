@@ -156,6 +156,36 @@ def update_reservation(reservation_id):
     finally:
         db.close()
 
+@reservation_bp.route("/reservations/<int:reservation_id>", methods=["DELETE"])
+def delete_reservation(reservation_id):
+    """
+    Delete a reservation by ID.
+
+    Args:
+        reservation_id (int): The ID of the reservation to delete.
+
+    Returns:
+        flask.Response: JSON message confirming deletion or error.
+    """
+    db = SessionLocal()
+    try:
+        reservation = db.query(Reservation).filter(Reservation.id == reservation_id).first()
+
+        if not reservation:
+            return jsonify({"error": f"Reservation with ID {reservation_id} not found"}), 404
+
+        db.delete(reservation)
+        db.commit()
+
+        return jsonify({"message": f"Reservation {reservation_id} deleted successfully"}), 200
+
+    except Exception as e:
+        db.rollback()
+        return jsonify({"error": f"Error deleting reservation: {str(e)}"}), 500
+    finally:
+        db.close()
+
+
 @reservation_bp.route("/reservations", methods=["GET"])
 def get_reservations():
     """
