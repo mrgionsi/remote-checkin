@@ -5,8 +5,18 @@ import { Pipe, PipeTransform } from '@angular/core';
 })
 export class DateShortPipe implements PipeTransform {
 
-  transform(value: string | Date): string {
+  transform(value: string | Date | null | undefined): string {
+    if (!value) {
+      return '';
+    }
+
     const date = new Date(value);
+
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      return '';
+    }
+
     const day = this.padZero(date.getDate());
     const month = this.padZero(date.getMonth() + 1); // Months are 0-based
     const year = date.getFullYear();
