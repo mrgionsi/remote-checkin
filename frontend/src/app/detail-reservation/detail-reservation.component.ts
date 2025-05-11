@@ -213,7 +213,20 @@ export class DetailReservationComponent implements OnInit {
           console.log(error)
         }
       });
+    } else {
+      // Add feedback for invalid form
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Validation Error',
+        detail: 'Please correct the highlighted fields before saving.'
+      });
+      // Mark all form controls as touched to trigger validation styling
+      Object.keys(this.form.controls).forEach(key => {
+        const control = this.form.get(key);
+        control?.markAsTouched();
+      });
     }
+  }
   }
 
 
