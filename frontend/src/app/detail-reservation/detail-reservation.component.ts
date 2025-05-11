@@ -61,12 +61,12 @@ export class DetailReservationComponent implements OnInit {
     private router: Router
   ) {
     this.form = this.fb.group({
-      id_reference: [this.reservation_details?.id_reference, Validators.required],
-      room: [this.reservation_details?.room],
-      start_date: [this.reservation_details?.start_date, Validators.required],
-      end_date: [this.reservation_details?.end_date, Validators.required],
-      name_reference: [this.reservation_details?.name_reference, Validators.required],
-      status: [this.reservation_details?.status],
+      id_reference: ['', Validators.required],
+      room: [''],
+      start_date: ['', Validators.required],
+      end_date: ['', Validators.required],
+      name_reference: ['', Validators.required],
+      status: [''],
     }, { validators: this.dateRangeValidator });
   }
 
