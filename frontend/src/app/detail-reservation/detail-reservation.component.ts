@@ -61,12 +61,12 @@ export class DetailReservationComponent implements OnInit {
     private router: Router
   ) {
     this.form = this.fb.group({
-      id_reference: [this.reservation_details?.id_reference, Validators.required],
-      room: [this.reservation_details?.room],
-      start_date: [this.reservation_details?.start_date, Validators.required],
-      end_date: [this.reservation_details?.end_date, Validators.required],
-      name_reference: [this.reservation_details?.name_reference, Validators.required],
-      status: [this.reservation_details?.status],
+      id_reference: ['', Validators.required],
+      room: [''],
+      start_date: ['', Validators.required],
+      end_date: ['', Validators.required],
+      name_reference: ['', Validators.required],
+      status: [''],
     }, { validators: this.dateRangeValidator });
   }
 
@@ -149,8 +149,8 @@ export class DetailReservationComponent implements OnInit {
         },
         error: (msg) => {
           console.error("Failed to fetch rooms")
-          //this.messageService.add({ severity: 'warn', summary: 'Failed', detail: 'Getting rooms. Please try again or contact your administrator.' });
-
+-          //this.messageService.add({ severity: 'warn', summary: 'Failed', detail: 'Getting rooms. Please try again or contact your administrator.' });
++          this.messageService.add({ severity: 'warn', summary: 'Failed', detail: 'Unable to load room data. You can continue, but room selection may be unavailable.' });
         }
       })
     })
@@ -213,7 +213,20 @@ export class DetailReservationComponent implements OnInit {
           console.log(error)
         }
       });
+    } else {
+      // Add feedback for invalid form
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Validation Error',
+        detail: 'Please correct the highlighted fields before saving.'
+      });
+      // Mark all form controls as touched to trigger validation styling
+      Object.keys(this.form.controls).forEach(key => {
+        const control = this.form.get(key);
+        control?.markAsTouched();
+      });
     }
+  }
   }
 
 
