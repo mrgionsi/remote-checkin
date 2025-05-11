@@ -120,12 +120,16 @@ def update_reservation(reservation_id):
 
         # Optional updates
         if "start_date" in data:
-            reservation.start_date = datetime.strptime(data["start_date"], "%a, %d %b %Y %H:%M:%S GMT")
+            reservation.start_date = datetime.strptime(
+                data["start_date"], "%a, %d %b %Y %H:%M:%S GMT"
+            )
         if "end_date" in data:
-            reservation.end_date = datetime.strptime(data["end_date"], "%a, %d %b %Y %H:%M:%S GMT")
+            reservation.end_date = datetime.strptime(
+                data["end_date"], "%a, %d %b %Y %H:%M:%S GMT"
+            )
         if "name_reference" in data:
             reservation.name_reference = data["name_reference"]
-        if "name_reference" in data:
+        if "id_reference" in data:
             reservation.id_reference = data["id_reference"]
         if "status" in data:
             reservation.status = data["status"]
@@ -155,7 +159,6 @@ def update_reservation(reservation_id):
         return jsonify({"error": f"Error updating reservation: {str(e)}"}), 500
     finally:
         db.close()
-
 @reservation_bp.route("/reservations/<int:reservation_id>", methods=["DELETE"])
 def delete_reservation(reservation_id):
     """
