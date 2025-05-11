@@ -199,7 +199,7 @@ export class DetailReservationComponent implements OnInit {
         next: () => {
           this.messageService.add({
             severity: 'success',
-            summary: 'Deleted',
+            summary: 'Updated',
             detail: 'Reservation has been successfully updated.'
           });
           // Redirect to reservations list or dashboard
