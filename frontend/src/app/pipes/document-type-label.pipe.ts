@@ -5,7 +5,10 @@ import { Pipe, PipeTransform } from '@angular/core';
 })
 export class DocumentTypeLabelPipe implements PipeTransform {
 
-  transform(value: string): string {
+  transform(value: string | null | undefined): string {
+    if (value === null || value === undefined) {
+      return '';
+    }
     const map: { [key: string]: string } = {
       identity_card: 'Identity card',
       passport: 'Passport',
