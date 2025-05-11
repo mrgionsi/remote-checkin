@@ -24,12 +24,6 @@
     border-color: #bd2130 !important;
 }
 
-.status-container {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 1rem;
-}
 
 .status-badge {
     display: inline-flex;
@@ -58,11 +52,6 @@
     background-color: #17a2b8; // Blue for Sent Back
 }
 
-.status-container {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
 
 .status-badge {
     padding: 0.3rem 0.6rem;
@@ -117,6 +106,8 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    align-items: center;
+    font-size: 1rem;
 }
 
 @media (min-width: 640px) {
