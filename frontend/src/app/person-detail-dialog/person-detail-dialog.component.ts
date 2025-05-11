@@ -11,7 +11,8 @@ import { DocumentTypeLabelPipe } from "../pipes/document-type-label.pipe";
   selector: 'app-person-detail-dialog',
   imports: [DialogModule, CommonModule, ImageModule, ButtonModule, CardModule, DocumentTypeLabelPipe],
   templateUrl: './person-detail-dialog.component.html',
-  styleUrl: './person-detail-dialog.component.scss'
+  styleUrls: ['./person-detail-dialog.component.scss'],
+  standalone: true
 })
 export class PersonDetailDialogComponent {
   person: any;
