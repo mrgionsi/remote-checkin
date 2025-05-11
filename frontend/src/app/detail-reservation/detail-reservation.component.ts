@@ -86,7 +86,7 @@ export class DetailReservationComponent implements OnInit {
 
   ngOnInit(): void {
     var reservationId: number;
-    var _ = this;
+    const _ = this;
     this.route.params.subscribe(params => {
       reservationId = params['id_reservation']; // Default to 'en' if missing
       //console.log(reservationId);
@@ -175,7 +175,7 @@ export class DetailReservationComponent implements OnInit {
 
   saveReservation() {
     if (this.form.valid) {
-      var reservationId = this.reservation_details.id;
+      const reservationId = this.reservation_details.id;
       this.editMode = false;
       this.reservation_details = { ...this.form.value };
       // Create Date object from start_date
