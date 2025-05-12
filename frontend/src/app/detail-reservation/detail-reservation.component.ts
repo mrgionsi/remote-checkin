@@ -101,7 +101,7 @@ export class DetailReservationComponent implements OnInit {
             next: (r) => {
               this.people = r;
               this.people.forEach(person => {
-                this.client_reservationService.getUserPhoto(reservationId, person.name, person.surname, person.cf).subscribe({
+                const photoSub = this.client_reservationService.getUserPhoto(reservationId, person.name, person.surname, person.cf).subscribe({
                   next: (person_photo: any) => {
                     //console.log(person_photo)
                     person.images = [];
@@ -118,6 +118,7 @@ export class DetailReservationComponent implements OnInit {
 
                   }
                 })
+                this.subscriptions.push(photoSub);
               })
 
             },
