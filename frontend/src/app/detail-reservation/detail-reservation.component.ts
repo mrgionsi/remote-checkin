@@ -149,8 +149,7 @@ export class DetailReservationComponent implements OnInit {
         },
         error: (msg) => {
           console.error("Failed to fetch rooms")
--          //this.messageService.add({ severity: 'warn', summary: 'Failed', detail: 'Getting rooms. Please try again or contact your administrator.' });
-+          this.messageService.add({ severity: 'warn', summary: 'Failed', detail: 'Unable to load room data. You can continue, but room selection may be unavailable.' });
+          this.messageService.add({ severity: 'warn', summary: 'Failed', detail: 'Unable to load room data. You can continue, but room selection may be unavailable.' });
         }
       })
     })
@@ -227,7 +226,7 @@ export class DetailReservationComponent implements OnInit {
       });
     }
   }
-  }
+
 
 
   cancelEdit() {
