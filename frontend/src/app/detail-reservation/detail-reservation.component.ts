@@ -49,7 +49,7 @@ export class DetailReservationComponent implements OnInit {
   form: FormGroup;
 
 
-  constructor(private reservationService: ReservationService,
+  constructor(
     private messageService: MessageService,
     private route: ActivatedRoute,
     private client_reservationService: ClientReservationService,
@@ -91,7 +91,7 @@ export class DetailReservationComponent implements OnInit {
       reservationId = params['id_reservation']; // Default to 'en' if missing
       //console.log(reservationId);
       this.reservationId = reservationId;
-      this.reservationService.getReservationById(reservationId).subscribe({
+      this.reservation_service.getReservationById(reservationId).subscribe({
         next: (resp) => {
           this.reservation_details = resp;
           console.log("Resp", resp);
@@ -269,7 +269,7 @@ export class DetailReservationComponent implements OnInit {
 
   removeReservation() {
     const reservationId = this.reservation_details.id;
-    this.reservationService.deleteReservation(reservationId).subscribe({
+    this.reservation_service.deleteReservation(reservationId).subscribe({
       next: () => {
         this.messageService.add({ severity: 'success', summary: 'Deleted', detail: 'Reservation deleted' });
         setTimeout(() => {
@@ -285,7 +285,7 @@ export class DetailReservationComponent implements OnInit {
   onStatusChange(newStatus: any) {
     if (!this.reservation_details?.id) return;
     console.log(newStatus)
-    this.reservationService.updateReservationStatus(this.reservation_details.id, newStatus.value).subscribe({
+    this.reservation_service.updateReservationStatus(this.reservation_details.id, newStatus.value).subscribe({
       next: () => {
         this.messageService.add({
           severity: 'success',
