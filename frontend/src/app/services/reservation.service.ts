@@ -16,6 +16,11 @@ export class ReservationService {
     return this.http.post(this.apiUrl, reservation);
   }
 
+  // Method to update a reservation
+  updateReservation(reservation: any, reservationId: number): Observable<any> {
+    return this.http.patch(this.apiUrl + '/' + reservationId, reservation);
+  }
+
   // Method to get reservations by structure ID
   getReservationByStructureId(id: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/structure/${id}`);
@@ -32,9 +37,13 @@ export class ReservationService {
   }
 
   // Method to update reservation status (Approved, Pending, Declined, Sent back to customer)
-  updateReservationStatus(reservationId: number, status: string): Observable<any> {
+  updateReservationStatus(reservationId: number, status: any): Observable<any> {
     const url = `${this.apiUrl}/${reservationId}/status`; // URL for updating status
     const body = { status };  // Status field to be updated
     return this.http.put(url, body);  // Send PUT request to the backend API
+  }
+
+  deleteReservation(reservationId: number) {
+    return this.http.delete(this.apiUrl + '/' + reservationId);
   }
 }

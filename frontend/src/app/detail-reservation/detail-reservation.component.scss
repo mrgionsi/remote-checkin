@@ -1,9 +1,3 @@
-.details-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-}
-
 .person-photo {
     border-radius: 50%;
     object-fit: cover;
@@ -30,36 +24,59 @@
     border-color: #bd2130 !important;
 }
 
-.status-container {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 1rem;
-}
 
-.status-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 3px 8px;
-    border-radius: 8px;
-    font-weight: bold;
-    color: white;
-}
 
 .status-approved {
-    background-color: #28a745; // Green for Approved
+    background-color: #d4edda;
+    color: #155724;
 }
 
 .status-pending {
-    background-color: #ffc107; // Yellow for Pending
-    color: #212529;
+    background-color: #fff3cd;
+    color: #856404;
 }
 
 .status-declined {
-    background-color: #dc3545; // Red for Declined
+    background-color: #f8d7da;
+    color: #721c24;
 }
 
 .status-sent-back {
-    background-color: #17a2b8; // Blue for Sent Back
+    background-color: #cce5ff;
+    color: #004085;
+}
+
+.status-dropdown {
+    .p-dropdown {
+        min-width: 12rem;
+    }
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    font-size: 0.95rem;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.status-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+    font-size: 1rem;
+}
+
+@media (min-width: 640px) {
+    .status-container {
+        flex-direction: row;
+        align-items: center;
+    }
 }
