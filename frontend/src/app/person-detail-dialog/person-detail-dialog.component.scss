@@ -36,14 +36,6 @@
     margin-bottom: 3em;
 }
 
-.dialog-container {
-    height: 75vh;
-    overflow: hidden;
-    display: flex;
-    gap: 20px;
-    align-items: flex-start;
-    /* Align content at the top */
-}
 
 .dialog-images {
     width: 60vw;
@@ -139,4 +131,32 @@
 .pi {
     color: #007bff;
     font-size: 1.2em;
+}
+
+
+.dialog-container {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    overflow: hidden;
+
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.dialog-images,
+.details-card {
+    flex: 1;
+}
+
+/* Stack vertically on small screens (mobile) */
+@media (max-width: 768px) {
+    .dialog-container {
+        flex-direction: column;
+    }
+
+    .dialog-images,
+    .details-card {
+        width: 100%;
+    }
 }

@@ -1,40 +1,107 @@
 <p-toast></p-toast>
 
-<p-card>
+<p-card class="mb-4">
     <ng-template pTemplate="title">
         <i class="pi pi-calendar"></i> Reservation Details
     </ng-template>
     <ng-template pTemplate="content">
-        <div class="details-grid">
-            <div><strong>ID Reference:</strong> {{ reservation_details?.id_reference }}</div>
-            <div><strong>Room:</strong> {{ reservation_details?.room.name }}</div>
-            <div><strong>Start Date:</strong> {{ reservation_details?.start_date | date:'dd-MM-yyyy' }}</div>
-            <div class="status-container">
-                <strong>Status:</strong>
-                <span class="status-badge" [ngClass]="getStatusClass(reservation_details?.status)">
-                    <i [class]="getStatusIcon(reservation_details?.status)"></i>
-                    {{ reservation_details?.status }}
-                </span>
+
+        <div class="p-4 surface-card shadow-2 border-round-lg text-900 text-sm">
+            <div class="grid formgrid p-fluid">
+                <!-- ID Reference -->
+                <div [formGroup]="form" class="field col-12 md:col-6">
+                    <label for="id_reference" class="font-bold text-600">ID Reference:</label>
+                    <div *ngIf="!editMode">{{ reservation_details?.id_reference }}</div>
+                    <input *ngIf="editMode" type="text" id="id_reference" class="p-inputtext w-full"
+                        formControlName="id_reference" />
+                </div>
+
+                <!-- Room Name -->
+                <div [formGroup]="form" class="field col-12 md:col-6" *ngIf="reservation_details['room']">
+                    <label for="room_select" class="font-bold text-600">Room:</label>
+                    <div *ngIf="!editMode">{{ reservation_details?.room.name }}</div>
+                    <div *ngIf="editMode">
+                        <p-select id="room_select" [options]="roomList" formControlName="room" optionLabel="name"
+                            dataKey="id" styleClass="w-full" [showClear]="false">
+                            <ng-template pTemplate="item" let-option>
+                                <div class="flex align-items-center">
+                                    {{ option.name }}
+                                </div>
+                            </ng-template>
+                        </p-select>
+                    </div>
+                </div>
+
+                <!-- Start Date -->
+                <div [formGroup]="form" class="field col-12 md:col-6">
+                    <label for="start_date" class="font-bold text-600">Start Date:</label>
+                    <div *ngIf="!editMode">{{ reservation_details?.start_date | date: 'dd-MM-yyyy' }}</div>
+                    <p-datepicker *ngIf="editMode" formControlName="start_date" showIcon inputId="start_date"
+                        placeholder="{{reservation_details?.start_date | dateShort}}" dateFormat="dd/mm/yy"
+                        class="w-full"></p-datepicker>
+                </div>
+
+                <!-- End Date -->
+                <div [formGroup]="form" class="field col-12 md:col-6">
+                    <label for="end_date" class="font-bold text-600">End Date:</label>
+                    <div *ngIf="!editMode">{{ reservation_details?.end_date | date: 'dd-MM-yyyy' }}</div>
+                    <p-datepicker *ngIf="editMode" formControlName="end_date" showIcon inputId="end_date"
+                        placeholder="{{reservation_details?.end_date | dateShort}}" dateFormat="dd/mm/yy"
+                        class="w-full"></p-datepicker>
+                    <p *ngIf="form.errors?.['endDateBeforeStartDate'] && form.get('end_date')?.touched" class="p-error">
+                        End date must be after start date.
+                    </p>
+                </div>
+
+                <!-- Guest -->
+                <div [formGroup]="form" class="field col-12 md:col-6">
+                    <label for="name_reference" class="font-bold text-600">Guest:</label>
+                    <div *ngIf="!editMode">{{ reservation_details?.name_reference }}</div>
+                    <input *ngIf="editMode" type="text" id="name_reference" class="p-inputtext w-full"
+                        formControlName="name_reference" />
+                </div>
+
+                <!-- Status -->
+                <div class="field col-12 md:col-6">
+                    <label for="status_select" class="font-bold text-600 mb-2">Status:</label>
+                    <p-select id="status_select" [options]="statusOptions" [(ngModel)]="reservation_status"
+                        optionLabel="label" dataKey="value" (onChange)="onStatusChange($event.value)"
+                        styleClass="w-full" [showClear]="false">
+                        <ng-template pTemplate="item" let-option>
+                            <div class="flex align-items-center">
+                                <i [class]="option.icon" class="mr-2"></i>
+                                {{ option.label }}
+                            </div>
+                        </ng-template>
+                    </p-select>
+                </div>
+
             </div>
-
-
-            <div><strong>End Date:</strong> {{ reservation_details?.end_date | date:'dd-MM-yyyy'}}</div>
-            <div><strong>Guest:</strong> {{ reservation_details?.name_reference }}</div>
         </div>
 
-        <!-- Buttons aligned to the right -->
-        <div class="reservation-actions">
-            <p-button label="Approve" icon="pi pi-check" class="p-button-success"
-                (click)="approveReservation(reservation_details)"></p-button>
-            <p-button label="Decline" icon="pi pi-times" severity="danger" class="p-button-danger custom-decline-button"
-                (click)="declineReservation(reservation_details)"></p-button>
-            <p-button label="Send back to the customer" icon="pi pi-undo" severity="info"
-                class="p-button-warning custom-send-back-button"
-                (click)="sendBackToClient(reservation_details)"></p-button>
+        <div class="reservation-actions mt-3 flex flex-wrap gap-2 justify-end">
+            <p-button *ngIf="!editMode" label="Edit" icon="pi pi-pencil" class="p-button-sm text-white"
+                (click)="editReservation()" (keydown.enter)="editReservation()" (keydown.space)="editReservation()">
+            </p-button>
+
+            <p-button *ngIf="editMode" label="Save" icon="pi pi-check" class="p-button-sm text-white"
+                (click)="saveReservation()" (keydown.enter)="saveReservation()" (keydown.space)="saveReservation()"
+                severity="success" [disabled]="form.invalid">
+            </p-button>
+
+            <p-button *ngIf="editMode" label="Cancel" icon="pi pi-times" class="p-button-sm text-white"
+                (click)="cancelEdit()" (keydown.enter)="cancelEdit()" (keydown.space)="cancelEdit()"
+                severity="secondary">
+            </p-button>
+
+            <p-button *ngIf="!editMode" label="Remove" icon="pi pi-trash" class="p-button-sm text-white"
+                severity="danger" (click)="confirmDeleteReservation()" (keydown.enter)="confirmDeleteReservation()"
+                (keydown.space)="confirmDeleteReservation()">
+            </p-button>
         </div>
+
     </ng-template>
 </p-card>
-
 
 <h3>People Associated with this Reservation</h3>
 <p-table [value]="people" responsiveLayout="scroll">
@@ -63,7 +130,6 @@
                 <i *ngIf="person.hasMissingImages" class="pi pi-exclamation-triangle text-danger"
                     title="Missing Images"></i>
                 <i *ngIf="!person.hasMissingImages" class="pi pi-check-circle text-success" title="Complete"></i>
-
             </td>
             <td>
                 <img *ngIf="person.images?.front" [src]="person.images?.front" alt="Front Image" width="50"
@@ -88,7 +154,9 @@
             <td>{{ person.telephone }}</td>
             <td>{{ person.document_number }}</td>
             <td>{{ person.cf }}</td>
-            <td>{{ person.document_type }}</td>
+            <td>{{ person.document_type | documentTypeLabel }}</td>
         </tr>
     </ng-template>
 </p-table>
+
+<p-confirmDialog></p-confirmDialog>

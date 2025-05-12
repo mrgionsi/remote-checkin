@@ -5,12 +5,14 @@ import { CardModule } from 'primeng/card';
 import { DialogModule } from 'primeng/dialog';
 import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { ImageModule } from 'primeng/image';
+import { DocumentTypeLabelPipe } from "../pipes/document-type-label.pipe";
 
 @Component({
   selector: 'app-person-detail-dialog',
-  imports: [DialogModule, CommonModule, ImageModule, ButtonModule, CardModule],
+  imports: [DialogModule, CommonModule, ImageModule, ButtonModule, CardModule, DocumentTypeLabelPipe],
   templateUrl: './person-detail-dialog.component.html',
-  styleUrl: './person-detail-dialog.component.scss'
+  styleUrls: ['./person-detail-dialog.component.scss'],
+  standalone: true
 })
 export class PersonDetailDialogComponent {
   person: any;
