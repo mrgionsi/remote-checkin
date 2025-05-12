@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ReservationService } from '../services/reservation.service';
 import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
-import { ActivatedRoute } from '@angular/router';
+import { MessageService, ConfirmationService } from 'primeng/api';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { CardModule } from 'primeng/card';
@@ -19,8 +19,6 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { DateShortPipe } from "../pipes/date-short.pipe";
 import { RoomService } from '../services/room.service';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ConfirmationService } from 'primeng/api';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-detail-reservation',
