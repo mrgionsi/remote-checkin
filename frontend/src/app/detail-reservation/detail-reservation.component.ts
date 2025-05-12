@@ -53,12 +53,12 @@ export class DetailReservationComponent implements OnInit {
     private messageService: MessageService,
     private route: ActivatedRoute,
     private client_reservationService: ClientReservationService,
-    private dialogService: DialogService,
-    private fb: FormBuilder,
-    private reservation_service: ReservationService,
-    private roomService: RoomService,
-    private confirmationService: ConfirmationService,
-    private router: Router
+    private readonly dialogService: DialogService,
+    private readonly fb: FormBuilder,
+    private readonly reservation_service: ReservationService,
+    private readonly roomService: RoomService,
+    private readonly confirmationService: ConfirmationService,
+    private readonly router: Router
   ) {
     this.form = this.fb.group({
       id_reference: ['', Validators.required],
