@@ -25,42 +25,6 @@
 }
 
 
-.status-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 3px 8px;
-    border-radius: 8px;
-    font-weight: bold;
-    color: white;
-}
-
-.status-approved {
-    background-color: #28a745; // Green for Approved
-}
-
-.status-pending {
-    background-color: #ffc107; // Yellow for Pending
-    color: #212529;
-}
-
-.status-declined {
-    background-color: #dc3545; // Red for Declined
-}
-
-.status-sent-back {
-    background-color: #17a2b8; // Blue for Sent Back
-}
-
-
-.status-badge {
-    padding: 0.3rem 0.6rem;
-    border-radius: 0.5rem;
-    font-weight: bold;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-}
 
 .status-approved {
     background-color: #d4edda;
