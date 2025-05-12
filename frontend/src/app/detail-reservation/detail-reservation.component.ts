@@ -22,7 +22,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 @Component({
   selector: 'app-detail-reservation',
-  imports: [ToastModule, CommonModule, TableModule, ConfirmDialogModule, CardModule, ButtonModule, FormsModule, SelectModule, DocumentTypeLabelPipe, DatePickerModule, ReactiveFormsModule, DateShortPipe],
+  imports: [ToastModule, CommonModule, TableModule, ConfirmDialogModule, CardModule, ButtonModule, FormsModule, SelectModule, DatePickerModule, ReactiveFormsModule, DateShortPipe, DocumentTypeLabelPipe],
   templateUrl: './detail-reservation.component.html',
   styleUrl: './detail-reservation.component.scss',
   providers: [MessageService, DialogService, ConfirmationService]
@@ -84,7 +84,6 @@ export class DetailReservationComponent implements OnInit {
 
   ngOnInit(): void {
     var reservationId: number;
-    const _ = this;
     this.route.params.subscribe(params => {
       reservationId = params['id_reservation']; // Default to 'en' if missing
       //console.log(reservationId);
@@ -93,7 +92,7 @@ export class DetailReservationComponent implements OnInit {
         next: (resp) => {
           this.reservation_details = resp;
           console.log("Resp", resp);
-          this.reservation_status = _.statusOptions.find(option => option.value === resp.status)
+          this.reservation_status = this.statusOptions.find(option => option.value === resp.status)
 
           this.client_reservationService.getClientByReservationId(this.reservation_details.id).subscribe({
             next: (r) => {
@@ -280,9 +279,15 @@ export class DetailReservationComponent implements OnInit {
       }
     });
   }
-  onStatusChange(newStatus: any) {
-    if (!this.reservation_details?.id) return;
-    console.log(newStatus)
+  onStatusChange(newStatus: { value: string, label: string, icon: string }): void {
+    if (!this.reservation_details?.id) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Cannot update status: reservation ID is missing'
+      });
+      return;
+    } console.log(newStatus)
     this.reservation_service.updateReservationStatus(this.reservation_details.id, newStatus.value).subscribe({
       next: () => {
         this.messageService.add({
