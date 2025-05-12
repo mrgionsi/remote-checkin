@@ -10,18 +10,19 @@
             <div class="grid formgrid p-fluid">
                 <!-- ID Reference -->
                 <div [formGroup]="form" class="field col-12 md:col-6">
-                    <label class="font-bold text-600">ID Reference:</label>
+                    <label for="id_reference" class="font-bold text-600">ID Reference:</label>
                     <div *ngIf="!editMode">{{ reservation_details?.id_reference }}</div>
-                    <input *ngIf="editMode" type="text" class="p-inputtext w-full" formControlName="id_reference" />
+                    <input *ngIf="editMode" type="text" id="id_reference" class="p-inputtext w-full"
+                        formControlName="id_reference" />
                 </div>
 
                 <!-- Room Name -->
                 <div [formGroup]="form" class="field col-12 md:col-6" *ngIf="reservation_details['room']">
-                    <label class="font-bold text-600">Room:</label>
+                    <label for="room_select" class="font-bold text-600">Room:</label>
                     <div *ngIf="!editMode">{{ reservation_details?.room.name }}</div>
                     <div *ngIf="editMode">
-                        <p-select [options]="roomList" formControlName="room" optionLabel="name" dataKey="id"
-                            styleClass="w-full" [showClear]="false">
+                        <p-select id="room_select" [options]="roomList" formControlName="room" optionLabel="name"
+                            dataKey="id" styleClass="w-full" [showClear]="false">
                             <ng-template pTemplate="item" let-option>
                                 <div class="flex align-items-center">
                                     {{ option.name }}
@@ -33,7 +34,7 @@
 
                 <!-- Start Date -->
                 <div [formGroup]="form" class="field col-12 md:col-6">
-                    <label class="font-bold text-600">Start Date:</label>
+                    <label for="start_date" class="font-bold text-600">Start Date:</label>
                     <div *ngIf="!editMode">{{ reservation_details?.start_date | date: 'dd-MM-yyyy' }}</div>
                     <p-datepicker *ngIf="editMode" formControlName="start_date" showIcon inputId="start_date"
                         placeholder="{{reservation_details?.start_date | dateShort}}" dateFormat="dd/mm/yy"
@@ -42,7 +43,7 @@
 
                 <!-- End Date -->
                 <div [formGroup]="form" class="field col-12 md:col-6">
-                    <label class="font-bold text-600">End Date:</label>
+                    <label for="end_date" class="font-bold text-600">End Date:</label>
                     <div *ngIf="!editMode">{{ reservation_details?.end_date | date: 'dd-MM-yyyy' }}</div>
                     <p-datepicker *ngIf="editMode" formControlName="end_date" showIcon inputId="end_date"
                         placeholder="{{reservation_details?.end_date | dateShort}}" dateFormat="dd/mm/yy"
@@ -50,21 +51,22 @@
                     <p *ngIf="form.errors?.['endDateBeforeStartDate'] && form.get('end_date')?.touched" class="p-error">
                         End date must be after start date.
                     </p>
-
                 </div>
 
                 <!-- Guest -->
                 <div [formGroup]="form" class="field col-12 md:col-6">
-                    <label class="font-bold text-600">Guest:</label>
+                    <label for="name_reference" class="font-bold text-600">Guest:</label>
                     <div *ngIf="!editMode">{{ reservation_details?.name_reference }}</div>
-                    <input *ngIf="editMode" type="text" class="p-inputtext w-full" formControlName="name_reference" />
+                    <input *ngIf="editMode" type="text" id="name_reference" class="p-inputtext w-full"
+                        formControlName="name_reference" />
                 </div>
 
+                <!-- Status -->
                 <div class="field col-12 md:col-6">
-                    <label class="font-bold text-600 mb-2">Status:</label>
-                    <p-select [options]="statusOptions" [(ngModel)]="reservation_status" optionLabel="label"
-                        dataKey="value" (onChange)="onStatusChange($event.value)" styleClass="w-full"
-                        [showClear]="false">
+                    <label for="status_select" class="font-bold text-600 mb-2">Status:</label>
+                    <p-select id="status_select" [options]="statusOptions" [(ngModel)]="reservation_status"
+                        optionLabel="label" dataKey="value" (onChange)="onStatusChange($event.value)"
+                        styleClass="w-full" [showClear]="false">
                         <ng-template pTemplate="item" let-option>
                             <div class="flex align-items-center">
                                 <i [class]="option.icon" class="mr-2"></i>
@@ -73,6 +75,7 @@
                         </ng-template>
                     </p-select>
                 </div>
+
 
             </div>
         </div>
