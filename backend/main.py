@@ -9,13 +9,17 @@ and registers blueprints for routing.
 import os
 from flask import Flask
 from flask_cors import CORS
+from routes.admin_routes import admin_bp
 from routes.room_routes import room_bp
 from routes.reservation_routes import reservation_bp  # Adjust the path as needed
 from routes.upload_reservation_routes import upload_bp  # Adjust the path as needed
 from routes.client_reservation_routes import client_reservation_bp  # Adjust the path as needed
+from flask_jwt_extended import JWTManager
 
 
 app = Flask(__name__)
+app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")  # Cambia questa chiave in produzione!
+jwt = JWTManager(app)
 allowed_origins = os.getenv("ALLOWED_CORS", "http://localhost:4200").split(",")
 CORS(app,
      origins=allowed_origins,
@@ -28,6 +32,7 @@ CORS(app,
 #Base.metadata.create_all(bind=engine)
 
 # Register blueprints
+app.register_blueprint(admin_bp)  # Register the admin blueprint
 app.register_blueprint(room_bp)
 app.register_blueprint(reservation_bp)  # Register the reservation blueprint
 app.register_blueprint(upload_bp)
