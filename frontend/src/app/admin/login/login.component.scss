@@ -1,0 +1,81 @@
+:host {
+    display: block;
+    height: 100vh;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(to right, #e3f2fd, #bbdefb); // stesso gradiente della reservation-check
+}
+
+.card {
+    width: 400px;
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.p-card-header {
+    background: #1976d2; // stesso blu principale della reservation-check
+    color: #fff;
+    padding: 1.5rem 1rem 1rem 1rem;
+    border-radius: 12px 12px 0 0;
+    text-align: center;
+}
+
+.p-card-header i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+h2 {
+    margin: 0;
+    color: #fff;
+}
+
+.p-card-body {
+    padding: 2rem 1.5rem 1.5rem 1.5rem;
+}
+
+.p-field {
+    text-align: left;
+    margin-bottom: 15px;
+}
+
+label {
+    font-weight: bold;
+    color: #444;
+    display: block;
+    margin-bottom: 5px;
+}
+
+input[pInputText] {
+    width: 100%;
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+button[pButton] {
+    width: 100%;
+    padding: 0.75rem 0;
+    font-size: 1.1rem;
+    border-radius: 8px;
+    background: #1976d2; // stesso blu principale
+    border: none;
+    color: #fff;
+    font-weight: 600;
+    transition: background 0.2s;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+button[pButton]:hover:enabled {
+    background: #1565c0; // blu più scuro per hover
+}
