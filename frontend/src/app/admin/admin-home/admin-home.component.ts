@@ -5,7 +5,7 @@ import { BadgeModule } from 'primeng/badge';
 import { RippleModule } from 'primeng/ripple';
 import { AvatarModule } from 'primeng/avatar';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { SidebarModule } from 'primeng/sidebar';
 import { ButtonModule } from 'primeng/button';
 
@@ -21,7 +21,7 @@ export class AdminHomeComponent {
   visible: boolean = false;
   menuItems: MenuItem[];
 
-  constructor() {
+  constructor(public router: Router) {
     this.menuItems = [
       { label: 'Dashboard', icon: 'pi pi-chart-line', routerLink: '/admin/dashboard' },
       { label: 'Add new Reservation', icon: 'pi pi-plus', routerLink: '/admin/create-reservation' },
@@ -33,6 +33,11 @@ export class AdminHomeComponent {
 
   toggleSidebar() {
     this.visible = !this.visible;
+  }
+
+
+  isLoginPage(): boolean {
+    return this.router.url === '/admin/login';
   }
 
 }
