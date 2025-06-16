@@ -7,6 +7,7 @@ import { AdminHomeComponent } from './admin/admin-home/admin-home.component';
 import { RoomComponent } from './admin/room/room.component';
 import { ReservationCheckComponent } from './reservation-check/reservation-check.component';
 import { DetailReservationComponent } from './detail-reservation/detail-reservation.component';
+import { LoginComponent } from './admin/login/login.component';
 
 export const routes: Routes = [
     { path: '', component: LanguageComponent },
@@ -20,6 +21,7 @@ export const routes: Routes = [
         path: 'admin',
         component: AdminHomeComponent, // Acts as the parent,
         children: [
+            { path: 'login', component: LoginComponent },
             { path: 'dashboard', component: DashboardComponent },
             { path: 'rooms', component: RoomComponent },
             { path: 'reservation-details/:id_reservation', component: DetailReservationComponent },
