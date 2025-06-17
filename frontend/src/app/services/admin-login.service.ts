@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environments';
 
 interface AdminLoginResponse {
   access_token: string;
@@ -18,8 +19,8 @@ interface AdminLoginResponse {
   providedIn: 'root'
 })
 export class AdminLoginService {
+  private apiUrl = `${environment.apiBaseUrl}/api/v1/admin/login`;  // Replace with your actual API URL
 
-  private apiUrl = '/api/v1/admin/login'; // Modifica se necessario
 
   constructor(private http: HttpClient) { }
 
