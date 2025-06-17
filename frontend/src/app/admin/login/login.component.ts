@@ -29,7 +29,7 @@ export class LoginComponent {
         // Salva il token dove preferisci (es: localStorage)
         localStorage.setItem('admin_token', res.access_token);
         // Naviga alla home admin o dove vuoi
-        this.router.navigate(['/admin']);
+        this.router.navigate(['/admin/dashboard']);
       },
       error: (err) => {
         this.errorMessage = err.error?.error || 'Errore di autenticazione';
