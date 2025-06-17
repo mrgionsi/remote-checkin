@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 from flask_jwt_extended import create_access_token
 from models import User, Role, AdminStructure
 from database import SessionLocal
@@ -41,7 +41,7 @@ def admin_login():
             return jsonify({"error": "Credenziali non valide"}), 401
 
         # Check if user has admin role
-        if not user.role or user.role.name.lower() != "admin":
+        if not user.role or user.role.name.lower() not in ["admin", "superadmin", "administrator"]:
             return jsonify({"error": "Non autorizzato"}), 403
 
         # Get structures administered by this user
@@ -69,3 +69,64 @@ def admin_login():
 
     except Exception as e:
         return jsonify({"error": f"Errore durante il login: {str(e)}"}), 500
+
+@admin_bp.route("/admin/create", methods=["POST"])
+def create_admin_user():
+    """
+    Create a new admin user.
+
+    Request Body (JSON):
+        - username (str): The new user's username (required)
+        - password (str): The new user's password (required)
+        - name (str): The new user's name (optional)
+        - surname (str): The new user's surname (optional)
+        - id_role (int): Role ID (required, e.g. 2 for superadmin)
+
+    Returns:
+        - 201: JSON with created user info
+        - 400: If required fields are missing or user exists
+        - 500: On server error
+    """
+    data = request.get_json()
+    username = data.get("username")
+    password = data.get("password")
+    name = data.get("name")
+    surname = data.get("surname")
+    id_role = data.get("id_role")
+
+    if not username or not password or not id_role:
+        return jsonify({"error": "username, password e id_role sono obbligatori"}), 400
+
+    try:
+        db_session = SessionLocal()
+        # Check if user already exists
+        if db_session.query(User).filter_by(username=username).first():
+            return jsonify({"error": "Username già esistente"}), 400
+
+        # Hash the password
+        hashed_password = generate_password_hash(password)
+
+        # Create user
+        new_user = User(
+            username=username,
+            password=hashed_password,
+            name=name,
+            surname=surname,
+            id_role=id_role
+        )
+        db_session.add(new_user)
+        db_session.commit()
+
+        return jsonify({
+            "message": "Utente creato con successo",
+            "user": {
+                "id": new_user.id,
+                "username": new_user.username,
+                "name": new_user.name,
+                "surname": new_user.surname,
+                "id_role": new_user.id_role
+            }
+        }), 201
+
+    except Exception as e:
+        return jsonify({"error": f"Errore durante la creazione utente: {str(e)}"}), 500
