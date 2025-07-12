@@ -1,0 +1,14 @@
+<div *ngIf="loading">Caricamento...</div>
+<div *ngIf="error">{{ error }}</div>
+<div *ngIf="adminInfo">
+    <h2>Informazioni Admin</h2>
+    <p><strong>Username:</strong> {{ adminInfo.username }}</p>
+    <p><strong>Nome:</strong> {{ adminInfo.name }}</p>
+    <p><strong>Cognome:</strong> {{ adminInfo.surname }}</p>
+    <p><strong>Ruolo:</strong> {{ adminInfo.role }}</p>
+    <p><strong>Strutture:</strong>
+        <span *ngFor="let s of adminInfo.structures; let last = last">
+            {{ s.name }}<span *ngIf="!last">, </span>
+        </span>
+    </p>
+</div>

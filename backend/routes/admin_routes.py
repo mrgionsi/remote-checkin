@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from models import User, Role, AdminStructure, Structure
 from database import SessionLocal
 from datetime import timedelta
@@ -138,5 +138,41 @@ def create_admin_user():
     except Exception as e:
         logging.error(f"Errore durante la creazione utente: {str(e)}")
         return jsonify({"error": f"Errore durante la creazione utente: {str(e)}"}), 500
+    finally:
+        db_session.close()
+
+@admin_bp.route("/admin/me", methods=["GET"])
+@jwt_required()
+def get_admin_info():
+    """
+    Get the logged-in admin user's information.
+
+    Returns:
+        - 200: JSON with user info and associated structures.
+        - 404: If user is not found.
+    """
+    db_session = SessionLocal()
+    try:
+        user_id = get_jwt_identity()
+        user = db_session.query(User).filter_by(id=int(user_id)).first()
+        if not user:
+            return jsonify({"error": "Utente non trovato"}), 404
+
+        structures = (
+            db_session.query(AdminStructure.id_structure, Structure.name)
+            .join(Structure, AdminStructure.id_structure == Structure.id)
+            .filter(AdminStructure.id_user == user.id)
+            .all()
+        )
+        structures_list = [{"id": s.id_structure, "name": s.name} for s in structures]
+
+        return jsonify({
+            "id": user.id,
+            "username": user.username,
+            "name": user.name,
+            "surname": user.surname,
+            "role": user.role.name,
+            "structures": structures_list
+        }), 200
     finally:
         db_session.close()

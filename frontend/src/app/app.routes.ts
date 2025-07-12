@@ -9,6 +9,7 @@ import { ReservationCheckComponent } from './reservation-check/reservation-check
 import { DetailReservationComponent } from './detail-reservation/detail-reservation.component';
 import { LoginComponent } from './admin/login/login.component';
 import { AuthGuard } from './guards/auth.guard';
+import { AdminInfoComponent } from './admin/admin-info/admin-info.component';
 
 export const routes: Routes = [
     { path: '', component: LanguageComponent },
@@ -27,6 +28,7 @@ export const routes: Routes = [
             { path: 'rooms', component: RoomComponent, canActivate: [AuthGuard] },
             { path: 'reservation-details/:id_reservation', component: DetailReservationComponent, canActivate: [AuthGuard] },
             { path: 'create-reservation', component: CreateReservationComponent, canActivate: [AuthGuard] },
+            { path: 'admin-info', component: AdminInfoComponent, canActivate: [AuthGuard] }, // <--- aggiungi questa riga
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 
         ]
