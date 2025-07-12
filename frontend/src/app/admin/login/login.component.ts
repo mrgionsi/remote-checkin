@@ -27,6 +27,7 @@ export class LoginComponent {
       next: (res) => {
         console.log(res)
         // Salva il token dove preferisci (es: localStorage)
+        localStorage.setItem('user', JSON.stringify(res.user));
         localStorage.setItem('admin_token', res.access_token);
         // Naviga alla home admin o dove vuoi
         this.router.navigate(['/admin/dashboard']);
