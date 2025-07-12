@@ -72,7 +72,7 @@ export class DashboardComponent implements OnInit {
     if (isPlatformBrowser(this.platformId)) {
       this.reservationService.getReservationByStructureId(1).subscribe({
         next: (reservations) => {
-          console.log('Reservations:', reservations);
+          console.log(reservations);
           this.reservations = reservations;
           // Handle the response data here
         },

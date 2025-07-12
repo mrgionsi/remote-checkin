@@ -48,8 +48,8 @@ def admin_login():
 
         # Token JWT con scadenza di 2 ore
         access_token = create_access_token(
-            identity={
-                "id": user.id,
+            identity=str(user.id),  # oppure user.username
+            additional_claims={
                 "username": user.username,
                 "role": user.role.name
             },
