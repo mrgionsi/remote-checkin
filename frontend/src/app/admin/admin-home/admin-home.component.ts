@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { MenuItem } from 'primeng/api';
 import { MenuModule } from 'primeng/menu';
 import { BadgeModule } from 'primeng/badge';
@@ -11,6 +11,8 @@ import { ButtonModule } from 'primeng/button';
 import { AuthService } from '../../services/auth.service'; // <--- aggiungi import
 import { DropdownModule } from 'primeng/dropdown';
 import { FormsModule } from '@angular/forms';
+import { Menu } from 'primeng/menu';
+
 @Component({
   selector: 'app-admin-home',
   imports: [MenuModule, BadgeModule, RippleModule, AvatarModule, CommonModule, DropdownModule, FormsModule,
@@ -23,12 +25,27 @@ export class AdminHomeComponent {
   visible: boolean = false;
   menuItems: MenuItem[];
   userMenuItems: MenuItem[] = [
-    { label: 'Profilo', icon: 'pi pi-id-card', routerLink: '/admin/profile' },
-    { label: 'Logout', icon: 'pi pi-sign-out', command: () => this.logout() }
+    {
+      label: 'Info utente',
+      icon: 'pi pi-user',
+      command: () => this.showUserInfo()
+    },
+    {
+      label: 'Cambia password',
+      icon: 'pi pi-key',
+      routerLink: '/admin/change-password'
+    },
+    {
+      label: 'Logout',
+      icon: 'pi pi-sign-out',
+      command: () => this.logout()
+    }
   ];
   userName: string = '';
   structures: { id: number, name: string }[] = [];
   selectedStructureId: number | null = null;
+
+  @ViewChild('userMenu') userMenu!: Menu;
 
   constructor(public router: Router, public authService: AuthService) {
     this.menuItems = [
@@ -82,10 +99,11 @@ export class AdminHomeComponent {
   }
 
   toggleUserMenu(event: Event) {
-    const userMenu = document.querySelector('#userMenu');
-    if (userMenu) {
-      (userMenu as any).toggle(event);
-    }
+    this.userMenu.toggle(event);
+  }
+
+  showUserInfo() {
+    this.router.navigate(['/admin/admin-info']);
   }
 
   logout() {
