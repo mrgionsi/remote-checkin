@@ -15,6 +15,8 @@ Each route interacts with the database to perform the necessary actions related 
 """
 
 from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required
+
 #pylint: disable=E0611,E0401
 from models import Room, Structure
 from database import get_db  # Use absolute import
@@ -24,6 +26,7 @@ room_bp = Blueprint("room", __name__, url_prefix="/api/v1")
 
 # Add a new room
 @room_bp.route("/rooms", methods=["POST"])
+@jwt_required()
 def add_room():
     """
     Add a new room to the database.
@@ -71,6 +74,7 @@ def add_room():
 
 # Get all rooms by structure
 @room_bp.route("/rooms", methods=["GET"])
+@jwt_required()
 def get_rooms():
     """
     Retrieve a list of rooms for a fixed structure.
@@ -101,6 +105,7 @@ def get_rooms():
 
 # Get room by ID
 @room_bp.route("/rooms/<int:room_id>", methods=["GET"])
+@jwt_required()
 def get_room(room_id):
     """
     Retrieve a room by its unique identifier.
@@ -124,6 +129,7 @@ def get_room(room_id):
 
 # Update a room
 @room_bp.route("/rooms/<int:room_id>", methods=["PUT"])
+@jwt_required()
 def update_room(room_id):
     """
     Update an existing room's details.
@@ -172,6 +178,7 @@ def update_room(room_id):
 
 # Delete a room
 @room_bp.route("/rooms/<int:room_id>", methods=["DELETE"])
+@jwt_required()
 def delete_room(room_id):
     """
     Delete a room from the database based on the provided room_id.
