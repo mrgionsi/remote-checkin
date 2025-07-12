@@ -69,9 +69,6 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (!this.authService.isLoggedIn()) {
-      this.router.navigate(['/admin/login']);
-    }
     if (isPlatformBrowser(this.platformId)) {
       this.reservationService.getReservationByStructureId(1).subscribe({
         next: (reservations) => {
