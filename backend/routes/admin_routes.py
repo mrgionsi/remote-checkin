@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_jwt_extended import create_access_token
-from models import User, Role, AdminStructure
+from models import User, Role, AdminStructure, Structure
 from database import SessionLocal
 from datetime import timedelta
 import logging
@@ -43,12 +43,18 @@ def admin_login():
         if not user.role or user.role.name.lower() not in ["admin", "superadmin", "administrator"]:
             return jsonify({"error": "Non autorizzato"}), 403
 
-        admin_structures = db_session.query(AdminStructure).filter_by(id_user=user.id).all()
-        structures = [astruct.id_structure for astruct in admin_structures]
+        # JOIN tra AdminStructure e Structure per ottenere id e nome struttura
+        structures = (
+            db_session.query(AdminStructure.id_structure, Structure.name)
+            .join(Structure, AdminStructure.id_structure == Structure.id)
+            .filter(AdminStructure.id_user == user.id)
+            .all()
+        )
+        # Array di dizionari con id e name
+        structures_list = [{"id": s.id_structure, "name": s.name} for s in structures]
 
-        # Token JWT con scadenza di 2 ore
         access_token = create_access_token(
-            identity=str(user.id),  # oppure user.username
+            identity=str(user.id),
             additional_claims={
                 "username": user.username,
                 "role": user.role.name
@@ -63,7 +69,7 @@ def admin_login():
                 "username": user.username,
                 "name": user.name,
                 "surname": user.surname,
-                "structures": structures,
+                "structures": structures_list,
                 "role": user.role.name
             }
         }), 200
