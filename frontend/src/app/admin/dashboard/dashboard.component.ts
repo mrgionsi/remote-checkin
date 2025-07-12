@@ -11,6 +11,7 @@ import { ReservationService } from '../../services/reservation.service';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 
 @Component({
@@ -35,6 +36,7 @@ export class DashboardComponent implements OnInit {
   constructor(
     private reservationService: ReservationService,
     private router: Router,
+    private authService: AuthService,
     @Inject(PLATFORM_ID) private platformId: object,
 
   ) {
@@ -66,6 +68,9 @@ export class DashboardComponent implements OnInit {
     }
   }
   ngOnInit(): void {
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/admin/login']);
+    }
     if (isPlatformBrowser(this.platformId)) {
       this.reservationService.getReservationByStructureId(1).subscribe({
         next: (reservations) => {
