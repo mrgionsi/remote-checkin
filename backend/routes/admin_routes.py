@@ -3,6 +3,8 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from flask_jwt_extended import create_access_token
 from models import User, Role, AdminStructure
 from database import SessionLocal
+from datetime import timedelta
+import logging
 
 # Blueprint setup
 admin_bp = Blueprint("admin", __name__, url_prefix="/api/v1")
@@ -29,31 +31,30 @@ def admin_login():
     if not username or not password:
         return jsonify({"error": "Username e password sono obbligatori"}), 400
 
-    # Database logic: Find user by username
+    db_session = SessionLocal()
     try:
-        db_session = SessionLocal()
         user = db_session.query(User).filter_by(username=username).first()
         if not user:
             return jsonify({"error": "Credenziali non valide"}), 401
 
-        # Verify password (assuming hashed)
         if not check_password_hash(user.password, password):
             return jsonify({"error": "Credenziali non valide"}), 401
 
-        # Check if user has admin role
         if not user.role or user.role.name.lower() not in ["admin", "superadmin", "administrator"]:
             return jsonify({"error": "Non autorizzato"}), 403
 
-        # Get structures administered by this user
         admin_structures = db_session.query(AdminStructure).filter_by(id_user=user.id).all()
         structures = [astruct.id_structure for astruct in admin_structures]
 
-        # Create JWT token
-        access_token = create_access_token(identity={
-            "id": user.id,
-            "username": user.username,
-            "role": user.role.name
-        })
+        # Token JWT con scadenza di 2 ore
+        access_token = create_access_token(
+            identity={
+                "id": user.id,
+                "username": user.username,
+                "role": user.role.name
+            },
+            expires_delta=timedelta(hours=2)
+        )
 
         return jsonify({
             "access_token": access_token,
@@ -68,7 +69,10 @@ def admin_login():
         }), 200
 
     except Exception as e:
+        logging.error(f"Errore durante il login: {str(e)}")
         return jsonify({"error": f"Errore durante il login: {str(e)}"}), 500
+    finally:
+        db_session.close()
 
 @admin_bp.route("/admin/create", methods=["POST"])
 def create_admin_user():
@@ -97,16 +101,13 @@ def create_admin_user():
     if not username or not password or not id_role:
         return jsonify({"error": "username, password e id_role sono obbligatori"}), 400
 
+    db_session = SessionLocal()
     try:
-        db_session = SessionLocal()
-        # Check if user already exists
         if db_session.query(User).filter_by(username=username).first():
-            return jsonify({"error": "Username già esistente"}), 400
+            return jsonify({"error": "Username gia' esistente"}), 400
 
-        # Hash the password
         hashed_password = generate_password_hash(password)
 
-        # Create user
         new_user = User(
             username=username,
             password=hashed_password,
@@ -129,4 +130,7 @@ def create_admin_user():
         }), 201
 
     except Exception as e:
+        logging.error(f"Errore durante la creazione utente: {str(e)}")
         return jsonify({"error": f"Errore durante la creazione utente: {str(e)}"}), 500
+    finally:
+        db_session.close()
