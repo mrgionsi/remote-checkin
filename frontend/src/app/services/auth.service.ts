@@ -30,7 +30,12 @@ export class AuthService {
     }
 
     isLoggedIn(): boolean {
-        return !!this.getUser() && this.isTokenValid();
+        const user = this.getUser();
+        if (!user || !this.isTokenValid()) {
+            this.logout(); // Pulisce il localStorage se non valido
+            return false;
+        }
+        return true;
     }
 
     getUserRole(): string {
@@ -40,5 +45,10 @@ export class AuthService {
 
     isSuperAdmin(): boolean {
         return this.getUserRole() === 'superadmin';
+    }
+
+    logout(): void {
+        localStorage.removeItem('user');
+        localStorage.removeItem('admin_token');
     }
 }
