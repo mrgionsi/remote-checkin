@@ -8,6 +8,7 @@ import { RoomComponent } from './admin/room/room.component';
 import { ReservationCheckComponent } from './reservation-check/reservation-check.component';
 import { DetailReservationComponent } from './detail-reservation/detail-reservation.component';
 import { LoginComponent } from './admin/login/login.component';
+import { AuthGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
     { path: '', component: LanguageComponent },
@@ -22,10 +23,10 @@ export const routes: Routes = [
         component: AdminHomeComponent, // Acts as the parent,
         children: [
             { path: 'login', component: LoginComponent },
-            { path: 'dashboard', component: DashboardComponent },
-            { path: 'rooms', component: RoomComponent },
-            { path: 'reservation-details/:id_reservation', component: DetailReservationComponent },
-            { path: 'create-reservation', component: CreateReservationComponent },
+            { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
+            { path: 'rooms', component: RoomComponent, canActivate: [AuthGuard] },
+            { path: 'reservation-details/:id_reservation', component: DetailReservationComponent, canActivate: [AuthGuard] },
+            { path: 'create-reservation', component: CreateReservationComponent, canActivate: [AuthGuard] },
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 
         ]
