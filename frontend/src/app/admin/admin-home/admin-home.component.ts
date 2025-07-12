@@ -21,8 +21,13 @@ export class AdminHomeComponent {
 
   visible: boolean = false;
   menuItems: MenuItem[];
+  userMenuItems: MenuItem[] = [
+    { label: 'Profilo', icon: 'pi pi-id-card', routerLink: '/admin/profile' },
+    { label: 'Logout', icon: 'pi pi-sign-out', command: () => this.logout() }
+  ];
+  userName: string = '';
 
-  constructor(public router: Router, private authService: AuthService) {
+  constructor(public router: Router, public authService: AuthService) {
     this.menuItems = [
       { label: 'Dashboard', icon: 'pi pi-chart-line', routerLink: '/admin/dashboard' },
       { label: 'Add new Reservation', icon: 'pi pi-plus', routerLink: '/admin/create-reservation' },
@@ -40,6 +45,8 @@ export class AdminHomeComponent {
       this.router.navigate(['/admin/login']);
       return;
     }
+    const user = this.authService.getUser();
+    this.userName = user?.username || '';
     if (this.authService.isSuperAdmin()) {
       this.menuItems.push({
         label: 'Superadmin Panel',
@@ -51,6 +58,18 @@ export class AdminHomeComponent {
 
   isLoginPage(): boolean {
     return this.router.url === '/admin/login';
+  }
+
+  toggleUserMenu(event: Event) {
+    const userMenu = document.querySelector('#userMenu');
+    if (userMenu) {
+      (userMenu as any).toggle(event);
+    }
+  }
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/admin/login']);
   }
 
 }
