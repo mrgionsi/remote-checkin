@@ -70,60 +70,60 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
-      this.reservationService.getReservationByStructureId(1).subscribe({
-        next: (reservations) => {
-          console.log(reservations);
-          this.reservations = reservations;
-          // Handle the response data here
-        },
-        error: (error) => {
-          console.error('Error fetching reservations:', error);
-          // Handle the error here (e.g., show a message to the user)
-        },
-        complete: () => {
-          console.log('Reservation fetch completed.');
-          // Optional: Handle completion logic
-        }
-      });
-      this.reservationService.getMonthlyReservation(1).subscribe({
-        next: (monthly_reserv) => {
-          console.log('Reservations:', monthly_reserv);
-          // Handle the response data here
-          this.monthly_reservatvion = monthly_reserv.map((item: { total_reservations: any; }) => item.total_reservations);
-          this.checkInData = {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'August', 'Sept', 'Oct', 'Nov', 'Dec'], // Example months
-            datasets: [
-              {
-                label: 'Check-ins',
-                data: this.monthly_reservatvion,
-                fill: true,
-                borderColor: '#42A5F5',
-                tension: 0.1
+      const structureIdStr = localStorage.getItem('selected_structure_id');
+      const structureId = structureIdStr ? +structureIdStr : null;
+      if (structureId) {
+        this.reservationService.getReservationByStructureId(structureId).subscribe({
+          next: (reservations) => {
+            console.log(reservations);
+            this.reservations = reservations;
+            // Handle the response data here
+          },
+          error: (error) => {
+            console.error('Error fetching reservations:', error);
+            // Handle the error here (e.g., show a message to the user)
+          },
+          complete: () => {
+            console.log('Reservation fetch completed.');
+            // Optional: Handle completion logic
+          }
+        });
+        this.reservationService.getMonthlyReservation(structureId).subscribe({
+          next: (monthly_reserv) => {
+            console.log('Reservations:', monthly_reserv);
+            // Handle the response data here
+            this.monthly_reservatvion = monthly_reserv.map((item: { total_reservations: any; }) => item.total_reservations);
+            this.checkInData = {
+              labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'August', 'Sept', 'Oct', 'Nov', 'Dec'], // Example months
+              datasets: [
+                {
+                  label: 'Check-ins',
+                  data: this.monthly_reservatvion,
+                  fill: true,
+                  borderColor: '#42A5F5',
+                  tension: 0.1
+                }
+              ]
+            };
+
+            this.chartOptions = {
+              responsive: true,
+              scales: {
+                x: { title: { display: true, text: 'Month' } },
+                y: { title: { display: true, text: 'Check-ins' } }
               }
-            ]
-          };
-
-          this.chartOptions = {
-            responsive: true,
-            scales: {
-              x: { title: { display: true, text: 'Month' } },
-              y: { title: { display: true, text: 'Check-ins' } }
-            }
-          };
-        },
-        error: (error) => {
-          console.error('Error fetching reservations:', error);
-          // Handle the error here (e.g., show a message to the user)
-        },
-        complete: () => {
-          console.log('Reservation fetch completed.');
-          // Optional: Handle completion logic
-        }
-      });
-
-
-
-
+            };
+          },
+          error: (error) => {
+            console.error('Error fetching reservations:', error);
+            // Handle the error here (e.g., show a message to the user)
+          },
+          complete: () => {
+            console.log('Reservation fetch completed.');
+            // Optional: Handle completion logic
+          }
+        });
+      }
     }
   }
 }
