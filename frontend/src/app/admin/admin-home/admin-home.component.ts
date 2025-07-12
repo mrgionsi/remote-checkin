@@ -49,11 +49,15 @@ export class AdminHomeComponent {
       return;
     }
     const user = this.authService.getUser();
-    console.log("User:", user);
     this.userName = user?.username || '';
     this.structures = user?.structures || [];
-    if (this.structures.length > 0) {
+    // Recupera struttura selezionata da localStorage o imposta la prima
+    const savedStructureId = localStorage.getItem('selected_structure_id');
+    if (savedStructureId && this.structures.some(s => s.id === +savedStructureId)) {
+      this.selectedStructureId = +savedStructureId;
+    } else if (this.structures.length > 0) {
       this.selectedStructureId = this.structures[0].id;
+      localStorage.setItem('selected_structure_id', String(this.selectedStructureId));
     }
     if (this.authService.isSuperAdmin()) {
       this.menuItems.push({
@@ -66,8 +70,11 @@ export class AdminHomeComponent {
 
   onStructureChange(event: any) {
     this.selectedStructureId = event.value;
-    // Qui puoi aggiungere la logica per aggiornare la dashboard o altre parti dell'app
-    // Esempio: this.dashboardService.loadDataForStructure(this.selectedStructureId);
+    localStorage.setItem('selected_structure_id', String(this.selectedStructureId));
+    // Ricarica la pagina corrente per aggiornare i dati
+    this.router.navigate([this.router.url]);
+    // Oppure, se vuoi sempre tornare alla dashboard:
+    // this.router.navigate(['/admin/dashboard']);
   }
 
   isLoginPage(): boolean {
