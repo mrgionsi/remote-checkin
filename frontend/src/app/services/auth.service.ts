@@ -7,6 +7,7 @@ import { HttpHeaders } from '@angular/common/http';
 export class AuthService {
 
     getUser() {
+        if (typeof window === 'undefined' || !window.localStorage) return null;
         const userStr = localStorage.getItem('user');
         if (!userStr) return null;
         try {
@@ -29,6 +30,8 @@ export class AuthService {
     }
 
     isLoggedIn(): boolean {
+        if (typeof window === 'undefined' || !window.localStorage) return false;
+
         const user = this.getUser();
         if (!user || !this.isTokenValid()) {
             this.logout(); // Pulisce il localStorage se non valido
@@ -39,7 +42,7 @@ export class AuthService {
 
     getUserRole(): string {
         const user = this.getUser();
-        return user?.user?.role || '';
+        return user?.role || '';
     }
 
     isSuperAdmin(): boolean {
@@ -53,7 +56,7 @@ export class AuthService {
 
     getAuthHeaders(): HttpHeaders {
         const token = localStorage.getItem('admin_token');
-        console.log(token)
+        //console.log(token)
         return new HttpHeaders({
             'Authorization': `Bearer ${token}`
         });
