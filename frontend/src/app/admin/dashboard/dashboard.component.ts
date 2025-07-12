@@ -67,6 +67,7 @@ export class DashboardComponent implements OnInit {
       this.router.navigate([`/admin/reservation-details/${reservation.reservation_id}`]);
     }
   }
+
   ngOnInit(): void {
     if (!this.authService.isLoggedIn()) {
       this.router.navigate(['/admin/login']);
