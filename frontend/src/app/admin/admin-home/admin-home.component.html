@@ -1,5 +1,9 @@
 <div class="admin-header" *ngIf="!isLoginPage()">
     <button pButton label="☰ Menu" (click)="toggleSidebar()" class="p-mr-2"></button>
+    <p-dropdown [options]="structures" optionLabel="name" optionValue="id" [(ngModel)]="selectedStructureId"
+        (onChange)="onStructureChange($event)" placeholder="Seleziona struttura" styleClass="structure-select"
+        *ngIf="structures.length > 0">
+    </p-dropdown>
     <div class="user-area">
         <span>Ciao, {{ userName }}</span>
         <button pButton icon="pi pi-user" class="user-btn" (click)="toggleUserMenu($event)"></button>

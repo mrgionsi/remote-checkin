@@ -9,10 +9,11 @@ import { Router, RouterOutlet } from '@angular/router';
 import { SidebarModule } from 'primeng/sidebar';
 import { ButtonModule } from 'primeng/button';
 import { AuthService } from '../../services/auth.service'; // <--- aggiungi import
-
+import { DropdownModule } from 'primeng/dropdown';
+import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-admin-home',
-  imports: [MenuModule, BadgeModule, RippleModule, AvatarModule, CommonModule,
+  imports: [MenuModule, BadgeModule, RippleModule, AvatarModule, CommonModule, DropdownModule, FormsModule,
     RouterOutlet, SidebarModule, ButtonModule],
   templateUrl: './admin-home.component.html',
   styleUrl: './admin-home.component.scss'
@@ -26,6 +27,8 @@ export class AdminHomeComponent {
     { label: 'Logout', icon: 'pi pi-sign-out', command: () => this.logout() }
   ];
   userName: string = '';
+  structures: { id: number, name: string }[] = [];
+  selectedStructureId: number | null = null;
 
   constructor(public router: Router, public authService: AuthService) {
     this.menuItems = [
@@ -46,7 +49,12 @@ export class AdminHomeComponent {
       return;
     }
     const user = this.authService.getUser();
+    console.log("User:", user);
     this.userName = user?.username || '';
+    this.structures = user?.structures || [];
+    if (this.structures.length > 0) {
+      this.selectedStructureId = this.structures[0].id;
+    }
     if (this.authService.isSuperAdmin()) {
       this.menuItems.push({
         label: 'Superadmin Panel',
@@ -54,6 +62,12 @@ export class AdminHomeComponent {
         routerLink: '/admin/superadmin'
       });
     }
+  }
+
+  onStructureChange(event: any) {
+    this.selectedStructureId = event.value;
+    // Qui puoi aggiungere la logica per aggiornare la dashboard o altre parti dell'app
+    // Esempio: this.dashboardService.loadDataForStructure(this.selectedStructureId);
   }
 
   isLoginPage(): boolean {
