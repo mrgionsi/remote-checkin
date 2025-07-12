@@ -2,3 +2,20 @@ button {
     margin: 10px;
     font-size: 16px;
 }
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+}
+
+.user-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-btn {
+    border-radius: 50%;
+}

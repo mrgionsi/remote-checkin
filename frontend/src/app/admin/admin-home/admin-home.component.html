@@ -1,8 +1,15 @@
+<div class="admin-header" *ngIf="!isLoginPage()">
+    <button pButton label="☰ Menu" (click)="toggleSidebar()" class="p-mr-2"></button>
+    <div class="user-area">
+        <span>Ciao, {{ userName }}</span>
+        <button pButton icon="pi pi-user" class="user-btn" (click)="toggleUserMenu($event)"></button>
+        <p-menu #userMenu [popup]="true" [model]="userMenuItems"></p-menu>
+    </div>
+</div>
+
 <p-sidebar *ngIf="!isLoginPage()" [(visible)]="visible" [baseZIndex]="10000" [showCloseIcon]="true">
     <h3>Admin Panel</h3>
     <p-menu [model]="menuItems"></p-menu>
 </p-sidebar>
-
-<button *ngIf="!isLoginPage()" pButton label="☰ Menu" (click)="toggleSidebar()" class="p-mr-2"></button>
 
 <router-outlet></router-outlet>
