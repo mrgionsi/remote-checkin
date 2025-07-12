@@ -16,12 +16,17 @@ from sqlalchemy.sql import extract
 from models import Reservation, Room, Structure, StructureReservationsView
 
 from database import SessionLocal
+from flask_jwt_extended import jwt_required, JWTManager
 
 # Create a blueprint for reservations
 reservation_bp = Blueprint("reservations", __name__, url_prefix="/api/v1")
 
+# Initialize JWT manager
+jwt = JWTManager()
+
 
 @reservation_bp.route("/reservations", methods=["POST"])
+@jwt_required()
 def create_reservation():
     """
     Create a new reservation from the JSON payload of a POST request.
@@ -99,6 +104,7 @@ def create_reservation():
         session.close()
 
 @reservation_bp.route("/reservations/<int:reservation_id>", methods=["PATCH"])
+@jwt_required()
 def update_reservation(reservation_id):
     """
     Update an existing reservation with provided fields.
@@ -160,6 +166,7 @@ def update_reservation(reservation_id):
     finally:
         db.close()
 @reservation_bp.route("/reservations/<int:reservation_id>", methods=["DELETE"])
+@jwt_required()
 def delete_reservation(reservation_id):
     """
     Delete a reservation by ID.
@@ -190,6 +197,7 @@ def delete_reservation(reservation_id):
 
 
 @reservation_bp.route("/reservations", methods=["GET"])
+@jwt_required()
 def get_reservations():
     """
     Return a JSON response containing the global reservations list.
@@ -207,6 +215,7 @@ def get_reservations():
 
 
 @reservation_bp.route("/reservations/structure/<structure_id>", methods=["GET"])
+@jwt_required()
 def get_reservations_by_structure(structure_id):
     """
     Get all reservations for a specific structure.
@@ -240,6 +249,7 @@ def get_reservations_by_structure(structure_id):
 
 
 @reservation_bp.route("/reservations/<int:reservation_id>", methods=["GET"])
+@jwt_required()
 def get_reservations_by_id(reservation_id):
     """
     Get specific reservation
@@ -268,6 +278,7 @@ def get_reservations_by_id(reservation_id):
         db.close()
 
 @reservation_bp.route("/reservations/monthly/<int:structure_id>", methods=["GET"])
+@jwt_required()
 def get_reservations_per_month(structure_id):
     """
     Get monthly reservation counts for a specific structure.
@@ -317,6 +328,7 @@ def get_reservations_per_month(structure_id):
 
 
 @reservation_bp.route("/reservations/<int:reservation_id>/status", methods=["PUT"])
+@jwt_required()
 def update_reservation_status(reservation_id):
     """
     Update the status of a reservation.
@@ -365,3 +377,4 @@ def update_reservation_status(reservation_id):
         return jsonify({"error": f"Error updating reservation status: {str(e)}"}), 500
     finally:
         db.close()
+
