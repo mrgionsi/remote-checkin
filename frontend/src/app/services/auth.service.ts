@@ -6,7 +6,6 @@ import { Injectable } from '@angular/core';
 export class AuthService {
 
     getUser() {
-        if (typeof window === 'undefined' || !window.localStorage) return null;
         const userStr = localStorage.getItem('user');
         if (!userStr) return null;
         try {
@@ -17,8 +16,7 @@ export class AuthService {
     }
 
     isTokenValid(): boolean {
-        const user = this.getUser();
-        const token = user?.token;
+        const token = localStorage.getItem('admin_token');
         if (!token) return false;
 
         // Decodifica il payload del JWT
