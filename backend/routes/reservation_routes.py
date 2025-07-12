@@ -13,10 +13,9 @@ from datetime import datetime
 from flask import Blueprint, request, jsonify
 from sqlalchemy import  func
 from sqlalchemy.sql import extract
-from models import Reservation, Room, Structure, StructureReservationsView
-
-from database import SessionLocal
 from flask_jwt_extended import jwt_required, JWTManager
+from models import Reservation, Room, Structure, StructureReservationsView
+from database import SessionLocal
 
 # Create a blueprint for reservations
 reservation_bp = Blueprint("reservations", __name__, url_prefix="/api/v1")
@@ -377,4 +376,3 @@ def update_reservation_status(reservation_id):
         return jsonify({"error": f"Error updating reservation status: {str(e)}"}), 500
     finally:
         db.close()
-

@@ -5,8 +5,8 @@ This module initializes the Flask app, sets up database tables,
 and registers blueprints for routing.
 """
 #pylint: disable=C0303,E0401
-
 import os
+from flask_jwt_extended import JWTManager
 from flask import Flask
 from flask_cors import CORS
 from routes.admin_routes import admin_bp
@@ -14,7 +14,6 @@ from routes.room_routes import room_bp
 from routes.reservation_routes import reservation_bp  # Adjust the path as needed
 from routes.upload_reservation_routes import upload_bp  # Adjust the path as needed
 from routes.client_reservation_routes import client_reservation_bp  # Adjust the path as needed
-from flask_jwt_extended import JWTManager
 
 
 app = Flask(__name__)

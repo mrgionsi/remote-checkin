@@ -1,10 +1,23 @@
+# pylint: disable=C0301,E0611,E0401,W0718
+
+"""Admin routes module for user authentication, account creation, and profile retrieval.
+
+This module defines Flask routes related to administrative user actions. It includes:
+- Authentication endpoint for admin users with JWT token issuance.
+- Endpoint for creating new admin users with role assignments.
+- Endpoint for retrieving the currently authenticated admin user's profile and associated structures.
+
+All routes are registered under the '/api/v1/admin' URL prefix and require appropriate user roles
+(e.g., admin, superadmin) for access.
+"""
+
+from datetime import timedelta
+import logging
 from flask import Blueprint, request, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-from models import User, Role, AdminStructure, Structure
+from models import User, AdminStructure, Structure
 from database import SessionLocal
-from datetime import timedelta
-import logging
 
 # Blueprint setup
 admin_bp = Blueprint("admin", __name__, url_prefix="/api/v1")
@@ -75,7 +88,7 @@ def admin_login():
         }), 200
 
     except Exception as e:
-        logging.error(f"Errore durante il login: {str(e)}")
+        logging.error("Errore durante il login: %s", e)
         return jsonify({"error": f"Errore durante il login: {str(e)}"}), 500
     finally:
         db_session.close()
@@ -136,7 +149,7 @@ def create_admin_user():
         }), 201
 
     except Exception as e:
-        logging.error(f"Errore durante la creazione utente: {str(e)}")
+        logging.error("Errore durante la creazione utente: %s", e)
         return jsonify({"error": f"Errore durante la creazione utente: {str(e)}"}), 500
     finally:
         db_session.close()
