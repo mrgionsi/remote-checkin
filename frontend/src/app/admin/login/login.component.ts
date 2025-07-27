@@ -32,6 +32,7 @@ export class LoginComponent {
       next: (res) => {
         localStorage.setItem('user', JSON.stringify(res.user));
         localStorage.setItem('admin_token', res.access_token);
+        localStorage.setItem('selected_structure_id', String(res.user.structures[0].id));
         this.messageService.add({ severity: 'success', summary: 'Login effettuato', detail: 'Benvenuto!' });
         this.router.navigate(['/admin/dashboard']);
       },
