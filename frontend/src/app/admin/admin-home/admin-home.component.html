@@ -1,19 +1,27 @@
-<div class="admin-header" *ngIf="!isLoginPage()">
-    <button pButton label="☰ Menu" (click)="toggleSidebar()" class="p-mr-2"></button>
-    <p-dropdown [options]="structures" optionLabel="name" optionValue="id" [(ngModel)]="selectedStructureId"
-        (onChange)="onStructureChange($event)" placeholder="Seleziona struttura" styleClass="structure-select"
-        *ngIf="structures.length > 0">
-    </p-dropdown>
-    <div class="user-area">
-        <span>Ciao, {{ userName }}</span>
-        <button pButton icon="pi pi-user" class="user-btn" (click)="toggleUserMenu($event)"></button>
-        <p-menu #userMenu [popup]="true" [model]="userMenuItems"></p-menu>
+<ng-container *ngIf="(authService.user$ | async) as user; else loading">
+    <div class="admin-header" *ngIf="!isLoginPage()">
+        <button pButton label="☰ Menu" (click)="toggleSidebar()" class="p-mr-2"></button>
+        <p-dropdown [options]="structures" optionLabel="name" optionValue="id" [(ngModel)]="selectedStructureId"
+            (onChange)="onStructureChange($event)" placeholder="Seleziona struttura" styleClass="structure-select"
+            *ngIf="structures.length > 0">
+        </p-dropdown>
+        <div class="user-area">
+            <span>Ciao, {{ userName }}</span>
+            <button pButton icon="pi pi-user" class="user-btn" (click)="toggleUserMenu($event)"></button>
+            <p-menu #userMenu [popup]="true" [model]="userMenuItems"></p-menu>
+        </div>
     </div>
-</div>
 
-<p-sidebar *ngIf="!isLoginPage()" [(visible)]="visible" [baseZIndex]="10000" [showCloseIcon]="true">
-    <h3>Admin Panel</h3>
-    <p-menu [model]="menuItems"></p-menu>
-</p-sidebar>
+    <p-sidebar *ngIf="!isLoginPage()" [(visible)]="visible" [baseZIndex]="10000" [showCloseIcon]="true">
+        <h3>Admin Panel</h3>
+        <p-menu [model]="menuItems"></p-menu>
+    </p-sidebar>
 
-<router-outlet></router-outlet>
+    <router-outlet></router-outlet>
+</ng-container>
+<ng-template #loading>
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 60vh;">
+        <div class="spinner"></div>
+        <div style="margin-top: 16px; font-size: 1.2em; color: #555;">Caricamento...</div>
+    </div>
+</ng-template>
