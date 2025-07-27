@@ -10,7 +10,7 @@ interface AdminLoginResponse {
     username: string;
     name: string;
     surname: string;
-    structures: number[];
+    structures: any[];
     role: string;
   };
 }
