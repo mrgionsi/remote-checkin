@@ -61,28 +61,25 @@ export class AdminHomeComponent {
   }
 
   ngOnInit() {
-    if (!this.authService.isLoggedIn()) {
-      this.router.navigate(['/admin/login']);
-      return;
-    }
-    const user = this.authService.getUser();
-    this.userName = user?.username || '';
-    this.structures = user?.structures || [];
-    // Recupera struttura selezionata da localStorage o imposta la prima
-    const savedStructureId = localStorage.getItem('selected_structure_id');
-    if (savedStructureId && this.structures.some(s => s.id === +savedStructureId)) {
-      this.selectedStructureId = +savedStructureId;
-    } else if (this.structures.length > 0) {
-      this.selectedStructureId = this.structures[0].id;
-      localStorage.setItem('selected_structure_id', String(this.selectedStructureId));
-    }
-    if (this.authService.isSuperAdmin()) {
-      this.menuItems.push({
-        label: 'Superadmin Panel',
-        icon: 'pi pi-shield',
-        routerLink: '/admin/superadmin'
-      });
-    }
+    this.authService.user$.subscribe(user => {
+      this.userName = user?.username || '';
+      this.structures = user?.structures || [];
+      // Recupera struttura selezionata da localStorage o imposta la prima
+      const savedStructureId = localStorage.getItem('selected_structure_id');
+      if (savedStructureId && this.structures.some(s => s.id === +savedStructureId)) {
+        this.selectedStructureId = +savedStructureId;
+      } else if (this.structures.length > 0) {
+        this.selectedStructureId = this.structures[0].id;
+        localStorage.setItem('selected_structure_id', String(this.selectedStructureId));
+      }
+      if (this.authService.isSuperAdmin()) {
+        this.menuItems.push({
+          label: 'Superadmin Panel',
+          icon: 'pi pi-shield',
+          routerLink: '/admin/superadmin'
+        });
+      }
+    });
   }
 
   onStructureChange(event: any) {

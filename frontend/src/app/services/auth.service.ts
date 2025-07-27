@@ -1,10 +1,23 @@
 import { Injectable } from '@angular/core';
 import { HttpHeaders } from '@angular/common/http';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
     providedIn: 'root'
 })
 export class AuthService {
+    private userSubject = new BehaviorSubject<any>(this.getUser());
+    user$ = this.userSubject.asObservable();
+
+    setUser(user: any) {
+        localStorage.setItem('user', JSON.stringify(user));
+        this.userSubject.next(user);
+    }
+
+    clearUser() {
+        localStorage.removeItem('user');
+        this.userSubject.next(null);
+    }
 
     getUser() {
         if (typeof window === 'undefined' || !window.localStorage) return null;
@@ -31,10 +44,9 @@ export class AuthService {
 
     isLoggedIn(): boolean {
         if (typeof window === 'undefined' || !window.localStorage) return false;
-
         const user = this.getUser();
         if (!user || !this.isTokenValid()) {
-            this.logout(); // Pulisce il localStorage se non valido
+            this.logout();
             return false;
         }
         return true;

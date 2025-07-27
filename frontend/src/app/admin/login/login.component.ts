@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { NgModule } from '@angular/core';
 import { ToastModule } from 'primeng/toast';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -23,14 +24,15 @@ export class LoginComponent {
   constructor(
     private adminLoginService: AdminLoginService,
     private router: Router,
-    private messageService: MessageService // <--- aggiungi qui
+    private messageService: MessageService, // <--- aggiungi qui
+    private authService: AuthService // Assicurati di importare il servizio AuthService
   ) { }
 
   onLogin() {
     this.errorMessage = null;
     this.adminLoginService.login(this.username, this.password).subscribe({
       next: (res) => {
-        localStorage.setItem('user', JSON.stringify(res.user));
+        this.authService.setUser(res.user);
         localStorage.setItem('admin_token', res.access_token);
         localStorage.setItem('selected_structure_id', String(res.user.structures[0].id));
         this.messageService.add({ severity: 'success', summary: 'Login effettuato', detail: 'Benvenuto!' });
