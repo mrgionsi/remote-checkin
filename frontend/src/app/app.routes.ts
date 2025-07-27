@@ -10,6 +10,7 @@ import { DetailReservationComponent } from './detail-reservation/detail-reservat
 import { LoginComponent } from './admin/login/login.component';
 import { AuthGuard } from './guards/auth.guard';
 import { AdminInfoComponent } from './admin/admin-info/admin-info.component';
+import { AuthResolver } from './resolvers/auth.resolver';
 
 export const routes: Routes = [
     { path: '', component: LanguageComponent },
@@ -22,6 +23,7 @@ export const routes: Routes = [
     {
         path: 'admin',
         component: AdminHomeComponent, // Acts as the parent,
+        resolve: { auth: AuthResolver },
         children: [
             { path: 'login', component: LoginComponent },
             { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
