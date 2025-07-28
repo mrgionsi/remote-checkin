@@ -8,9 +8,8 @@ import { RoomComponent } from './admin/room/room.component';
 import { ReservationCheckComponent } from './reservation-check/reservation-check.component';
 import { DetailReservationComponent } from './detail-reservation/detail-reservation.component';
 import { LoginComponent } from './admin/login/login.component';
-import { AuthGuard } from './guards/auth.guard';
+import { authGuard } from './guards/auth.guard';
 import { AdminInfoComponent } from './admin/admin-info/admin-info.component';
-import { AuthResolver } from './resolvers/auth.resolver';
 
 export const routes: Routes = [
     { path: '', component: LanguageComponent },
@@ -23,14 +22,13 @@ export const routes: Routes = [
     {
         path: 'admin',
         component: AdminHomeComponent, // Acts as the parent,
-        resolve: { auth: AuthResolver },
         children: [
             { path: 'login', component: LoginComponent },
-            { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
-            { path: 'rooms', component: RoomComponent, canActivate: [AuthGuard] },
-            { path: 'reservation-details/:id_reservation', component: DetailReservationComponent, canActivate: [AuthGuard] },
-            { path: 'create-reservation', component: CreateReservationComponent, canActivate: [AuthGuard] },
-            { path: 'admin-info', component: AdminInfoComponent, canActivate: [AuthGuard] }, // <--- aggiungi questa riga
+            { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
+            { path: 'rooms', component: RoomComponent, canActivate: [authGuard] },
+            { path: 'reservation-details/:id_reservation', component: DetailReservationComponent, canActivate: [authGuard] },
+            { path: 'create-reservation', component: CreateReservationComponent, canActivate: [authGuard] },
+            { path: 'admin-info', component: AdminInfoComponent, canActivate: [authGuard] }, // <--- aggiungi questa riga
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 
         ]

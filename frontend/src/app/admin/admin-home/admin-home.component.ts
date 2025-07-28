@@ -12,6 +12,8 @@ import { AuthService } from '../../services/auth.service'; // <--- aggiungi impo
 import { DropdownModule } from 'primeng/dropdown';
 import { FormsModule } from '@angular/forms';
 import { Menu } from 'primeng/menu';
+import { of } from 'rxjs';
+import { delay } from 'rxjs/operators';
 
 @Component({
   selector: 'app-admin-home',
@@ -48,6 +50,7 @@ export class AdminHomeComponent {
   @ViewChild('userMenu') userMenu!: Menu;
 
   constructor(public router: Router, public authService: AuthService) {
+    console.log('AdminHomeComponent initialized');
     this.menuItems = [
       { label: 'Dashboard', icon: 'pi pi-chart-line', routerLink: '/admin/dashboard' },
       { label: 'Add new Reservation', icon: 'pi pi-plus', routerLink: '/admin/create-reservation' },
@@ -61,23 +64,29 @@ export class AdminHomeComponent {
   }
 
   ngOnInit() {
+
     this.authService.user$.subscribe(user => {
-      this.userName = user?.username || '';
-      this.structures = user?.structures || [];
-      // Recupera struttura selezionata da localStorage o imposta la prima
-      const savedStructureId = localStorage.getItem('selected_structure_id');
-      if (savedStructureId && this.structures.some(s => s.id === +savedStructureId)) {
-        this.selectedStructureId = +savedStructureId;
-      } else if (this.structures.length > 0) {
-        this.selectedStructureId = this.structures[0].id;
-        localStorage.setItem('selected_structure_id', String(this.selectedStructureId));
+      if (user) {
+        this.userName = user?.username || '';
+        this.structures = user?.structures || [];
+        // Recupera struttura selezionata da localStorage o imposta la prima
+        const savedStructureId = localStorage.getItem('selected_structure_id');
+        if (savedStructureId && this.structures.some(s => s.id === +savedStructureId)) {
+          this.selectedStructureId = +savedStructureId;
+        } else if (this.structures.length > 0) {
+          this.selectedStructureId = this.structures[0].id;
+          localStorage.setItem('selected_structure_id', String(this.selectedStructureId));
+        }
+        if (this.authService.isSuperAdmin()) {
+          this.menuItems.push({
+            label: 'Superadmin Panel',
+            icon: 'pi pi-shield',
+            routerLink: '/admin/superadmin'
+          });
+        }
       }
-      if (this.authService.isSuperAdmin()) {
-        this.menuItems.push({
-          label: 'Superadmin Panel',
-          icon: 'pi pi-shield',
-          routerLink: '/admin/superadmin'
-        });
+      else {
+        this.router.navigate(['/admin/login']);
       }
     });
   }
@@ -92,8 +101,10 @@ export class AdminHomeComponent {
   }
 
   isLoginPage(): boolean {
+    //console.log('Current URL:', this.router.url);
     return this.router.url === '/admin/login';
   }
+
 
   toggleUserMenu(event: Event) {
     this.userMenu.toggle(event);

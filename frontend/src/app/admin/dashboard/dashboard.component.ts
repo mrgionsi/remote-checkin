@@ -69,6 +69,7 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    console.log('DashboardComponent initialized');
     if (isPlatformBrowser(this.platformId)) {
       const structureIdStr = localStorage.getItem('selected_structure_id');
       const structureId = structureIdStr ? +structureIdStr : null;
