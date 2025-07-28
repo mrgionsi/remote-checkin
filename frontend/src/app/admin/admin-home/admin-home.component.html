@@ -20,8 +20,15 @@
     <router-outlet></router-outlet>
 </ng-container>
 <ng-template #loading>
-    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 60vh;">
-        <div class="spinner"></div>
-        <div style="margin-top: 16px; font-size: 1.2em; color: #555;">Caricamento...</div>
+    <div class="" *ngIf="!isLoginPage()">
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 60vh;">
+            <div class="spinner"></div>
+            <div style="margin-top: 16px; font-size: 1.2em; color: #555;">Caricamento...</div>
+
+        </div>
     </div>
+    <div class="" *ngIf="isLoginPage()">
+        <router-outlet></router-outlet>
+    </div>
+
 </ng-template>

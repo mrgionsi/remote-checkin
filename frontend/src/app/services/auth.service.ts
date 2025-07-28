@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Injectable({
     providedIn: 'root'
@@ -8,6 +9,8 @@ import { BehaviorSubject } from 'rxjs';
 export class AuthService {
     private userSubject = new BehaviorSubject<any>(this.getUser());
     user$ = this.userSubject.asObservable();
+
+    constructor(private router: Router) { }
 
     setUser(user: any) {
         localStorage.setItem('user', JSON.stringify(user));
@@ -47,6 +50,7 @@ export class AuthService {
         const user = this.getUser();
         if (!user || !this.isTokenValid()) {
             this.logout();
+            this.router.navigate(['/admin/login']); //Implemented here the redirect because in auth.guard.ts the login page is showed at every refresh
             return false;
         }
         return true;
