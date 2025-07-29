@@ -6,6 +6,7 @@ and registers blueprints for routing.
 """
 #pylint: disable=C0303,E0401
 import os
+import re
 from flask_jwt_extended import JWTManager
 from flask import Flask
 from flask_cors import CORS
@@ -17,7 +18,21 @@ from routes.client_reservation_routes import client_reservation_bp  # Adjust the
 
 
 app = Flask(__name__)
-app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")  # Cambia questa chiave in produzione!
+
+# --- JWT Secret Key Handling and Security Configuration ---
+jwt_secret_key = os.getenv("JWT_SECRET_KEY")
+if not jwt_secret_key:
+    raise RuntimeError("JWT_SECRET_KEY environment variable is not set. Please set a strong secret key for production.")
+
+# Enforce minimum length and complexity (at least 16 chars, with letters and numbers/symbols)
+if len(jwt_secret_key) < 16 or not re.search(r"[A-Za-z]", jwt_secret_key) or not re.search(r"[\d\W]", jwt_secret_key):
+    raise RuntimeError("JWT_SECRET_KEY must be at least 16 characters long and contain both letters and numbers/symbols.")
+
+app.config["JWT_SECRET_KEY"] = jwt_secret_key  # Use a strong secret key in production!
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = 3600  # 1 hour (in seconds)
+app.config["JWT_REFRESH_TOKEN_EXPIRES"] = 60 * 60 * 24 * 30  # 30 days (in seconds)
+app.config["JWT_ALGORITHM"] = "HS256"
+
 jwt = JWTManager(app)
 allowed_origins = os.getenv("ALLOWED_CORS", "http://localhost:4200").split(",")
 CORS(app,
