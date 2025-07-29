@@ -25,17 +25,11 @@ admin_bp = Blueprint("admin", __name__, url_prefix="/api/v1")
 @admin_bp.route("/admin/login", methods=["POST"])
 def admin_login():
     """
-    Authenticate an admin user.
-
-    Request Body:
-        - username (str): The admin's username.
-        - password (str): The admin's password.
-
+    Authenticates an admin user by verifying credentials and role, returning a JWT token and associated structures on success.
+    
     Returns:
-        - 200: JSON with JWT token, user info and associated structures if credentials are valid and user is admin.
-        - 400: If username or password is missing.
-        - 401: If credentials are invalid.
-        - 403: If user is not an admin.
+        JSON response with JWT access token, user information, and associated structures if authentication is successful.
+        Returns HTTP 400 if username or password is missing, 401 if credentials are invalid, 403 if the user is not an admin, or 500 on server error.
     """
     data = request.get_json()
     username = data.get("username")
@@ -96,19 +90,12 @@ def admin_login():
 @admin_bp.route("/admin/create", methods=["POST"])
 def create_admin_user():
     """
-    Create a new admin user.
-
-    Request Body (JSON):
-        - username (str): The new user's username (required)
-        - password (str): The new user's password (required)
-        - name (str): The new user's name (optional)
-        - surname (str): The new user's surname (optional)
-        - id_role (int): Role ID (required, e.g. 2 for superadmin)
-
+    Creates a new admin user with the specified username, password, and role.
+    
+    Accepts a JSON request body containing the new user's credentials and optional profile information. Returns a JSON response with the created user's details on success, or an error message if required fields are missing or the username already exists.
+    
     Returns:
-        - 201: JSON with created user info
-        - 400: If required fields are missing or user exists
-        - 500: On server error
+        Response: JSON with user info and HTTP 201 on success, or error message with appropriate status code on failure.
     """
     data = request.get_json()
     username = data.get("username")
@@ -158,11 +145,11 @@ def create_admin_user():
 @jwt_required()
 def get_admin_info():
     """
-    Get the logged-in admin user's information.
-
+    Retrieves the authenticated admin user's profile and associated structures.
+    
     Returns:
-        - 200: JSON with user info and associated structures.
-        - 404: If user is not found.
+        200: JSON object containing the user's ID, username, name, surname, role, and a list of associated structures.
+        404: If the user is not found.
     """
     db_session = SessionLocal()
     try:
