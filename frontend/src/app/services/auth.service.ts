@@ -37,12 +37,17 @@ export class AuthService {
         const token = localStorage.getItem('admin_token');
         if (!token) return false;
 
-        // Decodifica il payload del JWT
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const exp = payload.exp;
-        const now = Math.floor(Date.now() / 1000);
+        try {
+            // Decodifica il payload del JWT
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const exp = payload.exp;
+            const now = Math.floor(Date.now() / 1000);
 
-        return exp && exp > now;
+            return exp && exp > now;
+        } catch (error) {
+            console.error('Invalid JWT token:', error);
+            return false;
+        }
     }
 
     isLoggedIn(): boolean {
