@@ -73,7 +73,7 @@ export class DashboardComponent implements OnInit {
     if (isPlatformBrowser(this.platformId)) {
       const structureIdStr = localStorage.getItem('selected_structure_id');
       const structureId = structureIdStr ? +structureIdStr : null;
-      if (structureId) {
+      if (structureId && !isNaN(structureId) && structureId > 0) {
         this.reservationService.getReservationByStructureId(structureId).subscribe({
           next: (reservations) => {
             console.log(reservations);
