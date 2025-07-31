@@ -99,10 +99,9 @@ export class AdminHomeComponent implements OnInit, OnDestroy {
   onStructureChange(event: any) {
     this.selectedStructureId = event.value;
     localStorage.setItem('selected_structure_id', String(this.selectedStructureId));
-    // Ricarica la pagina corrente per aggiornare i dati
-    this.router.navigate([this.router.url]);
-    // Oppure, se vuoi sempre tornare alla dashboard:
-    // this.router.navigate(['/admin/dashboard']);
+    // Force a full page reload to ensure data is refreshed everywhere
+    window.location.reload();
+    // Alternatively, use an event emitter/service for a more Angular way
   }
 
   isLoginPage(): boolean {
