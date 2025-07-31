@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, OnInit, OnDestroy } from '@angular/core';
 import { MenuItem } from 'primeng/api';
 import { MenuModule } from 'primeng/menu';
 import { BadgeModule } from 'primeng/badge';
@@ -12,6 +12,7 @@ import { AuthService } from '../../services/auth.service';
 import { DropdownModule } from 'primeng/dropdown';
 import { FormsModule } from '@angular/forms';
 import { Menu } from 'primeng/menu';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-admin-home',
@@ -20,7 +21,7 @@ import { Menu } from 'primeng/menu';
   templateUrl: './admin-home.component.html',
   styleUrl: './admin-home.component.scss'
 })
-export class AdminHomeComponent {
+export class AdminHomeComponent implements OnInit, OnDestroy {
 
   visible: boolean = false;
   menuItems: MenuItem[];
@@ -46,6 +47,7 @@ export class AdminHomeComponent {
   selectedStructureId: number | null = null;
 
   @ViewChild('userMenu') userMenu!: Menu;
+  private userSubscription!: Subscription;
 
   constructor(public router: Router, public authService: AuthService) {
     console.log('AdminHomeComponent initialized');
@@ -62,8 +64,7 @@ export class AdminHomeComponent {
   }
 
   ngOnInit() {
-
-    this.authService.user$.subscribe(user => {
+    this.userSubscription = this.authService.user$.subscribe(user => {
       if (user) {
         this.userName = user?.username || '';
         this.structures = user?.structures || [];
@@ -87,6 +88,12 @@ export class AdminHomeComponent {
         this.router.navigate(['/admin/login']);
       }
     });
+  }
+
+  ngOnDestroy() {
+    if (this.userSubscription) {
+      this.userSubscription.unsubscribe();
+    }
   }
 
   onStructureChange(event: any) {
