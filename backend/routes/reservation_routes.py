@@ -14,7 +14,6 @@ from flask import Blueprint, request, jsonify
 from sqlalchemy import  func
 from sqlalchemy.sql import extract
 from flask_jwt_extended import jwt_required
-from backend.main import jwt  # Import the centrally configured JWTManager instance
 from models import Reservation, Room, Structure, StructureReservationsView
 from database import SessionLocal
 
