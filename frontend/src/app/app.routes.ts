@@ -7,6 +7,9 @@ import { AdminHomeComponent } from './admin/admin-home/admin-home.component';
 import { RoomComponent } from './admin/room/room.component';
 import { ReservationCheckComponent } from './reservation-check/reservation-check.component';
 import { DetailReservationComponent } from './detail-reservation/detail-reservation.component';
+import { LoginComponent } from './admin/login/login.component';
+import { authGuard } from './guards/auth.guard';
+import { AdminInfoComponent } from './admin/admin-info/admin-info.component';
 
 export const routes: Routes = [
     { path: '', component: LanguageComponent },
@@ -20,10 +23,12 @@ export const routes: Routes = [
         path: 'admin',
         component: AdminHomeComponent, // Acts as the parent,
         children: [
-            { path: 'dashboard', component: DashboardComponent },
-            { path: 'rooms', component: RoomComponent },
-            { path: 'reservation-details/:id_reservation', component: DetailReservationComponent },
-            { path: 'create-reservation', component: CreateReservationComponent },
+            { path: 'login', component: LoginComponent },
+            { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
+            { path: 'rooms', component: RoomComponent, canActivate: [authGuard] },
+            { path: 'reservation-details/:id_reservation', component: DetailReservationComponent, canActivate: [authGuard] },
+            { path: 'create-reservation', component: CreateReservationComponent, canActivate: [authGuard] },
+            { path: 'admin-info', component: AdminInfoComponent, canActivate: [authGuard] }, // <--- aggiungi questa riga
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 
         ]

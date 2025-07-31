@@ -1,0 +1,27 @@
+<div class="container">
+    <div class="card">
+        <div class="p-card-header">
+            <i class="pi pi-user"></i>
+            <h2>Login Admin</h2>
+        </div>
+        <div class="p-card-body">
+            <form (ngSubmit)="onLogin()" #loginForm="ngForm">
+                <div class="p-field">
+                    <label for="username">Username</label>
+                    <input id="username" type="text" pInputText [(ngModel)]="username" name="username" required />
+                </div>
+                <div class="p-field" style="position: relative;">
+                    <label for="password">Password</label>
+                    <input id="password" [type]="showPassword ? 'text' : 'password'" pInputText [(ngModel)]="password"
+                        name="password" required style="padding-right: 2.5rem;" />
+                    <i class="pi" [ngClass]="showPassword ? 'pi-eye-slash' : 'pi-eye'"
+                        (click)="showPassword = !showPassword"
+                        style="position: absolute; right: 10px; top: 38px; cursor: pointer;"
+                        [attr.aria-label]="showPassword ? 'Nascondi password' : 'Mostra password'" tabindex="0"></i>
+                </div>
+                <button pButton type="submit" label="Login" [disabled]="!loginForm.form.valid">Login</button>
+            </form>
+        </div>
+    </div>
+</div>
+<p-toast></p-toast>

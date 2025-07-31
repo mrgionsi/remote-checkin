@@ -10,6 +10,7 @@ exceptiongroup==1.2.2
 filelock==3.17.0
 Flask==3.1.0
 Flask-Cors==5.0.0
+Flask-JWT-Extended==4.7.1
 greenlet==3.1.1
 gunicorn==23.0.0
 identify==2.6.7
@@ -30,6 +31,7 @@ platformdirs==4.3.6
 pluggy==1.5.0
 pre_commit==4.1.0
 psycopg2-binary==2.9.10
+PyJWT==2.10.1
 pylint==3.3.4
 pytesseract==0.3.13
 pytest==8.3.4

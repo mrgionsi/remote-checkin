@@ -13,8 +13,8 @@ from datetime import datetime
 from flask import Blueprint, request, jsonify
 from sqlalchemy import  func
 from sqlalchemy.sql import extract
+from flask_jwt_extended import jwt_required
 from models import Reservation, Room, Structure, StructureReservationsView
-
 from database import SessionLocal
 
 # Create a blueprint for reservations
@@ -22,18 +22,12 @@ reservation_bp = Blueprint("reservations", __name__, url_prefix="/api/v1")
 
 
 @reservation_bp.route("/reservations", methods=["POST"])
+@jwt_required()
 def create_reservation():
     """
-    Create a new reservation from the JSON payload of a POST request.
-
-    This function extracts reservation details from the incoming JSON payload, validates the presence of
-    required fields ("reservationNumber", "startDate", "endDate", "roomName"), and parses the date strings
-    into datetime objects. It then queries the database to locate the room by its name. If the room is found,
-    a new reservation is created and added to the database. The function commits the transaction and returns
-    a JSON response with the reservation details and a 201 status code. If any validation fails (e.g., missing
-    fields, invalid date formats) or if the room cannot be found, an appropriate error message with a relevant
-    HTTP status code (400, 404, or 500) is returned. The function ensures that the database session is properly
-    closed after the operation, rolling back the transaction in case of errors.
+    Creates a new reservation using details from the JSON payload of a POST request.
+    
+    Validates required fields and date formats, locates the specified room, and adds the reservation to the database. Returns the created reservation details with HTTP 201 on success, or an error message with an appropriate status code if validation fails or the room is not found.
     """
     data = request.get_json()
 
@@ -99,15 +93,16 @@ def create_reservation():
         session.close()
 
 @reservation_bp.route("/reservations/<int:reservation_id>", methods=["PATCH"])
+@jwt_required()
 def update_reservation(reservation_id):
     """
-    Update an existing reservation with provided fields.
-
-    Args:
-        reservation_id (int): The ID of the reservation to update.
-
+    Update fields of an existing reservation identified by its ID.
+    
+    Parameters:
+        reservation_id (int): Unique identifier of the reservation to update.
+    
     Returns:
-        flask.Response: JSON containing updated reservation details or an error message.
+        flask.Response: JSON response with updated reservation details and HTTP 200 on success, or an error message with appropriate HTTP status code if the reservation or room is not found, or if an error occurs.
     """
     data = request.get_json()
 
@@ -160,15 +155,13 @@ def update_reservation(reservation_id):
     finally:
         db.close()
 @reservation_bp.route("/reservations/<int:reservation_id>", methods=["DELETE"])
+@jwt_required()
 def delete_reservation(reservation_id):
     """
-    Delete a reservation by ID.
-
-    Args:
-        reservation_id (int): The ID of the reservation to delete.
-
+    Deletes a reservation identified by its ID.
+    
     Returns:
-        flask.Response: JSON message confirming deletion or error.
+        A JSON response confirming successful deletion with HTTP 200, or an error message with HTTP 404 if not found, or HTTP 500 on failure.
     """
     db = SessionLocal()
     try:
@@ -190,15 +183,12 @@ def delete_reservation(reservation_id):
 
 
 @reservation_bp.route("/reservations", methods=["GET"])
+@jwt_required()
 def get_reservations():
     """
-    Return a JSON response containing the global reservations list.
-
-    This function returns the global reservations list wrapped in a JSON response. The reservations are
-    returned under the key "reservations".
-
-    Returns:
-        flask.Response: A JSON response object containing the global reservations list.
+    Returns a JSON response with a list of all reservations.
+    
+    Currently returns an empty list placeholder; intended to be replaced with actual reservation data from the database.
     """
     # This would typically query the database to get reservations
     # Here, you can modify this to use your actual database retrieval logic
@@ -207,15 +197,16 @@ def get_reservations():
 
 
 @reservation_bp.route("/reservations/structure/<structure_id>", methods=["GET"])
+@jwt_required()
 def get_reservations_by_structure(structure_id):
     """
-    Get all reservations for a specific structure.
-
-    Args:
-        structure_id (int): The ID of the structure to get reservations for.
-
+    Retrieve all reservations associated with a given structure ID.
+    
+    Parameters:
+        structure_id (int): Unique identifier of the structure.
+    
     Returns:
-        flask.Response: JSON array containing reservation details.
+        flask.Response: JSON array of reservation details, including structure, reservation, and room information.
     """
     db = SessionLocal()
     reservations = (
@@ -240,15 +231,13 @@ def get_reservations_by_structure(structure_id):
 
 
 @reservation_bp.route("/reservations/<int:reservation_id>", methods=["GET"])
+@jwt_required()
 def get_reservations_by_id(reservation_id):
     """
-    Get specific reservation
-
-    Args:
-        reservation_id (int): The ID of the reservation.
-
+    Retrieve a reservation by its unique ID.
+    
     Returns:
-        flask.Response: JSON containing reservation details or a 404 error if not found.
+        JSON response with reservation details if found, or a 404 error if the reservation does not exist. Returns a 500 error for unexpected exceptions.
     """
     db = SessionLocal()
     try:
@@ -268,15 +257,16 @@ def get_reservations_by_id(reservation_id):
         db.close()
 
 @reservation_bp.route("/reservations/monthly/<int:structure_id>", methods=["GET"])
+@jwt_required()
 def get_reservations_per_month(structure_id):
     """
-    Get monthly reservation counts for a specific structure.
-
-    Args:
-        structure_id (int): The ID of the structure to get reservation counts for.
-
+    Return the number of reservations per month for a given structure.
+    
+    Parameters:
+        structure_id (int): Unique identifier of the structure.
+    
     Returns:
-        flask.Response: List of dictionaries containing month names and reservation counts, or an empty array if no reservations or structure doesn't exist.
+        flask.Response: JSON array with each month's name and the corresponding reservation count. Returns 404 if the structure does not exist.
     """
     db = SessionLocal()
     try:
@@ -317,15 +307,18 @@ def get_reservations_per_month(structure_id):
 
 
 @reservation_bp.route("/reservations/<int:reservation_id>/status", methods=["PUT"])
+@jwt_required()
 def update_reservation_status(reservation_id):
     """
-    Update the status of a reservation.
-
-    Args:
-        reservation_id (int): The ID of the reservation to update.
-
+    Update the status of a reservation by its ID.
+    
+    Validates the new status against allowed values and updates the reservation if found. Returns the updated reservation details as JSON, or an error message if the status is invalid or the reservation does not exist.
+    
+    Parameters:
+        reservation_id (int): The unique identifier of the reservation to update.
+    
     Returns:
-        flask.Response: JSON containing updated reservation details or an error message.
+        flask.Response: JSON response with updated reservation details and HTTP 200 on success, or an error message with appropriate HTTP status code.
     """
     data = request.get_json()
     allowed_statuses = {"Approved", "Pending", "Declined", "Sent back to customer"}
