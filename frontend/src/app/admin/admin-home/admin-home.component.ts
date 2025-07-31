@@ -1,38 +1,126 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild, OnInit, OnDestroy } from '@angular/core';
 import { MenuItem } from 'primeng/api';
 import { MenuModule } from 'primeng/menu';
 import { BadgeModule } from 'primeng/badge';
 import { RippleModule } from 'primeng/ripple';
 import { AvatarModule } from 'primeng/avatar';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { SidebarModule } from 'primeng/sidebar';
 import { ButtonModule } from 'primeng/button';
+import { AuthService } from '../../services/auth.service';
+import { DropdownModule } from 'primeng/dropdown';
+import { FormsModule } from '@angular/forms';
+import { Menu } from 'primeng/menu';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-admin-home',
-  imports: [MenuModule, BadgeModule, RippleModule, AvatarModule, CommonModule,
+  imports: [MenuModule, BadgeModule, RippleModule, AvatarModule, CommonModule, DropdownModule, FormsModule,
     RouterOutlet, SidebarModule, ButtonModule],
   templateUrl: './admin-home.component.html',
   styleUrl: './admin-home.component.scss'
 })
-export class AdminHomeComponent {
+export class AdminHomeComponent implements OnInit, OnDestroy {
 
   visible: boolean = false;
   menuItems: MenuItem[];
+  userMenuItems: MenuItem[] = [
+    {
+      label: 'Info utente',
+      icon: 'pi pi-user',
+      command: () => this.showUserInfo()
+    },
+    {
+      label: 'Cambia password',
+      icon: 'pi pi-key',
+      routerLink: '/admin/change-password'
+    },
+    {
+      label: 'Logout',
+      icon: 'pi pi-sign-out',
+      command: () => this.logout()
+    }
+  ];
+  userName: string = '';
+  structures: { id: number, name: string }[] = [];
+  selectedStructureId: number | null = null;
 
-  constructor() {
+  @ViewChild('userMenu') userMenu!: Menu;
+  private userSubscription!: Subscription;
+
+  constructor(public router: Router, public authService: AuthService) {
+    console.log('AdminHomeComponent initialized');
     this.menuItems = [
       { label: 'Dashboard', icon: 'pi pi-chart-line', routerLink: '/admin/dashboard' },
       { label: 'Add new Reservation', icon: 'pi pi-plus', routerLink: '/admin/create-reservation' },
       { label: 'Rooms', icon: 'pi pi-warehouse', routerLink: '/admin/rooms' },
-
       { label: 'Settings', icon: 'pi pi-cog', routerLink: '/admin/settings' }
     ];
   }
 
   toggleSidebar() {
     this.visible = !this.visible;
+  }
+
+  ngOnInit() {
+    this.userSubscription = this.authService.user$.subscribe(user => {
+      if (user) {
+        this.userName = user?.username || '';
+        this.structures = user?.structures || [];
+        // Recupera struttura selezionata da localStorage o imposta la prima
+        const savedStructureId = localStorage.getItem('selected_structure_id');
+        if (savedStructureId && this.structures.some(s => s.id === +savedStructureId)) {
+          this.selectedStructureId = +savedStructureId;
+        } else if (this.structures.length > 0) {
+          this.selectedStructureId = this.structures[0].id;
+          localStorage.setItem('selected_structure_id', String(this.selectedStructureId));
+        }
+        if (this.authService.isSuperAdmin()) {
+          this.menuItems.push({
+            label: 'Superadmin Panel',
+            icon: 'pi pi-shield',
+            routerLink: '/admin/superadmin'
+          });
+        }
+      }
+      else {
+        this.router.navigate(['/admin/login']);
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.userSubscription) {
+      this.userSubscription.unsubscribe();
+    }
+  }
+
+  onStructureChange(event: any) {
+    this.selectedStructureId = event.value;
+    localStorage.setItem('selected_structure_id', String(this.selectedStructureId));
+    // Force a full page reload to ensure data is refreshed everywhere
+    window.location.reload();
+    // Alternatively, use an event emitter/service for a more Angular way
+  }
+
+  isLoginPage(): boolean {
+    //console.log('Current URL:', this.router.url);
+    return this.router.url === '/admin/login';
+  }
+
+
+  toggleUserMenu(event: Event) {
+    this.userMenu.toggle(event);
+  }
+
+  showUserInfo() {
+    this.router.navigate(['/admin/admin-info']);
+  }
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/admin/login']);
   }
 
 }

@@ -1,49 +1,72 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { throwError, Observable } from 'rxjs';
 import { environment } from '../../environments/environments';
+import { AuthService } from './auth.service';
 
 @Injectable({
-  providedIn: 'root', // Service is available throughout the app
+  providedIn: 'root',
 })
 export class ReservationService {
-  private apiUrl = `${environment.apiBaseUrl}/api/v1/reservations`;  // Replace with your actual API URL
+  private apiUrl = `${environment.apiBaseUrl}/api/v1/reservations`;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private authService: AuthService) { }
 
-  // Method to create a reservation
+  private checkAuthOrError(): boolean {
+    return this.authService.isLoggedIn();
+  }
+
   createReservation(reservation: any): Observable<any> {
-    return this.http.post(this.apiUrl, reservation);
+    if (!this.checkAuthOrError()) {
+      return throwError(() => new Error('User not authenticated'));
+    }
+    return this.http.post(this.apiUrl, reservation, { headers: this.authService.getAuthHeaders() });
   }
 
-  // Method to update a reservation
   updateReservation(reservation: any, reservationId: number): Observable<any> {
-    return this.http.patch(this.apiUrl + '/' + reservationId, reservation);
+    if (!this.checkAuthOrError()) {
+      return throwError(() => new Error('User not authenticated'));
+    }
+    return this.http.patch(this.apiUrl + '/' + reservationId, reservation, { headers: this.authService.getAuthHeaders() });
   }
 
-  // Method to get reservations by structure ID
   getReservationByStructureId(id: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/structure/${id}`);
+    if (!this.checkAuthOrError()) {
+      return throwError(() => new Error('User not authenticated'));
+    }
+    return this.http.get(
+      `${this.apiUrl}/structure/${id}`,
+      { headers: this.authService.getAuthHeaders() }
+    );
   }
 
-  // Method to get monthly reservations for a structure
   getMonthlyReservation(id_structure: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/monthly/${id_structure}`);
+    if (!this.checkAuthOrError()) {
+      return throwError(() => new Error('User not authenticated'));
+    }
+    return this.http.get(`${this.apiUrl}/monthly/${id_structure}`, { headers: this.authService.getAuthHeaders() });
   }
 
-  // Method to get a reservation by its ID
   getReservationById(id_structure: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/${id_structure}`);
+    if (!this.checkAuthOrError()) {
+      return throwError(() => new Error('User not authenticated'));
+    }
+    return this.http.get(`${this.apiUrl}/${id_structure}`, { headers: this.authService.getAuthHeaders() });
   }
 
-  // Method to update reservation status (Approved, Pending, Declined, Sent back to customer)
   updateReservationStatus(reservationId: number, status: any): Observable<any> {
-    const url = `${this.apiUrl}/${reservationId}/status`; // URL for updating status
-    const body = { status };  // Status field to be updated
-    return this.http.put(url, body);  // Send PUT request to the backend API
+    if (!this.checkAuthOrError()) {
+      return throwError(() => new Error('User not authenticated'));
+    }
+    const url = `${this.apiUrl}/${reservationId}/status`;
+    const body = { status };
+    return this.http.put(url, body, { headers: this.authService.getAuthHeaders() });
   }
 
-  deleteReservation(reservationId: number) {
-    return this.http.delete(this.apiUrl + '/' + reservationId);
+  deleteReservation(reservationId: number): Observable<any> {
+    if (!this.checkAuthOrError()) {
+      return throwError(() => new Error('User not authenticated'));
+    }
+    return this.http.delete(this.apiUrl + '/' + reservationId, { headers: this.authService.getAuthHeaders() });
   }
 }
