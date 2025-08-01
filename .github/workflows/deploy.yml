@@ -1,10 +1,10 @@
 name: Deploy Docker Images
 
 on:
-  workflow_run:
-    workflows: ["Build Flask and Angular with Docker"]
-    types:
-      - completed
+#  workflow_run:
+#    workflows: ["Build Flask and Angular with Docker"]
+#    types:
+#      - completed
 
   push:
     branches:
@@ -13,8 +13,9 @@ on:
 
 jobs:
   compile:
-    # Reuse the compile workflow
+    name: Compile Angular and Flask
     uses: ./.github/workflows/build.yml
+
 
 
   deploy-images:
