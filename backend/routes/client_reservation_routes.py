@@ -43,10 +43,11 @@ import os
 from flask import Blueprint, jsonify, request, send_from_directory
 from models import Client, ClientReservations, Reservation
 from database import SessionLocal
+from flask_jwt_extended import jwt_required
 
 # Blueprint setup
 client_reservation_bp = Blueprint("client_reservations", __name__, url_prefix="/api/v1")
-
+@jwt_required()
 @client_reservation_bp.route("/reservations/<int:reservation_id>/clients", methods=["GET"])
 def get_clients_by_reservation(reservation_id):
     """
@@ -82,6 +83,7 @@ def get_clients_by_reservation(reservation_id):
 
 UPLOAD_FOLDER = "uploads/"  # Base directory for uploaded images
 
+@jwt_required()
 @client_reservation_bp.route("/reservations/<int:reservation_id>/client-images", methods=["POST"])
 def check_images(reservation_id):
     """
@@ -150,7 +152,7 @@ def check_images(reservation_id):
     return jsonify(result)
 
 
-
+@jwt_required()
 @client_reservation_bp.route("/images/<int:reservation_id>/<path:filename>")
 def get_image(reservation_id, filename):
     """

@@ -21,6 +21,7 @@ RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 # Create a non-root user
 RUN groupadd -r appuser && useradd -r -g appuser appuser
 
+COPY .env .
 # Copy application code while ignoring unnecessary files
 COPY . .
 RUN chown -R appuser:appuser /usr/src/app
