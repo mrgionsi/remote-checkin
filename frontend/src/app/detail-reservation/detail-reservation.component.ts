@@ -101,6 +101,7 @@ export class DetailReservationComponent implements OnInit {
                 const photoSub = this.client_reservationService.getUserPhoto(reservationId, person.name, person.surname, person.cf).subscribe({
                   next: (person_photo: any) => {
                     //console.log(person_photo)
+                    console.log(person_photo)
                     person.images = [];
                     person.images.back = person_photo.back_image ? environment.apiBaseUrl + person_photo?.back_image : null;
                     person.images.front = person_photo.front_image ? environment.apiBaseUrl + person_photo?.front_image : null;

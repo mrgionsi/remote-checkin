@@ -68,3 +68,22 @@ def save_file(file, folder, filename):
     except (OSError, IOError) as e:
         print(f"Error saving file: {e}")
         return None
+
+def sanitize_filename(name, surname, cf, suffix):
+    """
+    Sanitize the input for filename creation, allowing only certain characters.
+    
+    Parameters:
+        name (str): The name part of the filename.
+        surname (str): The surname part of the filename.
+        cf (str): The cf part of the filename (fiscal code or similar).
+        suffix (str): The suffix to be added at the end of the filename.
+    
+    Returns:
+        str: A sanitized filename.
+    """
+    allowed = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 -_")
+    sanitized_name = "".join(c for c in name if c in allowed).strip()
+    sanitized_surname = "".join(c for c in surname if c in allowed).strip()
+    sanitized_cf = "".join(c for c in cf if c.isalnum()).strip()
+    return f"{sanitized_name}-{sanitized_surname}-{sanitized_cf}-{suffix}.jpg"
