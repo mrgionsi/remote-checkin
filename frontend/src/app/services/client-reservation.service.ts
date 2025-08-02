@@ -17,8 +17,12 @@ export class ClientReservationService {
     return this.authService.isLoggedIn();
   }
 
+
   getClientByReservationId(id_reservation: number): Observable<any> {
-    return this.http.get(this.apiUrl + '/' + id_reservation + '/clients')
+        if (!this.checkAuthOrError()) {
+      return throwError(() => new Error('User not authenticated'));
+    }
+    return this.http.get(this.apiUrl + '/' + id_reservation + '/clients', { headers: this.authService.getAuthHeaders() })
   }
 
   getUserPhoto(id_reservation: number, name: string, surname: string, cf: string) {
