@@ -44,51 +44,50 @@ def init_db():
     yield db
     db.close()
 
-
-
-
 def test_successful_upload(client, init_db):
     """Test successful document upload."""
-    data = {
-        "reservationId": "12345",
-        "name": "John",
-        "surname": "Doe",
-        "birthday": "1990-01-01",
-        "street": "123 Main St",
-        "city": "Test City",
-        "province": "Test Province",
-        "cap": "12345",
-        "telephone": "1234567890",
-        "document_type": "ID",
-        "document_number": "ABC123456",
-        "cf": "JHNDOE90A01X123Y",
-        "frontimage": (
-            open("tests/test_images/front.jpeg", 'rb'),
-            "front.jpeg",
-            "image/jpeg"
-        ),
-        "backimage": (
-            open("tests/test_images/back.jpeg", 'rb'),
-            "back.jpeg",
-            "image/jpeg"
-        ),
-        "selfie": (
-            open("tests/test_images/selfie.jpeg", 'rb'),
-            "selfie.jpeg",
-            "image/jpeg"
+    with open("tests/test_images/front.jpeg", 'rb') as front_file, \
+         open("tests/test_images/back.jpeg", 'rb') as back_file, \
+         open("tests/test_images/selfie.jpeg", 'rb') as selfie_file:
+        data = {
+            "reservationId": "12345",
+            "name": "John",
+            "surname": "Doe",
+            "birthday": "1990-01-01",
+            "street": "123 Main St",
+            "city": "Test City",
+            "province": "Test Province",
+            "cap": "12345",
+            "telephone": "1234567890",
+            "document_type": "ID",
+            "document_number": "ABC123456",
+            "cf": "JHNDOE90A01X123Y",
+            "frontimage": (
+                front_file,
+                "front.jpeg",
+                "image/jpeg"
+            ),
+            "backimage": (
+                back_file,
+                "back.jpeg",
+                "image/jpeg"
+            ),
+            "selfie": (
+                selfie_file,
+                "selfie.jpeg",
+                "image/jpeg"
+            )
+        }
+
+        response = client.post(
+            "/api/v1/upload",
+            data=data,
+            content_type='multipart/form-data'
         )
-    }
 
-    response = client.post(
-        "/api/v1/upload",
-        data=data,
-        content_type='multipart/form-data'
-    )
+        print("PRINTING ", response.json)  # Debugging
 
-    print("PRINTING ", response.json)  # Debugging
-
-    assert response.status_code == 200
-
+        assert response.status_code == 200
 
 
 def test_upload_missing_files(client):
@@ -115,35 +114,39 @@ def test_upload_nonexistent_reservation(client):
     """
     Test upload with a nonexistent reservation.
     """
-    data = {"reservationId": "99999",
-        "name": "John",
-        "surname": "Doe",
-        "birthday": "1990-01-01",
-        "street": "123 Main St",
-        "city": "Test City",
-        "province": "Test Province",
-        "cap": "12345",
-        "telephone": "1234567890",
-        "document_type": "ID",
-        "document_number": "ABC123456",
-        "cf": "JHNDOE90A01X123Y",
-        "frontimage": (
-            open("tests/test_images/front.jpeg", 'rb'),
-            "front.jpeg",
-            "image/jpeg"
-        ),
-        "backimage": (
-            open("tests/test_images/back.jpeg", 'rb'),
-            "back.jpeg",
-            "image/jpeg"
-        ),
-        "selfie": (
-            open("tests/test_images/selfie.jpeg", 'rb'),
-            "selfie.jpeg",
-            "image/jpeg"
-        )
-    }
-    response = client.post("/api/v1/upload", data=data, content_type='multipart/form-data')
-    print(response.json)
-    assert response.status_code == 404
-    assert "Reservation not found" in response.get_json()["error"]
+    with open("tests/test_images/front.jpeg", 'rb') as front_file, \
+         open("tests/test_images/back.jpeg", 'rb') as back_file, \
+         open("tests/test_images/selfie.jpeg", 'rb') as selfie_file:
+        data = {
+            "reservationId": "99999",
+            "name": "John",
+            "surname": "Doe",
+            "birthday": "1990-01-01",
+            "street": "123 Main St",
+            "city": "Test City",
+            "province": "Test Province",
+            "cap": "12345",
+            "telephone": "1234567890",
+            "document_type": "ID",
+            "document_number": "ABC123456",
+            "cf": "JHNDOE90A01X123Y",
+            "frontimage": (
+                front_file,
+                "front.jpeg",
+                "image/jpeg"
+            ),
+            "backimage": (
+                back_file,
+                "back.jpeg",
+                "image/jpeg"
+            ),
+            "selfie": (
+                selfie_file,
+                "selfie.jpeg",
+                "image/jpeg"
+            )
+        }
+        response = client.post("/api/v1/upload", data=data, content_type='multipart/form-data')
+        print(response.json)
+        assert response.status_code == 404
+        assert "Reservation not found" in response.get_json()["error"]
