@@ -47,8 +47,9 @@ from flask_jwt_extended import jwt_required
 
 # Blueprint setup
 client_reservation_bp = Blueprint("client_reservations", __name__, url_prefix="/api/v1")
-@jwt_required()
+
 @client_reservation_bp.route("/reservations/<int:reservation_id>/clients", methods=["GET"])
+@jwt_required()
 def get_clients_by_reservation(reservation_id):
     """
     Get all clients associated with a given reservation ID.
@@ -83,8 +84,8 @@ def get_clients_by_reservation(reservation_id):
 
 UPLOAD_FOLDER = "uploads/"  # Base directory for uploaded images
 
-@jwt_required()
 @client_reservation_bp.route("/reservations/<int:reservation_id>/client-images", methods=["POST"])
+@jwt_required()
 def check_images(reservation_id):
     """
     Check if images exist for a given client and reservation ID.
@@ -152,8 +153,8 @@ def check_images(reservation_id):
     return jsonify(result)
 
 
-@jwt_required()
 @client_reservation_bp.route("/images/<int:reservation_id>/<path:filename>")
+@jwt_required()
 def get_image(reservation_id, filename):
     """
     Serve images from the uploads folder.
