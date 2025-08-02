@@ -100,8 +100,8 @@ describe('RemoteCheckinComponent', () => {
     });
 
     component.uploadForm.patchValue({
-      frontImage: null,
-      backImage: null,
+      frontimage: null,
+      backimage: null,
       selfie: null
     });
 
@@ -133,8 +133,8 @@ describe('RemoteCheckinComponent', () => {
   it('should upload reservation data and show success message', fakeAsync(() => {
     // Mock FormData and response
     const formData = new FormData();
-    formData.append('frontImage', 'file1');
-    formData.append('backImage', 'file2');
+    formData.append('frontimage', 'file1');
+    formData.append('backimage', 'file2');
     formData.append('selfie', 'file3');
     formData.append('name', 'John');
     formData.append('surname', 'Doe');
@@ -145,8 +145,8 @@ describe('RemoteCheckinComponent', () => {
 
     // Setting form values
     component.uploadForm.setValue({
-      frontImage: 'file1',
-      backImage: 'file2',
+      frontimage: 'file1',
+      backimage: 'file2',
       selfie: 'file3'
     });
 
