@@ -25,14 +25,14 @@ export class UploadIdentityComponent {
 
   constructor(private fb: FormBuilder) {
     this.uploadForm = this.fb.group({
-      frontImage: [null, Validators.required],
-      backImage: [null, Validators.required],
+      frontimage: [null, Validators.required],
+      backimage: [null, Validators.required],
       selfie: [null, Validators.required]
     });
   }
 
 
-  onFileSelect(event: any, type: 'frontImage' | 'backImage' | 'selfie') {
+  onFileSelect(event: any, type: 'frontimage' | 'backimage' | 'selfie') {
     console.log(event)
 
     const file = event.currentFiles[0];
@@ -40,8 +40,8 @@ export class UploadIdentityComponent {
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        if (type === 'frontImage') this.frontPreview = reader.result;
-        if (type === 'backImage') this.backPreview = reader.result;
+        if (type === 'frontimage') this.frontPreview = reader.result;
+        if (type === 'backimage') this.backPreview = reader.result;
         if (type === 'selfie') this.selfiePreview = reader.result;
       };
       reader.readAsDataURL(file);
