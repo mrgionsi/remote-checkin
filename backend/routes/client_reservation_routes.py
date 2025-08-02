@@ -42,8 +42,8 @@ Usage:
 import os
 from flask import Blueprint, jsonify, request, send_from_directory
 from models import Client, ClientReservations, Reservation
-from database import SessionLocal
 from flask_jwt_extended import jwt_required
+from database import SessionLocal
 
 # Blueprint setup
 client_reservation_bp = Blueprint("client_reservations", __name__, url_prefix="/api/v1")
