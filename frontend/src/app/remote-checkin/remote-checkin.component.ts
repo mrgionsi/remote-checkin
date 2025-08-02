@@ -46,8 +46,8 @@ export class RemoteCheckinComponent implements OnInit {
   constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder,
     private messageService: MessageService, private uploadService: UploadService) {
     this.uploadForm = this.fb.group({
-      frontImage: [null, Validators.required],
-      backImage: [null, Validators.required],
+      frontimage: [null, Validators.required],
+      backimage: [null, Validators.required],
       selfie: [null, Validators.required]
     });
     this.clientForm = this.fb.group({
@@ -84,7 +84,7 @@ export class RemoteCheckinComponent implements OnInit {
   handleFormData(formData: FormGroup) {
     // Here you can do anything with the received FormData
     this.uploadForm = formData;
-    console.log(this.uploadForm.get('frontImage'))
+    console.log(this.uploadForm.get('frontimage'))
     /*     this.messageService.add({
           severity: 'success',
           summary: 'Success',
@@ -103,8 +103,8 @@ export class RemoteCheckinComponent implements OnInit {
     const formData = new FormData();
 
     // Append image files
-    formData.append('frontImage', this.uploadForm.get('frontImage')?.value);
-    formData.append('backImage', this.uploadForm.get('backImage')?.value);
+    formData.append('frontimage', this.uploadForm.get('frontimage')?.value);
+    formData.append('backimage', this.uploadForm.get('backimage')?.value);
     formData.append('selfie', this.uploadForm.get('selfie')?.value);
 
     // Fetch additional data from clientForm

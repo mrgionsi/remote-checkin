@@ -160,15 +160,15 @@
                         <div class="col-6">
                             <p-card header="Uploaded Images" class="">
                                 <div class="image-upload-section p-3" class="flex flex-col items-center">
-                                    <div *ngIf="uploadForm.get('frontImage')?.value['objectURL']" class="pt-3 pr-3">
+                                    <div *ngIf="uploadForm.get('frontimage')?.value['objectURL']" class="pt-3 pr-3">
                                         <p> <strong>Front Image:</strong></p>
-                                        <img [src]="uploadForm.get('frontImage')?.value['objectURL']" alt="Front Image"
+                                        <img [src]="uploadForm.get('frontimage')?.value['objectURL']" alt="Front Image"
                                             class="image-preview w-32 h-32 object-cover rounded-md shadow-md border border-gray-300">
                                     </div>
 
-                                    <div *ngIf="uploadForm?.get('backImage')?.value['objectURL']" class="pt-3 pr-3">
+                                    <div *ngIf="uploadForm?.get('backimage')?.value['objectURL']" class="pt-3 pr-3">
                                         <p> <strong>Back Image:</strong></p>
-                                        <img [src]="uploadForm.get('backImage')?.value['objectURL']" alt="Back Image"
+                                        <img [src]="uploadForm.get('backimage')?.value['objectURL']" alt="Back Image"
                                             class="image-preview w-32 h-32 object-cover rounded-md shadow-md border border-gray-300">
                                     </div>
 

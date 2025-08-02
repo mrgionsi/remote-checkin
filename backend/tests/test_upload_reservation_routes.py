@@ -62,12 +62,12 @@ def test_successful_upload(client, init_db):
         "document_type": "ID",
         "document_number": "ABC123456",
         "cf": "JHNDOE90A01X123Y",
-        "frontImage": (
+        "frontimage": (
             open("tests/test_images/front.jpeg", 'rb'),
             "front.jpeg",
             "image/jpeg"
         ),
-        "backImage": (
+        "backimage": (
             open("tests/test_images/back.jpeg", 'rb'),
             "back.jpeg",
             "image/jpeg"
@@ -106,7 +106,7 @@ def test_upload_missing_files(client):
 #    """
 #    Test upload with an invalid file type.
 #    """
-#    data = {"reservationId": "12345", "frontImage": (BytesIO(b"fake data"), "document.pdf")}
+#    data = {"reservationId": "12345", "frontimage": (BytesIO(b"fake data"), "document.pdf")}
 #    response = client.post("/api/v1/upload", data=data, content_type='multipart/form-data')
 #    assert response.status_code == 400
 #    assert "Invalid file type" in response.get_json()["error"]
@@ -127,12 +127,12 @@ def test_upload_nonexistent_reservation(client):
         "document_type": "ID",
         "document_number": "ABC123456",
         "cf": "JHNDOE90A01X123Y",
-        "frontImage": (
+        "frontimage": (
             open("tests/test_images/front.jpeg", 'rb'),
             "front.jpeg",
             "image/jpeg"
         ),
-        "backImage": (
+        "backimage": (
             open("tests/test_images/back.jpeg", 'rb'),
             "back.jpeg",
             "image/jpeg"

@@ -12,7 +12,7 @@ Functions:
 import os
 from flask import Blueprint, request, jsonify
 from werkzeug.exceptions import BadRequest
-from utils.file_utils import allowed_file, save_file
+from utils.file_utils import allowed_file, sanitize_filename, save_file
 from utils.ocr_utils import validate_document
 from utils.db_utils import get_reservation_by_id, get_client_by_cf, add_or_update_client, link_client_to_reservation
 
@@ -26,7 +26,7 @@ def upload_file():
     """
     try:
         # Required files and form fields
-        required_files = ['frontImage', 'backImage', 'selfie']
+        required_files = ['frontimage', 'backimage', 'selfie']
         required_fields = ['reservationId', 'name', 'surname', 'birthday', 'street',
                            'city', 'province', 'cap', 'telephone', 'document_type', 'document_number', 'cf']        
 
@@ -49,10 +49,10 @@ def upload_file():
         validation_results = {}
 
         # Process images
-        for key in ['frontImage', 'backImage']:
+        for key in ['frontimage', 'backimage']:
             file = request.files[key]
             if file and allowed_file(file.filename):
-                filename = f"{form_data['name']}-{form_data['surname']}-{cf}-{key}.jpg"
+                filename = sanitize_filename(form_data['name'], form_data['surname'], cf, key)
                 filepath = save_file(file, reservation_folder, filename)
                 files[key] = filename
 
@@ -67,7 +67,7 @@ def upload_file():
         # Process selfie
         selfie = request.files['selfie']
         if selfie and allowed_file(selfie.filename):
-            selfie_filename = f"{form_data['name']}-{form_data['surname']}-{cf}-selfie.jpg"
+            selfie_filename = sanitize_filename(form_data['name'], form_data['surname'], cf, "selfie")
             selfie_filepath = save_file(selfie, reservation_folder, selfie_filename)
             files['selfie'] = selfie_filename
         else:
