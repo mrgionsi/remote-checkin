@@ -41,7 +41,7 @@ Usage:
 
 import os
 from flask import Blueprint, jsonify, request, send_from_directory
-from models import Client, ClientReservations, Reservation
+from models import Client, ClientReservations
 from flask_jwt_extended import jwt_required
 from database import SessionLocal
 
