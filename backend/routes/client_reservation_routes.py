@@ -134,7 +134,6 @@ def check_images(reservation_id):
     sanitized_surname = "".join(c for c in surname if c.isalnum() or c in [' ', '-', '_']).strip()
     sanitized_cf = "".join(c for c in cf if c.isalnum()).strip()
     file_base = f"{sanitized_name}-{sanitized_surname}-{sanitized_cf}"
-    print(file_base)
     file_names = {
         "back_image": f"{file_base}-backimage.jpg",
         "front_image": f"{file_base}-frontimage.jpg",
@@ -146,10 +145,8 @@ def check_images(reservation_id):
     for key, file_name in file_names.items():
         file_path = os.path.join(folder_path, file_name)
         if os.path.exists(file_path):
-            print(f"File found: {file_path}")
             result[key] = f"/api/v1/images/{reservation_id}/{file_name}"
         else:
-            print(f"File not found: {file_path}")
             result[key] = None  # File not found
 
     return jsonify(result)
