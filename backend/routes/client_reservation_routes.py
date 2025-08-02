@@ -108,14 +108,10 @@ def check_images(reservation_id):
     # Verify client belongs to this reservation
     db = SessionLocal()
     try:
-        id_reservation_subquery = db.query(Reservation.id)\
-            .filter(Reservation.id == str(reservation_id))\
-            .scalar_subquery()
-
         client_exists = db.query(Client).join(
             ClientReservations, Client.id == ClientReservations.id_client
         ).filter(
-            ClientReservations.id_reservation == id_reservation_subquery,
+            ClientReservations.id_reservation == reservation_id,
             Client.name == name,
             Client.surname == surname,
             Client.cf == cf
