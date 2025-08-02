@@ -132,16 +132,16 @@
                 <i *ngIf="!person.hasMissingImages" class="pi pi-check-circle text-success" title="Complete"></i>
             </td>
             <td>
-                <img *ngIf="person.images?.front" [src]="person.images?.front" alt="Front Image" width="50"
+                <img *ngIf="person.images?.front" [src]="person.images.front" alt="Front Image" width="50"
                     height="50" />
                 <span *ngIf="!person.images?.front">Not Found</span>
             </td>
             <td>
-                <img *ngIf="person.images?.back" [src]="person.images?.back" alt="Back Image" width="50" height="50" />
+                <img *ngIf="person.images?.back" [src]="person.images.back" alt="Back Image" width="50" height="50" />
                 <span *ngIf="!person.images?.back">Not Found</span>
             </td>
             <td>
-                <img *ngIf="person.images?.selfie" [src]="person.images?.selfie" alt="Selfie" width="50" height="50" />
+                <img *ngIf="person.images?.selfie" [src]="person.images.selfie" alt="Selfie" width="50" height="50" />
                 <span *ngIf="!person.images?.selfie">Not Found</span>
             </td>
             <td>{{ person.name }}</td>
