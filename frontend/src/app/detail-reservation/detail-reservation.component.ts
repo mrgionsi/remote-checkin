@@ -19,6 +19,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { DateShortPipe } from "../pipes/date-short.pipe";
 import { RoomService } from '../services/room.service';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-detail-reservation',
@@ -56,7 +57,8 @@ export class DetailReservationComponent implements OnInit {
     private readonly reservation_service: ReservationService,
     private readonly roomService: RoomService,
     private readonly confirmationService: ConfirmationService,
-    private readonly router: Router
+    private readonly router: Router,
+    private http: HttpClient
   ) {
     this.form = this.fb.group({
       id_reference: ['', Validators.required],
@@ -101,10 +103,22 @@ export class DetailReservationComponent implements OnInit {
                 const photoSub = this.client_reservationService.getUserPhoto(reservationId, person.name, person.surname, person.cf).subscribe({
                   next: (person_photo: any) => {
                     //console.log(person_photo)
-                    person.images = [];
-                    person.images.back = person_photo.back_image ? environment.apiBaseUrl + person_photo?.back_image : null;
-                    person.images.front = person_photo.front_image ? environment.apiBaseUrl + person_photo?.front_image : null;
-                    person.images.selfie = person_photo.selfie ? environment.apiBaseUrl + person_photo?.selfie : null;
+                    person.images = {};
+                    if (person_photo.back_image) {
+                      this.loadPersonImage(person, 'back', environment.apiBaseUrl + person_photo.back_image);
+                    } else {
+                      person.images.back = null;
+                    }
+                    if (person_photo.front_image) {
+                      this.loadPersonImage(person, 'front', environment.apiBaseUrl + person_photo.front_image);
+                    } else {
+                      person.images.front = null;
+                    }
+                    if (person_photo.selfie) {
+                      this.loadPersonImage(person, 'selfie', environment.apiBaseUrl + person_photo.selfie);
+                    } else {
+                      person.images.selfie = null;
+                    }
                     person.hasMissingImages = !person_photo.back_image || !person_photo.front_image || !person_photo.selfie;
 
                     //console.log(person)
@@ -307,5 +321,14 @@ export class DetailReservationComponent implements OnInit {
     });
   }
 
-
+  // Funzione per scaricare l'immagine con autenticazione
+  loadPersonImage(person: any, type: 'front' | 'back' | 'selfie', url: string) {
+    const token = localStorage.getItem('admin_token');
+    this.http.get(url, {
+      responseType: 'blob',
+      headers: { Authorization: `Bearer ${token}` }
+    }).subscribe(blob => {
+      person.images[type] = URL.createObjectURL(blob);
+    });
+  }
 }
