@@ -255,9 +255,9 @@ def get_admin_reservations_by_id(reservation_id):
         db.close()
 
 
-@reservation_bp.route("/reservations/<int:reservation_id>", methods=["GET"])
+@reservation_bp.route("/reservations/check/<int:reservation_id>", methods=["GET"])
 #@jwt_required() Not needed as this endpoint is for public access
-def get_reservations_by_id(reservation_id):
+def check_get_reservations_by_id(reservation_id):
     """
     Retrieve a reservation by its unique ID.
     
@@ -275,7 +275,7 @@ def get_reservations_by_id(reservation_id):
         if not reservation:
             return jsonify({"error": f"Reservation with ID {reservation_id} not found"}), 404
 
-        return jsonify(reservation.to_dict())
+        return jsonify({'id_reference':reservation_id}), 200
     except Exception as e:
         return jsonify({"error": f"Error retrieving reservation: {str(e)}"}), 500
     finally:
