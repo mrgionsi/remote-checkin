@@ -90,7 +90,7 @@ export class DetailReservationComponent implements OnInit {
       reservationId = params['id_reservation']; // Default to 'en' if missing
       //console.log(reservationId);
       this.reservationId = reservationId;
-      this.reservation_service.getReservationById(reservationId).subscribe({
+      this.reservation_service.getAdminReservationById(reservationId).subscribe({
         next: (resp) => {
           this.reservation_details = resp;
           console.log("Resp", resp);

@@ -51,6 +51,12 @@ export class ReservationService {
     // This endpoint is public, so we do not check authentication
     return this.http.get(`${this.apiUrl}/${id_structure}`);
   }
+  getAdminReservationById(id_structure: number): Observable<any> {
+    if (!this.checkAuthOrError()) {
+      return throwError(() => new Error('User not authenticated'));
+    }
+    return this.http.get(`${this.apiUrl}/admin/${id_structure}`, { headers: this.authService.getAuthHeaders() });
+  }
 
   updateReservationStatus(reservationId: number, status: any): Observable<any> {
     if (!this.checkAuthOrError()) {
