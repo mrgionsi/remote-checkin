@@ -200,13 +200,13 @@ def get_reservations():
 @jwt_required()
 def get_reservations_by_structure(structure_id):
     """
-    Retrieve all reservations associated with a given structure ID.
+    Retrieve all reservations linked to a specific structure.
     
     Parameters:
-        structure_id (int): Unique identifier of the structure.
+        structure_id (int): The unique ID of the structure whose reservations are to be retrieved.
     
     Returns:
-        flask.Response: JSON array of reservation details, including structure, reservation, and room information.
+        flask.Response: A JSON array containing details of each reservation, including structure, reservation, and room information.
     """
     db = SessionLocal()
     reservations = (
@@ -232,10 +232,13 @@ def get_reservations_by_structure(structure_id):
 @jwt_required()
 def get_admin_reservations_by_id(reservation_id):
     """
-    Retrieve a reservation by its unique ID.
+    Retrieve reservation details by its unique ID for administrative purposes.
+    
+    Parameters:
+        reservation_id (int): The primary key ID of the reservation to retrieve.
     
     Returns:
-        JSON response with reservation details if found, or a 404 error if the reservation does not exist. Returns a 500 error for unexpected exceptions.
+        Response: JSON object with reservation details and HTTP 200 if found; 404 if not found; 500 on unexpected errors.
     """
     db = SessionLocal()
     try:
@@ -259,10 +262,10 @@ def get_admin_reservations_by_id(reservation_id):
 #@jwt_required() Not needed as this endpoint is for public access
 def check_get_reservations_by_id(reservation_id):
     """
-    Retrieve a reservation by its unique ID.
+    Checks for the existence of a reservation by its reference ID and returns the reference if found.
     
     Returns:
-        JSON response with reservation details if found, or a 404 error if the reservation does not exist. Returns a 500 error for unexpected exceptions.
+        JSON response containing the reservation's reference ID with HTTP 200 if found, 404 if not found, or 500 on error.
     """
     db = SessionLocal()
     try:
@@ -285,13 +288,13 @@ def check_get_reservations_by_id(reservation_id):
 @jwt_required()
 def get_reservations_per_month(structure_id):
     """
-    Return the number of reservations per month for a given structure.
+    Returns the count of reservations for each month for a specified structure.
     
     Parameters:
-        structure_id (int): Unique identifier of the structure.
+        structure_id (int): The unique identifier of the structure to query.
     
     Returns:
-        flask.Response: JSON array with each month's name and the corresponding reservation count. Returns 404 if the structure does not exist.
+        flask.Response: A JSON array where each element contains the month's name and the total number of reservations for that month. Returns a 404 response if the structure does not exist.
     """
     db = SessionLocal()
     try:

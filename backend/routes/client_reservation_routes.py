@@ -88,16 +88,9 @@ UPLOAD_FOLDER = "uploads/"  # Base directory for uploaded images
 @jwt_required()
 def check_images(reservation_id):
     """
-    Check if images exist for a given client and reservation ID.
-
-    Request Body:
-        - name (str): Client's first name.
-        - surname (str): Client's last name.
-        - cf (str): Client's CF (Codice Fiscale).
-        - reservationId (int): The reservation ID.
-
-    Returns:
-        - JSON response with image URLs or error message.
+    Checks for the existence of client identity images associated with a specific reservation and client details.
+    
+    Validates that the reservation exists and the client is linked to it, then inspects the reservation's upload folder for the expected identity image files. Returns a JSON object with URLs to available images (`back_image`, `front_image`, `selfie`) or `null` for missing files. Responds with appropriate error messages for missing fields, non-existent reservation, client not associated, or missing folder.
     """
     data = request.get_json()
     name = data.get("name")
