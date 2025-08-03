@@ -41,7 +41,7 @@ Usage:
 
 import os
 from flask import Blueprint, jsonify, request, send_from_directory
-from models import Client, ClientReservations
+from models import Client, ClientReservations, Reservation
 from flask_jwt_extended import jwt_required
 from database import SessionLocal
 
@@ -88,16 +88,9 @@ UPLOAD_FOLDER = "uploads/"  # Base directory for uploaded images
 @jwt_required()
 def check_images(reservation_id):
     """
-    Check if images exist for a given client and reservation ID.
-
-    Request Body:
-        - name (str): Client's first name.
-        - surname (str): Client's last name.
-        - cf (str): Client's CF (Codice Fiscale).
-        - reservationId (int): The reservation ID.
-
-    Returns:
-        - JSON response with image URLs or error message.
+    Checks for the existence of client identity images associated with a specific reservation and client details.
+    
+    Validates that the reservation exists and the client is linked to it, then inspects the reservation's upload folder for the expected identity image files. Returns a JSON object with URLs to available images (`back_image`, `front_image`, `selfie`) or `null` for missing files. Responds with appropriate error messages for missing fields, non-existent reservation, client not associated, or missing folder.
     """
     data = request.get_json()
     name = data.get("name")
@@ -108,11 +101,16 @@ def check_images(reservation_id):
         return jsonify({"error": "Missing required fields"}), 400
     # Verify client belongs to this reservation
     db = SessionLocal()
+
     try:
+        reservation = db.query(Reservation).filter(
+        Reservation.id_reference == str(reservation_id)).first()
+        if not reservation:
+            return jsonify({"error": "Error fetching reservation, reservation doesn't exists"}), 404
         client_exists = db.query(Client).join(
             ClientReservations, Client.id == ClientReservations.id_client
         ).filter(
-            ClientReservations.id_reservation == reservation_id,
+            ClientReservations.id_reservation == reservation.id,
             Client.name == name,
             Client.surname == surname,
             Client.cf == cf

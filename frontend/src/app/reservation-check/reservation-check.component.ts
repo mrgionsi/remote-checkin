@@ -34,11 +34,15 @@ export class ReservationCheckComponent implements OnInit {
   goToCheckIn() {
     var _ = this;
 
-    this.reservationService.getReservationById(Number(this.reservationId)).subscribe({
+    this.reservationService.checkReservationById(Number(this.reservationId)).subscribe({
       next: (val) => {
-        console.log(val);
-        console.log('Reservation ID:', this.reservationId);
-        console.log('Language Code:', this.languageCode);
+        if (val && val.id_reference) {
+          _.messageService.add({ severity: 'success', summary: 'Success', detail: 'Reservation validated successfully.' });
+        } else {
+          _.messageService.add({ severity: 'error', summary: 'Error', detail: 'Invalid reservation ID. Please check and try again.' });
+          return;
+        }
+        // Navigate to the remote check-in page with the reservation ID and language code
 
         if (!this.reservationId || !this.languageCode) {
           console.error('Missing values! Cannot navigate.');
