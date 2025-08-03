@@ -19,9 +19,10 @@ export class ClientReservationService {
 
 
   getClientByReservationId(id_reservation: number): Observable<any> {
-        if (!this.checkAuthOrError()) {
+    if (!this.checkAuthOrError()) {
       return throwError(() => new Error('User not authenticated'));
     }
+    console.log('Fetching clients for reservation ID:', this.authService.getAuthHeaders());
     return this.http.get(this.apiUrl + '/' + id_reservation + '/clients', { headers: this.authService.getAuthHeaders() })
   }
 
@@ -29,7 +30,7 @@ export class ClientReservationService {
     if (!this.checkAuthOrError()) {
       return throwError(() => new Error('User not authenticated'));
     }
-    return this.http.post(this.apiUrl + '/' + id_reservation + '/client-images', { name, surname, cf })
+    return this.http.post(this.apiUrl + '/' + id_reservation + '/client-images', { name, surname, cf }, { headers: this.authService.getAuthHeaders() })
 
 
 
