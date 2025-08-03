@@ -22,7 +22,6 @@ export class ClientReservationService {
     if (!this.checkAuthOrError()) {
       return throwError(() => new Error('User not authenticated'));
     }
-    console.log('Fetching clients for reservation ID:', this.authService.getAuthHeaders());
     return this.http.get(this.apiUrl + '/' + id_reservation + '/clients', { headers: this.authService.getAuthHeaders() })
   }
 
