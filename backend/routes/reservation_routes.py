@@ -231,7 +231,7 @@ def get_reservations_by_structure(structure_id):
 
 
 @reservation_bp.route("/reservations/<int:reservation_id>", methods=["GET"])
-@jwt_required()
+#@jwt_required() Not needed as this endpoint is for public access
 def get_reservations_by_id(reservation_id):
     """
     Retrieve a reservation by its unique ID.
