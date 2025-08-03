@@ -87,7 +87,7 @@ export class DetailReservationComponent implements OnInit {
   ngOnInit(): void {
     var reservationId: number;
     this.route.params.subscribe(params => {
-      reservationId = params['id_reservation']; // Default to 'en' if missing
+      reservationId = params['id_reservation'];
       //console.log(reservationId);
       this.reservationId = reservationId;
       this.reservation_service.getAdminReservationById(reservationId).subscribe({
@@ -100,7 +100,7 @@ export class DetailReservationComponent implements OnInit {
             next: (r) => {
               this.people = r;
               this.people.forEach(person => {
-                const photoSub = this.client_reservationService.getUserPhoto(reservationId, person.name, person.surname, person.cf).subscribe({
+                const photoSub = this.client_reservationService.getUserPhoto(this.reservation_details.id_reference, person.name, person.surname, person.cf).subscribe({
                   next: (person_photo: any) => {
                     //console.log(person_photo)
 

@@ -41,7 +41,7 @@ Usage:
 
 import os
 from flask import Blueprint, jsonify, request, send_from_directory
-from models import Client, ClientReservations
+from models import Client, ClientReservations, Reservation
 from flask_jwt_extended import jwt_required
 from database import SessionLocal
 
@@ -108,11 +108,16 @@ def check_images(reservation_id):
         return jsonify({"error": "Missing required fields"}), 400
     # Verify client belongs to this reservation
     db = SessionLocal()
+
     try:
+        reservation = db.query(Reservation).filter(
+        Reservation.id_reference == str(reservation_id)).first()
+        if not reservation:
+            return jsonify({"error": "Error fetching reservation, reservation doesn't exists"}), 404
         client_exists = db.query(Client).join(
             ClientReservations, Client.id == ClientReservations.id_client
         ).filter(
-            ClientReservations.id_reservation == reservation_id,
+            ClientReservations.id_reservation == reservation.id,
             Client.name == name,
             Client.surname == surname,
             Client.cf == cf
