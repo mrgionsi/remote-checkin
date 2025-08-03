@@ -228,6 +228,31 @@ def get_reservations_by_structure(structure_id):
         "room_name": r.room_name
     } for r in reservations])
 
+@reservation_bp.route("/reservations/admin/<int:reservation_id>", methods=["GET"])
+@jwt_required()
+def get_admin_reservations_by_id(reservation_id):
+    """
+    Retrieve a reservation by its unique ID.
+    
+    Returns:
+        JSON response with reservation details if found, or a 404 error if the reservation does not exist. Returns a 500 error for unexpected exceptions.
+    """
+    db = SessionLocal()
+    try:
+        reservation = (
+            db.query(Reservation)
+            .filter(Reservation.id == str(reservation_id))
+            .first()
+        )
+
+        if not reservation:
+            return jsonify({"error": f"Reservation with ID {reservation_id} not found"}), 404
+
+        return jsonify(reservation.to_dict())
+    except Exception as e:
+        return jsonify({"error": f"Error retrieving reservation: {str(e)}"}), 500
+    finally:
+        db.close()
 
 
 @reservation_bp.route("/reservations/<int:reservation_id>", methods=["GET"])
@@ -243,7 +268,7 @@ def get_reservations_by_id(reservation_id):
     try:
         reservation = (
             db.query(Reservation)
-            .filter(Reservation.id == str(reservation_id))
+            .filter(Reservation.id_reference == str(reservation_id))
             .first()
         )
 
