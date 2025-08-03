@@ -15,6 +15,7 @@ import { UploadIdentityComponent } from '../upload-identity/upload-identity.comp
 import { UploadService } from '../services/upload.service';
 import { ToastModule } from 'primeng/toast';
 import { DialogModule } from 'primeng/dialog';
+import { DocumentTypeLabelPipe } from '../pipes/document-type-label.pipe';
 
 
 @Component({
@@ -23,7 +24,7 @@ import { DialogModule } from 'primeng/dialog';
   imports: [StepperModule, UploadIdentityComponent, ToastModule, DialogModule,
     DatePickerModule, InputGroupAddonModule, InputTextModule, CardModule,
     FormsModule, ReactiveFormsModule, InputGroupModule, ButtonModule,
-    CommonModule, SelectModule
+    CommonModule, SelectModule, DocumentTypeLabelPipe
   ],
   templateUrl: './remote-checkin.component.html',
   styleUrl: './remote-checkin.component.scss',
