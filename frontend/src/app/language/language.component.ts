@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 interface Language {
   name: string;
@@ -12,7 +13,10 @@ interface Language {
 
 @Component({
   selector: 'app-language',
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    TranslocoPipe
+  ],
   templateUrl: './language.component.html',
   styleUrl: './language.component.scss'
 })
