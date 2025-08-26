@@ -9,5 +9,17 @@
         "pt": "Portuguese",
         "ru": "Russian",
         "zh": "Chinese"
-    }
+    },
+    "remote-checkin-title": "Remote Check-in",
+    "reservation-check-description": "To continue, please enter your reservation code.",
+    "reservation-code-label": "Reservation Code",
+    "reservation-code-placeholder": "Enter your reservation code",
+    "go-to-checkin": "Go to Check-in",
+    "reservation-code-info": "The reservation code has been sent to your email. If you can't find it, please check your spam box.",
+    "need-help-contact-us": "Need help? Contact us",
+    "success": "Success",
+    "error": "Error",
+    "reservation-success": "Reservation validated successfully.",
+    "reservation-error": "Invalid reservation ID. Please check and try again.",
+    "reservation-check-fail": "Not possible to validate reservation. Please try again or contact your administrator."
 }

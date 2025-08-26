@@ -1,1 +1,25 @@
-{}
+{
+    "select-your-language": "Seleziona la tua lingua",
+    "languages": {
+        "en": "Inglese",
+        "it": "Italiano",
+        "es": "Spagnolo",
+        "fr": "Francese",
+        "de": "Tedesco",
+        "pt": "Portughese",
+        "ru": "Russo",
+        "zh": "Cinese"
+    },
+    "remote-checkin-title": "Remote Check-in",
+    "reservation-check-description": "Per continuare, insersci il tuo codice prenotazione",
+    "reservation-code-label": "Codice Prenotazione",
+    "reservation-code-placeholder": "Inserisci il tuo codice prenotazione",
+    "go-to-checkin": "VAI AL CHECK-IN",
+    "reservation-code-info": "Il codice della prenotazione è stato inviato alla tua email. Se non lo trovi, verifica nella cartella Spam.",
+    "need-help-contact-us": "Hai bisogno di aiuto? Contattaci.",
+    "success": "Completato",
+    "error": "Errore",
+    "reservation-success": "Prenotazione validata correttamente.",
+    "reservation-error": "ID prenotazione non valido. Controlla e riprova.",
+    "reservation-check-fail": "Impossibile convalidare la prenotazione. Riprova o contatta l'amministratore."
+}
