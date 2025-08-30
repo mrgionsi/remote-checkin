@@ -149,5 +149,8 @@
     "document-type-header": "Tipo di document",
     "missing-images-title": "Immagini mancanti",
     "complete-title": "Completato",
-    "not-found-label": "Non trovato"
+    "not-found-label": "Non trovato",
+    "zoomable-image-alt": "Zoom immagine",
+    "download-image-tooltip": "Download immagine",
+    "client-details-title": "Dettagli ospite"
 }
