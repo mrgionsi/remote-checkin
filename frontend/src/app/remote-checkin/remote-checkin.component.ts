@@ -43,7 +43,7 @@ export class RemoteCheckinComponent implements OnInit {
 
   constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder,
     private messageService: MessageService, private uploadService: UploadService,
-    private translocoService: TranslocoService // <-- aggiungi qui
+    private translocoService: TranslocoService
   ) {
     this.uploadForm = this.fb.group({
       frontimage: [null, Validators.required],
