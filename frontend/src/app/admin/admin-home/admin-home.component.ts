@@ -13,11 +13,12 @@ import { DropdownModule } from 'primeng/dropdown';
 import { FormsModule } from '@angular/forms';
 import { Menu } from 'primeng/menu';
 import { Subscription } from 'rxjs';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-admin-home',
   imports: [MenuModule, BadgeModule, RippleModule, AvatarModule, CommonModule, DropdownModule, FormsModule,
-    RouterOutlet, SidebarModule, ButtonModule],
+    RouterOutlet, SidebarModule, ButtonModule, TranslocoPipe],
   templateUrl: './admin-home.component.html',
   styleUrl: './admin-home.component.scss'
 })
