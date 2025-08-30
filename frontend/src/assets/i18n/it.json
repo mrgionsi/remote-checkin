@@ -106,7 +106,7 @@
     "room-name-label": "Nome stanza",
     "room-name-placeholder": "Seleziona una stanza",
     "room-name-required": "Nome stanza è obbligatorio.",
-    "date-range-invalid": "La data di inizio non può essere prima della data di fine.",
+    "date-range-invalid": "La data di inizio non può essere successiva alla data di fine.",
     "create-reservation-btn": "Crea prenotazione",
     "create-room-btn": "Crea Stanza",
     "room-id-header": "ID",
