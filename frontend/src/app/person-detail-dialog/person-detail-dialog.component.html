@@ -2,7 +2,7 @@
 <div class="dialog-container">
     <div class="dialog-images">
         <div class="image-container" *ngIf="person.images?.front">
-            <p-image class="img" [src]="person.images?.front" [alt]="'front-image-header' | transloco" width="90%"
+            <p-image class="img" [src]="person.images?.front" [alt]="'front-image-label' | transloco" width="90%"
                 [preview]="true" styleClass="zoomable-image shadow-2 rounded-image" />
             <div class="button-group">
                 <p-button pButton type="button" icon="pi pi-download" class="p-button-rounded p-button-info"
@@ -12,7 +12,7 @@
         </div>
 
         <div class="image-container" *ngIf="person.images?.back">
-            <p-image class="img" [src]="person.images?.back" [alt]="'back-image-header' | transloco" width="90%"
+            <p-image class="img" [src]="person.images?.back" [alt]="'back-image-label' | transloco" width="90%"
                 [preview]="true" styleClass="zoomable-image shadow-2 rounded-image" />
             <div class="button-group">
                 <p-button pButton type="button" icon="pi pi-download" class="p-button-rounded p-button-info"
@@ -22,7 +22,7 @@
         </div>
 
         <div class="image-container" *ngIf="person.images?.selfie">
-            <p-image class="img" [src]="person.images?.selfie" [alt]="'selfie-image-header' | transloco" width="90%"
+            <p-image class="img" [src]="person.images?.selfie" [alt]="'selfie-image-label' | transloco" width="90%"
                 [preview]="true" styleClass="zoomable-image shadow-2 rounded-image" />
             <div class="button-group">
                 <p-button pButton type="button" icon="pi pi-download" class="p-button-rounded p-button-info"
