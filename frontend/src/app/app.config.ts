@@ -26,14 +26,15 @@ export const appConfig: ApplicationConfig = {
     }
   }),
   provideZoneChangeDetection({ eventCoalescing: true }), provideRouter(routes), provideClientHydration(), provideHttpClient(), provideTransloco({
-        config: { 
-          availableLangs: ['en', 'es', 'it', 'fr', 'de'],
-          defaultLang: 'en',
-          // Remove this option if your application doesn't support changing language in runtime.
-          reRenderOnLangChange: true,
-          prodMode: !isDevMode(),
-        },
-        loader: TranslocoHttpLoader
-      })]
+    config: {
+      availableLangs: ['en', 'es', 'it', 'fr', 'de'],
+      defaultLang: 'en',
+      fallbackLang: 'en',
+      // Remove this option if your application doesn't support changing language in runtime.
+      reRenderOnLangChange: true,
+      prodMode: !isDevMode(),
+    },
+    loader: TranslocoHttpLoader
+  })]
 };
 
