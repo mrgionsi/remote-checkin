@@ -63,13 +63,15 @@
     "confirmation-sent-title": "Conferma Inviata",
     "confirmation-sent-message": "La tua conferma è stata inviata. Riceverai un'email a breve.",
     "ok": "OK",
-    "identity-card-label": "Carta d'Identità",
     "driver-license-label": "Patente di Guida",
     "passport-label": "Passaporto",
-    "identity-document-upload-title": "Identity Document Upload",
+    "identity-document-upload-title": "Carica i documenti d'identità",
     "front-side-label": "Immagine Fronte",
     "back-side-label": "Back Side",
     "selfie-with-document-label": "Selfie con documento",
     "file-size-exceeds": "La grandezza del file supera i 5MB",
-    "only-images-allowed": "Solo immagini sono consentite"
+    "only-images-allowed": "Solo immagini sono consentite",
+    "identity-card-label": "Carta d'identit",
+    "images-uploaded-success": "Immagini caricate con success",
+    "images-uploaded-fail": "Upload fallito"
 }

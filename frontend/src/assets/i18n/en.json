@@ -63,11 +63,13 @@
     "confirmation-sent-title": "Confirmation Sent",
     "confirmation-sent-message": "Your confirmation has been sent. You will receive an email shortly.",
     "ok": "OK",
-    "identity-card-label": "Identity Card",
     "driver-license-label": "Driver License",
     "passport-label": "Passport",
     "identity-document-upload-title": "Identity Document Upload",
     "selfie-with-document-label": "Selfie with Document",
     "file-size-exceeds": "File size exceeds 5MB",
-    "only-images-allowed": "Only images are allowed"
+    "only-images-allowed": "Only images are allowed",
+    "identity-card-label": "Identity Card",
+    "images-uploaded-success": "Images uploaded successfully",
+    "images-uploaded-fail": "Upload failed"
 }
