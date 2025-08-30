@@ -1,83 +1,98 @@
 <div class="p-fluid">
-    <h2 class="text-center mb-4">Add a Reservation</h2>
+    <h2 class="text-center mb-4">{{ 'add-reservation-title' | transloco }}</h2>
 
     <form [formGroup]="reservationForm" (ngSubmit)="onSubmit()">
         <!-- Reservation Number Field -->
         <div class="p-field p-grid align-items-center p-mb-3">
-            <label for="reservationNumber" class="p-col-12 p-md-3 text-right">Reservation Number (From Booking or
-                AirBnB)</label>
+            <label for="reservationNumber" class="p-col-12 p-md-3 text-right">
+                {{ 'reservation-number-label' | transloco }}
+            </label>
             <div class="p-col-12 p-md-9">
                 <input id="reservationNumber" pInputText formControlName="reservationNumber" type="text"
+                    [placeholder]="'reservation-number-placeholder' | transloco"
                     [class.p-invalid]="reservationForm.get('reservationNumber')?.invalid && reservationForm.get('reservationNumber')?.touched" />
                 <p *ngIf="reservationForm.get('reservationNumber')?.invalid && reservationForm.get('reservationNumber')?.touched"
                     class="p-error mt-2">
-                    Reservation number is required.
+                    {{ 'reservation-number-required' | transloco }}
                 </p>
             </div>
         </div>
 
         <!-- Start Date Field -->
         <div class="p-field p-grid align-items-center p-mb-3">
-            <label for="startDate" class="p-col-12 p-md-3 text-right">Start Date</label>
+            <label for="startDate" class="p-col-12 p-md-3 text-right">
+                {{ 'start-date-label' | transloco }}
+            </label>
             <div class="p-col-12 p-md-9">
                 <p-datepicker id="startDate" formControlName="startDate" [showTime]="true" dateFormat="yy-mm-dd"
+                    [placeholder]="'start-date-placeholder' | transloco"
                     [class.p-invalid]="reservationForm.get('startDate')?.invalid && reservationForm.get('startDate')?.touched"></p-datepicker>
                 <p *ngIf="reservationForm.get('startDate')?.invalid && reservationForm.get('startDate')?.touched"
                     class="p-error mt-2">
-                    Start date is required.
+                    {{ 'start-date-required' | transloco }}
                 </p>
             </div>
         </div>
 
         <!-- End Date Field -->
         <div class="p-field p-grid align-items-center p-mb-3">
-            <label for="endDate" class="p-col-12 p-md-3 text-right">End Date</label>
+            <label for="endDate" class="p-col-12 p-md-3 text-right">
+                {{ 'end-date-label' | transloco }}
+            </label>
             <div class="p-col-12 p-md-9">
                 <p-datepicker id="endDate" formControlName="endDate" [showTime]="true" dateFormat="yy-mm-dd"
+                    [placeholder]="'end-date-placeholder' | transloco"
                     [class.p-invalid]="reservationForm.get('endDate')?.invalid && reservationForm.get('endDate')?.touched"></p-datepicker>
                 <p *ngIf="reservationForm.get('endDate')?.invalid && reservationForm.get('endDate')?.touched"
                     class="p-error mt-2">
-                    End date is required.
+                    {{ 'end-date-required' | transloco }}
                 </p>
             </div>
         </div>
 
         <!-- Name Reference Field (New Field) -->
         <div class="p-field p-grid align-items-center p-mb-3">
-            <label for="nameReference" class="p-col-12 p-md-3 text-right">Reference Name</label>
+            <label for="nameReference" class="p-col-12 p-md-3 text-right">
+                {{ 'reference-name-label' | transloco }}
+            </label>
             <div class="p-col-12 p-md-9">
                 <input id="nameReference" pInputText formControlName="nameReference" type="text"
+                    [placeholder]="'reference-name-placeholder' | transloco"
                     [class.p-invalid]="reservationForm.get('nameReference')?.invalid && reservationForm.get('nameReference')?.touched" />
                 <p *ngIf="reservationForm.get('nameReference')?.invalid && reservationForm.get('nameReference')?.touched"
                     class="p-error mt-2">
-                    Reference name is required.
+                    {{ 'reference-name-required' | transloco }}
                 </p>
             </div>
         </div>
 
         <!-- Room Name Field -->
         <div class="p-field p-grid align-items-center p-mb-3">
-            <label for="roomName" class="p-col-12 p-md-3 text-right">Room Name</label>
+            <label for="roomName" class="p-col-12 p-md-3 text-right">
+                {{ 'room-name-label' | transloco }}
+            </label>
             <div class="p-col-12 p-md-9">
                 <p-select id="roomSelect" formControlName="roomName" [options]="rooms" optionLabel="name"
-                    placeholder="Select a Room"
+                    [placeholder]="'room-name-placeholder' | transloco"
                     [class.p-invalid]="reservationForm.get('roomName')?.invalid && reservationForm.get('roomName')?.touched">
                 </p-select>
                 <p *ngIf="reservationForm.get('roomName')?.invalid && reservationForm.get('roomName')?.touched"
                     class="p-error">
-                    Room name is required.
+                    {{ 'room-name-required' | transloco }}
                 </p>
                 <!-- Error Message -->
                 <div *ngIf="reservationForm.errors?.['dateRangeInvalid']">
-                    <p style="color: red;">Start date cannot be later than the end date.</p>
+                    <p style="color: red;">
+                        {{ 'date-range-invalid' | transloco }}
+                    </p>
                 </div>
             </div>
         </div>
 
         <!-- Submit Button -->
         <div class="text-center">
-            <button pButton label="Create Reservation" type="submit" [disabled]="reservationForm.invalid"
-                class="p-mt-3"></button>
+            <button pButton [label]="'create-reservation-btn' | transloco" type="submit"
+                [disabled]="reservationForm.invalid" class="p-mt-3"></button>
         </div>
     </form>
 </div>
