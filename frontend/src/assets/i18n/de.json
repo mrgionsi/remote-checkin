@@ -72,5 +72,10 @@
     "client-information": "Informationen für Kunden",
     "name-label": "Name",
     "surname-label": "Nachname",
-    "birthday-label": "Geburtstag"
+    "birthday-label": "Geburtstag",
+    "capPlaceholder": "5-stellige CAP",
+    "back": "Zurück",
+    "add-room-title": "Raum hinzufügen",
+    "Approved": "Genehmigt",
+    "add-reservation-label": "Neue Reservierung hinzufügen"
 }
