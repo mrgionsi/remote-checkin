@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { DropdownModule } from 'primeng/dropdown';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 
 @Component({
@@ -12,7 +12,7 @@ import { ButtonModule } from 'primeng/button';
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss'
 })
-export class SettingsComponent {
+export class SettingsComponent implements OnInit {
   languages = [
     { label: 'English', value: 'en' },
     { label: 'Italiano', value: 'it' },
@@ -20,14 +20,23 @@ export class SettingsComponent {
     { label: 'Français', value: 'fr' },
     { label: 'Deutsch', value: 'de' }
   ];
-  selectedLang = localStorage.getItem('appLang') || 'en';
+  selectedLang = 'en';
   saved = false;
 
-  constructor(private translocoService: TranslocoService) { }
+  constructor(private translocoService: TranslocoService, @Inject(PLATFORM_ID) private platformId: Object) { }
+
+  ngOnInit() {
+    const stored = isPlatformBrowser(this.platformId) ? localStorage.getItem('appLang') : null;
+    this.selectedLang = stored || 'en';
+    this.translocoService.setActiveLang(this.selectedLang);
+  }
+
+
 
   saveLanguage() {
-    localStorage.setItem('appLang', this.selectedLang);
-    this.translocoService.setActiveLang(this.selectedLang); // Cambia la lingua dell'app
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('appLang', this.selectedLang);
+    } this.translocoService.setActiveLang(this.selectedLang); // Cambia la lingua dell'app
     this.saved = true;
   }
 }
