@@ -1,51 +1,53 @@
-<p-card header="Identity Document Upload">
+<p-card [header]="'identity-document-upload-title' | transloco">
     <form [formGroup]="uploadForm" class="p-fluid">
         <div class="grid">
             <div class="col-12 md:col-4">
                 <div class="field">
-                    <label for="frontimage">Front Side</label>
-
+                    <label for="frontimage">{{ 'front-image-label' | transloco }}</label>
                     <p-fileupload name="frontimage" (onSelect)="onFileSelect($event, 'frontimage')"
                         accept="image/jpeg,image/png,image/gif" [maxFileSize]="5000000" mode="basic"
-                        [showUploadButton]="false" [invalidFileSizeMessageSummary]="'File size exceeds 5MB'"
-                        invalidFileTypeMessageSummary="Only images are allowed"></p-fileupload>
+                        [showUploadButton]="false" [invalidFileSizeMessageSummary]="'file-size-exceeds' | transloco"
+                        [invalidFileTypeMessageSummary]="'only-images-allowed' | transloco">
+                    </p-fileupload>
                 </div>
                 <div *ngIf="uploadForm.get('frontimage')?.value?.objectURL" class="pt-3">
-                    <p> <strong>Front Image:</strong></p>
-                    <img [src]="uploadForm.get('frontimage')?.value?.objectURL" alt="Front Image"
+                    <p><strong>{{ 'front-image-label' | transloco }}</strong></p>
+                    <img [src]="uploadForm.get('frontimage')?.value?.objectURL" [alt]="'front-image-label' | transloco"
                         class="image-preview w-32 h-32 object-cover rounded-md shadow-md border border-gray-300">
                 </div>
             </div>
 
             <div class="col-12 md:col-4">
                 <div class="field">
-                    <label for="backimage">Back Side</label>
+                    <label for="backimage">{{ 'back-image-label' | transloco }}</label>
                     <p-fileupload name="backimage" (onSelect)="onFileSelect($event, 'backimage')" accept="image/*"
-                        mode="basic"></p-fileupload>
+                        mode="basic">
+                    </p-fileupload>
                 </div>
                 <div *ngIf="uploadForm?.get('backimage')?.value?.objectURL" class="pt-3">
-                    <p> <strong>Back Image:</strong></p>
-                    <img [src]="uploadForm.get('backimage')?.value?.objectURL" alt="Back Image"
+                    <p><strong>{{ 'back-image-label' | transloco }}</strong></p>
+                    <img [src]="uploadForm.get('backimage')?.value?.objectURL" [alt]="'back-image-label' | transloco"
                         class="image-preview w-32 h-32 object-cover rounded-md shadow-md border border-gray-300">
                 </div>
             </div>
 
             <div class="col-12 md:col-4">
                 <div class="field">
-                    <label for="selfie">Selfie with Document</label>
+                    <label for="selfie">{{ 'selfie-with-document-label' | transloco }}</label>
                     <p-fileupload name="selfie" (onSelect)="onFileSelect($event, 'selfie')" accept="image/*"
-                        mode="basic"></p-fileupload>
+                        mode="basic">
+                    </p-fileupload>
                 </div>
                 <div *ngIf="uploadForm?.get('selfie')?.value?.objectURL" class="pt-3">
-                    <p> <strong>Selfie:</strong></p>
-                    <img [src]="uploadForm.get('selfie')?.value?.objectURL" alt="Selfie Image"
+                    <p><strong>{{ 'selfie-image-label' | transloco }}</strong></p>
+                    <img [src]="uploadForm.get('selfie')?.value?.objectURL" [alt]="'selfie-image-label' | transloco"
                         class="image-preview w-32 h-32 object-cover rounded-md shadow-md border border-gray-300">
                 </div>
             </div>
         </div>
 
-        <!--      <div class="flex justify-content-end">
-            <p-button type="submit" label="Submit" [disabled]="uploadForm.invalid" icon="pi pi-check"></p-button>
+        <!-- <div class="flex justify-content-end">
+            <p-button type="submit" [label]="'submit' | transloco" [disabled]="uploadForm.invalid" icon="pi pi-check"></p-button>
         </div> -->
     </form>
 </p-card>

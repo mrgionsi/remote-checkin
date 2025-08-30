@@ -7,11 +7,12 @@ import { FileUploadModule } from 'primeng/fileupload';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { ToastModule } from 'primeng/toast';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-upload-identity',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, FileUploadModule, ButtonModule, CardModule, ToastModule],
+  imports: [CommonModule, TranslocoPipe, FormsModule, ReactiveFormsModule, FileUploadModule, ButtonModule, CardModule, ToastModule],
   templateUrl: './upload-identity.component.html',
   styleUrl: './upload-identity.component.scss',
   providers: [MessageService]

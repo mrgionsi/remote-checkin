@@ -2,7 +2,7 @@
 
 <p-card class="mb-4">
     <ng-template pTemplate="title">
-        <i class="pi pi-calendar"></i> Reservation Details
+        <i class="pi pi-calendar"></i> {{ 'reservation-details-title' | transloco }}
     </ng-template>
     <ng-template pTemplate="content">
 
@@ -10,19 +10,20 @@
             <div class="grid formgrid p-fluid">
                 <!-- ID Reference -->
                 <div [formGroup]="form" class="field col-12 md:col-6">
-                    <label for="id_reference" class="font-bold text-600">ID Reference:</label>
+                    <label for="id_reference" class="font-bold text-600">{{ 'id-reference-label' | transloco }}</label>
                     <div *ngIf="!editMode">{{ reservation_details?.id_reference }}</div>
                     <input *ngIf="editMode" type="text" id="id_reference" class="p-inputtext w-full"
-                        formControlName="id_reference" />
+                        formControlName="id_reference" [placeholder]="'id-reference-placeholder' | transloco" />
                 </div>
 
                 <!-- Room Name -->
                 <div [formGroup]="form" class="field col-12 md:col-6" *ngIf="reservation_details['room']">
-                    <label for="room_select" class="font-bold text-600">Room:</label>
+                    <label for="room_select" class="font-bold text-600">{{ 'room-label' | transloco }}</label>
                     <div *ngIf="!editMode">{{ reservation_details?.room.name }}</div>
                     <div *ngIf="editMode">
                         <p-select id="room_select" [options]="roomList" formControlName="room" optionLabel="name"
-                            dataKey="id" styleClass="w-full" [showClear]="false">
+                            dataKey="id" styleClass="w-full" [showClear]="false"
+                            [placeholder]="'room-placeholder' | transloco">
                             <ng-template pTemplate="item" let-option>
                                 <div class="flex align-items-center">
                                     {{ option.name }}
@@ -34,43 +35,43 @@
 
                 <!-- Start Date -->
                 <div [formGroup]="form" class="field col-12 md:col-6">
-                    <label for="start_date" class="font-bold text-600">Start Date:</label>
+                    <label for="start_date" class="font-bold text-600">{{ 'start-date-label' | transloco }}</label>
                     <div *ngIf="!editMode">{{ reservation_details?.start_date | date: 'dd-MM-yyyy' }}</div>
                     <p-datepicker *ngIf="editMode" formControlName="start_date" showIcon inputId="start_date"
-                        placeholder="{{reservation_details?.start_date | dateShort}}" dateFormat="dd/mm/yy"
+                        [placeholder]="'start-date-placeholder' | transloco" dateFormat="dd/mm/yy"
                         class="w-full"></p-datepicker>
                 </div>
 
                 <!-- End Date -->
                 <div [formGroup]="form" class="field col-12 md:col-6">
-                    <label for="end_date" class="font-bold text-600">End Date:</label>
+                    <label for="end_date" class="font-bold text-600">{{ 'end-date-label' | transloco }}</label>
                     <div *ngIf="!editMode">{{ reservation_details?.end_date | date: 'dd-MM-yyyy' }}</div>
                     <p-datepicker *ngIf="editMode" formControlName="end_date" showIcon inputId="end_date"
-                        placeholder="{{reservation_details?.end_date | dateShort}}" dateFormat="dd/mm/yy"
+                        [placeholder]="'end-date-placeholder' | transloco" dateFormat="dd/mm/yy"
                         class="w-full"></p-datepicker>
                     <p *ngIf="form.errors?.['endDateBeforeStartDate'] && form.get('end_date')?.touched" class="p-error">
-                        End date must be after start date.
+                        {{ 'end-date-error' | transloco }}
                     </p>
                 </div>
 
                 <!-- Guest -->
                 <div [formGroup]="form" class="field col-12 md:col-6">
-                    <label for="name_reference" class="font-bold text-600">Guest:</label>
+                    <label for="name_reference" class="font-bold text-600">{{ 'guest-label' | transloco }}</label>
                     <div *ngIf="!editMode">{{ reservation_details?.name_reference }}</div>
                     <input *ngIf="editMode" type="text" id="name_reference" class="p-inputtext w-full"
-                        formControlName="name_reference" />
+                        formControlName="name_reference" [placeholder]="'guest-placeholder' | transloco" />
                 </div>
 
                 <!-- Status -->
                 <div class="field col-12 md:col-6">
-                    <label for="status_select" class="font-bold text-600 mb-2">Status:</label>
+                    <label for="status_select" class="font-bold text-600 mb-2">{{ 'status-label' | transloco }}</label>
                     <p-select id="status_select" [options]="statusOptions" [(ngModel)]="reservation_status"
                         optionLabel="label" dataKey="value" (onChange)="onStatusChange($event.value)"
-                        styleClass="w-full" [showClear]="false">
+                        styleClass="w-full" [showClear]="false" [placeholder]="'status-placeholder' | transloco">
                         <ng-template pTemplate="item" let-option>
                             <div class="flex align-items-center">
                                 <i [class]="option.icon" class="mr-2"></i>
-                                {{ option.label }}
+                                {{ option.label | transloco }}
                             </div>
                         </ng-template>
                     </p-select>
@@ -80,69 +81,73 @@
         </div>
 
         <div class="reservation-actions mt-3 flex flex-wrap gap-2 justify-end">
-            <p-button *ngIf="!editMode" label="Edit" icon="pi pi-pencil" class="p-button-sm text-white"
-                (click)="editReservation()" (keydown.enter)="editReservation()" (keydown.space)="editReservation()">
+            <p-button *ngIf="!editMode" [label]="'edit-btn' | transloco" icon="pi pi-pencil"
+                class="p-button-sm text-white" (click)="editReservation()" (keydown.enter)="editReservation()"
+                (keydown.space)="editReservation()">
             </p-button>
 
-            <p-button *ngIf="editMode" label="Save" icon="pi pi-check" class="p-button-sm text-white"
-                (click)="saveReservation()" (keydown.enter)="saveReservation()" (keydown.space)="saveReservation()"
-                severity="success" [disabled]="form.invalid">
+            <p-button *ngIf="editMode" [label]="'save-btn' | transloco" icon="pi pi-check"
+                class="p-button-sm text-white" (click)="saveReservation()" (keydown.enter)="saveReservation()"
+                (keydown.space)="saveReservation()" severity="success" [disabled]="form.invalid">
             </p-button>
 
-            <p-button *ngIf="editMode" label="Cancel" icon="pi pi-times" class="p-button-sm text-white"
-                (click)="cancelEdit()" (keydown.enter)="cancelEdit()" (keydown.space)="cancelEdit()"
-                severity="secondary">
+            <p-button *ngIf="editMode" [label]="'cancel-btn' | transloco" icon="pi pi-times"
+                class="p-button-sm text-white" (click)="cancelEdit()" (keydown.enter)="cancelEdit()"
+                (keydown.space)="cancelEdit()" severity="secondary">
             </p-button>
 
-            <p-button *ngIf="!editMode" label="Remove" icon="pi pi-trash" class="p-button-sm text-white"
-                severity="danger" (click)="confirmDeleteReservation()" (keydown.enter)="confirmDeleteReservation()"
-                (keydown.space)="confirmDeleteReservation()">
+            <p-button *ngIf="!editMode" [label]="'remove-btn' | transloco" icon="pi pi-trash"
+                class="p-button-sm text-white" severity="danger" (click)="confirmDeleteReservation()"
+                (keydown.enter)="confirmDeleteReservation()" (keydown.space)="confirmDeleteReservation()">
             </p-button>
         </div>
 
     </ng-template>
 </p-card>
 
-<h3>People Associated with this Reservation</h3>
+<h3>{{ 'people-associated-title' | transloco }}</h3>
 <p-table [value]="people" responsiveLayout="scroll">
     <ng-template pTemplate="header">
         <tr>
-            <th>Status</th>
-            <th>Front Photo</th>
-            <th>Back Photo</th>
-            <th>Selfie Photo</th>
-            <th>Name</th>
-            <th>Surname</th>
-            <th>Birthday</th>
-            <th>Street</th>
-            <th>City</th>
-            <th>Province</th>
-            <th>CAP</th>
-            <th>Telephone</th>
-            <th>Document Number</th>
-            <th>CF</th>
-            <th>Document Type</th>
+            <th scope="col">{{ 'status-header' | transloco }}</th>
+            <th scope="col">{{ 'front-photo-header' | transloco }}</th>
+            <th scope="col">{{ 'back-photo-header' | transloco }}</th>
+            <th scope="col">{{ 'selfie-photo-header' | transloco }}</th>
+            <th scope="col">{{ 'name-header' | transloco }}</th>
+            <th scope="col">{{ 'surname-header' | transloco }}</th>
+            <th scope="col">{{ 'birthday-header' | transloco }}</th>
+            <th scope="col">{{ 'street-header' | transloco }}</th>
+            <th scope="col">{{ 'city-header' | transloco }}</th>
+            <th scope="col">{{ 'province-header' | transloco }}</th>
+            <th scope="col">{{ 'cap-header' | transloco }}</th>
+            <th scope="col">{{ 'telephone-header' | transloco }}</th>
+            <th scope="col">{{ 'document-number-header' | transloco }}</th>
+            <th scope="col">{{ 'cf-header' | transloco }}</th>
+            <th scope="col">{{ 'document-type-header' | transloco }}</th>
         </tr>
     </ng-template>
     <ng-template pTemplate="body" let-person>
         <tr (click)="openDetails(person)" style="cursor: pointer;">
             <td>
                 <i *ngIf="person.hasMissingImages" class="pi pi-exclamation-triangle text-danger"
-                    title="Missing Images"></i>
-                <i *ngIf="!person.hasMissingImages" class="pi pi-check-circle text-success" title="Complete"></i>
+                    [title]="'missing-images-title' | transloco"></i>
+                <i *ngIf="!person.hasMissingImages" class="pi pi-check-circle text-success"
+                    [title]="'complete-title' | transloco"></i>
             </td>
             <td>
-                <img *ngIf="person.images?.front" [src]="person.images.front" alt="Front Image" width="50"
-                    height="50" />
-                <span *ngIf="!person.images?.front">Not Found</span>
+                <img *ngIf="person.images?.front" [src]="person.images.front" [alt]="'front-photo-header' | transloco"
+                    width="50" height="50" />
+                <span *ngIf="!person.images?.front">{{ 'not-found-label' | transloco }}</span>
             </td>
             <td>
-                <img *ngIf="person.images?.back" [src]="person.images.back" alt="Back Image" width="50" height="50" />
-                <span *ngIf="!person.images?.back">Not Found</span>
+                <img *ngIf="person.images?.back" [src]="person.images.back" [alt]="'back-photo-header' | transloco"
+                    width="50" height="50" />
+                <span *ngIf="!person.images?.back">{{ 'not-found-label' | transloco }}</span>
             </td>
             <td>
-                <img *ngIf="person.images?.selfie" [src]="person.images.selfie" alt="Selfie" width="50" height="50" />
-                <span *ngIf="!person.images?.selfie">Not Found</span>
+                <img *ngIf="person.images?.selfie" [src]="person.images.selfie"
+                    [alt]="'selfie-photo-header' | transloco" width="50" height="50" />
+                <span *ngIf="!person.images?.selfie">{{ 'not-found-label' | transloco }}</span>
             </td>
             <td>{{ person.name }}</td>
             <td>{{ person.surname }}</td>
@@ -154,7 +159,7 @@
             <td>{{ person.telephone }}</td>
             <td>{{ person.document_number }}</td>
             <td>{{ person.cf }}</td>
-            <td>{{ person.document_type | documentTypeLabel }}</td>
+            <td>{{ person.document_type | documentTypeLabel | transloco }}</td>
         </tr>
     </ng-template>
 </p-table>

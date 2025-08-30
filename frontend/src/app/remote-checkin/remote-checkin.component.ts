@@ -16,6 +16,7 @@ import { UploadService } from '../services/upload.service';
 import { ToastModule } from 'primeng/toast';
 import { DialogModule } from 'primeng/dialog';
 import { DocumentTypeLabelPipe } from '../pipes/document-type-label.pipe';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 
 @Component({
@@ -24,7 +25,7 @@ import { DocumentTypeLabelPipe } from '../pipes/document-type-label.pipe';
   imports: [StepperModule, UploadIdentityComponent, ToastModule, DialogModule,
     DatePickerModule, InputGroupAddonModule, InputTextModule, CardModule,
     FormsModule, ReactiveFormsModule, InputGroupModule, ButtonModule,
-    CommonModule, SelectModule, DocumentTypeLabelPipe
+    CommonModule, SelectModule, DocumentTypeLabelPipe, TranslocoPipe
   ],
   templateUrl: './remote-checkin.component.html',
   styleUrl: './remote-checkin.component.scss',
@@ -34,18 +35,16 @@ import { DocumentTypeLabelPipe } from '../pipes/document-type-label.pipe';
 export class RemoteCheckinComponent implements OnInit {
   clientForm: FormGroup;
   uploadForm: FormGroup;
-  documentTypes = [
-    { label: 'Identity Card', value: 'identity_card' },
-    { label: 'Driver License', value: 'driver_license' },
-    { label: 'Passport', value: 'passport' }
-  ];
+  documentTypes = [{}];
 
   languageCode: string | null = '';
   reservationId: string | null = '';
   showConfirmationDialog: boolean = false;
 
   constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder,
-    private messageService: MessageService, private uploadService: UploadService) {
+    private readonly messageService: MessageService, private uploadService: UploadService,
+    private readonly translocoService: TranslocoService
+  ) {
     this.uploadForm = this.fb.group({
       frontimage: [null, Validators.required],
       backimage: [null, Validators.required],
@@ -68,7 +67,11 @@ export class RemoteCheckinComponent implements OnInit {
   }
 
   ngOnInit() {
-
+    this.documentTypes = [
+      { label: this.translocoService.translate('identity-card-label'), value: 'identity_card' },
+      { label: this.translocoService.translate('driver-license-label'), value: 'driver_license' },
+      { label: this.translocoService.translate('passport-label'), value: 'passport' }
+    ];
 
     this.languageCode = this.route.snapshot.paramMap.get('code');
     this.route.params.subscribe(params => {

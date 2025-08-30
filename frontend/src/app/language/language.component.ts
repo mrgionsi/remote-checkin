@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 interface Language {
   name: string;
@@ -12,7 +13,10 @@ interface Language {
 
 @Component({
   selector: 'app-language',
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    TranslocoPipe
+  ],
   templateUrl: './language.component.html',
   styleUrl: './language.component.scss'
 })
@@ -28,6 +32,7 @@ export class LanguageComponent {
     { name: 'Chinese', code: 'zh', flag: '🇨🇳' }
   ];
   private destroy$ = new Subject<void>();
+  disabledLangs = ['pt', 'ru', 'zh'];
 
   selectedLanguage: Language = { name: '', code: '', flag: '' };
 
@@ -38,9 +43,14 @@ export class LanguageComponent {
     this.destroy$.next();
     this.destroy$.complete();
   }
-  selectLanguage(lang: Language) {
-    this.selectedLanguage = lang;
 
+
+
+  selectLanguage(lang: Language) {
+    if (this.disabledLangs.includes(lang.code)) {
+      return; // do nothing if disabled
+    }
+    this.selectedLanguage = lang;
     this.route.params.pipe(takeUntil(this.destroy$)).subscribe(params => {
       const reservationId = params['id']; // Extract the ID
 

@@ -1,0 +1,13 @@
+<div class="card p-4 max-w-md mx-auto">
+    <h2 class="mb-4">{{ 'settings-title' | transloco }}</h2>
+    <div class="field mb-4">
+        <label for="langSelect" class="font-semibold mb-2">{{ 'select-language-label' | transloco }}</label>
+        <p-dropdown id="langSelect" [options]="languages" [(ngModel)]="selectedLang" optionLabel="label"
+            optionValue="value" [placeholder]="'select-language-placeholder' | transloco" styleClass="w-full">
+        </p-dropdown>
+    </div>
+    <div class="flex justify-end">
+        <p-button type="button" [label]="'save-btn' | transloco" (onClick)="saveLanguage()" />
+    </div>
+    <p *ngIf="saved" class="text-green-600 mt-3">{{ 'settings-saved-message' | transloco }}</p>
+</div>

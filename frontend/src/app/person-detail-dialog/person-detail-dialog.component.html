@@ -2,31 +2,32 @@
 <div class="dialog-container">
     <div class="dialog-images">
         <div class="image-container" *ngIf="person.images?.front">
-            <p-image class="img" [src]="person.images?.front" alt="Front Image" width="90%" [preview]="true"
-                styleClass="zoomable-image shadow-2 rounded-image" />
+            <p-image class="img" [src]="person.images?.front" [alt]="'front-image-label' | transloco" width="90%"
+                [preview]="true" styleClass="zoomable-image shadow-2 rounded-image" />
             <div class="button-group">
                 <p-button pButton type="button" icon="pi pi-download" class="p-button-rounded p-button-info"
-                    (click)="forceDownload(person.images?.front)" pTooltip="Download Image"></p-button>
+                    (click)="forceDownload(person.images?.front)"
+                    [pTooltip]="'download-image-tooltip' | transloco"></p-button>
             </div>
         </div>
 
         <div class="image-container" *ngIf="person.images?.back">
-            <p-image class="img" [src]="person.images?.back" alt="Back Image" width="90%" [preview]="true"
-                styleClass="zoomable-image shadow-2 rounded-image" />
+            <p-image class="img" [src]="person.images?.back" [alt]="'back-image-label' | transloco" width="90%"
+                [preview]="true" styleClass="zoomable-image shadow-2 rounded-image" />
             <div class="button-group">
-
                 <p-button pButton type="button" icon="pi pi-download" class="p-button-rounded p-button-info"
-                    (click)="forceDownload(person.images?.back)" pTooltip="Download Image"></p-button>
+                    (click)="forceDownload(person.images?.back)"
+                    [pTooltip]="'download-image-tooltip' | transloco"></p-button>
             </div>
         </div>
 
         <div class="image-container" *ngIf="person.images?.selfie">
-            <p-image class="img" [src]="person.images?.selfie" alt="Selfie" width="90%" [preview]="true"
-                styleClass="zoomable-image shadow-2 rounded-image" />
+            <p-image class="img" [src]="person.images?.selfie" [alt]="'selfie-image-label' | transloco" width="90%"
+                [preview]="true" styleClass="zoomable-image shadow-2 rounded-image" />
             <div class="button-group">
-
                 <p-button pButton type="button" icon="pi pi-download" class="p-button-rounded p-button-info"
-                    (click)="forceDownload(person.images?.selfie)" pTooltip="Download Image"></p-button>
+                    (click)="forceDownload(person.images?.selfie)"
+                    [pTooltip]="'download-image-tooltip' | transloco"></p-button>
             </div>
         </div>
     </div>
@@ -34,54 +35,55 @@
     <!-- Second column for details -->
     <p-card class="details-card">
         <ng-template pTemplate="title">
-            <i class="pi pi-user"></i> Client Details
+            <i class="pi pi-user"></i> {{ 'client-details-title' | transloco }}
         </ng-template>
 
         <ng-template pTemplate="content">
             <div class="details-grid">
                 <div class="detail-item">
                     <i class="pi pi-id-card"></i>
-                    <strong>Name:</strong> {{ person.name }}
+                    <strong>{{ 'name-label' | transloco }}</strong> {{ person.name }}
                 </div>
                 <div class="detail-item">
                     <i class="pi pi-id-card"></i>
-                    <strong>Surname:</strong> {{ person.surname }}
+                    <strong>{{ 'surname-label' | transloco }}</strong> {{ person.surname }}
                 </div>
                 <div class="detail-item">
                     <i class="pi pi-calendar"></i>
-                    <strong>Birthday:</strong> {{ person.birthday | date:'dd-MM-yyyy' }}
+                    <strong>{{ 'birthday-label' | transloco }}</strong> {{ person.birthday | date:'dd-MM-yyyy' }}
                 </div>
                 <div class="detail-item">
                     <i class="pi pi-map-marker"></i>
-                    <strong>Street:</strong> {{ person.street }}
+                    <strong>{{ 'street-label' | transloco }}</strong> {{ person.street }}
                 </div>
                 <div class="detail-item">
                     <i class="pi pi-map"></i>
-                    <strong>City:</strong> {{ person.city }}
+                    <strong>{{ 'city-label' | transloco }}</strong> {{ person.city }}
                 </div>
                 <div class="detail-item">
                     <i class="pi pi-globe"></i>
-                    <strong>Province:</strong> {{ person.province }}
+                    <strong>{{ 'province-label' | transloco }}</strong> {{ person.province }}
                 </div>
                 <div class="detail-item">
                     <i class="pi pi-envelope"></i>
-                    <strong>CAP:</strong> {{ person.cap }}
+                    <strong>{{ 'cap-label' | transloco }}</strong> {{ person.cap }}
                 </div>
                 <div class="detail-item">
                     <i class="pi pi-phone"></i>
-                    <strong>Telephone:</strong> {{ person.telephone }}
+                    <strong>{{ 'telephone-label' | transloco }}</strong> {{ person.telephone }}
                 </div>
                 <div class="detail-item">
                     <i class="pi pi-id-card"></i>
-                    <strong>Document Number:</strong> {{ person.document_number }}
+                    <strong>{{ 'document-number-label' | transloco }}</strong> {{ person.document_number }}
                 </div>
                 <div class="detail-item">
                     <i class="pi pi-lock"></i>
-                    <strong>CF:</strong> {{ person.cf }}
+                    <strong>{{ 'cf-label' | transloco }}</strong> {{ person.cf }}
                 </div>
                 <div class="detail-item">
                     <i class="pi pi-file"></i>
-                    <strong>Document Type:</strong> {{ person.document_type | documentTypeLabel }}
+                    <strong>{{ 'document-type-label' | transloco }}</strong> {{ person.document_type | documentTypeLabel
+                    | transloco }}
                 </div>
             </div>
         </ng-template>
@@ -90,7 +92,7 @@
 </div>
 
 <p-dialog [(visible)]="fullscreenVisible" [style]="{width: '100vw', height: '100vh'}" [closable]="true" [modal]="true">
-    <p-image *ngIf="fullscreenImage" [src]="fullscreenImage" alt="Zoomable Image" [preview]="true"
+    <p-image *ngIf="fullscreenImage" [src]="fullscreenImage" [alt]="'zoomable-image-alt' | transloco" [preview]="true"
         styleClass="zoomable-image">
     </p-image>
 </p-dialog>
