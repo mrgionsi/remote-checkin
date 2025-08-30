@@ -16,20 +16,19 @@
                     <p-inputicon>
                         <i class="pi pi-search"></i>
                     </p-inputicon>
-
                     <input pInputText type="text" (input)="dt2.filterGlobal($any($event.target).value, 'contains')"
-                        placeholder="Global Search" />
+                        [placeholder]="'global-search-placeholder' | transloco" />
                 </p-iconfield>
             </div>
         </ng-template>
         <ng-template pTemplate="header">
             <tr>
-                <th scope="col">Reservation Number</th>
-                <th scope="col">Guest Name</th>
-                <th scope="col">Room</th>
-                <th scope="col">Check-in Date</th>
-                <th scope="col">Check-out Date</th>
-                <th scope="col">Status</th>
+                <th scope="col">{{ 'reservation-number-header' | transloco }}</th>
+                <th scope="col">{{ 'guest-name-header' | transloco }}</th>
+                <th scope="col">{{ 'room-header' | transloco }}</th>
+                <th scope="col">{{ 'checkin-date-header' | transloco }}</th>
+                <th scope="col">{{ 'checkout-date-header' | transloco }}</th>
+                <th scope="col">{{ 'status-header' | transloco }}</th>
             </tr>
         </ng-template>
 
@@ -41,14 +40,15 @@
                 <td>{{ reservation.start_date }}</td>
                 <td>{{ reservation.end_date }}</td>
                 <td>
-                    <p-tag [value]="reservation.status" [severity]="getStatusSeverity(reservation.status)"></p-tag>
+                    <p-tag [value]="reservation.status | transloco"
+                        [severity]="getStatusSeverity(reservation.status)"></p-tag>
                 </td>
             </tr>
         </ng-template>
 
         <ng-template #emptymessage>
             <tr>
-                <td colspan="7">No data found.</td>
+                <td colspan="7">{{ 'no-data-found-message' | transloco }}</td>
             </tr>
         </ng-template>
     </p-table>

@@ -1,34 +1,33 @@
 <div class="container">
     <div class="card">
         <!-- Title Section -->
-        <h2>Check-in Remoto</h2>
-        <p class="description">Inserisci il codice della tua prenotazione per procedere</p>
+        <h2>{{ 'remote-checkin-title' | transloco }}</h2>
+        <p class="description">{{ 'reservation-check-description' | transloco }}</p>
 
         <!-- Reservation Code Input -->
         <div class="form-group">
-            <label for="reservationCode">Codice Prenotazione</label>
-            <input type="text" id="reservationCode" placeholder="Inserisci il tuo codice" pInputText
-                [(ngModel)]="reservationId" />
+            <label for="reservationCode">{{ 'reservation-code-label' | transloco }}</label>
+            <input type="text" id="reservationCode" [placeholder]="'reservation-code-placeholder' | transloco"
+                pInputText [(ngModel)]="reservationId" />
         </div>
 
         <!-- Button Section -->
         <div class="button-container">
-            <p-button label="VAI AL CHECK-IN" icon="pi pi-arrow-right" class="p-button-primary" (click)="goToCheckIn()"
-                [disabled]="!reservationId.trim()">
+            <p-button [label]="'go-to-checkin' | transloco" icon="pi pi-arrow-right" class="p-button-primary"
+                (click)="goToCheckIn()" [disabled]="!reservationId.trim()">
             </p-button>
         </div>
 
         <!-- Information Section -->
         <div class="info-box">
             <i class="pi pi-info-circle"></i>
-            <p>Il codice della prenotazione è stato inviato alla tua email. Se non lo trovi, verifica nella cartella
-                Spam.</p>
+            <p>{{ 'reservation-code-info' | transloco }}</p>
         </div>
 
         <!-- Support Link -->
         <div class="support">
             <a href="mailto:support@yourhotel.com">
-                <i class="pi pi-envelope"></i> Hai bisogno di aiuto? Contattaci
+                <i class="pi pi-envelope"></i> {{ 'need-help-contact-us' | transloco }}
             </a>
         </div>
     </div>

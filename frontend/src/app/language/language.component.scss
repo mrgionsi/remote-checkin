@@ -44,3 +44,11 @@
     flex-grow: 1;
     text-align: left;
 }
+
+
+.language-list li.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    /* prevents click */
+    cursor: not-allowed;
+}

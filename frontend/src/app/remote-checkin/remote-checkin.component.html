@@ -4,52 +4,54 @@
 <div class="card justify-center" *ngIf="!showConfirmationDialog">
     <p-stepper [value]="1" class="basis-[80rem]">
         <p-step-list>
-            <p-step [value]="1">Client Information</p-step>
-            <p-step [disabled]="clientForm.invalid" [value]="2">Upload Images</p-step>
-            <p-step [disabled]="uploadForm.invalid" [value]="3">Confirm Data</p-step>
+            <p-step [value]="1">{{ 'client-information' | transloco }}</p-step>
+            <p-step [disabled]="clientForm.invalid" [value]="2">{{ 'upload-images-step' | transloco }}</p-step>
+            <p-step [disabled]="uploadForm.invalid" [value]="3">{{ 'confirm-data-step' | transloco }}</p-step>
         </p-step-list>
         <p-step-panels>
             <p-step-panel [value]="1">
                 <ng-template #content let-activateCallback="activateCallback">
                     <div class="flex flex-col h-48">
                         <div class="flex-auto justify-center items-center font-medium">
-                            <p-card header="Client Information">
+                            <p-card header="{{ 'client-information' | transloco }}">
                                 <form [formGroup]="clientForm" class="p-fluid">
                                     <div class="grid">
                                         <!-- Column 1 -->
                                         <div class="col-12 md:col-6">
                                             <div class="field">
-                                                <label for="name">Name</label>
+                                                <label for="name">{{ 'name-label' | transloco }}</label>
                                                 <input pInputText id="name" formControlName="name"
-                                                    placeholder="Enter Name" />
+                                                    [placeholder]="'namePlaceholder' | transloco" />
                                             </div>
                                             <div class="field">
-                                                <label for="surname">Surname</label>
+                                                <label for="surname">{{ 'surname-label' | transloco }}</label>
                                                 <input pInputText id="surname" formControlName="surname"
-                                                    placeholder="Enter Surname" />
+                                                    [placeholder]="'surnamePlaceholder' | transloco" />
                                             </div>
                                             <div class="field">
-                                                <label for="birthday">Birthday</label>
+                                                <label for="birthday">{{ 'birthday-label' | transloco }}</label>
                                                 <p-datePicker id="birthday" formControlName="birthday" showIcon
-                                                    dateFormat="dd/mm/yy"></p-datePicker>
+                                                    dateFormat="dd/mm/yy"
+                                                    [placeholder]="'birthdayPlaceholder' | transloco"></p-datePicker>
                                             </div>
                                             <div class="field">
-                                                <label for="street">Street</label>
+                                                <label for="street">{{ 'street-label' | transloco }}</label>
                                                 <input pInputText id="street" formControlName="street"
-                                                    placeholder="Street Address" />
+                                                    [placeholder]="'streetPlaceholder' | transloco" />
                                             </div>
                                             <div class="field">
-                                                <label for="city">City</label>
-                                                <input pInputText id="city" formControlName="city" placeholder="City" />
+                                                <label for="city">{{ 'city-label' | transloco }}</label>
+                                                <input pInputText id="city" formControlName="city"
+                                                    [placeholder]="'cityPlaceholder' | transloco" />
                                             </div>
                                             <div class="field">
-                                                <label for="cap">CAP</label>
+                                                <label for="cap">{{ 'cap-label' | transloco }}</label>
                                                 <input pInputText id="cap" formControlName="cap"
-                                                    placeholder="5-digit CAP" />
+                                                    [placeholder]="'capPlaceholder' | transloco" />
                                                 <small
                                                     *ngIf="clientForm.get('cap')?.invalid && clientForm.get('cap')?.touched"
                                                     class="p-error">
-                                                    CAP must be 5 digits
+                                                    {{ 'cap-error' | transloco }}
                                                 </small>
                                             </div>
                                         </div>
@@ -57,39 +59,42 @@
                                         <!-- Column 2 -->
                                         <div class="col-12 md:col-6">
                                             <div class="field">
-                                                <label for="province">Province</label>
+                                                <label for="province">{{ 'province-label' | transloco }}</label>
                                                 <input pInputText id="province" formControlName="province"
-                                                    placeholder="Province" />
+                                                    [placeholder]="'provincePlaceholder' | transloco" />
                                             </div>
                                             <div class="field">
-                                                <label for="number_city">City Number</label>
+                                                <label for="number_city">{{ 'number-city-label' | transloco }}</label>
                                                 <input pInputText id="number_city" formControlName="number_city"
-                                                    placeholder="City Number" />
+                                                    [placeholder]="'numberCityPlaceholder' | transloco" />
                                             </div>
                                             <div class="field">
-                                                <label for="telephone">Telephone</label>
+                                                <label for="telephone">{{ 'telephone-label' | transloco }}</label>
                                                 <input pInputText id="telephone" formControlName="telephone"
-                                                    placeholder="Phone Number" />
+                                                    [placeholder]="'telephonePlaceholder' | transloco" />
                                             </div>
                                             <div class="field">
-                                                <label for="document_type">Document Type</label>
+                                                <label for="document_type">{{ 'document-type-label' | transloco
+                                                    }}</label>
                                                 <p-select id="document_type" formControlName="document_type"
-                                                    [options]="documentTypes" placeholder="Select Document Type"
+                                                    [options]="documentTypes"
+                                                    [placeholder]="'documentTypePlaceholder' | transloco"
                                                     class="w-16rem"></p-select>
                                             </div>
                                             <div class="field">
-                                                <label for="document_number">Document Number</label>
+                                                <label for="document_number">{{ 'document-number-label' | transloco
+                                                    }}</label>
                                                 <input pInputText id="document_number" formControlName="document_number"
-                                                    placeholder="Document Number" />
+                                                    [placeholder]="'documentNumberPlaceholder' | transloco" />
                                             </div>
                                             <div class="field">
-                                                <label for="cf">CF (Tax Code)</label>
+                                                <label for="cf">{{ 'cf-label' | transloco }}</label>
                                                 <input pInputText id="cf" formControlName="cf"
-                                                    placeholder="Tax Code (16 chars)" />
+                                                    [placeholder]="'cfPlaceholder' | transloco" />
                                                 <small
                                                     *ngIf="clientForm.get('cf')?.invalid && clientForm.get('cf')?.touched"
                                                     class="p-error">
-                                                    CF must be 16 alphanumeric characters
+                                                    {{ 'cf-error' | transloco }}
                                                 </small>
                                             </div>
                                         </div>
@@ -105,8 +110,7 @@
 
                     </div>
                     <div class="flex  pt-6 justify-content-end">
-                        <!-- [disabled]="clientForm.invalid"  -->
-                        <p-button label="Next" icon="pi pi-arrow-right" iconPos="right"
+                        <p-button [label]="'next' | transloco" icon="pi pi-arrow-right" iconPos="right"
                             (onClick)="activateCallback(2)" />
                     </div>
                 </ng-template>
@@ -120,14 +124,12 @@
                         </div>
                     </div>
                     <div class="flex justify-space-between w-full pt-6">
-                        <p-button label="Back" severity="secondary" icon="pi pi-arrow-left"
+                        <p-button [label]="'back' | transloco" severity="secondary" icon="pi pi-arrow-left"
                             (onClick)="activateCallback(1)" />
 
-                        <p-button label="Next" icon="pi pi-arrow-right" iconPos="right" [disabled]="uploadForm.invalid"
-                            (onClick)="activateCallback(3)" />
+                        <p-button [label]="'next' | transloco" icon="pi pi-arrow-right" iconPos="right"
+                            [disabled]="uploadForm.invalid" (onClick)="activateCallback(3)" />
                     </div>
-
-
                 </ng-template>
             </p-step-panel>
 
@@ -136,47 +138,59 @@
                     <div class="grid">
                         <!-- Form Recap Section -->
                         <div class="col-6">
-                            <p-card header="Form Details">
+                            <p-card header="{{ 'form-details' | transloco }}">
                                 <div class="form-recap p-3">
-                                    <p><strong>Reservation ID:</strong> {{ reservationId }}
+                                    <p><strong>{{ 'reservation-id-label' | transloco }}</strong> {{ reservationId }}</p>
+                                    <p><strong>{{ 'name-label' | transloco }}</strong> {{ clientForm.get('name')?.value
+                                        }}</p>
+                                    <p><strong>{{ 'surname-label' | transloco }}</strong> {{
+                                        clientForm.get('surname')?.value }}</p>
+                                    <p><strong>{{ 'birthday-label' | transloco }}</strong> {{
+                                        clientForm.get('birthday')?.value | date }}</p>
+                                    <p><strong>{{ 'street-label' | transloco }}</strong> {{
+                                        clientForm.get('street')?.value }}</p>
+                                    <p><strong>{{ 'city-label' | transloco }}</strong> {{ clientForm.get('city')?.value
+                                        }}</p>
+                                    <p><strong>{{ 'province-label' | transloco }}</strong> {{
+                                        clientForm.get('province')?.value }}</p>
+                                    <p><strong>{{ 'cap-label' | transloco }}</strong> {{ clientForm.get('cap')?.value }}
                                     </p>
-                                    <p><strong>Name:</strong> {{ clientForm.get('name')?.value }}</p>
-                                    <p><strong>Surname:</strong> {{ clientForm.get('surname')?.value }}</p>
-                                    <p><strong>Birthday:</strong> {{ clientForm.get('birthday')?.value | date }}</p>
-                                    <p><strong>Street:</strong> {{ clientForm.get('street')?.value }}</p>
-                                    <p><strong>City:</strong> {{ clientForm.get('city')?.value }}</p>
-                                    <p><strong>Province:</strong> {{ clientForm.get('province')?.value }}</p>
-                                    <p><strong>CAP:</strong> {{ clientForm.get('cap')?.value }}</p>
-                                    <p><strong>Telephone:</strong> {{ clientForm.get('telephone')?.value }}</p>
-                                    <p><strong>Document Type:</strong> {{ clientForm.get('document_type')?.value |
-                                        documentTypeLabel }}</p>
-                                    <p><strong>Document Number:</strong> {{ clientForm.get('document_number')?.value }}
+                                    <p><strong>{{ 'telephone-label' | transloco }}</strong> {{
+                                        clientForm.get('telephone')?.value }}</p>
+                                    <p><strong>{{ 'document-type-label' | transloco }}</strong>
+                                        {{ (clientForm.get('document_type')?.value | documentTypeLabel) | transloco }}
                                     </p>
-                                    <p><strong>CF (Codice Fiscale):</strong> {{ clientForm.get('cf')?.value }}</p>
+                                    <p><strong>{{ 'document-number-label' | transloco }}</strong> {{
+                                        clientForm.get('document_number')?.value }}</p>
+                                    <p><strong>{{ 'cf-label' | transloco }}</strong> {{ clientForm.get('cf')?.value }}
+                                    </p>
                                 </div>
                             </p-card>
                         </div>
 
                         <!-- Image Upload Section -->
                         <div class="col-6">
-                            <p-card header="Uploaded Images" class="">
-                                <div class="image-upload-section p-3" class="flex flex-col items-center">
+                            <p-card header="{{ 'uploaded-images' | transloco }}">
+                                <div class="image-upload-section p-3 flex flex-col items-center">
                                     <div *ngIf="uploadForm.get('frontimage')?.value['objectURL']" class="pt-3 pr-3">
-                                        <p> <strong>Front Image:</strong></p>
-                                        <img [src]="uploadForm.get('frontimage')?.value['objectURL']" alt="Front Image"
-                                            class="image-preview w-32 h-32 object-cover rounded-md shadow-md border border-gray-300">
+                                        <p><strong>{{ 'front-image-label' | transloco }}</strong></p>
+                                        <img [src]="uploadForm.get('frontimage')?.value['objectURL']"
+                                            [alt]="'front-image-label' | transloco"
+                                            class="image-preview w-32 h-32 object-cover rounded-md shadow-md border border-gray-300" />
                                     </div>
 
                                     <div *ngIf="uploadForm?.get('backimage')?.value['objectURL']" class="pt-3 pr-3">
-                                        <p> <strong>Back Image:</strong></p>
-                                        <img [src]="uploadForm.get('backimage')?.value['objectURL']" alt="Back Image"
-                                            class="image-preview w-32 h-32 object-cover rounded-md shadow-md border border-gray-300">
+                                        <p><strong>{{ 'back-image-label' | transloco }}</strong></p>
+                                        <img [src]="uploadForm.get('backimage')?.value['objectURL']"
+                                            [alt]="'back-image-label' | transloco"
+                                            class="image-preview w-32 h-32 object-cover rounded-md shadow-md border border-gray-300" />
                                     </div>
 
                                     <div *ngIf="uploadForm?.get('selfie')?.value['objectURL']" class="pt-3">
-                                        <p> <strong>Selfie:</strong></p>
-                                        <img [src]="uploadForm.get('selfie')?.value['objectURL']" alt="Selfie Image"
-                                            class="image-preview w-32 h-32 object-cover rounded-md shadow-md border border-gray-300">
+                                        <p><strong>{{ 'selfie-image-label' | transloco }}</strong></p>
+                                        <img [src]="uploadForm.get('selfie')?.value['objectURL']"
+                                            [alt]="'selfie-image-label' | transloco"
+                                            class="image-preview w-32 h-32 object-cover rounded-md shadow-md border border-gray-300" />
                                     </div>
                                 </div>
                             </p-card>
@@ -185,14 +199,12 @@
 
                     <!-- Submit Button Section - Centered -->
                     <div class="flex justify-center pt-4 w-full">
-                        <p-button label="Submit" icon="pi pi-check" class="p-button-lg"
-                            (click)="uploadReservationData()"></p-button>
+                        <p-button [label]="'submit' | transloco" icon="pi pi-check" class="p-button-lg"
+                            (onClick)="uploadReservationData()"></p-button>
                     </div>
 
-
-
                     <div class="flex pt-6 justify-start">
-                        <p-button label="Back" icon="pi pi-arrow-left" iconPos="right"
+                        <p-button [label]="'back' | transloco" icon="pi pi-arrow-left" iconPos="right"
                             (onClick)="activateCallback(2)" />
                     </div>
                 </ng-template>
@@ -201,10 +213,10 @@
     </p-stepper>
 </div>
 
-
-<p-dialog [(visible)]="showConfirmationDialog" modal header="Confirmation Sent" [style]="{ width: '400px' }">
-    <p>Your confirmation has been sent. You will receive an email shortly.</p>
+<p-dialog [(visible)]="showConfirmationDialog" modal [header]="'confirmation-sent-title' | transloco"
+    [style]="{ width: '400px' }">
+    <p>{{ 'confirmation-sent-message' | transloco }}</p>
     <ng-template pTemplate="footer">
-        <button pButton label="OK" icon="pi pi-check" (click)="closeDialog()"></button>
+        <button pButton [label]="'ok' | transloco" icon="pi pi-check" (click)="closeDialog()"></button>
     </ng-template>
 </p-dialog>

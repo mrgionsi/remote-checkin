@@ -9,12 +9,12 @@ import { ReservationService } from '../../services/reservation.service';
 import { CommonModule } from '@angular/common';
 import { RoomService } from '../../services/room.service';
 import { dateRangeValidator } from '../../validators/date-range.validator';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-create-reservation',
-  imports: [DatePickerModule, InputTextModule, ButtonModule, CommonModule, ReactiveFormsModule, SelectModule],
+  imports: [DatePickerModule, InputTextModule, ButtonModule, CommonModule, ReactiveFormsModule, SelectModule, TranslocoPipe],
   templateUrl: './create-reservation.component.html',
-  providers: [ReservationService], // <-- Manually provide the service in the component
   styleUrl: './create-reservation.component.scss'
 })
 export class CreateReservationComponent implements OnInit {

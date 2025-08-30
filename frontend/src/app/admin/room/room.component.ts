@@ -13,6 +13,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { Dialog } from 'primeng/dialog';
 import { isPlatformBrowser } from '@angular/common';
 import { Inject, PLATFORM_ID } from '@angular/core';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-room',
@@ -25,7 +26,7 @@ import { Inject, PLATFORM_ID } from '@angular/core';
     ToastModule,
     ConfirmDialogModule,
     Dialog,
-    FormsModule],
+    FormsModule, TranslocoPipe],
   templateUrl: './room.component.html',
   styleUrl: './room.component.scss',
   providers: [MessageService, ConfirmationService]

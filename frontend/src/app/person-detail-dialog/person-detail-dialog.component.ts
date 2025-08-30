@@ -6,10 +6,12 @@ import { DialogModule } from 'primeng/dialog';
 import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { ImageModule } from 'primeng/image';
 import { DocumentTypeLabelPipe } from "../pipes/document-type-label.pipe";
+import { TranslocoPipe } from '@jsverse/transloco';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-person-detail-dialog',
-  imports: [DialogModule, CommonModule, ImageModule, ButtonModule, CardModule, DocumentTypeLabelPipe],
+  imports: [DialogModule, CommonModule, ImageModule, ButtonModule, CardModule, DocumentTypeLabelPipe, TranslocoPipe, TooltipModule],
   templateUrl: './person-detail-dialog.component.html',
   styleUrls: ['./person-detail-dialog.component.scss'],
   standalone: true

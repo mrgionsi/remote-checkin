@@ -13,35 +13,20 @@ import { DropdownModule } from 'primeng/dropdown';
 import { FormsModule } from '@angular/forms';
 import { Menu } from 'primeng/menu';
 import { Subscription } from 'rxjs';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-admin-home',
   imports: [MenuModule, BadgeModule, RippleModule, AvatarModule, CommonModule, DropdownModule, FormsModule,
-    RouterOutlet, SidebarModule, ButtonModule],
+    RouterOutlet, SidebarModule, ButtonModule, TranslocoPipe],
   templateUrl: './admin-home.component.html',
   styleUrl: './admin-home.component.scss'
 })
 export class AdminHomeComponent implements OnInit, OnDestroy {
 
   visible: boolean = false;
-  menuItems: MenuItem[];
-  userMenuItems: MenuItem[] = [
-    {
-      label: 'Info utente',
-      icon: 'pi pi-user',
-      command: () => this.showUserInfo()
-    },
-    {
-      label: 'Cambia password',
-      icon: 'pi pi-key',
-      routerLink: '/admin/change-password'
-    },
-    {
-      label: 'Logout',
-      icon: 'pi pi-sign-out',
-      command: () => this.logout()
-    }
-  ];
+  menuItems: MenuItem[] = [];
+  userMenuItems: MenuItem[] = [];
   userName: string = '';
   structures: { id: number, name: string }[] = [];
   selectedStructureId: number | null = null;
@@ -49,14 +34,15 @@ export class AdminHomeComponent implements OnInit, OnDestroy {
   @ViewChild('userMenu') userMenu!: Menu;
   private userSubscription!: Subscription;
 
-  constructor(public router: Router, public authService: AuthService) {
-    console.log('AdminHomeComponent initialized');
-    this.menuItems = [
-      { label: 'Dashboard', icon: 'pi pi-chart-line', routerLink: '/admin/dashboard' },
-      { label: 'Add new Reservation', icon: 'pi pi-plus', routerLink: '/admin/create-reservation' },
-      { label: 'Rooms', icon: 'pi pi-warehouse', routerLink: '/admin/rooms' },
-      { label: 'Settings', icon: 'pi pi-cog', routerLink: '/admin/settings' }
-    ];
+  constructor(
+    public router: Router,
+    public authService: AuthService,
+    private readonly translocoService: TranslocoService
+  ) {
+    const lang = localStorage.getItem('appLang') || 'en';
+    this.translocoService.setActiveLang(lang);
+
+
   }
 
   toggleSidebar() {
@@ -64,6 +50,47 @@ export class AdminHomeComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+
+    this.translocoService.selectTranslateObject([
+      'dashboard-label',
+      'add-reservation-label',
+      'rooms-label',
+      'settings-label',
+      'user-info-label',
+      'change-password-label'
+    ]).subscribe((translations: any) => {
+      console.log('Translations loaded:', translations);
+      this.menuItems = [
+        { label: translations[0], icon: 'pi pi-chart-line', routerLink: '/admin/dashboard' },
+        { label: translations[1], icon: 'pi pi-plus', routerLink: '/admin/create-reservation' },
+        { label: translations[2], icon: 'pi pi-warehouse', routerLink: '/admin/rooms' },
+        { label: translations[3], icon: 'pi pi-cog', routerLink: '/admin/settings' }
+      ];
+      if (this.authService.isSuperAdmin()) {
+        this.menuItems.push({
+          label: 'Superadmin Panel',
+          icon: 'pi pi-shield',
+          routerLink: '/admin/superadmin'
+        });
+      }
+      this.userMenuItems = [
+        {
+          label: translations[4],
+          icon: 'pi pi-user',
+          command: () => this.showUserInfo()
+        },
+        {
+          label: translations[5],
+          icon: 'pi pi-key',
+          routerLink: '/admin/change-password'
+        },
+        {
+          label: 'Logout',
+          icon: 'pi pi-sign-out',
+          command: () => this.logout()
+        }
+      ];
+    });
     this.userSubscription = this.authService.user$.subscribe(user => {
       if (user) {
         this.userName = user?.username || '';
@@ -76,18 +103,14 @@ export class AdminHomeComponent implements OnInit, OnDestroy {
           this.selectedStructureId = this.structures[0].id;
           localStorage.setItem('selected_structure_id', String(this.selectedStructureId));
         }
-        if (this.authService.isSuperAdmin()) {
-          this.menuItems.push({
-            label: 'Superadmin Panel',
-            icon: 'pi pi-shield',
-            routerLink: '/admin/superadmin'
-          });
-        }
+        console.log(this.authService.isSuperAdmin())
+
       }
       else {
         this.router.navigate(['/admin/login']);
       }
     });
+
   }
 
   ngOnDestroy() {

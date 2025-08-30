@@ -1,10 +1,10 @@
 <div class="container">
-    <h3>Seleziona la tua lingua</h3>
+    <h3>{{ 'select-your-language' | transloco }}</h3>
     <ul class="language-list">
         <li *ngFor="let lang of languages" (click)="selectLanguage(lang)"
-            [class.selected]="lang.code === selectedLanguage.code">
+            [class.selected]="lang.code === selectedLanguage.code" [class.disabled]="disabledLangs.includes(lang.code)">
             <span class="flag">{{ lang.flag }}</span>
-            <span class="name">{{ lang.name }}</span>
+            <span class="name">{{ ('languages.' + lang.code) | transloco }}</span>
         </li>
     </ul>
 </div>

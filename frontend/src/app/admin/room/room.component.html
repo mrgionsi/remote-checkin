@@ -1,16 +1,19 @@
 <div class="card">
     <div class="btn-right mb-2">
-        <p-button class="" label="Create Room" icon="pi pi-plus" severity="info"
+        <p-button class="" [label]="'create-room-btn' | transloco" icon="pi pi-plus" severity="info"
             (click)="showDialogCreateRoom()"></p-button>
     </div>
     <p-table [value]="rooms" dataKey="id" editMode="row" [tableStyle]="{ 'min-width': '50rem' }">
         <ng-template #header>
             <tr>
-                <th pSortableColumn="id">ID <p-sortIcon field="id" /></th>
-                <th pSortableColumn="name">Name <p-sortIcon field="name" /></th>
-                <th>Struttura</th>
-                <th pSortableColumn="capacity">Capienza <p-sortIcon field="capacity" /></th>
-                <th>Actions</th>
+                <th scope="col" pSortableColumn="id">{{ 'room-id-header' | transloco }} <p-sortIcon field="id" /></th>
+                <th scope="col" pSortableColumn="name">{{ 'room-name-header' | transloco }} <p-sortIcon field="name" />
+                </th>
+                <!--                 <th>{{ 'structure-header' | transloco }}</th>
+ -->
+                <th scope="col" pSortableColumn="capacity">{{ 'capacity-header' | transloco }} <p-sortIcon
+                        field="capacity" /></th>
+                <th scope="col">{{ 'actions-header' | transloco }}</th>
             </tr>
         </ng-template>
         <ng-template #body let-room let-editing="editing" let-ri="rowIndex">
@@ -26,7 +29,7 @@
                         </ng-template>
                     </p-cellEditor>
                 </td>
-                <td>B&B Chapeau</td>
+                <!--                 <td>{{pleace structure name here}}</td> -->
                 <td>
                     <p-cellEditor>
                         <ng-template #input>
@@ -40,13 +43,17 @@
                 <td>
                     <div class="flex items-center justify-center gap-2">
                         <button *ngIf="!editing" pButton pRipple type="button" pInitEditableRow icon="pi pi-pencil"
-                            (click)="onRowEditInit(room)" text rounded severity="secondary"></button>
+                            (click)="onRowEditInit(room)" text rounded severity="secondary"
+                            [label]="'edit-btn' | transloco"></button>
                         <button *ngIf="!editing" pButton type="button" icon="pi pi-trash"
-                            (click)="onRowDelete(room,ri,$event)" text rounded severity="secondary"></button>
+                            (click)="onRowDelete(room,ri,$event)" text rounded severity="secondary"
+                            [label]="'delete-btn' | transloco"></button>
                         <button *ngIf="editing" pButton pRipple type="button" pSaveEditableRow icon="pi pi-check"
-                            (click)="onRowEditSave(room)" text rounded severity="secondary"></button>
+                            (click)="onRowEditSave(room)" text rounded severity="secondary"
+                            [label]="'save-btn' | transloco"></button>
                         <button *ngIf="editing" pButton pRipple type="button" pCancelEditableRow icon="pi pi-times"
-                            (click)="onRowEditCancel(room, ri)" text rounded severity="secondary"></button>
+                            (click)="onRowEditCancel(room, ri)" text rounded severity="secondary"
+                            [label]="'cancel-btn' | transloco"></button>
                     </div>
                 </td>
             </tr>
@@ -57,22 +64,21 @@
 <p-toast />
 <p-confirmdialog />
 
-
-<p-dialog header="Add Room" [modal]="true" [(visible)]="add_room_visible" [style]="{ width: '25rem' }">
-    <!--     <span class="p-text-secondary block mb-8">Add new room</span>
- -->
+<p-dialog [header]="'add-room-title' | transloco" [modal]="true" [(visible)]="add_room_visible"
+    [style]="{ width: '25rem' }">
     <div class="flex items-center gap-4 mb-4">
-        <label for="name" class="font-semibold w-24">Room name</label>
+        <label for="name" class="font-semibold w-24">{{ 'room-name-label' | transloco }}</label>
         <input pInputText id="name" class="flex-auto" autocomplete="off" [(ngModel)]="new_room.name" required
-            minlength="1" maxlength="100" />
+            minlength="1" maxlength="100" [placeholder]="'room-name-placeholder-insert' | transloco" />
     </div>
     <div class="flex items-center gap-4 mb-8">
-        <label for="capacity" class="font-semibold w-24">Capacity</label>
+        <label for="capacity" class="font-semibold w-24">{{ 'capacity-label' | transloco }}</label>
         <input pInputText id="capacity" class="flex-auto" type="number" autocomplete="off"
-            [(ngModel)]="new_room.capacity" required min="1" max="999" />
+            [(ngModel)]="new_room.capacity" required min="1" max="999"
+            [placeholder]="'capacity-placeholder' | transloco" />
     </div>
     <div class="flex justify-end gap-2 mt-2">
-        <p-button label="Cancel" severity="secondary" (click)="add_room_visible = false" />
-        <p-button label="Save" (click)="addRoom()" />
+        <p-button [label]="'cancel-btn' | transloco" severity="secondary" (click)="add_room_visible = false" />
+        <p-button [label]="'save-btn' | transloco" (click)="addRoom()" />
     </div>
 </p-dialog>
