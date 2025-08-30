@@ -20,10 +20,11 @@ import { DateShortPipe } from "../pipes/date-short.pipe";
 import { RoomService } from '../services/room.service';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { HttpClient } from '@angular/common/http';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-detail-reservation',
-  imports: [ToastModule, CommonModule, TableModule, ConfirmDialogModule, CardModule, ButtonModule, FormsModule, SelectModule, DatePickerModule, ReactiveFormsModule, DateShortPipe, DocumentTypeLabelPipe],
+  imports: [ToastModule, TranslocoPipe, CommonModule, TableModule, ConfirmDialogModule, CardModule, ButtonModule, FormsModule, SelectModule, DatePickerModule, ReactiveFormsModule, DocumentTypeLabelPipe],
   templateUrl: './detail-reservation.component.html',
   styleUrl: './detail-reservation.component.scss',
   providers: [MessageService, DialogService, ConfirmationService]
