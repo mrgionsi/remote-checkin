@@ -105,5 +105,20 @@
     "room-name-placeholder": "Select a Room",
     "room-name-required": "Room name is required.",
     "date-range-invalid": "Start date cannot be later than the end date.",
-    "create-reservation-btn": "Create Reservation"
+    "create-reservation-btn": "Create Reservation",
+    "create-room-btn": "Create Room",
+    "room-id-header": "ID",
+    "room-name-header": "Name",
+    "structure-header": "Structure",
+    "structure-name": "B&B Chapeau",
+    "capacity-header": "Capacity",
+    "actions-header": "Actions",
+    "edit-btn": "Edit",
+    "delete-btn": "Delete",
+    "save-btn": "Save",
+    "cancel-btn": "Cancel",
+    "add-room-title": "Add Room",
+    "room-name-placeholder-insert": "Enter room name",
+    "capacity-label": "Capacity",
+    "capacity-placeholder": "Enter capacity"
 }
