@@ -23,7 +23,7 @@ export class SettingsComponent implements OnInit {
   selectedLang = 'en';
   saved = false;
 
-  constructor(private translocoService: TranslocoService, @Inject(PLATFORM_ID) private platformId: Object) { }
+  constructor(private readonly translocoService: TranslocoService, @Inject(PLATFORM_ID) private readonly platformId: Object) { }
 
   ngOnInit() {
     const stored = isPlatformBrowser(this.platformId) ? localStorage.getItem('appLang') : null;

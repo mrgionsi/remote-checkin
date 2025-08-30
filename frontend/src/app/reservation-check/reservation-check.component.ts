@@ -21,11 +21,11 @@ export class ReservationCheckComponent implements OnInit {
   languageCode: string = '';
 
   constructor(
-    private route: ActivatedRoute,
+    private readonly route: ActivatedRoute,
     private router: Router,
     private reservationService: ReservationService,
-    private messageService: MessageService,
-    private translocoService: TranslocoService
+    private readonly messageService: MessageService,
+    private readonly translocoService: TranslocoService
   ) { }
 
   ngOnInit() {
@@ -40,9 +40,6 @@ export class ReservationCheckComponent implements OnInit {
 
     this.reservationService.checkReservationById(Number(this.reservationId)).subscribe({
       next: (val) => {
-        const successMsg = this.translocoService.translate('reservation-success');
-        const errorMsg = this.translocoService.translate('reservation-error');
-
         if (val && val.id_reference) {
           _.messageService.add({
             severity: 'success',

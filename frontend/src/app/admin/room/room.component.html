@@ -6,12 +6,14 @@
     <p-table [value]="rooms" dataKey="id" editMode="row" [tableStyle]="{ 'min-width': '50rem' }">
         <ng-template #header>
             <tr>
-                <th pSortableColumn="id">{{ 'room-id-header' | transloco }} <p-sortIcon field="id" /></th>
-                <th pSortableColumn="name">{{ 'room-name-header' | transloco }} <p-sortIcon field="name" /></th>
+                <th scope="col" pSortableColumn="id">{{ 'room-id-header' | transloco }} <p-sortIcon field="id" /></th>
+                <th scope="col" pSortableColumn="name">{{ 'room-name-header' | transloco }} <p-sortIcon field="name" />
+                </th>
                 <!--                 <th>{{ 'structure-header' | transloco }}</th>
  -->
-                <th pSortableColumn="capacity">{{ 'capacity-header' | transloco }} <p-sortIcon field="capacity" /></th>
-                <th>{{ 'actions-header' | transloco }}</th>
+                <th scope="col" pSortableColumn="capacity">{{ 'capacity-header' | transloco }} <p-sortIcon
+                        field="capacity" /></th>
+                <th scope="col">{{ 'actions-header' | transloco }}</th>
             </tr>
         </ng-template>
         <ng-template #body let-room let-editing="editing" let-ri="rowIndex">

@@ -37,7 +37,7 @@ export class AdminHomeComponent implements OnInit, OnDestroy {
   constructor(
     public router: Router,
     public authService: AuthService,
-    private translocoService: TranslocoService
+    private readonly translocoService: TranslocoService
   ) {
     const lang = localStorage.getItem('appLang') || 'en';
     this.translocoService.setActiveLang(lang);

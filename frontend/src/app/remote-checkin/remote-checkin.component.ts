@@ -42,8 +42,8 @@ export class RemoteCheckinComponent implements OnInit {
   showConfirmationDialog: boolean = false;
 
   constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder,
-    private messageService: MessageService, private uploadService: UploadService,
-    private translocoService: TranslocoService
+    private readonly messageService: MessageService, private uploadService: UploadService,
+    private readonly translocoService: TranslocoService
   ) {
     this.uploadForm = this.fb.group({
       frontimage: [null, Validators.required],
