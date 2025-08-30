@@ -72,7 +72,8 @@
     "file-size-exceeds": "La grandezza del file supera i 5MB",
     "only-images-allowed": "Solo immagini sono consentite",
     "identity-card-label": "Carta d'identit",
-    "images-uploaded-success": "Immagini caricate con success",
+    "images-uploaded-success": "Immagini caricate con successo",
+    "select-structure-placeholder": "Seleziona struttura",
     "images-uploaded-fail": "Upload fallito",
     "hello-label": "Ciao",
     "admin-panel-title": "Pannello Admin",
@@ -152,5 +153,13 @@
     "not-found-label": "Non trovato",
     "zoomable-image-alt": "Zoom immagine",
     "download-image-tooltip": "Download immagine",
-    "client-details-title": "Dettagli ospite"
+    "client-details-title": "Dettagli ospite",
+    "settings-title": "Impostazioni",
+    "select-language-label": "Lingua",
+    "select-language-placeholder": "Seleziona lingua",
+    "settings-saved-message": "Impostazioni salvate.",
+    "dashboard-label": "Dashboard",
+    "add-reservation-label": "Aggiungi Prenotazione",
+    "rooms-label": "Gestione Stanze",
+    "settings-label": "Impostazioni"
 }

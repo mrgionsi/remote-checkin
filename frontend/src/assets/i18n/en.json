@@ -110,7 +110,6 @@
     "room-id-header": "ID",
     "room-name-header": "Name",
     "structure-header": "Structure",
-    "structure-name": "B&B Chapeau",
     "capacity-header": "Capacity",
     "actions-header": "Actions",
     "edit-btn": "Edit",
@@ -152,5 +151,14 @@
     "not-found-label": "Not Found",
     "zoomable-image-alt": "Zoomable Image",
     "download-image-tooltip": "Download Image",
-    "client-details-title": "Client Details"
+    "client-details-title": "Client Details",
+    "settings-title": "Settings",
+    "select-language-label": "Language",
+    "select-language-placeholder": "Select Language",
+    "save-changes-btn": "Save Changes",
+    "settings-saved-message": "Settings saved successfully.",
+    "dashboard-label": "Dashboard",
+    "add-reservation-label": "Add new Reservation",
+    "rooms-label": "Rooms Handling",
+    "settings-label": "Settings"
 }

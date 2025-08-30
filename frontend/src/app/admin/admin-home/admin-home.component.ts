@@ -13,7 +13,7 @@ import { DropdownModule } from 'primeng/dropdown';
 import { FormsModule } from '@angular/forms';
 import { Menu } from 'primeng/menu';
 import { Subscription } from 'rxjs';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-admin-home',
@@ -50,13 +50,19 @@ export class AdminHomeComponent implements OnInit, OnDestroy {
   @ViewChild('userMenu') userMenu!: Menu;
   private userSubscription!: Subscription;
 
-  constructor(public router: Router, public authService: AuthService) {
-    console.log('AdminHomeComponent initialized');
+  constructor(
+    public router: Router,
+    public authService: AuthService,
+    private translocoService: TranslocoService
+  ) {
+    const lang = localStorage.getItem('appLang') || 'en';
+    this.translocoService.setActiveLang(lang);
+
     this.menuItems = [
-      { label: 'Dashboard', icon: 'pi pi-chart-line', routerLink: '/admin/dashboard' },
-      { label: 'Add new Reservation', icon: 'pi pi-plus', routerLink: '/admin/create-reservation' },
-      { label: 'Rooms', icon: 'pi pi-warehouse', routerLink: '/admin/rooms' },
-      { label: 'Settings', icon: 'pi pi-cog', routerLink: '/admin/settings' }
+      { label: this.translocoService.translate('dashboard-label'), icon: 'pi pi-chart-line', routerLink: '/admin/dashboard' },
+      { label: this.translocoService.translate('add-reservation-label'), icon: 'pi pi-plus', routerLink: '/admin/create-reservation' },
+      { label: this.translocoService.translate('rooms-label'), icon: 'pi pi-warehouse', routerLink: '/admin/rooms' },
+      { label: this.translocoService.translate('settings-label'), icon: 'pi pi-cog', routerLink: '/admin/settings' }
     ];
   }
 
