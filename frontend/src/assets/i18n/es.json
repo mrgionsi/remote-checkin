@@ -31,7 +31,7 @@
     "Sent back to customer": "Devuelto al cliente",
     "Pending": "Pendiente",
     "add-reservation-title": "Agregar reserva",
-    "reservation-number-label": "Número de reserva (de Booking o AirBnB)",
+    "reservation-number-label": "Número de reserva (de Booking o Airbnb)",
     "reservation-number-placeholder": "Introduzca el número de reserva",
     "reservation-number-required": "El número de reserva es obligatorio.",
     "start-date-label": "Fecha de inicio",
