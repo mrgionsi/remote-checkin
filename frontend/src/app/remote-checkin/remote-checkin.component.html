@@ -157,8 +157,9 @@
                                     </p>
                                     <p><strong>{{ 'telephone-label' | transloco }}</strong> {{
                                         clientForm.get('telephone')?.value }}</p>
-                                    <p><strong>{{ 'document-type-label' | transloco }}</strong> {{
-                                        clientForm.get('document_type')?.value | documentTypeLabel }}</p>
+                                    <p><strong>{{ 'document-type-label' | transloco }}</strong>
+                                        {{ (clientForm.get('document_type')?.value | documentTypeLabel) | transloco }}
+                                    </p>
                                     <p><strong>{{ 'document-number-label' | transloco }}</strong> {{
                                         clientForm.get('document_number')?.value }}</p>
                                     <p><strong>{{ 'cf-label' | transloco }}</strong> {{ clientForm.get('cf')?.value }}

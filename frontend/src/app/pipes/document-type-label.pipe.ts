@@ -5,14 +5,16 @@ import { Pipe, PipeTransform } from '@angular/core';
   standalone: true
 })
 export class DocumentTypeLabelPipe implements PipeTransform {
-  private readonly types = [
-    { label: 'Identity Card', value: 'identity_card' },
-    { label: 'Driver License', value: 'driver_license' },
-    { label: 'Passport', value: 'passport' }
-  ];
-
   transform(value: string): string {
-    const found = this.types.find(t => t.value === value);
-    return found ? found.label : value;
+    switch (value) {
+      case 'identity_card':
+        return 'identity-card-label';
+      case 'driver_license':
+        return 'driver-license-label';
+      case 'passport':
+        return 'passport-label';
+      default:
+        return value;
+    }
   }
 }
