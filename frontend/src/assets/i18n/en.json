@@ -71,5 +71,9 @@
     "only-images-allowed": "Only images are allowed",
     "identity-card-label": "Identity Card",
     "images-uploaded-success": "Images uploaded successfully",
-    "images-uploaded-fail": "Upload failed"
+    "images-uploaded-fail": "Upload failed",
+    "select-structure-placeholder": "Select structure",
+    "hello-label": "Hello",
+    "admin-panel-title": "Admin Panel",
+    "loading-label": "Loading..."
 }
