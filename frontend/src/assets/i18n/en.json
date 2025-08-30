@@ -75,5 +75,17 @@
     "select-structure-placeholder": "Select structure",
     "hello-label": "Hello",
     "admin-panel-title": "Admin Panel",
-    "loading-label": "Loading..."
+    "loading-label": "Loading...",
+    "global-search-placeholder": "Global Search",
+    "reservation-number-header": "Reservation Number",
+    "guest-name-header": "Guest Name",
+    "room-header": "Room",
+    "checkin-date-header": "Check-in Date",
+    "checkout-date-header": "Check-out Date",
+    "status-header": "Status",
+    "no-data-found-message": "No data found.",
+    "Approved": "Approved",
+    "Declined": "Declined",
+    "Sent back to customer": "Sent back to the customer",
+    "Pending": "Pending"
 }

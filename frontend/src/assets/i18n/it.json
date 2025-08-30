@@ -76,5 +76,17 @@
     "images-uploaded-fail": "Upload fallito",
     "hello-label": "Ciao",
     "admin-panel-title": "Pannello Admin",
-    "loading-label": "Caricamento..."
+    "loading-label": "Caricamento...",
+    "global-search-placeholder": "Ricerca Globale",
+    "reservation-number-header": "Numero Prenotazione",
+    "guest-name-header": "Nome Ospite",
+    "room-header": "Stanza",
+    "checkin-date-header": "Data Check-in",
+    "checkout-date-header": "Data Check-out",
+    "status-header": "Stato",
+    "no-data-found-message": "Nessun dato trovato.",
+    "Approved": "Approvato",
+    "Declined": "Rifiutato",
+    "Sent back to customer": "Rimandato al cliente",
+    "Pending": "In attesa"
 }
