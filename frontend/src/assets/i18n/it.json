@@ -106,5 +106,19 @@
     "room-name-placeholder": "Seleziona una stanza",
     "room-name-required": "Nome stanza è obbligatorio.",
     "date-range-invalid": "La data di inizio non può essere prima della data di fine.",
-    "create-reservation-btn": "Crea prenotazione"
+    "create-reservation-btn": "Crea prenotazione",
+    "create-room-btn": "Crea Stanza",
+    "room-id-header": "ID",
+    "room-name-header": "Nome",
+    "structure-header": "Struttura",
+    "capacity-header": "Capienza",
+    "actions-header": "Azioni",
+    "edit-btn": "Modifica",
+    "delete-btn": "Elimina",
+    "save-btn": "Salva",
+    "cancel-btn": "Annulla",
+    "add-room-title": "Aggiungi stanza",
+    "room-name-placeholder-insert": "Inserisci il nome della stanza",
+    "capacity-label": "Capacità",
+    "capacity-placeholder": "Inserisci la capienza"
 }
