@@ -161,5 +161,7 @@
     "dashboard-label": "Dashboard",
     "add-reservation-label": "Aggiungi Prenotazione",
     "rooms-label": "Gestione Stanze",
-    "settings-label": "Impostazioni"
+    "settings-label": "Impostazioni",
+    "user-info-label": "Info Utente",
+    "change-password-label": "Cambia Password"
 }

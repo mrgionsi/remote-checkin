@@ -160,5 +160,7 @@
     "dashboard-label": "Dashboard",
     "add-reservation-label": "Add new Reservation",
     "rooms-label": "Rooms Handling",
-    "settings-label": "Settings"
+    "settings-label": "Settings",
+    "user-info-label": "User Info",
+    "change-password-label": "Change Password"
 }
