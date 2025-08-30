@@ -15,7 +15,6 @@ import { TranslocoPipe } from '@jsverse/transloco';
   selector: 'app-create-reservation',
   imports: [DatePickerModule, InputTextModule, ButtonModule, CommonModule, ReactiveFormsModule, SelectModule, TranslocoPipe],
   templateUrl: './create-reservation.component.html',
-  providers: [ReservationService], // <-- Manually provide the service in the component
   styleUrl: './create-reservation.component.scss'
 })
 export class CreateReservationComponent implements OnInit {
