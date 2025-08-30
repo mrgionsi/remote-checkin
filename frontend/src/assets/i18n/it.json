@@ -163,5 +163,6 @@
     "rooms-label": "Gestione Stanze",
     "settings-label": "Impostazioni",
     "user-info-label": "Info Utente",
-    "change-password-label": "Cambia Password"
+    "change-password-label": "Cambia Password",
+    "save-changes-btn": "Salva"
 }
