@@ -67,6 +67,8 @@ export class DetailReservationComponent implements OnInit {
       start_date: ['', Validators.required],
       end_date: ['', Validators.required],
       name_reference: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      telephone: [''],
       status: [''],
     }, { validators: this.dateRangeValidator });
   }
@@ -181,6 +183,8 @@ export class DetailReservationComponent implements OnInit {
       start_date: this.reservation_details.start_date,
       end_date: this.reservation_details.end_date,
       name_reference: this.reservation_details.name_reference,
+      email: this.reservation_details.email,
+      telephone: this.reservation_details.telephone,
       status: this.reservation_details.status,
     });
 

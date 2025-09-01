@@ -62,6 +62,22 @@
                         formControlName="name_reference" [placeholder]="'guest-placeholder' | transloco" />
                 </div>
 
+                <!-- Email -->
+                <div [formGroup]="form" class="field col-12 md:col-6">
+                    <label for="email" class="font-bold text-600">{{ 'email-label' | transloco }}</label>
+                    <div *ngIf="!editMode">{{ reservation_details?.email }}</div>
+                    <input *ngIf="editMode" type="email" id="email" class="p-inputtext w-full" formControlName="email"
+                        [placeholder]="'email-placeholder' | transloco" />
+                </div>
+
+                <!-- Telephone -->
+                <div [formGroup]="form" class="field col-12 md:col-6">
+                    <label for="telephone" class="font-bold text-600">{{ 'telephone-label' | transloco }}</label>
+                    <div *ngIf="!editMode">{{ reservation_details?.telephone }}</div>
+                    <input *ngIf="editMode" type="tel" id="telephone" class="p-inputtext w-full"
+                        formControlName="telephone" [placeholder]="'telephone-placeholder' | transloco" />
+                </div>
+
                 <!-- Status -->
                 <div class="field col-12 md:col-6">
                     <label for="status_select" class="font-bold text-600 mb-2">{{ 'status-label' | transloco }}</label>
