@@ -66,6 +66,43 @@
             </div>
         </div>
 
+        <!-- Email Field -->
+        <div class="p-field p-grid align-items-center p-mb-3">
+            <label for="email" class="p-col-12 p-md-3 text-right">
+                {{ 'email-label' | transloco }}
+            </label>
+            <div class="p-col-12 p-md-9">
+                <input id="email" pInputText formControlName="email" type="email"
+                    [placeholder]="'email-placeholder' | transloco"
+                    [class.p-invalid]="reservationForm.get('email')?.invalid && reservationForm.get('email')?.touched" />
+                <p *ngIf="reservationForm.get('email')?.invalid && reservationForm.get('email')?.touched"
+                    class="p-error mt-2">
+                    <span *ngIf="reservationForm.get('email')?.errors?.['required']">
+                        {{ 'email-required' | transloco }}
+                    </span>
+                    <span *ngIf="reservationForm.get('email')?.errors?.['email']">
+                        {{ 'email-invalid' | transloco }}
+                    </span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Telephone Field -->
+        <div class="p-field p-grid align-items-center p-mb-3">
+            <label for="telephone" class="p-col-12 p-md-3 text-right">
+                {{ 'telephone-label' | transloco }}
+            </label>
+            <div class="p-col-12 p-md-9">
+                <input id="telephone" pInputText formControlName="telephone" type="tel"
+                    [placeholder]="'telephone-placeholder' | transloco"
+                    [class.p-invalid]="reservationForm.get('telephone')?.invalid && reservationForm.get('telephone')?.touched" />
+                <p *ngIf="reservationForm.get('telephone')?.invalid && reservationForm.get('telephone')?.touched"
+                    class="p-error mt-2">
+                    {{ 'telephone-invalid' | transloco }}
+                </p>
+            </div>
+        </div>
+
         <!-- Room Name Field -->
         <div class="p-field p-grid align-items-center p-mb-3">
             <label for="roomName" class="p-col-12 p-md-3 text-right">
