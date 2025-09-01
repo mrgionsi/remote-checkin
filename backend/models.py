@@ -183,7 +183,9 @@ class Reservation(Base):
     id_room = Column(BigInteger, ForeignKey("room.id"))
     status = Column(String, default='Pending') #Approved, Pending, Declined, Sent back to customer
     name_reference = Column(String, default='Not available')
-
+    email = Column(String, nullable=False)
+    telephone = Column(String, default='')
+    
 
     room = relationship("Room", lazy="joined")
     clients = relationship(
@@ -199,7 +201,9 @@ class Reservation(Base):
             "end_date": self.end_date,
             "room": self.room.to_dict() if self.room else None,  # Include full room details
             "status": self.status,
-            "name_reference": self.name_reference
+            "name_reference": self.name_reference,
+            'email': self.email,
+            'telephone': self.telephone
         }
 
     def __repr__(self):
