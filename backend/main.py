@@ -10,13 +10,19 @@ import re
 from flask_jwt_extended import JWTManager
 from flask import Flask
 from flask_cors import CORS
+from routes.email_config_routes import email_config_bp
 from routes.admin_routes import admin_bp
 from routes.room_routes import room_bp
 from routes.reservation_routes import reservation_bp
 from routes.upload_reservation_routes import upload_bp
 from routes.client_reservation_routes import client_reservation_bp
+from flask_mail import Mail
+from config import Config
 
 app = Flask(__name__)
+
+# Load configuration
+app.config.from_object(Config())
 
 # --- JWT Secret Key Handling and Security Configuration ---
 jwt_secret_key = os.getenv("JWT_SECRET_KEY")
@@ -44,13 +50,18 @@ app.config["JWT_ALGORITHM"] = "HS256"
 
 jwt = JWTManager(app)
 
+# Initialize Flask-Mail after all configuration is set
+mail = Mail(app)
+# Ensure mail is properly registered with app extensions
+app.extensions['mail'] = mail
+
 allowed_origins = os.getenv("ALLOWED_CORS", "http://localhost:4200").split(",")
 
 CORS(
     app,
     origins=allowed_origins,
     supports_credentials=True,
-    methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+    methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],  # add OPTIONS
     allow_headers=["Content-Type", "Authorization"],
     expose_headers=["Content-Type", "Authorization"],
 )
@@ -64,7 +75,7 @@ app.register_blueprint(room_bp)
 app.register_blueprint(reservation_bp)
 app.register_blueprint(upload_bp)
 app.register_blueprint(client_reservation_bp)
-
+app.register_blueprint(email_config_bp)
 
 @app.route("/")
 def home():
@@ -74,6 +85,25 @@ def home():
     This route is used to check if the server is running.
     """
     return "Hello, Flask!"
+
+@app.route("/test-email-config")
+def test_email_config():
+    """
+    Test route to check if email configuration is working.
+    """
+    try:
+        if 'mail' not in app.extensions:
+            return {"status": "error", "message": "Flask-Mail extension not found"}
+        
+        mail = app.extensions['mail']
+        return {
+            "status": "success", 
+            "message": "Email configuration is available",
+            "mail_type": str(type(mail)),
+            "extensions": list(app.extensions.keys())
+        }
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 
 if __name__ == "__main__":
