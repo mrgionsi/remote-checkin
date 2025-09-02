@@ -39,8 +39,11 @@ export class AdminHomeComponent implements OnInit, OnDestroy {
     public authService: AuthService,
     private readonly translocoService: TranslocoService
   ) {
-    const lang = localStorage.getItem('appLang') || 'en';
-    this.translocoService.setActiveLang(lang);
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const lang = localStorage.getItem('appLang') || 'en';
+      this.translocoService.setActiveLang(lang);
+
+    }
 
 
   }
@@ -59,7 +62,6 @@ export class AdminHomeComponent implements OnInit, OnDestroy {
       'user-info-label',
       'change-password-label'
     ]).subscribe((translations: any) => {
-      console.log('Translations loaded:', translations);
       this.menuItems = [
         { label: translations[0], icon: 'pi pi-chart-line', routerLink: '/admin/dashboard' },
         { label: translations[1], icon: 'pi pi-plus', routerLink: '/admin/create-reservation' },
@@ -95,7 +97,7 @@ export class AdminHomeComponent implements OnInit, OnDestroy {
       if (user) {
         this.userName = user?.username || '';
         this.structures = user?.structures || [];
-        // Recupera struttura selezionata da localStorage o imposta la prima
+
         const savedStructureId = localStorage.getItem('selected_structure_id');
         if (savedStructureId && this.structures.some(s => s.id === +savedStructureId)) {
           this.selectedStructureId = +savedStructureId;
