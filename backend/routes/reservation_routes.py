@@ -13,7 +13,7 @@ from datetime import datetime
 from flask import Blueprint, request, jsonify, current_app
 from sqlalchemy import  func
 from sqlalchemy.sql import extract
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from email_handler import EmailService
 from models import Reservation, Room, Structure, StructureReservationsView
 from database import SessionLocal
@@ -108,7 +108,7 @@ def create_reservation():
             current_app.logger.info(f"Preparing to send email to: {data['email']}")
             current_app.logger.info(f"Reservation data: {reservation_data}")
             current_app.logger.info(f"Email service type: {type(email_service)}")
-            current_app.logger.info(f"Mail instance type: {type(mail)}")
+            # current_app.logger.info(f"Mail instance type: {type(mail)}")  # Removed as mail is not used in new email system
             
             # Send confirmation email
             email_result = email_service.send_reservation_confirmation(
@@ -196,6 +196,10 @@ def update_reservation(reservation_id):
             reservation.name_reference = data["name_reference"]
         if "id_reference" in data:
             reservation.id_reference = data["id_reference"]
+        if "email" in data:
+            reservation.email = data["email"]
+        if "telephone" in data:
+            reservation.telephone = data["telephone"]
         if "status" in data:
             reservation.status = data["status"]
         if "room" in data and isinstance(data["room"], dict) and "id" in data["room"]:
