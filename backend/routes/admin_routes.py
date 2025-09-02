@@ -76,6 +76,8 @@ def admin_login():
                 "username": user.username,
                 "name": user.name,
                 "surname": user.surname,
+                "email": user.email,
+                "telephone": user.telephone,
                 "structures": structures_list,
                 "role": user.role.name
             }
@@ -102,6 +104,8 @@ def create_admin_user():
     password = data.get("password")
     name = data.get("name")
     surname = data.get("surname")
+    email = data.get("email")
+    telephone = data.get("telephone")
     id_role = data.get("id_role")
 
     if not username or not password or not id_role:
@@ -119,6 +123,8 @@ def create_admin_user():
             password=hashed_password,
             name=name,
             surname=surname,
+            email=email,
+            telephone=telephone,
             id_role=id_role
         )
         db_session.add(new_user)
@@ -131,6 +137,8 @@ def create_admin_user():
                 "username": new_user.username,
                 "name": new_user.name,
                 "surname": new_user.surname,
+                "email": new_user.email,
+                "telephone": new_user.telephone,
                 "id_role": new_user.id_role
             }
         }), 201
@@ -171,6 +179,8 @@ def get_admin_info():
             "username": user.username,
             "name": user.name,
             "surname": user.surname,
+            "email": user.email,
+            "telephone": user.telephone,
             "role": user.role.name,
             "structures": structures_list
         }), 200
