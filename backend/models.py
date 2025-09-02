@@ -5,8 +5,8 @@ This module defines the SQLAlchemy models used for the application's database,
 including Room, Client, Reservation, and others.
 """
 
-from datetime import date
-from sqlalchemy import Column, Integer, BigInteger, String, Date, ForeignKey, Sequence
+from datetime import date, datetime
+from sqlalchemy import Column, Integer, BigInteger, String, Date, ForeignKey, Sequence, Boolean, DateTime
 from sqlalchemy.orm import relationship
 #pylint: disable=C0303
 #pylint: disable=E0611
@@ -325,3 +325,69 @@ class StructureReservationsView(Base):
             f"end_date={self.end_date}, room_id={self.room_id}, room_name='{self.room_name}', "
             f"status='{self.status}')>"
         )
+
+
+class EmailConfig(Base):
+    """
+    Represents email configuration for a user.
+    
+    Attributes:
+        id (int): Unique identifier for the email configuration.
+        user_id (int): Foreign key referencing the user.
+        mail_server (str): SMTP server address.
+        mail_port (int): SMTP server port.
+        mail_use_tls (bool): Whether to use TLS encryption.
+        mail_use_ssl (bool): Whether to use SSL encryption.
+        mail_username (str): Email username/address.
+        mail_password (str): Encrypted email password.
+        mail_default_sender_name (str): Default sender name.
+        mail_default_sender_email (str): Default sender email.
+        provider_type (str): Type of email provider (smtp, mailgun, sendgrid, etc.).
+        provider_config (str): JSON string for provider-specific configuration.
+        is_active (bool): Whether this configuration is active.
+        created_at (datetime): When the configuration was created.
+        updated_at (datetime): When the configuration was last updated.
+    """
+    __tablename__ = "email_config"
+
+    id = Column(Integer, Sequence("email_config_id_seq"), primary_key=True, index=True)
+    user_id = Column(BigInteger, ForeignKey("user.id"), nullable=False)
+    mail_server = Column(String, nullable=False)
+    mail_port = Column(Integer, nullable=False)
+    mail_use_tls = Column(Boolean, default=True)
+    mail_use_ssl = Column(Boolean, default=False)
+    mail_username = Column(String, nullable=False)
+    mail_password = Column(String, nullable=False)  # Encrypted
+    mail_default_sender_name = Column(String)
+    mail_default_sender_email = Column(String, nullable=False)
+    provider_type = Column(String, default='smtp')  # smtp, mailgun, sendgrid, etc.
+    provider_config = Column(String)  # JSON string for provider-specific settings
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationship
+    user = relationship("User", back_populates="email_config")
+
+    def to_dict(self):
+        """Return a dictionary representation of the EmailConfig instance."""
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "mail_server": self.mail_server,
+            "mail_port": self.mail_port,
+            "mail_use_tls": self.mail_use_tls,
+            "mail_use_ssl": self.mail_use_ssl,
+            "mail_username": self.mail_username,
+            "mail_password": "***",  # Don't expose password
+            "mail_default_sender_name": self.mail_default_sender_name,
+            "mail_default_sender_email": self.mail_default_sender_email,
+            "provider_type": self.provider_type,
+            "provider_config": self.provider_config,
+            "is_active": self.is_active,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None
+        }
+
+    def __repr__(self):
+        return f"<EmailConfig(id={self.id}, user_id={self.user_id}, provider_type={self.provider_type})>"

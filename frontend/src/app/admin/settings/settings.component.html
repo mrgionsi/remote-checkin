@@ -1,13 +1,165 @@
-<div class="card p-4 max-w-md mx-auto">
-    <h2 class="mb-4">{{ 'settings-title' | transloco }}</h2>
-    <div class="field mb-4">
-        <label for="langSelect" class="font-semibold mb-2">{{ 'select-language-label' | transloco }}</label>
-        <p-dropdown id="langSelect" [options]="languages" [(ngModel)]="selectedLang" optionLabel="label"
-            optionValue="value" [placeholder]="'select-language-placeholder' | transloco" styleClass="w-full">
-        </p-dropdown>
+<div class="max-w-4xl mx-auto p-4">
+    <h2 class="mb-6">{{ 'settings-title' | transloco }}</h2>
+
+    <!-- Language Settings -->
+    <div class="card p-4 mb-6">
+        <h3 class="mb-4">Language Settings</h3>
+        <div class="field mb-4">
+            <label for="langSelect" class="font-semibold mb-2">{{ 'select-language-label' | transloco }}</label>
+            <p-dropdown id="langSelect" [options]="languages" [(ngModel)]="selectedLang" optionLabel="label"
+                optionValue="value" [placeholder]="'select-language-placeholder' | transloco" styleClass="w-full">
+            </p-dropdown>
+        </div>
+        <div class="flex justify-end">
+            <p-button type="button" [label]="'save-btn' | transloco" (onClick)="saveLanguage()" />
+        </div>
+        <p *ngIf="saved" class="text-green-600 mt-3">{{ 'settings-saved-message' | transloco }}</p>
     </div>
-    <div class="flex justify-end">
-        <p-button type="button" [label]="'save-btn' | transloco" (onClick)="saveLanguage()" />
+
+    <!-- Email Settings -->
+    <div class="card p-4">
+        <div class="flex align-items-center gap-2 mb-4">
+            <i class="pi pi-envelope text-2xl text-primary"></i>
+            <h3 class="mb-0">Email Configuration</h3>
+        </div>
+
+        <div class="p-fluid p-formgrid grid" [formGroup]="emailForm">
+            <!-- Provider Preset Section -->
+            <div class="col-12">
+                <div class="field">
+                    <label for="preset" class="font-semibold">Provider Preset</label>
+                    <p-dropdown id="preset" #presetSel [options]="presets" optionLabel="label" optionValue="key"
+                        placeholder="Select a preset to auto-fill settings" formControlName="preset"
+                        (onChange)="applyEmailPreset(presetSel.value)" styleClass="w-full">
+                    </p-dropdown>
+                    <small class="text-600">Choose a preset to automatically configure common email providers</small>
+                </div>
+            </div>
+
+            <!-- Provider Type -->
+            <div class="col-12 md:col-6">
+                <div class="field">
+                    <label for="provider_type" class="font-semibold">Provider Type</label>
+                    <input pInputText id="provider_type" type="text" formControlName="provider_type"
+                        placeholder="smtp, mailgun, sendgrid">
+                </div>
+            </div>
+
+            <!-- SMTP Server -->
+            <div class="col-12 md:col-6">
+                <div class="field">
+                    <label for="mail_server" class="font-semibold">SMTP Server</label>
+                    <input pInputText id="mail_server" type="text" formControlName="mail_server"
+                        placeholder="smtp.gmail.com">
+                </div>
+            </div>
+
+            <!-- Port and Security -->
+            <div class="col-12 md:col-3">
+                <div class="field">
+                    <label for="mail_port" class="font-semibold">Port</label>
+                    <input pInputText id="mail_port" type="number" formControlName="mail_port" placeholder="587">
+                </div>
+            </div>
+
+            <div class="col-12 md:col-9">
+                <div class="field">
+                    <label class="font-semibold">Security</label>
+                    <div class="flex gap-3 align-items-center mt-2">
+                        <div class="flex align-items-center">
+                            <p-checkbox formControlName="mail_use_tls" [binary]="true" inputId="tls"></p-checkbox>
+                            <label for="tls" class="ml-2">TLS</label>
+                        </div>
+                        <div class="flex align-items-center">
+                            <p-checkbox formControlName="mail_use_ssl" [binary]="true" inputId="ssl"></p-checkbox>
+                            <label for="ssl" class="ml-2">SSL</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Credentials -->
+            <div class="col-12 md:col-6">
+                <div class="field">
+                    <label for="mail_username" class="font-semibold">Username / Email</label>
+                    <input pInputText id="mail_username" type="email" formControlName="mail_username"
+                        placeholder="your-email@gmail.com">
+                </div>
+            </div>
+
+            <div class="col-12 md:col-6">
+                <div class="field">
+                    <label for="mail_password" class="font-semibold">Password / App Password</label>
+                    <div class="p-input-icon-right w-full">
+                        <input pInputText id="mail_password" [type]="showPassword ? 'text' : 'password'"
+                            formControlName="mail_password" placeholder="Enter your password or app password">
+                        <i [class]="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'" (click)="togglePasswordVisibility()"
+                            class="cursor-pointer text-600"></i>
+                    </div>
+                    <small class="text-600">For Gmail, use App Password instead of regular password</small>
+                </div>
+            </div>
+
+            <!-- Sender Information -->
+            <div class="col-12 md:col-6">
+                <div class="field">
+                    <label for="mail_default_sender_name" class="font-semibold">Sender Name</label>
+                    <input pInputText id="mail_default_sender_name" type="text"
+                        formControlName="mail_default_sender_name" placeholder="Your Business Name">
+                    <small class="text-600">This will appear as "Remote Check-in System ('Your Business Name')"</small>
+                </div>
+            </div>
+
+            <div class="col-12 md:col-6">
+                <div class="field">
+                    <label for="mail_default_sender_email" class="font-semibold">Sender Email</label>
+                    <input pInputText id="mail_default_sender_email" type="email"
+                        formControlName="mail_default_sender_email" placeholder="sender@yourdomain.com">
+                </div>
+            </div>
+
+            <!-- Provider Config Section -->
+            <div class="col-12" formGroupName="provider_config" *ngIf="provider_config">
+                <div class="border-top-1 surface-border pt-4 mt-4">
+                    <div class="flex align-items-center gap-2 mb-3">
+                        <i class="pi pi-cog text-lg text-primary"></i>
+                        <h4 class="mb-0">Provider Configuration (Optional)</h4>
+                    </div>
+                    <small class="text-600 mb-3 block">Additional settings for external email providers like Mailgun or
+                        SendGrid</small>
+
+                    <div class="grid">
+                        <div class="col-12 md:col-6">
+                            <div class="field">
+                                <label for="domain" class="font-semibold">Domain (Mailgun)</label>
+                                <input pInputText id="domain" type="text" formControlName="domain"
+                                    placeholder="mg.yourdomain.com">
+                            </div>
+                        </div>
+                        <div class="col-12 md:col-6">
+                            <div class="field">
+                                <label for="api_key" class="font-semibold">API Key (Mailgun/SendGrid)</label>
+                                <input pInputText id="api_key" type="text" formControlName="api_key"
+                                    placeholder="Your API key">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="col-12">
+                <div class="flex gap-2 justify-content-end mt-4 pt-3 border-top-1 surface-border">
+                    <p-button type="button" label="Test Configuration" icon="pi pi-send" (onClick)="testEmailConfig()"
+                        styleClass="p-button-outlined p-button-secondary">
+                    </p-button>
+                    <p-button type="button" label="Save Configuration" icon="pi pi-save" (onClick)="saveEmailConfig()"
+                        styleClass="p-button-success">
+                    </p-button>
+                </div>
+            </div>
+        </div>
     </div>
-    <p *ngIf="saved" class="text-green-600 mt-3">{{ 'settings-saved-message' | transloco }}</p>
 </div>
+
+<p-toast></p-toast>
