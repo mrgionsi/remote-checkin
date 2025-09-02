@@ -10,10 +10,11 @@ It supports operations such as creating new reservations and listing all reserva
 
 import calendar
 from datetime import datetime
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from sqlalchemy import  func
 from sqlalchemy.sql import extract
 from flask_jwt_extended import jwt_required
+from email_handler import EmailService
 from models import Reservation, Room, Structure, StructureReservationsView
 from database import SessionLocal
 
@@ -32,7 +33,7 @@ def create_reservation():
     data = request.get_json()
 
     # Validate required fields
-    required_fields = ["reservationNumber", "startDate", "endDate", "roomName"]
+    required_fields = ["reservationNumber", "startDate", "endDate", "roomName", "email"]
     if not all(field in data for field in required_fields):
         return jsonify({"error": "Missing required fields"}), 400
 
@@ -54,6 +55,8 @@ def create_reservation():
             start_date=start_date,
             end_date=end_date,
             name_reference = data["nameReference"],
+            email=data["email"],
+            telephone=data.get("telephone", ""),  # Optional field with default empty string
             id_room=room.id,
         )
 
@@ -62,7 +65,71 @@ def create_reservation():
 
         # Commit transaction
         session.commit()
-
+        
+        # Send email after committing reservation
+        try:
+            # Get user's email configuration from database
+            from models import EmailConfig
+            from email_handler import EmailService
+            from routes.email_config_routes import get_encryption_key
+            
+            current_user_id = get_jwt_identity()
+            session = SessionLocal()
+            
+            try:
+                # Get user's email configuration from database
+                email_config = session.query(EmailConfig).filter(
+                    EmailConfig.user_id == current_user_id,
+                    EmailConfig.is_active == True
+                ).first()
+                
+                if not email_config:
+                    current_app.logger.error("No email configuration found for user")
+                    raise Exception("Email configuration not found. Please configure email settings first.")
+                
+                # Use database configuration
+                current_app.logger.info("Using database email configuration")
+                encryption_key = get_encryption_key()
+                email_service = EmailService(config=email_config, encryption_key=encryption_key)
+                    
+            finally:
+                session.close()
+            
+            # Prepare reservation data for email
+            reservation_data = {
+                'reservation_number': new_reservation.id_reference,
+                'guest_name': data.get('nameReference', 'Guest'),
+                'start_date': data['startDate'],
+                'end_date': data['endDate'],
+                'room_name': room.name
+            }
+            
+            # Log the data being sent
+            current_app.logger.info(f"Preparing to send email to: {data['email']}")
+            current_app.logger.info(f"Reservation data: {reservation_data}")
+            current_app.logger.info(f"Email service type: {type(email_service)}")
+            current_app.logger.info(f"Mail instance type: {type(mail)}")
+            
+            # Send confirmation email
+            email_result = email_service.send_reservation_confirmation(
+                client_email=data["email"],  # Use email from frontend
+                reservation_data=reservation_data
+            )
+            
+            # Log email result
+            if email_result['status'] == 'error':
+                current_app.logger.warning(f"Failed to send email: {email_result['message']}")
+                current_app.logger.warning(f"Email error type: {email_result.get('error_type', 'unknown')}")
+            else:
+                current_app.logger.info("Reservation confirmation email sent successfully")
+                current_app.logger.info(f"Email sent to: {email_result.get('to', 'unknown')}")
+                
+        except Exception as e:
+            # Log email error but don't fail the reservation creation
+            current_app.logger.error(f"Error sending email: {str(e)}")
+            import traceback
+            current_app.logger.error(f"Email error traceback: {traceback.format_exc()}")
+        
         return (
             jsonify(
                 {
@@ -72,6 +139,9 @@ def create_reservation():
                         "reservationNumber": new_reservation.id_reference,
                         "startDate": new_reservation.start_date.strftime("%Y-%m-%d"),
                         "endDate": new_reservation.end_date.strftime("%Y-%m-%d"),
+                        "nameReference": new_reservation.name_reference,
+                        "email": new_reservation.email,
+                        "telephone": new_reservation.telephone,
                         "roomName": new_reservation.room.to_dict(),
                     },
                 }
