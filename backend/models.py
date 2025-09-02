@@ -218,17 +218,22 @@ class User(Base):
         id (int): Unique identifier for the user.
         name (str): User's name.
         surname (str): User's surname.
+        email (str): User's email address.
+        telephone (str): User's telephone number.
     """
     __tablename__ = "user"
 
     id = Column(BigInteger, Sequence("user_id_seq"), primary_key=True, index=True)
     name = Column(String)
     surname = Column(String)
+    email = Column(String)
+    telephone = Column(String)
     password = Column(String)
     username = Column(String)
     id_role = Column(Integer, ForeignKey("role.id"))
 
     role = relationship("Role")
+    email_config = relationship("EmailConfig", back_populates="user", uselist=False)
 
     def to_dict(self):
         """Return a dictionary representation of the User instance."""
@@ -236,6 +241,8 @@ class User(Base):
             "id": self.id,
             "name": self.name,
             "surname": self.surname,
+            "email": self.email,
+            "telephone": self.telephone,
             "username": self.username,
             "id_role": self.id_role,
         }
@@ -253,6 +260,7 @@ class Structure(Base):
         name (str): Name of the structure.
         street (str): Street address of the structure.
         city (str): City of the structure.
+        cin (str): CIN (Codice Identificativo Nazionale) of the structure.
     """
     __tablename__ = "structure"
 
@@ -260,6 +268,7 @@ class Structure(Base):
     name = Column(String)
     street = Column(String)
     city = Column(String)
+    cin = Column(String)
 
     rooms = relationship("Room", back_populates="structure")
 
@@ -270,6 +279,7 @@ class Structure(Base):
             "name": self.name,
             "street": self.street,
             "city": self.city,
+            "cin": self.cin,
         }
 
     def __repr__(self):
