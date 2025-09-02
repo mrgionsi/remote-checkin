@@ -1,6 +1,11 @@
 <p-toast></p-toast>
 
-<p-card class="mb-4">
+<div *ngIf="loading" class="flex justify-content-center align-items-center" style="height: 200px;">
+    <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+    <span class="ml-2">Loading reservation details...</span>
+</div>
+
+<p-card class="mb-4" *ngIf="!loading">
     <ng-template pTemplate="title">
         <i class="pi pi-calendar"></i> {{ 'reservation-details-title' | transloco }}
     </ng-template>
@@ -104,7 +109,8 @@
 
             <p-button *ngIf="editMode" [label]="'save-btn' | transloco" icon="pi pi-check"
                 class="p-button-sm text-white" (click)="saveReservation()" (keydown.enter)="saveReservation()"
-                (keydown.space)="saveReservation()" severity="success" [disabled]="form.invalid">
+                (keydown.space)="saveReservation()" severity="success" [disabled]="form.invalid || saving"
+                [loading]="saving">
             </p-button>
 
             <p-button *ngIf="editMode" [label]="'cancel-btn' | transloco" icon="pi pi-times"

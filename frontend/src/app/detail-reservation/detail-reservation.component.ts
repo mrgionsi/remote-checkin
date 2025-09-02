@@ -36,6 +36,8 @@ export class DetailReservationComponent implements OnInit {
   reservation_details: any = {}; // Initialize as an empty object
   reservationId: any;
   reservation_status: any;
+  loading = true;
+  saving = false;
   statusOptions = [
     { label: 'Approved', value: 'Approved', icon: 'pi pi-check-circle' },
     { label: 'Declined', value: 'Declined', icon: 'pi pi-times-circle' },
@@ -97,7 +99,8 @@ export class DetailReservationComponent implements OnInit {
         next: (resp) => {
           this.reservation_details = resp;
           console.log("Resp", resp);
-          this.reservation_status = this.statusOptions.find(option => option.value === resp.status)
+          this.reservation_status = this.statusOptions.find(option => option.value === resp.status);
+          this.loading = false;
 
           this.client_reservationService.getClientByReservationId(this.reservation_details.id).subscribe({
             next: (r) => {
@@ -128,9 +131,15 @@ export class DetailReservationComponent implements OnInit {
                     //console.log(person)
                   },
                   error: (error: any) => {
-                    this.messageService.add({ severity: 'warn', summary: 'Error', detail: 'Error fetching client photo for ' + person.name + ' ' + person.surname + ', please try again.' });
+                    console.error('Error fetching client photo:', error);
+                    this.messageService.add({
+                      severity: 'warn',
+                      summary: 'Photo Loading Error',
+                      detail: `Error loading photos for ${person.name} ${person.surname}. Some images may not be available.`
+                    });
                     person.hasMissingImages = true; // Assume missing if API request fails
-
+                    // Initialize empty images object to prevent undefined errors
+                    person.images = { front: null, back: null, selfie: null };
                   }
                 })
                 this.subscriptions.push(photoSub);
@@ -162,6 +171,10 @@ export class DetailReservationComponent implements OnInit {
         next: (value) => {
           console.log(value)
           this.roomList = value;
+          // If we're already in edit mode, update the room selection
+          if (this.editMode) {
+            this.updateRoomSelection();
+          }
         },
         error: (msg) => {
           console.error("Failed to fetch rooms")
@@ -177,51 +190,132 @@ export class DetailReservationComponent implements OnInit {
   editReservation() {
 
     this.editMode = true;
+
+    // Convert dates to proper Date objects for the datepicker
+    const startDate = this.reservation_details.start_date ? new Date(this.reservation_details.start_date) : null;
+    const endDate = this.reservation_details.end_date ? new Date(this.reservation_details.end_date) : null;
+
+    console.log('Date conversion:', {
+      originalStartDate: this.reservation_details.start_date,
+      convertedStartDate: startDate,
+      originalEndDate: this.reservation_details.end_date,
+      convertedEndDate: endDate
+    });
+
     this.form.patchValue({
       id_reference: this.reservation_details.id_reference,
-      room: this.reservation_details['room'],
-      start_date: this.reservation_details.start_date,
-      end_date: this.reservation_details.end_date,
+      start_date: startDate,
+      end_date: endDate,
       name_reference: this.reservation_details.name_reference,
       email: this.reservation_details.email,
       telephone: this.reservation_details.telephone,
       status: this.reservation_details.status,
     });
 
+    // Update room selection (will work if roomList is already loaded)
+    this.updateRoomSelection();
+
+  }
+
+  updateRoomSelection(): void {
+    if (this.reservation_details.room && this.roomList) {
+      console.log('Updating room selection:', {
+        reservationRoom: this.reservation_details.room,
+        roomList: this.roomList
+      });
+      const selectedRoom = this.roomList.find((room: any) => room.id === this.reservation_details.room.id);
+      console.log('Found selected room:', selectedRoom);
+      if (selectedRoom) {
+        this.form.patchValue({ room: selectedRoom });
+        console.log('Room selection updated in form');
+      } else {
+        console.log('Room not found in roomList, using reservation room object');
+        // Fallback: use the reservation room object directly
+        this.form.patchValue({ room: this.reservation_details.room });
+      }
+    } else {
+      console.log('Cannot update room selection:', {
+        hasReservationRoom: !!this.reservation_details.room,
+        hasRoomList: !!this.roomList
+      });
+      // If roomList is not loaded yet, use the reservation room object as fallback
+      if (this.reservation_details.room) {
+        this.form.patchValue({ room: this.reservation_details.room });
+        console.log('Using reservation room as fallback');
+      }
+    }
   }
 
   saveReservation() {
     if (this.form.valid) {
       const reservationId = this.reservation_details.id;
+      this.saving = true;
       this.editMode = false;
-      this.reservation_details = { ...this.form.value };
-      // Create Date object from start_date
-      this.reservation_details.id = reservationId;
-      const endDate = new Date(this.form.value.end_date);
 
+      // Prepare update data with proper room structure
+      const updateData = { ...this.form.value };
+      updateData.id = reservationId;
+
+      // Handle room object - ensure it has the correct structure for backend
+      if (updateData.room && typeof updateData.room === 'object' && updateData.room.id) {
+        updateData.room = { id: updateData.room.id };
+      }
+
+      // Create Date object from start_date
+      const endDate = new Date(this.form.value.end_date);
       // Set time to 03:00:00
       endDate.setHours(3, 0, 0, 0);
-
       // Convert to the correct format (GMT)
-      this.reservation_details.end_date = endDate.toUTCString();
-      const startDate = new Date(this.form.value.start_date);
+      updateData.end_date = endDate.toUTCString();
 
+      const startDate = new Date(this.form.value.start_date);
       // Set time to 03:00:00
       startDate.setHours(3, 0, 0, 0);
-      this.reservation_details.start_date = startDate.toUTCString();
+      updateData.start_date = startDate.toUTCString();
 
-      // Optionally persist data to backend
-      console.log(this.reservation_details)
-      this.reservation_service.updateReservation(this.reservation_details, reservationId).subscribe({
+      // Persist data to backend
+      console.log('Updating reservation with data:', updateData);
+      this.reservation_service.updateReservation(updateData, reservationId).subscribe({
         next: () => {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Updated',
-            detail: 'Reservation has been successfully updated.'
+          this.saving = false;
+
+          // Refresh reservation details from backend to ensure we have the latest data
+          this.reservation_service.getAdminReservationById(reservationId).subscribe({
+            next: (updatedReservation) => {
+              this.reservation_details = updatedReservation;
+              this.reservation_status = this.statusOptions.find(option => option.value === updatedReservation.status);
+              console.log('Refreshed reservation_details from backend:', this.reservation_details);
+
+              this.messageService.add({
+                severity: 'success',
+                summary: 'Updated',
+                detail: 'Reservation has been successfully updated.'
+              });
+            },
+            error: (error) => {
+              console.error('Error refreshing reservation details:', error);
+              // Fallback: update local data manually
+              this.reservation_details = { ...this.reservation_details, ...updateData };
+
+              // If room was changed, update the room object in reservation_details
+              if (updateData.room && this.roomList) {
+                const updatedRoom = this.roomList.find((room: any) => room.id === updateData.room.id);
+                if (updatedRoom) {
+                  this.reservation_details.room = updatedRoom;
+                }
+              }
+
+              this.messageService.add({
+                severity: 'success',
+                summary: 'Updated',
+                detail: 'Reservation has been successfully updated.'
+              });
+            }
           });
-          // Redirect to reservations list or dashboard
         },
         error: (error: any) => {
+          this.saving = false;
+          this.editMode = true; // Re-enable edit mode on error
           this.messageService.add({
             severity: 'error',
             summary: 'Error',
@@ -333,8 +427,14 @@ export class DetailReservationComponent implements OnInit {
     this.http.get(url, {
       responseType: 'blob',
       headers: { Authorization: `Bearer ${token}` }
-    }).subscribe(blob => {
-      person.images[type] = URL.createObjectURL(blob);
+    }).subscribe({
+      next: (blob) => {
+        person.images[type] = URL.createObjectURL(blob);
+      },
+      error: (error) => {
+        console.error(`Error loading ${type} image for ${person.name}:`, error);
+        person.images[type] = null;
+      }
     });
   }
 }
