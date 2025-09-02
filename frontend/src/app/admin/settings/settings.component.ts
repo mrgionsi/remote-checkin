@@ -7,13 +7,14 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { ToastModule } from 'primeng/toast';
 import { CheckboxModule } from 'primeng/checkbox';
+import { PasswordModule } from 'primeng/password';
 import { MessageService } from 'primeng/api';
 import { EmailConfig, EmailConfigService, EmailProviderPreset } from '../../services/email-config.service';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [DropdownModule, FormsModule, ReactiveFormsModule, TranslocoPipe, CommonModule, ButtonModule, InputTextModule, ToastModule, CheckboxModule],
+  imports: [DropdownModule, FormsModule, ReactiveFormsModule, TranslocoPipe, CommonModule, ButtonModule, InputTextModule, ToastModule, CheckboxModule, PasswordModule],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',
   providers: [MessageService]
@@ -33,7 +34,6 @@ export class SettingsComponent implements OnInit {
   emailForm: FormGroup;
   presets: { key: string; label: string }[] = [];
   presetMap: { [key: string]: EmailProviderPreset } = {};
-  showPassword: boolean = false;
   provider_config: boolean = false;
 
   constructor(
@@ -110,17 +110,19 @@ export class SettingsComponent implements OnInit {
     this.emailConfigService.getEmailConfig(true).subscribe({
       next: (config) => {
         if (!config) return;
+
         this.emailForm.patchValue({
           mail_server: config.mail_server,
           mail_port: config.mail_port,
           mail_use_tls: config.mail_use_tls,
           mail_use_ssl: config.mail_use_ssl,
           mail_username: config.mail_username,
-          mail_password: config.mail_password, // Now includes decrypted password
+          mail_password: config.mail_password,
           mail_default_sender_name: config.mail_default_sender_name,
           mail_default_sender_email: config.mail_default_sender_email,
           provider_type: config.provider_type || 'smtp'
         });
+
         // provider_config is optional JSON
         if (config.provider_config) {
           this.emailForm.get('provider_config')?.patchValue(config.provider_config);
@@ -167,9 +169,7 @@ export class SettingsComponent implements OnInit {
     });
   }
 
-  togglePasswordVisibility(): void {
-    this.showPassword = !this.showPassword;
-  }
+
 
   selectMatchingPreset(config: any): void {
     // Find the preset that matches the current configuration
