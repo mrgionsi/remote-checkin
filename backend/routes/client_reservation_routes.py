@@ -84,7 +84,7 @@ def get_clients_by_reservation(reservation_id):
 
 UPLOAD_FOLDER = "uploads/"  # Base directory for uploaded images
 
-@client_reservation_bp.route("/reservations/<int:reservation_id>/client-images", methods=["POST"])
+@client_reservation_bp.route("/reservations/<string:reservation_id>/client-images", methods=["POST"])
 @jwt_required()
 def check_images(reservation_id):
     """
@@ -126,7 +126,6 @@ def check_images(reservation_id):
     if not os.path.exists(folder_path):
         return jsonify({"error": f"Folder for reservation {reservation_id} not found"}), 404
 
-
     # Expected filenames
     # Use sanitized versions of name, surname, and CF to prevent path traversal
     sanitized_name = "".join(c for c in name if c.isalnum() or c in [' ', '-', '_']).strip()
@@ -151,27 +150,49 @@ def check_images(reservation_id):
     return jsonify(result)
 
 
-@client_reservation_bp.route("/images/<int:reservation_id>/<path:filename>")
-@jwt_required()
+@client_reservation_bp.route("/images/<string:reservation_id>/<path:filename>", methods=["GET", "OPTIONS"])
 def get_image(reservation_id, filename):
     """
     Serve images from the uploads folder.
 
     Args:
-        reservation_id (int): The reservation ID.
+        reservation_id (str): The reservation ID (can be string reference ID).
         filename (str): The image file name.
 
     Returns:
         - The image file if found.
         - 404 error if the file does not exist.
     """
+    # Handle OPTIONS request for CORS preflight
+    if request.method == 'OPTIONS':
+        response = jsonify({})
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        return response
+    
+    # For GET requests, require JWT authentication
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
+    
     folder_path = os.path.join(UPLOAD_FOLDER, str(reservation_id))
+    print(f"Looking for image: reservation_id={reservation_id}, filename={filename}")
+    print(f"Folder path: {folder_path}")
 
     if not os.path.exists(folder_path):
+        print(f"Folder not found: {folder_path}")
         return jsonify({"error": "Reservation folder not found"}), 404
 
     file_path = os.path.join(folder_path, filename)
+    print(f"File path: {file_path}")
 
     if not os.path.exists(file_path):
+        print(f"File not found: {file_path}")
         return jsonify({"error": "Image not found"}), 404
-    return send_from_directory(folder_path, filename)
+    
+    # Set proper headers for image serving
+    response = send_from_directory(folder_path, filename)
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+    return response

@@ -8,7 +8,7 @@ and registers blueprints for routing.
 import os
 import re
 from flask_jwt_extended import JWTManager
-from flask import Flask
+from flask import Flask, make_response, request
 from flask_cors import CORS
 from routes.email_config_routes import email_config_bp
 from routes.admin_routes import admin_bp
@@ -61,9 +61,10 @@ CORS(
     app,
     origins=allowed_origins,
     supports_credentials=True,
-    methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],  # add OPTIONS
-    allow_headers=["Content-Type", "Authorization"],
+    methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"], 
+    allow_headers=["Content-Type", "Authorization", "Accept", "Origin", "X-Requested-With"],
     expose_headers=["Content-Type", "Authorization"],
+    max_age=3600,  # Cache preflight response for 1 hour
 )
 
 # Create database tables
@@ -85,6 +86,16 @@ def home():
     This route is used to check if the server is running.
     """
     return "Hello, Flask!"
+
+@app.before_request
+def handle_preflight():
+    """Handle CORS preflight requests."""
+    if request.method == "OPTIONS":
+        response = make_response()
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add('Access-Control-Allow-Headers', "*")
+        response.headers.add('Access-Control-Allow-Methods', "*")
+        return response
 
 @app.route("/test-email-config")
 def test_email_config():
