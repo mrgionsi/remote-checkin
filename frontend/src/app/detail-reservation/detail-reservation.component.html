@@ -86,10 +86,27 @@
                 <!-- Status -->
                 <div class="field col-12 md:col-6">
                     <label for="status_select" class="font-bold text-600 mb-2">{{ 'status-label' | transloco }}</label>
-                    <p-select id="status_select" [options]="statusOptions" [(ngModel)]="reservation_status"
-                        optionLabel="label" dataKey="value" (onChange)="onStatusChange($event.value)"
-                        styleClass="w-full" [showClear]="false" [placeholder]="'status-placeholder' | transloco">
+
+                    <!-- Show status as text when not in edit mode -->
+                    <div *ngIf="!editMode" class="status-display">
+                        <div class="flex align-items-center p-2 border-round"
+                            [ngClass]="'status-' + (reservation_status?.value || 'pending').toLowerCase().replace(' ', '-')">
+                            <i [class]="reservation_status?.icon || 'pi pi-clock'" class="mr-2"></i>
+                            <span class="font-medium">{{ reservation_status?.label || 'Pending' | transloco }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Show status select box when in edit mode -->
+                    <p-select *ngIf="editMode" id="status_select" [options]="statusOptions"
+                        [(ngModel)]="reservation_status" optionLabel="label" dataKey="value" styleClass="w-full"
+                        [showClear]="false" [placeholder]="'status-placeholder' | transloco">
                         <ng-template pTemplate="item" let-option>
+                            <div class="flex align-items-center">
+                                <i [class]="option.icon" class="mr-2"></i>
+                                {{ option.label | transloco }}
+                            </div>
+                        </ng-template>
+                        <ng-template pTemplate="selectedItem" let-option>
                             <div class="flex align-items-center">
                                 <i [class]="option.icon" class="mr-2"></i>
                                 {{ option.label | transloco }}

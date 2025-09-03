@@ -13,10 +13,10 @@ import { PersonDetailDialogComponent } from '../person-detail-dialog/person-deta
 import { ButtonModule } from 'primeng/button';
 import { Subscription } from 'rxjs';
 import { SelectModule } from 'primeng/select';
+
 import { AbstractControl, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DocumentTypeLabelPipe } from "../pipes/document-type-label.pipe";
 import { DatePickerModule } from 'primeng/datepicker';
-import { DateShortPipe } from "../pipes/date-short.pipe";
 import { RoomService } from '../services/room.service';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { HttpClient } from '@angular/common/http';
@@ -39,11 +39,10 @@ export class DetailReservationComponent implements OnInit {
   loading = true;
   saving = false;
   statusOptions = [
-    { label: 'Approved', value: 'Approved', icon: 'pi pi-check-circle' },
-    { label: 'Declined', value: 'Declined', icon: 'pi pi-times-circle' },
-    { label: 'Sent back to customer', value: 'Sent back to customer', icon: 'pi pi-arrow-left' },
-    { label: 'Pending', value: 'Pending', icon: 'pi pi-clock' },
-
+    { label: 'status-approved', value: 'Approved', icon: 'pi pi-check-circle' },
+    { label: 'status-declined', value: 'Declined', icon: 'pi pi-times-circle' },
+    { label: 'status-sent-back-to-customer', value: 'Sent back to customer', icon: 'pi pi-arrow-left' },
+    { label: 'status-pending', value: 'Pending', icon: 'pi pi-clock' },
   ];
 
   roomList: any;
@@ -250,7 +249,7 @@ export class DetailReservationComponent implements OnInit {
     if (this.form.valid) {
       const reservationId = this.reservation_details.id;
       this.saving = true;
-      this.editMode = false;
+      // Don't set editMode = false here - let it be set after successful save
 
       // Prepare update data with proper room structure
       const updateData = { ...this.form.value };
@@ -273,45 +272,37 @@ export class DetailReservationComponent implements OnInit {
       startDate.setHours(3, 0, 0, 0);
       updateData.start_date = startDate.toUTCString();
 
+      // Check if status has changed and update it separately
+      const statusChanged = this.reservation_status &&
+        this.reservation_status.value !== this.reservation_details.status;
+
       // Persist data to backend
       console.log('Updating reservation with data:', updateData);
       this.reservation_service.updateReservation(updateData, reservationId).subscribe({
         next: () => {
-          this.saving = false;
-
-          // Refresh reservation details from backend to ensure we have the latest data
-          this.reservation_service.getAdminReservationById(reservationId).subscribe({
-            next: (updatedReservation) => {
-              this.reservation_details = updatedReservation;
-              this.reservation_status = this.statusOptions.find(option => option.value === updatedReservation.status);
-              console.log('Refreshed reservation_details from backend:', this.reservation_details);
-
-              this.messageService.add({
-                severity: 'success',
-                summary: 'Updated',
-                detail: 'Reservation has been successfully updated.'
-              });
-            },
-            error: (error) => {
-              console.error('Error refreshing reservation details:', error);
-              // Fallback: update local data manually
-              this.reservation_details = { ...this.reservation_details, ...updateData };
-
-              // If room was changed, update the room object in reservation_details
-              if (updateData.room && this.roomList) {
-                const updatedRoom = this.roomList.find((room: any) => room.id === updateData.room.id);
-                if (updatedRoom) {
-                  this.reservation_details.room = updatedRoom;
-                }
+          // If status has changed, update it separately
+          if (statusChanged) {
+            this.reservation_service.updateReservationStatus(reservationId, this.reservation_status.value).subscribe({
+              next: () => {
+                this.saving = false;
+                this.editMode = false; // Exit edit mode on success
+                this.refreshReservationData(reservationId);
+              },
+              error: (error: any) => {
+                this.saving = false;
+                this.editMode = true; // Re-enable edit mode on error
+                this.messageService.add({
+                  severity: 'error',
+                  summary: 'Error',
+                  detail: 'Failed to update reservation status.'
+                });
               }
-
-              this.messageService.add({
-                severity: 'success',
-                summary: 'Updated',
-                detail: 'Reservation has been successfully updated.'
-              });
-            }
-          });
+            });
+          } else {
+            this.saving = false;
+            this.editMode = false; // Exit edit mode on success
+            this.refreshReservationData(reservationId);
+          }
         },
         error: (error: any) => {
           this.saving = false;
@@ -394,29 +385,43 @@ export class DetailReservationComponent implements OnInit {
     });
   }
   onStatusChange(newStatus: { value: string, label: string, icon: string }): void {
-    if (!this.reservation_details?.id) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Cannot update status: reservation ID is missing'
-      });
-      return;
-    } console.log(newStatus)
-    this.reservation_service.updateReservationStatus(this.reservation_details.id, newStatus.value).subscribe({
-      next: () => {
+    // Just update the local status - the actual update will happen when saving
+    this.reservation_status = newStatus;
+    console.log('Status changed locally to:', newStatus);
+  }
+
+  private refreshReservationData(reservationId: number): void {
+    // Refresh reservation details from backend to ensure we have the latest data
+    this.reservation_service.getAdminReservationById(reservationId).subscribe({
+      next: (updatedReservation) => {
+        this.reservation_details = updatedReservation;
+        this.reservation_status = this.statusOptions.find(option => option.value === updatedReservation.status);
+        console.log('Refreshed reservation_details from backend:', this.reservation_details);
+
         this.messageService.add({
           severity: 'success',
-          summary: 'Status Updated',
-          detail: `Reservation status updated to ${newStatus.value}.`
+          summary: 'Updated',
+          detail: 'Reservation has been successfully updated.'
         });
       },
-      error: () => {
+      error: (error) => {
+        console.error('Error refreshing reservation details:', error);
+        // Fallback: update local data manually
+        this.reservation_details = { ...this.reservation_details, ...this.form.value };
+
+        // If room was changed, update the room object in reservation_details
+        if (this.form.value.room && this.roomList) {
+          const updatedRoom = this.roomList.find((room: any) => room.id === this.form.value.room.id);
+          if (updatedRoom) {
+            this.reservation_details.room = updatedRoom;
+          }
+        }
+
         this.messageService.add({
-          severity: 'error',
-          summary: 'Update Failed',
-          detail: 'Could not update reservation status. Please try again.'
+          severity: 'success',
+          summary: 'Updated',
+          detail: 'Reservation has been successfully updated.'
         });
-        // Optionally revert the value here
       }
     });
   }
