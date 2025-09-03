@@ -82,6 +82,90 @@ def upload_file():
         client = add_or_update_client(form_data, client)
         link_client_to_reservation(reservation.id, client.id)
 
+        # Send admin notification about completed check-in
+        try:
+            from models import EmailConfig, User, Structure, Room
+            from email_handler import EmailService
+            from routes.email_config_routes import get_encryption_key
+            from database import SessionLocal as EmailSessionLocal
+            
+            # Get admin email configuration
+            email_session = EmailSessionLocal()
+            try:
+                # Get the structure admin using AdminStructure relationship
+                from models import AdminStructure
+                admin_structure = email_session.query(AdminStructure).filter(
+                    AdminStructure.id_structure == reservation.room.id_structure
+                ).first()
+                
+                admin_user = None
+                if admin_structure:
+                    admin_user = email_session.query(User).filter(
+                        User.id == admin_structure.id_user
+                    ).first()
+                
+                if admin_user:
+                    # Get admin's email configuration
+                    email_config = email_session.query(EmailConfig).filter(
+                        EmailConfig.user_id == admin_user.id,
+                        EmailConfig.is_active == True
+                    ).first()
+                    
+                    if email_config:
+                        # Prepare check-in data for admin notification
+                        checkin_data = {
+                            'reservation_number': reservation.id_reference,
+                            'guest_name': reservation.name_reference,
+                            'start_date': reservation.start_date.strftime('%Y-%m-%d') if reservation.start_date else 'N/A',
+                            'end_date': reservation.end_date.strftime('%Y-%m-%d') if reservation.end_date else 'N/A',
+                            'room_name': reservation.room.name if reservation.room else 'N/A',
+                            'client_name': client.name,
+                            'client_surname': client.surname,
+                            'client_email': form_data.get('email', 'N/A'),
+                            'client_phone': client.telephone,
+                            'document_type': client.document_type,
+                            'document_number': client.document_number,
+                            'has_front_image': 'front_image' in files,
+                            'has_back_image': 'back_image' in files,
+                            'has_selfie': 'selfie' in files
+                        }
+                        
+                        # Send admin notification
+                        encryption_key = get_encryption_key()
+                        email_service = EmailService(config=email_config, encryption_key=encryption_key)
+                        
+                        # Use admin's email from user table, email config, or fallback
+                        admin_email = None
+                        if hasattr(admin_user, 'email') and admin_user.email:
+                            admin_email = admin_user.email
+                        elif email_config.mail_default_sender_email:
+                            admin_email = email_config.mail_default_sender_email
+                        else:
+                            admin_email = email_config.mail_username  # Fallback to SMTP username
+                        
+                        if admin_email:
+                            email_result = email_service.send_admin_checkin_notification(admin_email, checkin_data)
+                            
+                            if email_result.get('status') == 'success':
+                                print(f"Admin notification sent successfully to {admin_email}")
+                            else:
+                                print(f"Failed to send admin notification: {email_result.get('message', 'Unknown error')}")
+                        else:
+                            print("No valid admin email address found")
+                    else:
+                        print(f"No email configuration found for admin user {admin_user.id}")
+                else:
+                    print(f"No admin user found for structure {reservation.room.id_structure}")
+                    
+            finally:
+                email_session.close()
+                
+        except Exception as e:
+            # Don't fail the upload if email notification fails
+            print(f"Error sending admin notification: {str(e)}")
+            import traceback
+            print(f"Traceback: {traceback.format_exc()}")
+
         return jsonify({
             "message": "Files uploaded successfully and client linked to reservation",
             "files": files,
