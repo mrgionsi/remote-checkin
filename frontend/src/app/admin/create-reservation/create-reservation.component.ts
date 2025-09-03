@@ -23,6 +23,7 @@ export class CreateReservationComponent implements OnInit {
   reservationService = inject(ReservationService)
   // Array of room options for the dropdown
   rooms: any[] = [];
+  saving = false; // Loading state for save button
   constructor(
     private fb: FormBuilder,
     private router: Router,
@@ -60,6 +61,7 @@ export class CreateReservationComponent implements OnInit {
 
   onSubmit(): void {
     if (this.reservationForm.valid) {
+      this.saving = true; // Set loading state
       const reservation = this.reservationForm.value;
       console.log(reservation)
 
@@ -68,6 +70,7 @@ export class CreateReservationComponent implements OnInit {
         reservation.roomName = reservation.roomName['name'];
       } else {
         console.error('Room name is not selected or invalid:', reservation.roomName);
+        this.saving = false; // Reset loading state on error
         return; // Don't submit if room is not selected
       }
 
@@ -90,6 +93,7 @@ export class CreateReservationComponent implements OnInit {
       const observer = {
         next: (response: any) => {
           console.log('Reservation created successfully', response);
+          this.saving = false; // Reset loading state on success
           // Pass reservation data in the state while navigating
           this.router.navigate(['/admin/dashboard'], {
             state: { reservation }
@@ -97,6 +101,7 @@ export class CreateReservationComponent implements OnInit {
         },
         error: (error: any) => {
           console.error('Error creating reservation', error);
+          this.saving = false; // Reset loading state on error
         }
       };
 

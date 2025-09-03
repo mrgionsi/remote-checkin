@@ -136,7 +136,7 @@
         <!-- Submit Button -->
         <div class="text-center">
             <button pButton [label]="'create-reservation-btn' | transloco" type="submit"
-                [disabled]="reservationForm.invalid" class="p-mt-3"></button>
+                [disabled]="reservationForm.invalid || saving" [loading]="saving" class="p-mt-3"></button>
         </div>
     </form>
 </div>
