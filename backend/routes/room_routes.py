@@ -87,7 +87,8 @@ def get_rooms():
                 Room
             ).all()  # Return all rooms if no structure is specified
 
-        return jsonify([room.to_dict() for room in rooms])
+        room_data = [room.to_dict() for room in rooms]
+        return jsonify(room_data)
 
 
 # Get room by ID
