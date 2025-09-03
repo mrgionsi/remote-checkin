@@ -84,6 +84,10 @@ class EmailService:
     
     def _decrypt_password(self, encrypted_password: str) -> str:
         """Decrypt password from database."""
+        if not encrypted_password:
+            logger.warning("Encrypted password is empty or None")
+            return ""
+            
         try:
             from cryptography.fernet import Fernet
             
@@ -101,11 +105,17 @@ class EmailService:
                 logger.info("No encryption key found, using password as-is")
                 return encrypted_password
             
+            # Ensure key is bytes
+            if isinstance(key, str):
+                key = key.encode()
+            
             f = Fernet(key)
             return f.decrypt(encrypted_password.encode()).decode()
         except Exception as e:
-            logger.warning(f"Failed to decrypt password, using as-is: {str(e)}")
-            return encrypted_password
+            logger.error(f"Failed to decrypt password: {str(e)}")
+            logger.error(f"Encrypted password type: {type(encrypted_password)}, length: {len(encrypted_password) if encrypted_password else 'None'}")
+            logger.error(f"Key type: {type(key) if 'key' in locals() else 'None'}")
+            raise e
     
     def validate_email_address(self, email: str) -> str:
         """
@@ -1004,6 +1014,264 @@ Remote Check-in System
         <div class="footer">
             <p><strong>Action Required:</strong> Please review the uploaded documents and client information in the admin panel.</p>
             <p>Best regards,<br>Remote Check-in System</p>
+        </div>
+    </div>
+</body>
+</html>
+        """.strip()
+
+
+    def send_reservation_approval_notification(
+        self, 
+        client_email: str, 
+        reservation_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """
+        Send reservation approval notification to client.
+        
+        Args:
+            client_email: Client's email address
+            reservation_data: Dictionary containing reservation information
+            
+        Returns:
+            Dictionary with status and message
+        """
+        try:
+            # Validate email address
+            validated_email = self.validate_email_address(client_email)
+            
+            # Create email subject and body
+            subject = f"Reservation Approved - {reservation_data.get('reservation_number', 'N/A')}"
+            body = self._create_reservation_approval_text(reservation_data)
+            html_body = self._create_reservation_approval_html(reservation_data)
+            
+            # Create EmailData object
+            email_data = EmailData(
+                to_email=validated_email,
+                subject=subject,
+                body=body,
+                html_body=html_body
+            )
+            
+            # Send email
+            return self.send_email(email_data)
+            
+        except EmailValidationError as e:
+            logger.error(f"Email validation error: {str(e)}")
+            return {"status": "error", "message": f"Invalid email address: {str(e)}"}
+        except Exception as e:
+            logger.error(f"Error sending reservation approval notification: {str(e)}")
+            return {"status": "error", "message": f"Failed to send approval notification: {str(e)}"}
+
+    def send_reservation_revision_notification(
+        self, 
+        client_email: str, 
+        reservation_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """
+        Send reservation revision notification to client.
+        
+        Args:
+            client_email: Client's email address
+            reservation_data: Dictionary containing reservation information
+            
+        Returns:
+            Dictionary with status and message
+        """
+        try:
+            # Validate email address
+            validated_email = self.validate_email_address(client_email)
+            
+            # Create email subject and body
+            subject = f"Reservation Requires Revision - {reservation_data.get('reservation_number', 'N/A')}"
+            body = self._create_reservation_revision_text(reservation_data)
+            html_body = self._create_reservation_revision_html(reservation_data)
+            
+            # Create EmailData object
+            email_data = EmailData(
+                to_email=validated_email,
+                subject=subject,
+                body=body,
+                html_body=html_body
+            )
+            
+            # Send email
+            return self.send_email(email_data)
+            
+        except EmailValidationError as e:
+            logger.error(f"Email validation error: {str(e)}")
+            return {"status": "error", "message": f"Invalid email address: {str(e)}"}
+        except Exception as e:
+            logger.error(f"Error sending reservation revision notification: {str(e)}")
+            return {"status": "error", "message": f"Failed to send revision notification: {str(e)}"}
+
+    def _create_reservation_approval_text(self, reservation_data: Dict[str, Any]) -> str:
+        """Create plain text template for reservation approval notification."""
+        return f"""
+Dear {reservation_data.get('guest_name', 'Guest')},
+
+Great news! Your reservation has been approved.
+
+Reservation Details:
+- Reservation Number: {reservation_data.get('reservation_number', 'N/A')}
+- Check-in Date: {reservation_data.get('start_date', 'N/A')}
+- Check-out Date: {reservation_data.get('end_date', 'N/A')}
+- Room: {reservation_data.get('room_name', 'N/A')}
+
+Your reservation is now confirmed and ready for your stay. Please keep this email for your records.
+
+If you have any questions or need to make changes, please contact us as soon as possible.
+
+We look forward to welcoming you!
+
+Best regards,
+The Management Team
+        """.strip()
+
+    def _create_reservation_approval_html(self, reservation_data: Dict[str, Any]) -> str:
+        """Create HTML template for reservation approval notification."""
+        return f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Reservation Approved</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background-color: #28a745; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }}
+        .content {{ background-color: #f8f9fa; padding: 20px; border-radius: 0 0 5px 5px; }}
+        .reservation-details {{ background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0; }}
+        .info-row {{ display: flex; justify-content: space-between; margin: 10px 0; padding: 5px 0; border-bottom: 1px solid #eee; }}
+        .label {{ font-weight: bold; color: #555; }}
+        .value {{ color: #333; }}
+        .footer {{ margin-top: 20px; padding-top: 15px; border-top: 1px solid #ddd; color: #666; }}
+        .success {{ color: #28a745; font-weight: bold; }}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎉 Reservation Approved!</h1>
+    </div>
+    
+    <div class="content">
+        <p>Dear <strong>{reservation_data.get('guest_name', 'Guest')}</strong>,</p>
+        
+        <p class="success">Great news! Your reservation has been approved and is now confirmed.</p>
+        
+        <div class="reservation-details">
+            <h3>Reservation Details</h3>
+            <div class="info-row">
+                <span class="label">Reservation Number:</span>
+                <span class="value">{reservation_data.get('reservation_number', 'N/A')}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Check-in Date:</span>
+                <span class="value">{reservation_data.get('start_date', 'N/A')}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Check-out Date:</span>
+                <span class="value">{reservation_data.get('end_date', 'N/A')}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Room:</span>
+                <span class="value">{reservation_data.get('room_name', 'N/A')}</span>
+            </div>
+        </div>
+        
+        <p>Your reservation is now confirmed and ready for your stay. Please keep this email for your records.</p>
+        
+        <p>If you have any questions or need to make changes, please contact us as soon as possible.</p>
+        
+        <p>We look forward to welcoming you!</p>
+        
+        <div class="footer">
+            <p>Best regards,<br>The Management Team</p>
+        </div>
+    </div>
+</body>
+</html>
+        """.strip()
+
+    def _create_reservation_revision_text(self, reservation_data: Dict[str, Any]) -> str:
+        """Create plain text template for reservation revision notification."""
+        return f"""
+Dear {reservation_data.get('guest_name', 'Guest')},
+
+We need to discuss your reservation and may require some revisions.
+
+Reservation Details:
+- Reservation Number: {reservation_data.get('reservation_number', 'N/A')}
+- Check-in Date: {reservation_data.get('start_date', 'N/A')}
+- Check-out Date: {reservation_data.get('end_date', 'N/A')}
+- Room: {reservation_data.get('room_name', 'N/A')}
+
+Please contact us as soon as possible to discuss the details of your reservation. We want to ensure everything is perfect for your stay.
+
+We appreciate your understanding and look forward to resolving any questions you may have.
+
+Best regards,
+The Management Team
+        """.strip()
+
+    def _create_reservation_revision_html(self, reservation_data: Dict[str, Any]) -> str:
+        """Create HTML template for reservation revision notification."""
+        return f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Reservation Requires Revision</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background-color: #ffc107; color: #333; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }}
+        .content {{ background-color: #f8f9fa; padding: 20px; border-radius: 0 0 5px 5px; }}
+        .reservation-details {{ background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0; }}
+        .info-row {{ display: flex; justify-content: space-between; margin: 10px 0; padding: 5px 0; border-bottom: 1px solid #eee; }}
+        .label {{ font-weight: bold; color: #555; }}
+        .value {{ color: #333; }}
+        .footer {{ margin-top: 20px; padding-top: 15px; border-top: 1px solid #ddd; color: #666; }}
+        .warning {{ color: #ffc107; font-weight: bold; }}
+        .action {{ background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 15px 0; }}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📋 Reservation Requires Revision</h1>
+    </div>
+    
+    <div class="content">
+        <p>Dear <strong>{reservation_data.get('guest_name', 'Guest')}</strong>,</p>
+        
+        <p class="warning">We need to discuss your reservation and may require some revisions.</p>
+        
+        <div class="reservation-details">
+            <h3>Reservation Details</h3>
+            <div class="info-row">
+                <span class="label">Reservation Number:</span>
+                <span class="value">{reservation_data.get('reservation_number', 'N/A')}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Check-in Date:</span>
+                <span class="value">{reservation_data.get('start_date', 'N/A')}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Check-out Date:</span>
+                <span class="value">{reservation_data.get('end_date', 'N/A')}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Room:</span>
+                <span class="value">{reservation_data.get('room_name', 'N/A')}</span>
+            </div>
+        </div>
+        
+        <div class="action">
+            <p><strong>Action Required:</strong> Please contact us as soon as possible to discuss the details of your reservation. We want to ensure everything is perfect for your stay.</p>
+        </div>
+        
+        <p>We appreciate your understanding and look forward to resolving any questions you may have.</p>
+        
+        <div class="footer">
+            <p>Best regards,<br>The Management Team</p>
         </div>
     </div>
 </body>
