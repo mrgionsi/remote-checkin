@@ -739,6 +739,277 @@ The Remote Check-in Team
 </html>
         """.strip()
 
+    def send_admin_checkin_notification(
+        self, 
+        admin_email: str, 
+        checkin_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """
+        Send check-in completion notification to admin.
+        
+        Args:
+            admin_email: Admin's email address
+            checkin_data: Dictionary containing check-in details
+            
+        Returns:
+            Dictionary with status and message
+        """
+        try:
+            # Validate admin email first
+            try:
+                validated_email = self.validate_email_address(admin_email)
+                logger.info(f"Admin email validation successful: {admin_email} -> {validated_email}")
+            except EmailValidationError as e:
+                logger.warning(f"Strict email validation failed for admin {admin_email}: {str(e)}")
+                # Try lenient validation as fallback
+                try:
+                    validated_email = self.validate_email_address_lenient(admin_email)
+                    logger.info(f"Lenient admin email validation successful: {admin_email} -> {validated_email}")
+                except EmailValidationError as e2:
+                    logger.error(f"Both strict and lenient email validation failed for admin {admin_email}: {str(e2)}")
+                    return {
+                        "status": "error",
+                        "message": f"Invalid admin email address: {str(e2)}",
+                        "error_type": "validation_error"
+                    }
+            
+            # Create email content
+            subject = f"New Check-in Completed - {checkin_data.get('reservation_number', 'N/A')}"
+            
+            # Plain text body
+            body = self._create_admin_checkin_notification_text(checkin_data)
+            
+            # HTML body
+            html_body = self._create_admin_checkin_notification_html(checkin_data)
+            
+            # Create email data
+            email_data = EmailData(
+                to_email=validated_email,  # Use validated email
+                subject=subject,
+                body=body,
+                html_body=html_body
+            )
+            
+            logger.info(f"Sending admin check-in notification to: {validated_email}")
+            return self.send_email(email_data)
+            
+        except Exception as e:
+            logger.error(f"Error creating admin check-in notification email: {str(e)}")
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            return {
+                "status": "error",
+                "message": f"Error creating admin notification email: {str(e)}",
+                "error_type": "creation_error"
+            }
+
+    def _create_admin_checkin_notification_text(self, checkin_data: Dict[str, Any]) -> str:
+        """Create plain text version of admin check-in notification email."""
+        return f"""
+New Check-in Completed
+
+A client has completed the check-in process for the following reservation:
+
+Reservation Details:
+- Reservation Number: {checkin_data.get('reservation_number', 'N/A')}
+- Guest Name: {checkin_data.get('guest_name', 'N/A')}
+- Check-in Date: {checkin_data.get('start_date', 'N/A')}
+- Check-out Date: {checkin_data.get('end_date', 'N/A')}
+- Room: {checkin_data.get('room_name', 'N/A')}
+
+Client Information:
+- Name: {checkin_data.get('client_name', 'N/A')}
+- Surname: {checkin_data.get('client_surname', 'N/A')}
+- Email: {checkin_data.get('client_email', 'N/A')}
+- Phone: {checkin_data.get('client_phone', 'N/A')}
+- Document Type: {checkin_data.get('document_type', 'N/A')}
+- Document Number: {checkin_data.get('document_number', 'N/A')}
+
+Uploaded Documents:
+- Front Document: {'✓ Uploaded' if checkin_data.get('has_front_image') else '✗ Missing'}
+- Back Document: {'✓ Uploaded' if checkin_data.get('has_back_image') else '✗ Missing'}
+- Selfie: {'✓ Uploaded' if checkin_data.get('has_selfie') else '✗ Missing'}
+
+Please review the uploaded documents and client information in the admin panel.
+
+Best regards,
+Remote Check-in System
+        """.strip()
+
+    def _create_admin_checkin_notification_html(self, checkin_data: Dict[str, Any]) -> str:
+        """Create HTML version of admin check-in notification email."""
+        return f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Check-in Completed</title>
+    <style>
+        body {{
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }}
+        .header {{
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }}
+        .content {{
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 0 0 8px 8px;
+        }}
+        .section {{
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+        }}
+        .section h3 {{
+            margin-top: 0;
+            color: #2c3e50;
+        }}
+        .info-row {{
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }}
+        .info-row:last-child {{
+            border-bottom: none;
+        }}
+        .label {{
+            font-weight: bold;
+            color: #555;
+        }}
+        .value {{
+            color: #333;
+        }}
+        .status {{
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }}
+        .status.uploaded {{
+            background-color: #d4edda;
+            color: #155724;
+        }}
+        .status.missing {{
+            background-color: #f8d7da;
+            color: #721c24;
+        }}
+        .footer {{
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            font-size: 14px;
+            color: #6c757d;
+        }}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔔 New Check-in Completed</h1>
+        <p>A client has completed the check-in process</p>
+    </div>
+    
+    <div class="content">
+        <div class="section">
+            <h3>📋 Reservation Details</h3>
+            <div class="info-row">
+                <span class="label">Reservation Number:</span>
+                <span class="value">{checkin_data.get('reservation_number', 'N/A')}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Guest Name:</span>
+                <span class="value">{checkin_data.get('guest_name', 'N/A')}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Check-in Date:</span>
+                <span class="value">{checkin_data.get('start_date', 'N/A')}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Check-out Date:</span>
+                <span class="value">{checkin_data.get('end_date', 'N/A')}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Room:</span>
+                <span class="value">{checkin_data.get('room_name', 'N/A')}</span>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>👤 Client Information</h3>
+            <div class="info-row">
+                <span class="label">Name:</span>
+                <span class="value">{checkin_data.get('client_name', 'N/A')}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Surname:</span>
+                <span class="value">{checkin_data.get('client_surname', 'N/A')}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Email:</span>
+                <span class="value">{checkin_data.get('client_email', 'N/A')}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Phone:</span>
+                <span class="value">{checkin_data.get('client_phone', 'N/A')}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Document Type:</span>
+                <span class="value">{checkin_data.get('document_type', 'N/A')}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Document Number:</span>
+                <span class="value">{checkin_data.get('document_number', 'N/A')}</span>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>📄 Uploaded Documents</h3>
+            <div class="info-row">
+                <span class="label">Front Document:</span>
+                <span class="status {'uploaded' if checkin_data.get('has_front_image') else 'missing'}">
+                    {'✓ Uploaded' if checkin_data.get('has_front_image') else '✗ Missing'}
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="label">Back Document:</span>
+                <span class="status {'uploaded' if checkin_data.get('has_back_image') else 'missing'}">
+                    {'✓ Uploaded' if checkin_data.get('has_back_image') else '✗ Missing'}
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="label">Selfie:</span>
+                <span class="status {'uploaded' if checkin_data.get('has_selfie') else 'missing'}">
+                    {'✓ Uploaded' if checkin_data.get('has_selfie') else '✗ Missing'}
+                </span>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Action Required:</strong> Please review the uploaded documents and client information in the admin panel.</p>
+            <p>Best regards,<br>Remote Check-in System</p>
+        </div>
+    </div>
+</body>
+</html>
+        """.strip()
+
 
 # Legacy function for backward compatibility
 def send_reservation_email(client_email: str, reservation_details: str, user_id: int = None) -> dict:
