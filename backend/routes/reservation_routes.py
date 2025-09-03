@@ -107,6 +107,9 @@ def create_reservation():
                 # Use database configuration
                 current_app.logger.info("Using database email configuration")
                 encryption_key = get_encryption_key()
+                current_app.logger.info(f"Encryption key type: {type(encryption_key)}")
+                current_app.logger.info(f"Email config mail_password type: {type(email_config.mail_password)}")
+                current_app.logger.info(f"Email config mail_password length: {len(email_config.mail_password) if email_config.mail_password else 'None'}")
                 email_service = EmailService(config=email_config, encryption_key=encryption_key)
                     
             finally:
@@ -457,8 +460,80 @@ def update_reservation_status(reservation_id):
         if not reservation:
             return jsonify({"error": f"Reservation with ID {reservation_id} not found"}), 404
 
+        old_status = reservation.status
         reservation.status = new_status
         db.commit()
+        
+        # Send email notification if status changed to "Approved" or "Sent back to customer"
+        if old_status != new_status and new_status in ["Approved", "Sent back to customer"]:
+            try:
+                from email_handler import EmailService
+                from routes.email_config_routes import get_encryption_key
+                from models import EmailConfig, User, AdminStructure
+                
+                email_session = SessionLocal()
+                try:
+                    # Get the structure admin using AdminStructure relationship
+                    admin_structure = email_session.query(AdminStructure).filter(
+                        AdminStructure.id_structure == reservation.room.id_structure
+                    ).first()
+                    
+                    admin_user = None
+                    if admin_structure:
+                        admin_user = email_session.query(User).filter(
+                            User.id == admin_structure.id_user
+                        ).first()
+                    
+                    if admin_user:
+                        email_config = email_session.query(EmailConfig).filter(
+                            EmailConfig.user_id == admin_user.id,
+                            EmailConfig.is_active == True
+                        ).first()
+                        
+                        if email_config and reservation.email:
+                            encryption_key = get_encryption_key()
+                            email_service = EmailService(config=email_config, encryption_key=encryption_key)
+                            
+                            # Prepare email data based on status
+                            if new_status == "Approved":
+                                email_result = email_service.send_reservation_approval_notification(
+                                    reservation.email,
+                                    {
+                                        'reservation_number': reservation.id_reference,
+                                        'guest_name': reservation.name_reference,
+                                        'start_date': reservation.start_date.strftime('%Y-%m-%d') if reservation.start_date else 'N/A',
+                                        'end_date': reservation.end_date.strftime('%Y-%m-%d') if reservation.end_date else 'N/A',
+                                        'room_name': reservation.room.name if reservation.room else 'N/A'
+                                    }
+                                )
+                            elif new_status == "Sent back to customer":
+                                email_result = email_service.send_reservation_revision_notification(
+                                    reservation.email,
+                                    {
+                                        'reservation_number': reservation.id_reference,
+                                        'guest_name': reservation.name_reference,
+                                        'start_date': reservation.start_date.strftime('%Y-%m-%d') if reservation.start_date else 'N/A',
+                                        'end_date': reservation.end_date.strftime('%Y-%m-%d') if reservation.end_date else 'N/A',
+                                        'room_name': reservation.room.name if reservation.room else 'N/A'
+                                    }
+                                )
+                            
+                            if email_result.get('status') == 'success':
+                                current_app.logger.info(f"Status change notification sent successfully to {reservation.email}")
+                            else:
+                                current_app.logger.warning(f"Failed to send status change notification: {email_result.get('message', 'Unknown error')}")
+                        else:
+                            current_app.logger.warning(f"No email configuration found for admin or no client email for reservation {reservation.id}")
+                    else:
+                        current_app.logger.warning(f"No admin user found for structure {reservation.room.id_structure}")
+                        
+                finally:
+                    email_session.close()
+                    
+            except Exception as e:
+                current_app.logger.error(f"Error sending status change notification: {str(e)}")
+                import traceback
+                current_app.logger.error(f"Traceback: {traceback.format_exc()}")
 
         return jsonify({
             "message": "Reservation status updated successfully",
