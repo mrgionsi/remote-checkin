@@ -40,9 +40,19 @@ def create_reservation():
     session = SessionLocal()
 
     try:
+        # Debug: Log the received data
+        current_app.logger.info(f"Received reservation data: {data}")
+        current_app.logger.info(f"startDate type: {type(data['startDate'])}, value: {data['startDate']}")
+        current_app.logger.info(f"endDate type: {type(data['endDate'])}, value: {data['endDate']}")
+        
         # Validate and parse date fields
-        start_date = datetime.strptime(data["startDate"], "%Y-%m-%d")
-        end_date = datetime.strptime(data["endDate"], "%Y-%m-%d")
+        try:
+            start_date = datetime.strptime(data["startDate"], "%Y-%m-%d")
+            end_date = datetime.strptime(data["endDate"], "%Y-%m-%d")
+        except ValueError as e:
+            current_app.logger.error(f"Date parsing error: {e}")
+            current_app.logger.error(f"startDate: '{data['startDate']}', endDate: '{data['endDate']}'")
+            return jsonify({"error": f"Invalid date format. Expected YYYY-MM-DD, got startDate: '{data['startDate']}', endDate: '{data['endDate']}'"}), 400
 
         # Find room ID by name
         room = session.query(Room).filter(Room.name == data["roomName"]).first()
@@ -66,6 +76,13 @@ def create_reservation():
         # Commit transaction
         session.commit()
         
+        # Capture reservation data before session is closed
+        reservation_number = new_reservation.id_reference
+        room_name = room.name
+        
+        # Close the first session
+        session.close()
+        
         # Send email after committing reservation
         try:
             # Get user's email configuration from database
@@ -74,11 +91,11 @@ def create_reservation():
             from routes.email_config_routes import get_encryption_key
             
             current_user_id = get_jwt_identity()
-            session = SessionLocal()
+            email_session = SessionLocal()
             
             try:
                 # Get user's email configuration from database
-                email_config = session.query(EmailConfig).filter(
+                email_config = email_session.query(EmailConfig).filter(
                     EmailConfig.user_id == current_user_id,
                     EmailConfig.is_active == True
                 ).first()
@@ -93,15 +110,15 @@ def create_reservation():
                 email_service = EmailService(config=email_config, encryption_key=encryption_key)
                     
             finally:
-                session.close()
+                email_session.close()
             
             # Prepare reservation data for email
             reservation_data = {
-                'reservation_number': new_reservation.id_reference,
+                'reservation_number': reservation_number,
                 'guest_name': data.get('nameReference', 'Guest'),
                 'start_date': data['startDate'],
                 'end_date': data['endDate'],
-                'room_name': room.name
+                'room_name': room_name
             }
             
             # Log the data being sent
@@ -332,7 +349,7 @@ def get_admin_reservations_by_id(reservation_id):
         db.close()
 
 
-@reservation_bp.route("/reservations/check/<int:reservation_id>", methods=["GET"])
+@reservation_bp.route("/reservations/check/<string:reservation_id>", methods=["GET"])
 #@jwt_required() Not needed as this endpoint is for public access
 def check_get_reservations_by_id(reservation_id):
     """
