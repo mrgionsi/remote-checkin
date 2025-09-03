@@ -71,16 +71,16 @@ export class CreateReservationComponent implements OnInit {
         return; // Don't submit if room is not selected
       }
 
-      // Handle date conversion safely
+      // Handle date conversion safely using local timezone
       if (reservation.startDate instanceof Date) {
-        reservation.startDate = reservation.startDate.toISOString().split('T')[0];
+        reservation.startDate = this.formatDateToLocalString(reservation.startDate);
       } else if (reservation.startDate) {
         // If it's already a string, use it as is
         reservation.startDate = reservation.startDate.toString().split('T')[0];
       }
 
       if (reservation.endDate instanceof Date) {
-        reservation.endDate = reservation.endDate.toISOString().split('T')[0];
+        reservation.endDate = this.formatDateToLocalString(reservation.endDate);
       } else if (reservation.endDate) {
         // If it's already a string, use it as is
         reservation.endDate = reservation.endDate.toString().split('T')[0];
@@ -103,5 +103,16 @@ export class CreateReservationComponent implements OnInit {
       // Pass the observer object to subscribe
       this.reservationService.createReservation(reservation).subscribe(observer);
     }
+  }
+
+  /**
+   * Format a Date object to YYYY-MM-DD string using local timezone
+   * This avoids timezone shift issues that occur with toISOString()
+   */
+  private formatDateToLocalString(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }  
