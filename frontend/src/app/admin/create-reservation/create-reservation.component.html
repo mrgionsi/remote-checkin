@@ -4,13 +4,14 @@
     <form [formGroup]="reservationForm" (ngSubmit)="onSubmit()">
         <!-- Reservation Number Field -->
         <div class="p-field p-grid align-items-center p-mb-3">
-            <label for="reservationNumber" class="p-col-12 p-md-3 text-right">
+            <label for="reservationNumber" class="p-col-12 p-md-2 text-right">
                 {{ 'reservation-number-label' | transloco }}
             </label>
-            <div class="p-col-12 p-md-9">
+            <div class="p-col-12 p-md-10">
                 <input id="reservationNumber" pInputText formControlName="reservationNumber" type="text"
                     [placeholder]="'reservation-number-placeholder' | transloco"
-                    [class.p-invalid]="reservationForm.get('reservationNumber')?.invalid && reservationForm.get('reservationNumber')?.touched" />
+                    [class.p-invalid]="reservationForm.get('reservationNumber')?.invalid && reservationForm.get('reservationNumber')?.touched"
+                    class="wide-input" />
                 <p *ngIf="reservationForm.get('reservationNumber')?.invalid && reservationForm.get('reservationNumber')?.touched"
                     class="p-error mt-2">
                     {{ 'reservation-number-required' | transloco }}
@@ -20,13 +21,14 @@
 
         <!-- Start Date Field -->
         <div class="p-field p-grid align-items-center p-mb-3">
-            <label for="startDate" class="p-col-12 p-md-3 text-right">
+            <label for="startDate" class="p-col-12 p-md-2 text-right">
                 {{ 'start-date-label' | transloco }}
             </label>
-            <div class="p-col-12 p-md-9">
+            <div class="p-col-12 p-md-10">
                 <p-datepicker id="startDate" formControlName="startDate" [showTime]="true" dateFormat="yy-mm-dd"
                     [placeholder]="'start-date-placeholder' | transloco"
-                    [class.p-invalid]="reservationForm.get('startDate')?.invalid && reservationForm.get('startDate')?.touched"></p-datepicker>
+                    [class.p-invalid]="reservationForm.get('startDate')?.invalid && reservationForm.get('startDate')?.touched"
+                    styleClass="wide-input"></p-datepicker>
                 <p *ngIf="reservationForm.get('startDate')?.invalid && reservationForm.get('startDate')?.touched"
                     class="p-error mt-2">
                     {{ 'start-date-required' | transloco }}
@@ -36,13 +38,14 @@
 
         <!-- End Date Field -->
         <div class="p-field p-grid align-items-center p-mb-3">
-            <label for="endDate" class="p-col-12 p-md-3 text-right">
+            <label for="endDate" class="p-col-12 p-md-2 text-right">
                 {{ 'end-date-label' | transloco }}
             </label>
-            <div class="p-col-12 p-md-9">
+            <div class="p-col-12 p-md-10">
                 <p-datepicker id="endDate" formControlName="endDate" [showTime]="true" dateFormat="yy-mm-dd"
                     [placeholder]="'end-date-placeholder' | transloco"
-                    [class.p-invalid]="reservationForm.get('endDate')?.invalid && reservationForm.get('endDate')?.touched"></p-datepicker>
+                    [class.p-invalid]="reservationForm.get('endDate')?.invalid && reservationForm.get('endDate')?.touched"
+                    styleClass="wide-input"></p-datepicker>
                 <p *ngIf="reservationForm.get('endDate')?.invalid && reservationForm.get('endDate')?.touched"
                     class="p-error mt-2">
                     {{ 'end-date-required' | transloco }}
@@ -52,13 +55,14 @@
 
         <!-- Name Reference Field (New Field) -->
         <div class="p-field p-grid align-items-center p-mb-3">
-            <label for="nameReference" class="p-col-12 p-md-3 text-right">
+            <label for="nameReference" class="p-col-12 p-md-2 text-right">
                 {{ 'reference-name-label' | transloco }}
             </label>
-            <div class="p-col-12 p-md-9">
+            <div class="p-col-12 p-md-10">
                 <input id="nameReference" pInputText formControlName="nameReference" type="text"
                     [placeholder]="'reference-name-placeholder' | transloco"
-                    [class.p-invalid]="reservationForm.get('nameReference')?.invalid && reservationForm.get('nameReference')?.touched" />
+                    [class.p-invalid]="reservationForm.get('nameReference')?.invalid && reservationForm.get('nameReference')?.touched"
+                    class="wide-input" />
                 <p *ngIf="reservationForm.get('nameReference')?.invalid && reservationForm.get('nameReference')?.touched"
                     class="p-error mt-2">
                     {{ 'reference-name-required' | transloco }}
@@ -68,13 +72,14 @@
 
         <!-- Email Field -->
         <div class="p-field p-grid align-items-center p-mb-3">
-            <label for="email" class="p-col-12 p-md-3 text-right">
+            <label for="email" class="p-col-12 p-md-2 text-right">
                 {{ 'email-label' | transloco }}
             </label>
-            <div class="p-col-12 p-md-9">
+            <div class="p-col-12 p-md-10">
                 <input id="email" pInputText formControlName="email" type="email"
                     [placeholder]="'email-placeholder' | transloco"
-                    [class.p-invalid]="reservationForm.get('email')?.invalid && reservationForm.get('email')?.touched" />
+                    [class.p-invalid]="reservationForm.get('email')?.invalid && reservationForm.get('email')?.touched"
+                    class="wide-input" />
                 <p *ngIf="reservationForm.get('email')?.invalid && reservationForm.get('email')?.touched"
                     class="p-error mt-2">
                     <span *ngIf="reservationForm.get('email')?.errors?.['required']">
@@ -89,13 +94,14 @@
 
         <!-- Telephone Field -->
         <div class="p-field p-grid align-items-center p-mb-3">
-            <label for="telephone" class="p-col-12 p-md-3 text-right">
+            <label for="telephone" class="p-col-12 p-md-2 text-right">
                 {{ 'telephone-label' | transloco }}
             </label>
-            <div class="p-col-12 p-md-9">
+            <div class="p-col-12 p-md-10">
                 <input id="telephone" pInputText formControlName="telephone" type="tel"
                     [placeholder]="'telephone-placeholder' | transloco"
-                    [class.p-invalid]="reservationForm.get('telephone')?.invalid && reservationForm.get('telephone')?.touched" />
+                    [class.p-invalid]="reservationForm.get('telephone')?.invalid && reservationForm.get('telephone')?.touched"
+                    class="wide-input" />
                 <p *ngIf="reservationForm.get('telephone')?.invalid && reservationForm.get('telephone')?.touched"
                     class="p-error mt-2">
                     {{ 'telephone-invalid' | transloco }}
@@ -105,13 +111,14 @@
 
         <!-- Room Name Field -->
         <div class="p-field p-grid align-items-center p-mb-3">
-            <label for="roomName" class="p-col-12 p-md-3 text-right">
+            <label for="roomName" class="p-col-12 p-md-2 text-right">
                 {{ 'room-name-label' | transloco }}
             </label>
-            <div class="p-col-12 p-md-9">
+            <div class="p-col-12 p-md-10">
                 <p-select id="roomSelect" formControlName="roomName" [options]="rooms" optionLabel="name"
                     [placeholder]="'room-name-placeholder' | transloco"
-                    [class.p-invalid]="reservationForm.get('roomName')?.invalid && reservationForm.get('roomName')?.touched">
+                    [class.p-invalid]="reservationForm.get('roomName')?.invalid && reservationForm.get('roomName')?.touched"
+                    styleClass="wide-input">
                 </p-select>
                 <p *ngIf="reservationForm.get('roomName')?.invalid && reservationForm.get('roomName')?.touched"
                     class="p-error">
