@@ -49,8 +49,8 @@ export class CreateReservationComponent implements OnInit {
   getRooms(): void {
     this.roomService.getRooms().subscribe({
       next: (rooms) => {
+        console.log('Rooms loaded:', rooms);
         this.rooms = rooms;
-
       },
       error: (error) => {
         console.error('Error fetching rooms:', error);
@@ -62,9 +62,29 @@ export class CreateReservationComponent implements OnInit {
     if (this.reservationForm.valid) {
       const reservation = this.reservationForm.value;
       console.log(reservation)
-      reservation.roomName = reservation.roomName['name']
-      reservation.startDate = reservation.startDate.toISOString().split('T')[0];
-      reservation.endDate = reservation.endDate.toISOString().split('T')[0];
+
+      // Handle room name extraction safely
+      if (reservation.roomName && reservation.roomName['name']) {
+        reservation.roomName = reservation.roomName['name'];
+      } else {
+        console.error('Room name is not selected or invalid:', reservation.roomName);
+        return; // Don't submit if room is not selected
+      }
+
+      // Handle date conversion safely
+      if (reservation.startDate instanceof Date) {
+        reservation.startDate = reservation.startDate.toISOString().split('T')[0];
+      } else if (reservation.startDate) {
+        // If it's already a string, use it as is
+        reservation.startDate = reservation.startDate.toString().split('T')[0];
+      }
+
+      if (reservation.endDate instanceof Date) {
+        reservation.endDate = reservation.endDate.toISOString().split('T')[0];
+      } else if (reservation.endDate) {
+        // If it's already a string, use it as is
+        reservation.endDate = reservation.endDate.toString().split('T')[0];
+      }
 
       // Create an observer object
       const observer = {
