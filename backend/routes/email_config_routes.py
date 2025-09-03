@@ -131,19 +131,23 @@ def get_email_config():
         
         # Check if password should be included
         include_password = request.args.get('include_password', 'false').lower() == 'true'
+        logger.info(f"Email config request - include_password: {include_password}")
         
         if include_password:
             # Return config with decrypted password for editing
-            config_dict = config.to_dict()
+            config_dict = config.to_dict(include_password=True)
             try:
-                config_dict['mail_password'] = decrypt_password(config.mail_password)
+                decrypted_password = decrypt_password(config.mail_password)
+                config_dict['mail_password'] = decrypted_password
+                logger.info(f"Password decrypted successfully, length: {len(decrypted_password)}")
             except Exception as e:
                 logger.error(f"Error decrypting password: {str(e)}")
                 config_dict['mail_password'] = ""  # Return empty string if decryption fails
             return jsonify(config_dict)
         else:
             # Return config with masked password (default behavior)
-            return jsonify(config.to_dict())
+            logger.info("Returning config with masked password")
+            return jsonify(config.to_dict(include_password=False))
         
     except Exception as e:
         logger.error(f"Error getting email config: {str(e)}")
