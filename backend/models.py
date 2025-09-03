@@ -369,7 +369,7 @@ class EmailConfig(Base):
     # Relationship
     user = relationship("User", back_populates="email_config")
 
-    def to_dict(self):
+    def to_dict(self, include_password=False):
         """Return a dictionary representation of the EmailConfig instance."""
         return {
             "id": self.id,
@@ -379,7 +379,7 @@ class EmailConfig(Base):
             "mail_use_tls": self.mail_use_tls,
             "mail_use_ssl": self.mail_use_ssl,
             "mail_username": self.mail_username,
-            "mail_password": "***",  # Don't expose password
+            "mail_password": self.mail_password if include_password else "***",  # Include password only if requested
             "mail_default_sender_name": self.mail_default_sender_name,
             "mail_default_sender_email": self.mail_default_sender_email,
             "provider_type": self.provider_type,
