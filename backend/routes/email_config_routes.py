@@ -83,26 +83,66 @@ EMAIL_PROVIDER_PRESETS = {
 
 def get_encryption_key():
     """Get or create encryption key for email passwords."""
+    # First try to get from Flask app config (in-memory)
     key = current_app.config.get('EMAIL_ENCRYPTION_KEY')
+    
     if not key:
-        # Generate a new key if not exists
-        key = Fernet.generate_key()
-        current_app.config['EMAIL_ENCRYPTION_KEY'] = key
+        # Try to get from environment variable
+        import os
+        key_string = os.getenv('EMAIL_ENCRYPTION_KEY')
+        print(key_string)
+        if key_string:
+            # Use the key string directly (Fernet expects base64-encoded string)
+            key = key_string.encode('utf-8')
+            current_app.config['EMAIL_ENCRYPTION_KEY'] = key
+            logger.info("Using EMAIL_ENCRYPTION_KEY from environment variable")
+        else:
+            # Generate a new key if none exists
+            key = Fernet.generate_key()
+            current_app.config['EMAIL_ENCRYPTION_KEY'] = key
+            logger.warning("Generated new EMAIL_ENCRYPTION_KEY - existing encrypted passwords may not be readable")
+            logger.warning("Set EMAIL_ENCRYPTION_KEY environment variable to maintain consistency across restarts")
+    
     return key
 
 
 def encrypt_password(password: str) -> str:
     """Encrypt password for storage."""
-    key = get_encryption_key()
-    f = Fernet(key)
-    return f.encrypt(password.encode()).decode()
+    if not password:
+        logger.warning("Password is empty or None")
+        return ""
+    
+    try:
+        key = get_encryption_key()
+        f = Fernet(key)
+        encrypted = f.encrypt(password.encode()).decode()
+        logger.info(f"Password encrypted successfully, original length: {len(password)}, encrypted length: {len(encrypted)}")
+        return encrypted
+    except Exception as e:
+        logger.error(f"Failed to encrypt password: {str(e)}")
+        raise e
 
 
 def decrypt_password(encrypted_password: str) -> str:
     """Decrypt password for use."""
-    key = get_encryption_key()
-    f = Fernet(key)
-    return f.decrypt(encrypted_password.encode()).decode()
+    if not encrypted_password:
+        raise ValueError("Encrypted password is empty or None")
+    
+    try:
+        key = get_encryption_key()
+        logger.info(f"Key type: {type(key)}, Key length: {len(key) if key else 'None'}")
+        logger.info(f"Encrypted password first 20 chars: {encrypted_password[:20] if len(encrypted_password) > 20 else encrypted_password}")
+        
+        f = Fernet(key)
+        decrypted = f.decrypt(encrypted_password.encode()).decode()
+        logger.info(f"Decryption successful, decrypted length: {len(decrypted)}")
+        return decrypted
+    except Exception as e:
+        logger.error(f"Decryption failed - encrypted_password type: {type(encrypted_password)}, length: {len(encrypted_password) if encrypted_password else 'None'}")
+        logger.error(f"Key type: {type(key) if 'key' in locals() else 'None'}")
+        logger.error(f"Exception type: {type(e)}, Exception message: '{str(e)}'")
+        logger.error(f"Exception args: {e.args if hasattr(e, 'args') else 'No args'}")
+        raise e
 
 
 @email_config_bp.route("/email-config", methods=["GET"])
