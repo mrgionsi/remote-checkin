@@ -123,7 +123,10 @@ export class RemoteCheckinComponent implements OnInit {
 
       // If the field is 'birthday', format it to 'YYYY-MM-DD' to ensure compliance
       if (field === 'birthday' && value) {
-        value = value instanceof Date ? value.toISOString().split('T')[0] : value; // Format as 'YYYY-MM-DD'
+        if (value instanceof Date) {
+          // Use local timezone to avoid day shift issues
+          value = this.formatDateToLocalString(value);
+        }
       }
 
       if (value) formData.append(field, value);
@@ -159,6 +162,18 @@ export class RemoteCheckinComponent implements OnInit {
     });
 
   }
+
+  /**
+   * Format a Date object to YYYY-MM-DD string using local timezone
+   * This avoids timezone shift issues that occur with toISOString()
+   */
+  private formatDateToLocalString(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
   closeDialog() {
   }
 
