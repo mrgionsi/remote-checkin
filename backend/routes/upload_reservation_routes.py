@@ -125,8 +125,8 @@ def upload_file():
                             'client_phone': client.telephone,
                             'document_type': client.document_type,
                             'document_number': client.document_number,
-                            'has_front_image': 'front_image' in files,
-                            'has_back_image': 'back_image' in files,
+                            'has_front_image': 'frontimage' in files,
+                            'has_back_image': 'backimage' in files,
                             'has_selfie': 'selfie' in files
                         }
                         
