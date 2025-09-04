@@ -61,7 +61,15 @@ class TestEmailService:
 
     @pytest.fixture
     def mock_app_config(self):
-        """Create a mock Flask app config."""
+        """
+        Return a minimal mock Flask-Mail configuration used by tests.
+        
+        The dictionary includes the keys required by EmailService initialization:
+        - MAIL_SERVER, MAIL_PORT, MAIL_USERNAME, MAIL_PASSWORD, MAIL_DEFAULT_SENDER
+        
+        Returns:
+            dict: Mock Flask app config suitable for initializing Flask-Mail in tests.
+        """
         return {
             'MAIL_SERVER': 'smtp.example.com',
             'MAIL_PORT': 587,
