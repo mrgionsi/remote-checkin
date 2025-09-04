@@ -61,7 +61,7 @@ CORS(
     app,
     origins=allowed_origins,
     supports_credentials=True,
-    methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"], 
+    methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization", "Accept", "Origin", "X-Requested-With"],
     expose_headers=["Content-Type", "Authorization"],
     max_age=3600,  # Cache preflight response for 1 hour
@@ -105,10 +105,10 @@ def test_email_config():
     try:
         if 'mail' not in app.extensions:
             return {"status": "error", "message": "Flask-Mail extension not found"}
-        
+
         mail = app.extensions['mail']
         return {
-            "status": "success", 
+            "status": "success",
             "message": "Email configuration is available",
             "mail_type": str(type(mail)),
             "extensions": list(app.extensions.keys())

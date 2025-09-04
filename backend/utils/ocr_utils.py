@@ -25,10 +25,10 @@ import pytesseract
 def validate_document(image_path):
     """
     Validate the document by extracting text using OCR.
-    
+
     Parameters:
         image_path (str): The file path of the uploaded document.
-    
+
     Returns:
         tuple: (bool, str) where bool indicates validity and str contains extracted text.
     """

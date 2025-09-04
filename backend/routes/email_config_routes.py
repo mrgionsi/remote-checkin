@@ -13,7 +13,7 @@ import logging
 from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy.exc import IntegrityError
-from models import EmailConfig, User
+from models import EmailConfig
 from database import SessionLocal
 from email_handler import EmailService
 from cryptography.fernet import Fernet
@@ -85,7 +85,7 @@ def get_encryption_key():
     """Get or create encryption key for email passwords."""
     # First try to get from Flask app config (in-memory)
     key = current_app.config.get('EMAIL_ENCRYPTION_KEY')
-    
+
     if not key:
         # Try to get from environment variable
         import os
@@ -102,7 +102,7 @@ def get_encryption_key():
             current_app.config['EMAIL_ENCRYPTION_KEY'] = key
             logger.warning("Generated new EMAIL_ENCRYPTION_KEY - existing encrypted passwords may not be readable")
             logger.warning("Set EMAIL_ENCRYPTION_KEY environment variable to maintain consistency across restarts")
-    
+
     return key
 
 
@@ -111,7 +111,7 @@ def encrypt_password(password: str) -> str:
     if not password:
         logger.warning("Password is empty or None")
         return ""
-    
+
     try:
         key = get_encryption_key()
         f = Fernet(key)
@@ -127,12 +127,12 @@ def decrypt_password(encrypted_password: str) -> str:
     """Decrypt password for use."""
     if not encrypted_password:
         raise ValueError("Encrypted password is empty or None")
-    
+
     try:
         key = get_encryption_key()
         logger.info(f"Key type: {type(key)}, Key length: {len(key) if key else 'None'}")
         logger.info(f"Encrypted password first 20 chars: {encrypted_password[:20] if len(encrypted_password) > 20 else encrypted_password}")
-        
+
         f = Fernet(key)
         decrypted = f.decrypt(encrypted_password.encode()).decode()
         logger.info(f"Decryption successful, decrypted length: {len(decrypted)}")
@@ -150,29 +150,29 @@ def decrypt_password(encrypted_password: str) -> str:
 def get_email_config():
     """
     Get current user's email configuration.
-    
+
     Query Parameters:
         include_password (bool): If true, returns decrypted password. Default: false.
-    
+
     Returns:
         JSON response with email configuration or 404 if not found.
     """
     current_user_id = get_jwt_identity()
     session = SessionLocal()
-    
+
     try:
         config = session.query(EmailConfig).filter(
             EmailConfig.user_id == current_user_id,
             EmailConfig.is_active == True
         ).first()
-        
+
         if not config:
             return jsonify({"error": "No email configuration found"}), 404
-        
+
         # Check if password should be included
         include_password = request.args.get('include_password', 'false').lower() == 'true'
         logger.info(f"Email config request - include_password: {include_password}")
-        
+
         if include_password:
             # Return config with decrypted password for editing
             config_dict = config.to_dict(include_password=True)
@@ -188,7 +188,7 @@ def get_email_config():
             # Return config with masked password (default behavior)
             logger.info("Returning config with masked password")
             return jsonify(config.to_dict(include_password=False))
-        
+
     except Exception as e:
         logger.error(f"Error getting email config: {str(e)}")
         return jsonify({"error": "Failed to retrieve email configuration"}), 500
@@ -201,30 +201,30 @@ def get_email_config():
 def create_or_update_email_config():
     """
     Create or update current user's email configuration.
-    
+
     Returns:
         JSON response with success message or error.
     """
     current_user_id = get_jwt_identity()
     data = request.get_json()
     session = SessionLocal()
-    
+
     try:
         # Validate required fields
         required_fields = ["mail_server", "mail_port", "mail_username", "mail_password", "mail_default_sender_email"]
         for field in required_fields:
             if field not in data or not data[field]:
                 return jsonify({"error": f"Missing required field: {field}"}), 400
-        
+
         # Find existing config or create new one
         config = session.query(EmailConfig).filter(
             EmailConfig.user_id == current_user_id
         ).first()
-        
+
         if not config:
             config = EmailConfig(user_id=current_user_id)
             session.add(config)
-        
+
         # Update fields
         config.mail_server = data['mail_server']
         config.mail_port = int(data['mail_port'])
@@ -237,14 +237,14 @@ def create_or_update_email_config():
         config.provider_type = data.get('provider_type', 'smtp')
         config.provider_config = json.dumps(data.get('provider_config', {}))
         config.is_active = True
-        
+
         session.commit()
-        
+
         return jsonify({
             "message": "Email configuration saved successfully",
             "config": config.to_dict()
         })
-        
+
     except ValueError as e:
         session.rollback()
         return jsonify({"error": f"Invalid data: {str(e)}"}), 400
@@ -264,14 +264,14 @@ def create_or_update_email_config():
 def test_email_config():
     """
     Test email configuration by sending a test email.
-    
+
     Returns:
         JSON response with test result.
     """
     current_user_id = get_jwt_identity()
     data = request.get_json()
     session = SessionLocal()
-    
+
     try:
         # Get test email address from request body or query parameter
         test_email = data.get('test_email') if data else None
@@ -279,20 +279,20 @@ def test_email_config():
             test_email = request.args.get('test_email')
         if not test_email:
             return jsonify({"error": "Test email address is required"}), 400
-        
+
         # Get user's email config
         config = session.query(EmailConfig).filter(
             EmailConfig.user_id == current_user_id,
             EmailConfig.is_active == True
         ).first()
-        
+
         if not config:
             return jsonify({"error": "No email configuration found"}), 404
-        
+
         # Create temporary email service with user's config
         encryption_key = get_encryption_key()
         email_service = EmailService(config=config, encryption_key=encryption_key)
-        
+
         # Send test email
         test_data = {
             'reservation_number': 'TEST123',
@@ -301,9 +301,9 @@ def test_email_config():
             'end_date': '2024-01-03',
             'room_name': 'Test Room'
         }
-        
+
         result = email_service.send_reservation_confirmation(test_email, test_data)
-        
+
         if result['status'] == 'success':
             return jsonify({
                 "message": "Test email sent successfully",
@@ -314,7 +314,7 @@ def test_email_config():
                 "error": "Failed to send test email",
                 "result": result
             }), 400
-            
+
     except Exception as e:
         logger.error(f"Error testing email config: {str(e)}")
         return jsonify({"error": f"Test failed: {str(e)}"}), 500
@@ -327,7 +327,7 @@ def test_email_config():
 def get_email_presets():
     """
     Get available email provider presets.
-    
+
     Returns:
         JSON response with email provider presets.
     """
@@ -339,16 +339,16 @@ def get_email_presets():
 def get_email_preset(preset_name):
     """
     Get specific email provider preset.
-    
+
     Args:
         preset_name: Name of the preset (gmail, outlook, yahoo, etc.)
-    
+
     Returns:
         JSON response with preset configuration.
     """
     if preset_name not in EMAIL_PROVIDER_PRESETS:
         return jsonify({"error": "Invalid preset name"}), 400
-    
+
     return jsonify(EMAIL_PROVIDER_PRESETS[preset_name])
 
 
@@ -357,26 +357,26 @@ def get_email_preset(preset_name):
 def delete_email_config():
     """
     Delete current user's email configuration.
-    
+
     Returns:
         JSON response with success message.
     """
     current_user_id = get_jwt_identity()
     session = SessionLocal()
-    
+
     try:
         config = session.query(EmailConfig).filter(
             EmailConfig.user_id == current_user_id
         ).first()
-        
+
         if not config:
             return jsonify({"error": "No email configuration found"}), 404
-        
+
         session.delete(config)
         session.commit()
-        
+
         return jsonify({"message": "Email configuration deleted successfully"})
-        
+
     except Exception as e:
         session.rollback()
         logger.error(f"Error deleting email config: {str(e)}")
@@ -390,30 +390,30 @@ def delete_email_config():
 def migrate_to_external_provider():
     """
     Migrate from SMTP to external email provider (Mailgun, SendGrid, etc.).
-    
+
     Returns:
         JSON response with migration result.
     """
     current_user_id = get_jwt_identity()
     data = request.get_json()
     session = SessionLocal()
-    
+
     try:
         provider_type = data.get('provider_type')
         if not provider_type:
             return jsonify({"error": "Provider type is required"}), 400
-        
+
         # Get current config
         config = session.query(EmailConfig).filter(
             EmailConfig.user_id == current_user_id
         ).first()
-        
+
         if not config:
             return jsonify({"error": "No email configuration found"}), 404
-        
+
         # Update provider type and configuration
         config.provider_type = provider_type
-        
+
         # Provider-specific configuration
         if provider_type == 'mailgun':
             config.mail_server = 'smtp.mailgun.org'
@@ -432,14 +432,14 @@ def migrate_to_external_provider():
             config.provider_config = json.dumps({
                 'api_key': data.get('api_key')
             })
-        
+
         session.commit()
-        
+
         return jsonify({
             "message": f"Successfully migrated to {provider_type}",
             "config": config.to_dict()
         })
-        
+
     except Exception as e:
         session.rollback()
         logger.error(f"Error migrating email config: {str(e)}")

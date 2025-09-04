@@ -27,7 +27,7 @@ class Config:
         f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}"
         f"@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
     )
-    
+
     # Email configuration
     #MAIL_SERVER = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
    # MAIL_PORT = int(os.getenv('MAIL_PORT', 587))
@@ -41,7 +41,7 @@ class Config:
     #)
     MAIL_MAX_EMAILS = int(os.getenv('MAIL_MAX_EMAILS', 100))
     MAIL_ASCII_ATTACHMENTS = os.getenv('MAIL_ASCII_ATTACHMENTS', 'False').lower() == 'true'
-    
+
     # Email templates
     EMAIL_TEMPLATES = {
         'reservation_confirmation': {
@@ -68,7 +68,7 @@ class TestConfig(Config):
     # Configuration for testing
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"  # In-memory SQLite for testing
     TESTING = True  # Enable testing mode
-    
+
     # Test email configuration
     MAIL_SERVER = 'localhost'
     MAIL_PORT = 1025

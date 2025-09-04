@@ -30,7 +30,7 @@ def init_db():
     db.execute(text('DROP VIEW IF EXISTS structure_reservations;'))  # Use CASCADE to remove dependent objects
 
     # Remove data from dependent tables first
-    db.query(AdminStructure).delete()    
+    db.query(AdminStructure).delete()
     db.query(User).delete()
     db.query(ClientReservations).delete()
     db.query(Reservation).delete()
@@ -175,7 +175,7 @@ def test_get_reservations_per_month_basic(client, init_db):
     db.commit()
 
     response = client.get(f"/api/v1/reservations/monthly/{structure_id}")
-    
+
     assert response.status_code == 200
     data = response.get_json()
     assert isinstance(data, list)
@@ -190,7 +190,7 @@ def test_get_reservations_per_month_no_reservations(client, init_db):
     structure_id = db.query(Structure).first().id
 
     response = client.get(f"/api/v1/reservations/monthly/{structure_id}")
-    
+
     assert response.status_code == 200
     data = response.get_json()
     assert isinstance(data, list)
@@ -203,7 +203,7 @@ def test_get_reservations_per_month_invalid_structure_id(client, init_db):
     invalid_structure_id = 9999  # Assuming this structure ID doesn't exist
 
     response = client.get(f"/api/v1/reservations/monthly/{invalid_structure_id}")
-    
+
     assert response.status_code == 404
     data = response.get_json()
     assert data["message"] == "Structure not found"  # Ensure the message matches the error returned

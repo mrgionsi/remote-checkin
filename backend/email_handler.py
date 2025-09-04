@@ -6,12 +6,10 @@ including reservation confirmations, updates, and cancellations.
 """
 
 import logging
-import re
 import json
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 from flask import current_app
-from flask_mail import Message, Mail
 from email_validator import validate_email, EmailNotValidError
 import requests
 
@@ -47,50 +45,50 @@ class EmailServiceError(Exception):
 class EmailService:
     """
     Comprehensive email service for handling all email operations.
-    
+
     This service provides methods for sending various types of emails,
     validating email addresses, and managing email templates.
     Supports both SMTP and external providers like Mailgun, SendGrid.
     """
-    
+
     def __init__(self, config: 'EmailConfig', encryption_key: str = None):
         """
         Initialize the EmailService.
-        
+
         Args:
             config: EmailConfig instance (for database configuration)
             encryption_key: Encryption key for decrypting passwords
         """
         if not config:
             raise EmailServiceError("EmailConfig is required")
-            
+
         self.config = config
         self.encryption_key = encryption_key
         self.provider_type = config.provider_type or 'smtp'
         self.provider_config = json.loads(config.provider_config) if config.provider_config else {}
-        
+
         self._setup_from_config()
-    
+
     def _setup_from_config(self) -> None:
         """Setup email service from database configuration."""
         if not self.config:
             raise EmailServiceError("No configuration provided")
-        
+
         # Store the decrypted password for use in sending emails
         self.decrypted_password = self._decrypt_password(self.config.mail_password)
-        
+
         # We don't need to create a Flask app - we'll use the existing one
         # and override the mail configuration when sending emails
-    
+
     def _decrypt_password(self, encrypted_password: str) -> str:
         """Decrypt password from database."""
         if not encrypted_password:
             logger.warning("Encrypted password is empty or None")
             return ""
-            
+
         try:
             from cryptography.fernet import Fernet
-            
+
             # Use encryption key passed to constructor, or try to get from current app context
             key = self.encryption_key
             if not key:
@@ -99,16 +97,16 @@ class EmailService:
                 except RuntimeError:
                     # current_app is not available in this context
                     logger.warning("No Flask app context available for decryption")
-            
+
             if not key:
                 # If no encryption key, assume password is not encrypted (for backward compatibility)
                 logger.info("No encryption key found, using password as-is")
                 return encrypted_password
-            
+
             # Ensure key is bytes
             if isinstance(key, str):
                 key = key.encode()
-            
+
             f = Fernet(key)
             return f.decrypt(encrypted_password.encode()).decode()
         except Exception as e:
@@ -116,17 +114,17 @@ class EmailService:
             logger.error(f"Encrypted password type: {type(encrypted_password)}, length: {len(encrypted_password) if encrypted_password else 'None'}")
             logger.error(f"Key type: {type(key) if 'key' in locals() else 'None'}")
             raise e
-    
+
     def validate_email_address(self, email: str) -> str:
         """
         Validate an email address.
-        
+
         Args:
             email: Email address to validate
-            
+
         Returns:
             Normalized email address
-            
+
         Raises:
             EmailValidationError: If email is invalid
         """
@@ -136,73 +134,73 @@ class EmailService:
             return validated_email.normalized
         except EmailNotValidError as e:
             raise EmailValidationError(f"Invalid email address: {str(e)}")
-    
+
     def validate_email_address_lenient(self, email: str) -> str:
         """
         Validate an email address with more lenient rules.
-        
+
         Args:
             email: Email address to validate
-            
+
         Returns:
             Email address (cleaned but not strictly validated)
         """
         if not email or not isinstance(email, str):
             raise EmailValidationError("Email address is required")
-        
+
         # Basic email format check
         email = email.strip().lower()
         if '@' not in email or '.' not in email.split('@')[-1]:
             raise EmailValidationError("Invalid email format")
-        
+
         # Remove any whitespace and normalize
         email = email.strip()
-        
+
         return email
-    
+
     def validate_email_list(self, emails: List[str]) -> List[str]:
         """
         Validate a list of email addresses.
-        
+
         Args:
             emails: List of email addresses to validate
-            
+
         Returns:
             List of normalized email addresses
-            
+
         Raises:
             EmailValidationError: If any email is invalid
         """
         validated_emails = []
         invalid_emails = []
-        
+
         for email in emails:
             try:
                 validated_email = self.validate_email_address(email)
                 validated_emails.append(validated_email)
             except EmailValidationError:
                 invalid_emails.append(email)
-        
+
         if invalid_emails:
             raise EmailValidationError(
                 f"Invalid email addresses: {', '.join(invalid_emails)}"
             )
-        
+
         return validated_emails
-    
+
     def send_email(self, email_data: EmailData) -> Dict[str, Any]:
         """
         Send an email using the configured provider.
-        
+
         Args:
             email_data: EmailData object containing email information
-            
+
         Returns:
             Dictionary with status and message
         """
         try:
             logger.info(f"Preparing to send email to: {email_data.to_email} using {self.provider_type}")
-            
+
             # Route to appropriate provider
             if self.provider_type == 'mailgun':
                 return self._send_via_mailgun(email_data)
@@ -211,7 +209,7 @@ class EmailService:
             else:
                 # Default to SMTP
                 return self._send_via_smtp(email_data)
-            
+
         except EmailValidationError as e:
             logger.error(f"Email validation error: {str(e)}")
             return {
@@ -226,14 +224,14 @@ class EmailService:
                 "message": f"Failed to send email: {str(e)}",
                 "error_type": "send_error"
             }
-    
+
     def _send_via_smtp(self, email_data: EmailData) -> Dict[str, Any]:
         """Send email via SMTP using smtplib directly."""
         import smtplib
         from email.mime.text import MIMEText
         from email.mime.multipart import MIMEMultipart
         from email.utils import formataddr
-        
+
         try:
             # Create message
             msg = MIMEMultipart('alternative')
@@ -241,31 +239,31 @@ class EmailService:
             # Format sender name as "Remote Check-in System ('B&B Chapeau')"
             sender_name = self.config.mail_default_sender_name if self.config.mail_default_sender_name and self.config.mail_default_sender_name.strip() else 'Remote Check-in'
             formatted_sender_name = f"Remote Check-in System ('{sender_name}')"
-            
+
             msg['From'] = formataddr((formatted_sender_name, self.config.mail_default_sender_email))
             msg['To'] = email_data.to_email
-            
+
             # Add CC and BCC if provided
             if email_data.cc:
                 msg['Cc'] = ', '.join(email_data.cc)
             if email_data.bcc:
                 msg['Bcc'] = ', '.join(email_data.bcc)
-            
+
             # Add body parts
             if email_data.body:
                 text_part = MIMEText(email_data.body, 'plain', 'utf-8')
                 msg.attach(text_part)
-            
+
             if email_data.html_body:
                 html_part = MIMEText(email_data.html_body, 'html', 'utf-8')
                 msg.attach(html_part)
-            
+
             # Add attachments if provided
             if email_data.attachments:
                 for attachment in email_data.attachments:
                     from email.mime.base import MIMEBase
                     from email import encoders
-                    
+
                     part = MIMEBase('application', 'octet-stream')
                     part.set_payload(attachment['data'])
                     encoders.encode_base64(part)
@@ -274,7 +272,7 @@ class EmailService:
                         f'attachment; filename= {attachment["filename"]}'
                     )
                     msg.attach(part)
-            
+
             # Connect to SMTP server
             if self.config.mail_use_ssl:
                 server = smtplib.SMTP_SSL(self.config.mail_server, self.config.mail_port)
@@ -282,20 +280,20 @@ class EmailService:
                 server = smtplib.SMTP(self.config.mail_server, self.config.mail_port)
                 if self.config.mail_use_tls:
                     server.starttls()
-            
+
             # Login and send
             server.login(self.config.mail_username, self.decrypted_password)
-            
+
             # Prepare recipients list
             recipients = [email_data.to_email]
             if email_data.cc:
                 recipients.extend(email_data.cc)
             if email_data.bcc:
                 recipients.extend(email_data.bcc)
-            
+
             server.send_message(msg, to_addrs=recipients)
             server.quit()
-            
+
             logger.info(f"Email sent successfully via SMTP to: {email_data.to_email}")
             return {
                 "status": "success",
@@ -304,21 +302,21 @@ class EmailService:
                 "subject": email_data.subject,
                 "provider": "smtp"
             }
-            
+
         except Exception as e:
             logger.error(f"SMTP error: {str(e)}")
             raise EmailServiceError(f"Failed to send email via SMTP: {str(e)}")
-    
+
     def _send_via_mailgun(self, email_data: EmailData) -> Dict[str, Any]:
         """Send email via Mailgun API."""
         domain = self.provider_config.get('domain')
         api_key = self.provider_config.get('api_key')
-        
+
         if not domain or not api_key:
             raise EmailServiceError("Mailgun domain and API key are required")
-        
+
         url = f"https://api.mailgun.net/v3/{domain}/messages"
-        
+
         sender_name = self.config.mail_default_sender_name if self.config.mail_default_sender_name and self.config.mail_default_sender_name.strip() else "Remote Check-in"
         formatted_sender_name = f"Remote Check-in System ('{sender_name}')"
         data = {
@@ -328,14 +326,14 @@ class EmailService:
             "text": email_data.body,
             "html": email_data.html_body
         }
-        
+
         response = requests.post(
             url,
             auth=("api", api_key),
             data=data,
             timeout=30
         )
-        
+
         if response.status_code == 200:
             logger.info(f"Email sent successfully via Mailgun to: {email_data.to_email}")
             return {
@@ -348,16 +346,16 @@ class EmailService:
             }
         else:
             raise EmailServiceError(f"Mailgun API error: {response.status_code} - {response.text}")
-    
+
     def _send_via_sendgrid(self, email_data: EmailData) -> Dict[str, Any]:
         """Send email via SendGrid API."""
         api_key = self.provider_config.get('api_key')
-        
+
         if not api_key:
             raise EmailServiceError("SendGrid API key is required")
-        
+
         url = "https://api.sendgrid.com/v3/mail/send"
-        
+
         payload = {
             "personalizations": [
                 {
@@ -367,7 +365,7 @@ class EmailService:
             ],
             "from": {
                 "email": self.config.mail_default_sender_email,
-                "name": f"Remote Check-in System ('{self.config.mail_default_sender_name if self.config.mail_default_sender_name and self.config.mail_default_sender_name.strip() else 'Remote Check-in'}')"
+                "name": f"Remote Check-in System ('{self.config.mail_default_sender_name if self.config.mail_default_sender_name and self.config.mail_default_sender_name.strip() else 'Remote Check-in'}')"  # pylint: disable=line-too-long
             },
             "content": [
                 {
@@ -380,14 +378,14 @@ class EmailService:
                 }
             ]
         }
-        
+
         headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json"
         }
-        
+
         response = requests.post(url, json=payload, headers=headers, timeout=30)
-        
+
         if response.status_code == 202:
             logger.info(f"Email sent successfully via SendGrid to: {email_data.to_email}")
             return {
@@ -399,19 +397,19 @@ class EmailService:
             }
         else:
             raise EmailServiceError(f"SendGrid API error: {response.status_code} - {response.text}")
-    
+
     def send_reservation_confirmation(
-        self, 
-        client_email: str, 
+        self,
+        client_email: str,
         reservation_data: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
         Send a reservation confirmation email.
-        
+
         Args:
             client_email: Client's email address
             reservation_data: Dictionary containing reservation information
-            
+
         Returns:
             Dictionary with status and message
         """
@@ -433,16 +431,16 @@ class EmailService:
                         "message": f"Invalid email address: {str(e2)}",
                         "error_type": "validation_error"
                     }
-            
+
             # Create email content
             subject = f"Reservation Confirmation - {reservation_data.get('reservation_number', 'N/A')}"
-            
+
             # Plain text body
             body = self._create_reservation_confirmation_text(reservation_data)
-            
+
             # HTML body
             html_body = self._create_reservation_confirmation_html(reservation_data)
-            
+
             # Create email data
             email_data = EmailData(
                 to_email=validated_email,  # Use validated email
@@ -450,10 +448,10 @@ class EmailService:
                 body=body,
                 html_body=html_body
             )
-            
+
             logger.info(f"Sending reservation confirmation to: {validated_email}")
             return self.send_email(email_data)
-            
+
         except Exception as e:
             logger.error(f"Error creating reservation confirmation email: {str(e)}")
             import traceback
@@ -463,37 +461,37 @@ class EmailService:
                 "message": f"Error creating email: {str(e)}",
                 "error_type": "creation_error"
             }
-    
+
     def send_reservation_update(
-        self, 
-        client_email: str, 
+        self,
+        client_email: str,
         reservation_data: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
         Send a reservation update email.
-        
+
         Args:
             client_email: Client's email address
             reservation_data: Dictionary containing updated reservation information
-            
+
         Returns:
             Dictionary with status and message
         """
         try:
             subject = f"Reservation Update - {reservation_data.get('reservation_number', 'N/A')}"
-            
+
             body = self._create_reservation_update_text(reservation_data)
             html_body = self._create_reservation_update_html(reservation_data)
-            
+
             email_data = EmailData(
                 to_email=client_email,
                 subject=subject,
                 body=body,
                 html_body=html_body
             )
-            
+
             return self.send_email(email_data)
-            
+
         except Exception as e:
             logger.error(f"Error creating reservation update email: {str(e)}")
             return {
@@ -501,37 +499,37 @@ class EmailService:
                 "message": f"Error creating email: {str(e)}",
                 "error_type": "creation_error"
             }
-    
+
     def send_reservation_cancellation(
-        self, 
-        client_email: str, 
+        self,
+        client_email: str,
         reservation_data: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
         Send a reservation cancellation email.
-        
+
         Args:
             client_email: Client's email address
             reservation_data: Dictionary containing cancelled reservation information
-            
+
         Returns:
             Dictionary with status and message
         """
         try:
             subject = f"Reservation Cancellation - {reservation_data.get('reservation_number', 'N/A')}"
-            
+
             body = self._create_reservation_cancellation_text(reservation_data)
             html_body = self._create_reservation_cancellation_html(reservation_data)
-            
+
             email_data = EmailData(
                 to_email=client_email,
                 subject=subject,
                 body=body,
                 html_body=html_body
             )
-            
+
             return self.send_email(email_data)
-            
+
         except Exception as e:
             logger.error(f"Error creating reservation cancellation email: {str(e)}")
             return {
@@ -539,7 +537,7 @@ class EmailService:
                 "message": f"Error creating email: {str(e)}",
                 "error_type": "creation_error"
             }
-    
+
     def _create_reservation_confirmation_text(self, reservation_data: Dict[str, Any]) -> str:
         """Create plain text body for reservation confirmation."""
         # Safely get values and convert to strings
@@ -548,7 +546,7 @@ class EmailService:
         start_date = str(reservation_data.get('start_date', 'N/A'))
         end_date = str(reservation_data.get('end_date', 'N/A'))
         room_name = str(reservation_data.get('room_name', 'N/A'))
-        
+
         return f"""
 Dear Guest,
 
@@ -566,7 +564,7 @@ We look forward to welcoming you!
 Best regards,
 The Remote Check-in Team
         """.strip()
-    
+
     def _create_reservation_confirmation_html(self, reservation_data: Dict[str, Any]) -> str:
         """Create HTML body for reservation confirmation."""
         # Safely get values and convert to strings
@@ -575,7 +573,7 @@ The Remote Check-in Team
         start_date = str(reservation_data.get('start_date', 'N/A'))
         end_date = str(reservation_data.get('end_date', 'N/A'))
         room_name = str(reservation_data.get('room_name', 'N/A'))
-        
+
         return f"""
 <!DOCTYPE html>
 <html>
@@ -599,7 +597,7 @@ The Remote Check-in Team
         <div class="content">
             <p>Dear Guest,</p>
             <p>Your reservation has been confirmed successfully!</p>
-            
+
             <div class="details">
                 <h3>Reservation Details:</h3>
                 <p><strong>Reservation Number:</strong> {reservation_number}</p>
@@ -608,7 +606,7 @@ The Remote Check-in Team
                 <p><strong>Check-out Date:</strong> {end_date}</p>
                 <p><strong>Room:</strong> {room_name}</p>
             </div>
-            
+
             <p>We look forward to welcoming you!</p>
         </div>
         <div class="footer">
@@ -618,7 +616,7 @@ The Remote Check-in Team
 </body>
 </html>
         """.strip()
-    
+
     def _create_reservation_update_text(self, reservation_data: Dict[str, Any]) -> str:
         """Create plain text body for reservation update."""
         return f"""
@@ -638,7 +636,7 @@ If you have any questions, please don't hesitate to contact us.
 Best regards,
 The Remote Check-in Team
         """.strip()
-    
+
     def _create_reservation_update_html(self, reservation_data: Dict[str, Any]) -> str:
         """Create HTML body for reservation update."""
         return f"""
@@ -664,7 +662,7 @@ The Remote Check-in Team
         <div class="content">
             <p>Dear Guest,</p>
             <p>Your reservation has been updated successfully!</p>
-            
+
             <div class="details">
                 <h3>Updated Reservation Details:</h3>
                 <p><strong>Reservation Number:</strong> {reservation_data.get('reservation_number', 'N/A')}</p>
@@ -673,7 +671,7 @@ The Remote Check-in Team
                 <p><strong>Check-out Date:</strong> {reservation_data.get('end_date', 'N/A')}</p>
                 <p><strong>Room:</strong> {reservation_data.get('room_name', 'N/A')}</p>
             </div>
-            
+
             <p>If you have any questions, please don't hesitate to contact us.</p>
         </div>
         <div class="footer">
@@ -683,7 +681,7 @@ The Remote Check-in Team
 </body>
 </html>
         """.strip()
-    
+
     def _create_reservation_cancellation_text(self, reservation_data: Dict[str, Any]) -> str:
         """Create plain text body for reservation cancellation."""
         return f"""
@@ -703,7 +701,7 @@ If you have any questions or if this cancellation was made in error, please cont
 Best regards,
 The Remote Check-in Team
         """.strip()
-    
+
     def _create_reservation_cancellation_html(self, reservation_data: Dict[str, Any]) -> str:
         """Create HTML body for reservation cancellation."""
         return f"""
@@ -729,7 +727,7 @@ The Remote Check-in Team
         <div class="content">
             <p>Dear Guest,</p>
             <p>Your reservation has been cancelled.</p>
-            
+
             <div class="details">
                 <h3>Cancelled Reservation Details:</h3>
                 <p><strong>Reservation Number:</strong> {reservation_data.get('reservation_number', 'N/A')}</p>
@@ -738,7 +736,7 @@ The Remote Check-in Team
                 <p><strong>Check-out Date:</strong> {reservation_data.get('end_date', 'N/A')}</p>
                 <p><strong>Room:</strong> {reservation_data.get('room_name', 'N/A')}</p>
             </div>
-            
+
             <p>If you have any questions or if this cancellation was made in error, please contact us immediately.</p>
         </div>
         <div class="footer">
@@ -750,17 +748,17 @@ The Remote Check-in Team
         """.strip()
 
     def send_admin_checkin_notification(
-        self, 
-        admin_email: str, 
+        self,
+        admin_email: str,
         checkin_data: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
         Send check-in completion notification to admin.
-        
+
         Args:
             admin_email: Admin's email address
             checkin_data: Dictionary containing check-in details
-            
+
         Returns:
             Dictionary with status and message
         """
@@ -782,16 +780,16 @@ The Remote Check-in Team
                         "message": f"Invalid admin email address: {str(e2)}",
                         "error_type": "validation_error"
                     }
-            
+
             # Create email content
             subject = f"New Check-in Completed - {checkin_data.get('reservation_number', 'N/A')}"
-            
+
             # Plain text body
             body = self._create_admin_checkin_notification_text(checkin_data)
-            
+
             # HTML body
             html_body = self._create_admin_checkin_notification_html(checkin_data)
-            
+
             # Create email data
             email_data = EmailData(
                 to_email=validated_email,  # Use validated email
@@ -799,10 +797,10 @@ The Remote Check-in Team
                 body=body,
                 html_body=html_body
             )
-            
+
             logger.info(f"Sending admin check-in notification to: {validated_email}")
             return self.send_email(email_data)
-            
+
         except Exception as e:
             logger.error(f"Error creating admin check-in notification email: {str(e)}")
             import traceback
@@ -935,7 +933,7 @@ Remote Check-in System
         <h1>🔔 New Check-in Completed</h1>
         <p>A client has completed the check-in process</p>
     </div>
-    
+
     <div class="content">
         <div class="section">
             <h3>📋 Reservation Details</h3>
@@ -960,7 +958,7 @@ Remote Check-in System
                 <span class="value">{checkin_data.get('room_name', 'N/A')}</span>
             </div>
         </div>
-        
+
         <div class="section">
             <h3>👤 Client Information</h3>
             <div class="info-row">
@@ -988,7 +986,7 @@ Remote Check-in System
                 <span class="value">{checkin_data.get('document_number', 'N/A')}</span>
             </div>
         </div>
-        
+
         <div class="section">
             <h3>📄 Uploaded Documents</h3>
             <div class="info-row">
@@ -1010,7 +1008,7 @@ Remote Check-in System
                 </span>
             </div>
         </div>
-        
+
         <div class="footer">
             <p><strong>Action Required:</strong> Please review the uploaded documents and client information in the admin panel.</p>
             <p>Best regards,<br>Remote Check-in System</p>
@@ -1022,29 +1020,29 @@ Remote Check-in System
 
 
     def send_reservation_approval_notification(
-        self, 
-        client_email: str, 
+        self,
+        client_email: str,
         reservation_data: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
         Send reservation approval notification to client.
-        
+
         Args:
             client_email: Client's email address
             reservation_data: Dictionary containing reservation information
-            
+
         Returns:
             Dictionary with status and message
         """
         try:
             # Validate email address
             validated_email = self.validate_email_address(client_email)
-            
+
             # Create email subject and body
             subject = f"Reservation Approved - {reservation_data.get('reservation_number', 'N/A')}"
             body = self._create_reservation_approval_text(reservation_data)
             html_body = self._create_reservation_approval_html(reservation_data)
-            
+
             # Create EmailData object
             email_data = EmailData(
                 to_email=validated_email,
@@ -1052,10 +1050,10 @@ Remote Check-in System
                 body=body,
                 html_body=html_body
             )
-            
+
             # Send email
             return self.send_email(email_data)
-            
+
         except EmailValidationError as e:
             logger.error(f"Email validation error: {str(e)}")
             return {"status": "error", "message": f"Invalid email address: {str(e)}"}
@@ -1064,29 +1062,29 @@ Remote Check-in System
             return {"status": "error", "message": f"Failed to send approval notification: {str(e)}"}
 
     def send_reservation_revision_notification(
-        self, 
-        client_email: str, 
+        self,
+        client_email: str,
         reservation_data: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
         Send reservation revision notification to client.
-        
+
         Args:
             client_email: Client's email address
             reservation_data: Dictionary containing reservation information
-            
+
         Returns:
             Dictionary with status and message
         """
         try:
             # Validate email address
             validated_email = self.validate_email_address(client_email)
-            
+
             # Create email subject and body
             subject = f"Reservation Requires Revision - {reservation_data.get('reservation_number', 'N/A')}"
             body = self._create_reservation_revision_text(reservation_data)
             html_body = self._create_reservation_revision_html(reservation_data)
-            
+
             # Create EmailData object
             email_data = EmailData(
                 to_email=validated_email,
@@ -1094,10 +1092,10 @@ Remote Check-in System
                 body=body,
                 html_body=html_body
             )
-            
+
             # Send email
             return self.send_email(email_data)
-            
+
         except EmailValidationError as e:
             logger.error(f"Email validation error: {str(e)}")
             return {"status": "error", "message": f"Invalid email address: {str(e)}"}
@@ -1152,12 +1150,12 @@ The Management Team
     <div class="header">
         <h1>🎉 Reservation Approved!</h1>
     </div>
-    
+
     <div class="content">
         <p>Dear <strong>{reservation_data.get('guest_name', 'Guest')}</strong>,</p>
-        
+
         <p class="success">Great news! Your reservation has been approved and is now confirmed.</p>
-        
+
         <div class="reservation-details">
             <h3>Reservation Details</h3>
             <div class="info-row">
@@ -1177,13 +1175,13 @@ The Management Team
                 <span class="value">{reservation_data.get('room_name', 'N/A')}</span>
             </div>
         </div>
-        
+
         <p>Your reservation is now confirmed and ready for your stay. Please keep this email for your records.</p>
-        
+
         <p>If you have any questions or need to make changes, please contact us as soon as possible.</p>
-        
+
         <p>We look forward to welcoming you!</p>
-        
+
         <div class="footer">
             <p>Best regards,<br>The Management Team</p>
         </div>
@@ -1238,12 +1236,12 @@ The Management Team
     <div class="header">
         <h1>📋 Reservation Requires Revision</h1>
     </div>
-    
+
     <div class="content">
         <p>Dear <strong>{reservation_data.get('guest_name', 'Guest')}</strong>,</p>
-        
+
         <p class="warning">We need to discuss your reservation and may require some revisions.</p>
-        
+
         <div class="reservation-details">
             <h3>Reservation Details</h3>
             <div class="info-row">
@@ -1263,13 +1261,13 @@ The Management Team
                 <span class="value">{reservation_data.get('room_name', 'N/A')}</span>
             </div>
         </div>
-        
+
         <div class="action">
             <p><strong>Action Required:</strong> Please contact us as soon as possible to discuss the details of your reservation. We want to ensure everything is perfect for your stay.</p>
         </div>
-        
+
         <p>We appreciate your understanding and look forward to resolving any questions you may have.</p>
-        
+
         <div class="footer">
             <p>Best regards,<br>The Management Team</p>
         </div>
@@ -1283,21 +1281,21 @@ The Management Team
 def send_reservation_email(client_email: str, reservation_details: str, user_id: int = None) -> dict:
     """
     Legacy function for backward compatibility.
-    
+
     Args:
         client_email: Client's email address
         reservation_details: Reservation details as string
         user_id: User ID to get email configuration from database
-        
+
     Returns:
         Dictionary with status and message
     """
     try:
         logger.warning("Using legacy send_reservation_email function. Consider using EmailService instead.")
-        
+
         if not user_id:
             return {"status": "error", "message": "User ID is required for email configuration"}
-        
+
         # Create a basic reservation data structure
         reservation_data = {
             'reservation_number': 'N/A',
@@ -1306,7 +1304,7 @@ def send_reservation_email(client_email: str, reservation_details: str, user_id:
             'end_date': 'N/A',
             'room_name': 'N/A'
         }
-        
+
         # Try to extract information from reservation_details string
         if 'Reservation #' in reservation_details:
             # Extract reservation number
@@ -1314,30 +1312,30 @@ def send_reservation_email(client_email: str, reservation_details: str, user_id:
             match = re.search(r'Reservation #(\d+)', reservation_details)
             if match:
                 reservation_data['reservation_number'] = match.group(1)
-        
+
         # Get email configuration from database
         from models import EmailConfig
         from database import SessionLocal
         from routes.email_config_routes import get_encryption_key
-        
+
         session = SessionLocal()
         try:
             email_config = session.query(EmailConfig).filter(
                 EmailConfig.user_id == user_id,
                 EmailConfig.is_active == True
             ).first()
-            
+
             if not email_config:
                 return {"status": "error", "message": "No email configuration found for user"}
-            
+
             encryption_key = get_encryption_key()
             email_service = EmailService(config=email_config, encryption_key=encryption_key)
-            
+
             return email_service.send_reservation_confirmation(client_email, reservation_data)
-            
+
         finally:
             session.close()
-        
+
     except Exception as e:
         logger.error(f"Error in legacy send_reservation_email: {str(e)}")
         return {"status": "error", "message": str(e)}

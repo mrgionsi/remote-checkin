@@ -30,9 +30,9 @@ room_bp = Blueprint("room", __name__, url_prefix="/api/v1")
 def add_room():
     """
     Creates a new room using JSON data from the request and adds it to the database.
-    
+
     Validates that "name", "id_structure", and "capacity" are present in the request body. Returns a JSON error message with status 400 if any required field is missing. On success, returns the created room as JSON with status 201.
-      
+
     Returns:
         tuple: JSON response containing the new room or an error message, and the corresponding HTTP status code.
     """
@@ -72,7 +72,7 @@ def add_room():
 def get_rooms():
     """
     Returns a JSON list of rooms belonging to a fixed structure.
-    
+
     Currently retrieves all rooms with `id_structure` set to 1 and returns their serialized representations as a JSON array.
     """
     with get_db() as db:  # Using 'with' to properly manage the db session
@@ -97,10 +97,10 @@ def get_rooms():
 def get_room(room_id):
     """
     Retrieve a room by its ID and return its details as JSON.
-    
+
     Parameters:
         room_id (int): The ID of the room to retrieve.
-    
+
     Returns:
         Flask response: JSON with room details if found, or an error message with HTTP 404 if not found.
     """
@@ -117,12 +117,12 @@ def get_room(room_id):
 def update_room(room_id):
     """
     Update the details of an existing room by its ID.
-    
+
     If the room exists, updates its fields based on the provided JSON payload and returns the updated room as JSON. Returns a 404 error if the room is not found, or a 400 error for invalid input values.
-    
+
     Parameters:
         room_id (int): The ID of the room to update.
-    
+
     Returns:
         flask.Response: JSON response with the updated room details (HTTP 200), or an error message (HTTP 400 or 404).
     """
@@ -165,12 +165,12 @@ def update_room(room_id):
 def delete_room(room_id):
     """
     Delete a room by its ID and return a JSON response indicating the result.
-    
+
     If the specified room exists, it is removed from the database and a success message is returned with HTTP 200. If not found, returns an error message with HTTP 404.
-    
+
     Parameters:
         room_id (int): Unique identifier of the room to delete.
-    
+
     Returns:
         tuple: JSON response and HTTP status code.
     """

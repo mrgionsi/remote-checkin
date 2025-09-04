@@ -26,7 +26,7 @@ admin_bp = Blueprint("admin", __name__, url_prefix="/api/v1")
 def admin_login():
     """
     Authenticates an admin user by verifying credentials and role, returning a JWT token and associated structures on success.
-    
+
     Returns:
         JSON response with JWT access token, user information, and associated structures if authentication is successful.
         Returns HTTP 400 if username or password is missing, 401 if credentials are invalid, 403 if the user is not an admin, or 500 on server error.
@@ -93,9 +93,9 @@ def admin_login():
 def create_admin_user():
     """
     Creates a new admin user with the specified username, password, and role.
-    
+
     Accepts a JSON request body containing the new user's credentials and optional profile information. Returns a JSON response with the created user's details on success, or an error message if required fields are missing or the username already exists.
-    
+
     Returns:
         Response: JSON with user info and HTTP 201 on success, or error message with appropriate status code on failure.
     """
@@ -154,7 +154,7 @@ def create_admin_user():
 def get_admin_info():
     """
     Retrieves the authenticated admin user's profile and associated structures.
-    
+
     Returns:
         200: JSON object containing the user's ID, username, name, surname, role, and a list of associated structures.
         404: If the user is not found.
