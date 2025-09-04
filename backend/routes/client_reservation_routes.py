@@ -3,7 +3,7 @@
 """
 Client Reservations API Blueprint
 
-This module defines a Flask Blueprint (`client_reservation_bp`) that handles operations related to 
+This module defines a Flask Blueprint (`client_reservation_bp`) that handles operations related to
 clients and their reservations, including retrieving client details and managing uploaded images.
 
 Endpoints:
@@ -89,7 +89,7 @@ UPLOAD_FOLDER = "uploads/"  # Base directory for uploaded images
 def check_images(reservation_id):
     """
     Checks for the existence of client identity images associated with a specific reservation and client details.
-    
+
     Validates that the reservation exists and the client is linked to it, then inspects the reservation's upload folder for the expected identity image files. Returns a JSON object with URLs to available images (`back_image`, `front_image`, `selfie`) or `null` for missing files. Responds with appropriate error messages for missing fields, non-existent reservation, client not associated, or missing folder.
     """
     data = request.get_json()
@@ -170,11 +170,11 @@ def get_image(reservation_id, filename):
         response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
         return response
-    
+
     # For GET requests, require JWT authentication
     from flask_jwt_extended import verify_jwt_in_request
     verify_jwt_in_request()
-    
+
     folder_path = os.path.join(UPLOAD_FOLDER, str(reservation_id))
     print(f"Looking for image: reservation_id={reservation_id}, filename={filename}")
     print(f"Folder path: {folder_path}")
@@ -189,7 +189,7 @@ def get_image(reservation_id, filename):
     if not os.path.exists(file_path):
         print(f"File not found: {file_path}")
         return jsonify({"error": "Image not found"}), 404
-    
+
     # Set proper headers for image serving
     response = send_from_directory(folder_path, filename)
     response.headers['Access-Control-Allow-Origin'] = '*'

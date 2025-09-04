@@ -1,7 +1,7 @@
 """
 Models module for the remote check-in system.
 
-This module defines the SQLAlchemy models used for the application's database, 
+This module defines the SQLAlchemy models used for the application's database,
 including Room, Client, Reservation, and others.
 """
 
@@ -185,7 +185,7 @@ class Reservation(Base):
     name_reference = Column(String, default='Not available')
     email = Column(String, nullable=False)
     telephone = Column(String, default='')
-    
+
 
     room = relationship("Room", lazy="joined")
     clients = relationship(
@@ -330,7 +330,7 @@ class StructureReservationsView(Base):
 class EmailConfig(Base):
     """
     Represents email configuration for a user.
-    
+
     Attributes:
         id (int): Unique identifier for the email configuration.
         user_id (int): Foreign key referencing the user.

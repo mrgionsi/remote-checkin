@@ -9,7 +9,7 @@ Functions:
     - function_name_1: Description of function.
     - function_name_2: Description of function.
     - ...
-    
+
 Usage Example:
     >>> from backend.utils.file_utils import function_name_1
     >>> result = function_name_1('file_path')
@@ -28,10 +28,10 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 def allowed_file(filename):
     """
     Check if the uploaded file has an allowed extension.
-    
+
     Parameters:
         filename (str): The name of the uploaded file.
-    
+
     Returns:
         bool: True if file extension is allowed, False otherwise.
     """
@@ -43,15 +43,15 @@ def allowed_file(filename):
 def save_file(file, folder, filename):
     """
     Save the uploaded file to the specified folder with the given filename.
-    
+
     Parameters:
         file (FileStorage): The file to be saved.
         folder (str): The target folder where the file will be saved.
         filename (str): The name of the file to be saved.
-    
+
     Returns:
         str: The path to the saved file on success, None on failure.
-    
+
     Raises:
         OSError: If the folder doesn't exist or cannot be created.
         IOError: If the file cannot be saved.
@@ -72,17 +72,17 @@ def save_file(file, folder, filename):
 def sanitize_filename(name, surname, cf, suffix, extension="jpg"):
     """
     Sanitize the input for filename creation, allowing only certain characters and limiting length.
-    
+
     Parameters:
         name (str): The name part of the filename.
         surname (str): The surname part of the filename.
         cf (str): The cf part of the filename (fiscal code or similar).
         suffix (str): The suffix to be added at the end of the filename (e.g., 'selfie', 'frontimage').
         extension (str): The file extension (default 'jpg').
-    
+
     Returns:
         str: A sanitized filename.
-    
+
     Raises:
         ValueError: If any sanitized component is empty or exceeds length limits.
     """

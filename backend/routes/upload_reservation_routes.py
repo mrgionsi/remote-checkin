@@ -28,7 +28,7 @@ def upload_file():
         # Required files and form fields
         required_files = ['frontimage', 'backimage', 'selfie']
         required_fields = ['reservationId', 'name', 'surname', 'birthday', 'street',
-                           'city', 'province', 'cap', 'telephone', 'document_type', 'document_number', 'cf']        
+                           'city', 'province', 'cap', 'telephone', 'document_type', 'document_number', 'cf']
 
         # Check if required files are in request
         if any(file_key not in request.files for file_key in required_files):
@@ -84,11 +84,11 @@ def upload_file():
 
         # Send admin notification about completed check-in
         try:
-            from models import EmailConfig, User, Structure, Room
+            from models import EmailConfig, User
             from email_handler import EmailService
             from routes.email_config_routes import get_encryption_key
             from database import SessionLocal as EmailSessionLocal
-            
+
             # Get admin email configuration
             email_session = EmailSessionLocal()
             try:
@@ -97,20 +97,20 @@ def upload_file():
                 admin_structure = email_session.query(AdminStructure).filter(
                     AdminStructure.id_structure == reservation.room.id_structure
                 ).first()
-                
+
                 admin_user = None
                 if admin_structure:
                     admin_user = email_session.query(User).filter(
                         User.id == admin_structure.id_user
                     ).first()
-                
+
                 if admin_user:
                     # Get admin's email configuration
                     email_config = email_session.query(EmailConfig).filter(
                         EmailConfig.user_id == admin_user.id,
                         EmailConfig.is_active == True
                     ).first()
-                    
+
                     if email_config:
                         # Prepare check-in data for admin notification
                         checkin_data = {
@@ -129,11 +129,11 @@ def upload_file():
                             'has_back_image': 'backimage' in files,
                             'has_selfie': 'selfie' in files
                         }
-                        
+
                         # Send admin notification
                         encryption_key = get_encryption_key()
                         email_service = EmailService(config=email_config, encryption_key=encryption_key)
-                        
+
                         # Use admin's email from user table, email config, or fallback
                         admin_email = None
                         if hasattr(admin_user, 'email') and admin_user.email:
@@ -142,10 +142,10 @@ def upload_file():
                             admin_email = email_config.mail_default_sender_email
                         else:
                             admin_email = email_config.mail_username  # Fallback to SMTP username
-                        
+
                         if admin_email:
                             email_result = email_service.send_admin_checkin_notification(admin_email, checkin_data)
-                            
+
                             if email_result.get('status') == 'success':
                                 print(f"Admin notification sent successfully to {admin_email}")
                             else:
@@ -156,10 +156,10 @@ def upload_file():
                         print(f"No email configuration found for admin user {admin_user.id}")
                 else:
                     print(f"No admin user found for structure {reservation.room.id_structure}")
-                    
+
             finally:
                 email_session.close()
-                
+
         except Exception as e:
             # Don't fail the upload if email notification fails
             print(f"Error sending admin notification: {str(e)}")
