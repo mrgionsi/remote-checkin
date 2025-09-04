@@ -18,7 +18,17 @@ from routes.email_config_routes import get_encryption_key
 load_dotenv()
 
 def create_test_app():
-    """Create a minimal Flask app for testing."""
+    """
+    Create and return a minimal Flask application configured for tests.
+    
+    The app is configured with a SQLAlchemy database URI taken from the
+    DATABASE_URL environment variable; if not set, a PostgreSQL URI
+    postgresql://user:password@localhost/remotecheckin is used as a fallback.
+    SQLALCHEMY_TRACK_MODIFICATIONS is disabled.
+    
+    Returns:
+        Flask: A Flask application instance with the database configuration applied.
+    """
     app = Flask(__name__)
 
     # Configure database connection
@@ -28,7 +38,18 @@ def create_test_app():
     return app
 
 def get_user_email_config(user_id: int):
-    """Get email configuration for a user from database."""
+    """
+    Return the active EmailConfig for a given user or None.
+    
+    Queries the database for the first EmailConfig with a matching user_id and is_active == True.
+    The database session is closed before returning.
+    
+    Parameters:
+        user_id (int): ID of the user whose active email configuration to retrieve.
+    
+    Returns:
+        EmailConfig | None: The active EmailConfig instance if found, otherwise None.
+    """
     session = SessionLocal()
     try:
         config = session.query(EmailConfig).filter(
@@ -40,7 +61,14 @@ def get_user_email_config(user_id: int):
         session.close()
 
 def test_basic_email():
-    """Test sending a basic email."""
+    """
+    Send a test email using the database-backed email configuration for a chosen user.
+    
+    Prompts for a user ID and recipient email, loads the user's active EmailConfig from the database within a minimal Flask app context, constructs an EmailService (using the app's encryption key), and sends a simple test message. If no active configuration is found for the provided user ID, returns an error dictionary.
+    
+    Returns:
+        The result returned by EmailService.send_email (typically a dict or service-specific response), or an error dict with keys "status" and "message" when no configuration is found.
+    """
     print("Testing basic email functionality...")
 
     # Get user ID
@@ -78,7 +106,15 @@ def test_basic_email():
         return result
 
 def test_reservation_confirmation():
-    """Test sending a reservation confirmation email."""
+    """
+    Prompt for test inputs, load the user's active email configuration, and send a reservation confirmation email using EmailService.
+    
+    This is a CLI helper that:
+    - Prompts for a user ID and recipient/reservation fields (with defaults if input is empty).
+    - Creates a minimal Flask app context and fetches the user's active EmailConfig from the database.
+    - Retrieves the encryption key and constructs EmailService, then calls send_reservation_confirmation(recipient_email, reservation_data).
+    - Prints progress and returns the result from EmailService; if no active email configuration is found, returns a dict like {"status": "error", "message": "No email configuration found"}.
+    """
     print("Testing reservation confirmation email...")
 
     # Get user ID
@@ -117,7 +153,15 @@ def test_reservation_confirmation():
         return result
 
 def test_email_validation():
-    """Test email validation functionality."""
+    """
+    Run interactive tests for the email validation utilities.
+    
+    Prompts for a user ID, loads that user's active EmailConfig from the database within a minimal Flask app context, instantiates EmailService with the system encryption key, and exercises:
+    - validate_email_address on a small set of example addresses (prints each validation result or error).
+    - validate_email_list on a small list of addresses (prints the result or error).
+    
+    This function does not return a value; results and errors are printed to stdout.
+    """
     print("Testing email validation...")
 
     # Get user ID
@@ -158,7 +202,20 @@ def test_email_validation():
             print(f"✗ List validation failed: {e}")
 
 def test_admin_checkin_notification():
-    """Test sending admin check-in notification email."""
+    """
+    Prompt for test data and send an admin check-in notification email using the user's stored EmailConfig.
+    
+    This interactive test helper:
+    - Prompts for a user ID, builds a minimal Flask app context, and loads the user's active EmailConfig from the database.
+    - Prompts for admin and client/check-in details (provides sensible defaults when inputs are empty).
+    - Instantiates EmailService with the retrieved config and encryption key and calls send_admin_checkin_notification with the collected check-in data.
+    - Prints and returns the service result.
+    
+    Returns:
+        The value returned by EmailService.send_admin_checkin_notification, or a dict
+        {"status": "error", "message": "No email configuration found"} if no active
+        EmailConfig exists for the provided user ID.
+    """
     print("Testing admin check-in notification email...")
 
     # Get user ID
@@ -209,7 +266,19 @@ def test_admin_checkin_notification():
         return result
 
 def test_reservation_status_notifications():
-    """Test sending reservation status notification emails."""
+    """
+    Send test reservation status emails (approval and revision) using the user's stored email configuration.
+    
+    This function prompts for a user ID and client email, loads the active EmailConfig for that user from the database, creates an EmailService with the application's encryption key, and sends two test notifications:
+    1) reservation approval notification
+    2) reservation revision notification
+    
+    It prints interim status and returns a dictionary with the results of each send. If no active email configuration is found for the provided user ID, it returns {"status": "error", "message": "No email configuration found"}.
+    
+    Returns:
+        dict: On success, a dict with keys "approval" and "revision" containing whatever the EmailService methods return.
+              On missing configuration, a dict with keys "status" and "message".
+    """
     print("Testing reservation status notification emails...")
 
     # Get user ID
@@ -253,7 +322,23 @@ def test_reservation_status_notifications():
         }
 
 def main():
-    """Main function to run email tests."""
+    """
+    Run the interactive CLI to select and execute email test routines.
+    
+    Displays a menu of available email tests, prompts the user to choose one (1–6),
+    and dispatches to the corresponding test helper (e.g., test_basic_email,
+    test_reservation_confirmation, test_email_validation, test_admin_checkin_notification,
+    test_reservation_status_notifications). Option 6 runs all tests in sequence.
+    
+    Side effects:
+    - Reads user input from stdin.
+    - Prints status and error messages to stdout.
+    - Invokes other module-level test functions that may access the database and send emails.
+    
+    Behavior:
+    - Gracefully handles KeyboardInterrupt by notifying the user that the test was cancelled.
+    - Catches other exceptions, prints a brief error message, and advises checking email configuration.
+    """
     print("Email Test Utility for Remote Check-in System")
     print("=" * 50)
     print("Note: This utility now uses database email configuration.")

@@ -71,9 +71,9 @@ def add_room():
 @jwt_required()
 def get_rooms():
     """
-    Returns a JSON list of rooms belonging to a fixed structure.
-
-    Currently retrieves all rooms with `id_structure` set to 1 and returns their serialized representations as a JSON array.
+    Return a JSON array of rooms for a fixed structure.
+    
+    Queries the database for Room records with id_structure currently hard-coded to 1, serializes each Room using its to_dict() method, and returns the list as a JSON response. The function does not accept parameters; behavior will need updating when structure selection is implemented via request parameters.
     """
     with get_db() as db:  # Using 'with' to properly manage the db session
         id_structure = (

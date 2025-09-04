@@ -54,10 +54,16 @@ class EmailService:
     def __init__(self, config: 'EmailConfig', encryption_key: str = None):
         """
         Initialize the EmailService.
-
-        Args:
-            config: EmailConfig instance (for database configuration)
-            encryption_key: Encryption key for decrypting passwords
+        
+        Initializes internal state from an EmailConfig (required) and prepares provider-specific settings.
+        An optional Fernet encryption key may be provided to decrypt stored provider credentials; if omitted
+        the service will attempt to obtain a key from application configuration or use credentials as-is.
+        
+        Parameters:
+            encryption_key (str, optional): Fernet key used to decrypt encrypted provider passwords.
+        
+        Raises:
+            EmailServiceError: If no EmailConfig is provided.
         """
         if not config:
             raise EmailServiceError("EmailConfig is required")
@@ -70,7 +76,13 @@ class EmailService:
         self._setup_from_config()
 
     def _setup_from_config(self) -> None:
-        """Setup email service from database configuration."""
+        """
+        Initialize internal state from the provided EmailConfig.
+        
+        Reads required values from self.config, decrypts the stored mail password and sets
+        self.decrypted_password for use by sending methods. Raises EmailServiceError if
+        no configuration is present.
+        """
         if not self.config:
             raise EmailServiceError("No configuration provided")
 
@@ -81,7 +93,11 @@ class EmailService:
         # and override the mail configuration when sending emails
 
     def _decrypt_password(self, encrypted_password: str) -> str:
-        """Decrypt password from database."""
+        """
+        Decrypts an encrypted password string and returns the plaintext.
+        
+        If encrypted_password is falsy (None or empty) returns an empty string. The method attempts to use the instance's encryption_key, falling back to the Flask app config key 'EMAIL_ENCRYPTION_KEY' when available. If no key is found, the function treats the provided value as already plaintext and returns it unchanged (backward compatibility). On decryption errors the underlying exception is re-raised.
+        """
         if not encrypted_password:
             logger.warning("Encrypted password is empty or None")
             return ""
@@ -117,16 +133,19 @@ class EmailService:
 
     def validate_email_address(self, email: str) -> str:
         """
-        Validate an email address.
-
-        Args:
-            email: Email address to validate
-
+        Validate and normalize an email address using strict syntax rules.
+        
+        Performs syntactic validation via the `email_validator` library (deliverability is not checked)
+        and returns the normalized form (e.g., lowercasing and canonicalization).
+        
+        Parameters:
+            email (str): The email address to validate.
+        
         Returns:
-            Normalized email address
-
+            str: The normalized email address.
+        
         Raises:
-            EmailValidationError: If email is invalid
+            EmailValidationError: If the address is syntactically invalid.
         """
         try:
             # Validate and normalize email
@@ -137,13 +156,19 @@ class EmailService:
 
     def validate_email_address_lenient(self, email: str) -> str:
         """
-        Validate an email address with more lenient rules.
-
-        Args:
-            email: Email address to validate
-
+        Leniently validate and normalize an email address.
+        
+        Performs basic checks (presence of '@' and a dot in the domain part), trims surrounding whitespace,
+        and lowercases the result. Intended as a non-strict fallback when strict validation is not required.
+        
+        Parameters:
+            email (str): The email address to validate and normalize.
+        
         Returns:
-            Email address (cleaned but not strictly validated)
+            str: The normalized email address (trimmed and lowercased).
+        
+        Raises:
+            EmailValidationError: If `email` is missing, not a string, or fails the basic format check.
         """
         if not email or not isinstance(email, str):
             raise EmailValidationError("Email address is required")
@@ -160,16 +185,11 @@ class EmailService:
 
     def validate_email_list(self, emails: List[str]) -> List[str]:
         """
-        Validate a list of email addresses.
-
-        Args:
-            emails: List of email addresses to validate
-
-        Returns:
-            List of normalized email addresses
-
-        Raises:
-            EmailValidationError: If any email is invalid
+        Validate and normalize a list of email addresses.
+        
+        Each address is validated using the service's strict validator (validate_email_address).
+        Returns the list of normalized addresses in the same order. If any address fails
+        validation, raises EmailValidationError listing the invalid entries.
         """
         validated_emails = []
         invalid_emails = []
@@ -190,13 +210,15 @@ class EmailService:
 
     def send_email(self, email_data: EmailData) -> Dict[str, Any]:
         """
-        Send an email using the configured provider.
-
-        Args:
-            email_data: EmailData object containing email information
-
+        Send an email using the configured provider (SMTP, Mailgun, or SendGrid).
+        
+        Routes the provided EmailData to the provider configured for this EmailService instance and returns a structured result describing success or failure. On validation errors or send failures the result contains "status": "error", a human-readable "message", and an "error_type" (e.g., "validation_error" or "send_error").
+        
+        Parameters:
+            email_data (EmailData): Email payload (recipient, subject, plain text body; may include html_body, attachments, cc, bcc).
+        
         Returns:
-            Dictionary with status and message
+            Dict[str, Any]: Result dictionary with at least "status" ("success" or "error") and "message"; may include provider-specific details or an "error_type" on failure.
         """
         try:
             logger.info(f"Preparing to send email to: {email_data.to_email} using {self.provider_type}")
@@ -226,7 +248,17 @@ class EmailService:
             }
 
     def _send_via_smtp(self, email_data: EmailData) -> Dict[str, Any]:
-        """Send email via SMTP using smtplib directly."""
+        """
+        Send an email via SMTP using the configured server.
+        
+        This method builds a multipart MIME message from the provided EmailData (plain text and/or HTML bodies, optional attachments, optional CC/BCC), connects to the configured SMTP server (with optional SSL/TLS), authenticates using the decrypted credentials stored on the service, and sends the message to all recipients.
+        
+        Returns:
+            dict: A success result containing keys "status", "message", "to", "subject", and "provider" on successful send.
+        
+        Raises:
+            EmailServiceError: If any error occurs while constructing the message, connecting, authenticating, or sending.
+        """
         import smtplib
         from email.mime.text import MIMEText
         from email.mime.multipart import MIMEMultipart
@@ -308,7 +340,17 @@ class EmailService:
             raise EmailServiceError(f"Failed to send email via SMTP: {str(e)}")
 
     def _send_via_mailgun(self, email_data: EmailData) -> Dict[str, Any]:
-        """Send email via Mailgun API."""
+        """
+        Send the given EmailData using the Mailgun HTTP API.
+        
+        Uses provider_config['domain'] and provider_config['api_key'] from the service configuration. The EmailData fields used are: to_email, subject, body (text) and html_body (optional). The sender address and display name are derived from the service config.
+        
+        Returns:
+            dict: On success, returns a dictionary with keys: "status", "message", "to", "subject", "provider", and "response" (Mailgun JSON response).
+        
+        Raises:
+            EmailServiceError: If Mailgun domain or API key are missing, or if the Mailgun API returns a non-200 response.
+        """
         domain = self.provider_config.get('domain')
         api_key = self.provider_config.get('api_key')
 
@@ -348,7 +390,17 @@ class EmailService:
             raise EmailServiceError(f"Mailgun API error: {response.status_code} - {response.text}")
 
     def _send_via_sendgrid(self, email_data: EmailData) -> Dict[str, Any]:
-        """Send email via SendGrid API."""
+        """
+        Send the given EmailData using the SendGrid Web API.
+        
+        This builds a SendGrid JSON payload using email_data.to_email, subject, plain-text body, and optional HTML body, and sends it from the configured default sender in self.config. Requires a SendGrid API key in self.provider_config['api_key'].
+        
+        Returns:
+            dict: A status dictionary on success containing keys like "status", "message", "to", "subject", and "provider".
+        
+        Raises:
+            EmailServiceError: If the SendGrid API key is missing or the API responds with a non-202 error.
+        """
         api_key = self.provider_config.get('api_key')
 
         if not api_key:
@@ -404,14 +456,16 @@ class EmailService:
         reservation_data: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
-        Send a reservation confirmation email.
-
+        Send a reservation confirmation email to a client.
+        
+        Attempts strict validation of client_email and falls back to lenient validation; if both fail returns an error dict with "status": "error" and "error_type": "validation_error". On success, builds plain-text and HTML confirmation bodies from reservation_data, constructs an EmailData payload, and delegates sending to self.send_email.
+        
         Args:
-            client_email: Client's email address
-            reservation_data: Dictionary containing reservation information
-
+            client_email (str): Recipient email address to validate and use as the target.
+            reservation_data (Dict[str, Any]): Reservation fields used to populate templates (e.g., reservation_number, guest_name, start_date, end_date, room_name).
+        
         Returns:
-            Dictionary with status and message
+            Dict[str, Any]: Result from send_email on success, or an error dictionary containing "status", "message", and "error_type" (possible values include "validation_error" and "creation_error").
         """
         try:
             # Validate client email first
@@ -468,14 +522,16 @@ class EmailService:
         reservation_data: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
-        Send a reservation update email.
-
-        Args:
-            client_email: Client's email address
-            reservation_data: Dictionary containing updated reservation information
-
+        Send a reservation update email to a client.
+        
+        Constructs plain-text and HTML bodies from reservation_data, wraps them in an EmailData object, and sends via the configured provider.
+        
+        Parameters:
+            client_email (str): Recipient email address (validated by send_email).
+            reservation_data (Dict[str, Any]): Reservation fields used to build the message (e.g., reservation_number, guest_name, dates, room_name).
+        
         Returns:
-            Dictionary with status and message
+            Dict[str, Any]: Result dictionary from send_email on success, or an error dictionary with keys "status", "message", and "error_type" on failure.
         """
         try:
             subject = f"Reservation Update - {reservation_data.get('reservation_number', 'N/A')}"
@@ -506,14 +562,16 @@ class EmailService:
         reservation_data: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
-        Send a reservation cancellation email.
-
-        Args:
-            client_email: Client's email address
-            reservation_data: Dictionary containing cancelled reservation information
-
+        Send a reservation cancellation email to the specified client.
+        
+        Builds plain-text and HTML cancellation content from reservation_data, constructs an EmailData payload, and delegates delivery to send_email. If message creation fails an error dictionary is returned.
+        
+        Parameters:
+            client_email (str): Recipient email address.
+            reservation_data (Dict[str, Any]): Reservation fields used to render templates (e.g., reservation_number, guest_name, start_date, end_date, room_name).
+        
         Returns:
-            Dictionary with status and message
+            Dict[str, Any]: Result from send_email on success, or an error dictionary with keys "status", "message", and "error_type" if email creation fails.
         """
         try:
             subject = f"Reservation Cancellation - {reservation_data.get('reservation_number', 'N/A')}"
@@ -566,7 +624,24 @@ The Remote Check-in Team
         """.strip()
 
     def _create_reservation_confirmation_html(self, reservation_data: Dict[str, Any]) -> str:
-        """Create HTML body for reservation confirmation."""
+        """
+        Return an HTML-formatted reservation confirmation email body.
+        
+        Generates a self-contained HTML document for a reservation confirmation using fields from
+        the provided reservation_data. Values for the following keys are read and coerced to strings;
+        missing keys are replaced with 'N/A':
+        - reservation_number
+        - guest_name
+        - start_date
+        - end_date
+        - room_name
+        
+        Parameters:
+            reservation_data (Dict[str, Any]): Mapping containing reservation fields listed above.
+        
+        Returns:
+            str: Complete HTML document as a string suitable for use as an email HTML body.
+        """
         # Safely get values and convert to strings
         reservation_number = str(reservation_data.get('reservation_number', 'N/A'))
         guest_name = str(reservation_data.get('guest_name', 'N/A'))
@@ -618,7 +693,19 @@ The Remote Check-in Team
         """.strip()
 
     def _create_reservation_update_text(self, reservation_data: Dict[str, Any]) -> str:
-        """Create plain text body for reservation update."""
+        """
+        Return a plain-text email body notifying a guest that their reservation was updated.
+        
+        The function formats a short message using values from reservation_data. Expected keys (string values) and their defaults if missing:
+        - reservation_number: reservation identifier (defaults to 'N/A')
+        - guest_name: guest's full name (defaults to 'N/A')
+        - start_date: check-in date (defaults to 'N/A')
+        - end_date: check-out date (defaults to 'N/A')
+        - room_name: name or type of the room (defaults to 'N/A')
+        
+        Returns:
+            A formatted plain-text string suitable for the body of an update notification email.
+        """
         return f"""
 Dear Guest,
 
@@ -638,7 +725,22 @@ The Remote Check-in Team
         """.strip()
 
     def _create_reservation_update_html(self, reservation_data: Dict[str, Any]) -> str:
-        """Create HTML body for reservation update."""
+        """
+        Return an HTML-formatted email body for a reservation update.
+        
+        Generates a complete HTML document (styled and ready to send as an HTML email) that summarizes the updated reservation details.
+        
+        Parameters:
+            reservation_data (Dict[str, Any]): Mapping containing reservation fields used in the template. Expected keys (strings) include:
+                - 'reservation_number': reservation identifier (displayed or 'N/A' if missing)
+                - 'guest_name': guest's full name
+                - 'start_date': check-in date
+                - 'end_date': check-out date
+                - 'room_name': assigned room name
+        
+        Returns:
+            str: The rendered HTML string for the reservation update email.
+        """
         return f"""
 <!DOCTYPE html>
 <html>
@@ -683,7 +785,21 @@ The Remote Check-in Team
         """.strip()
 
     def _create_reservation_cancellation_text(self, reservation_data: Dict[str, Any]) -> str:
-        """Create plain text body for reservation cancellation."""
+        """
+        Builds the plain-text email body for a reservation cancellation.
+        
+        reservation_data should be a dict containing reservation fields used to populate the template. Known keys:
+        - reservation_number
+        - guest_name
+        - start_date
+        - end_date
+        - room_name
+        
+        Missing keys are replaced with 'N/A'.
+        
+        Returns:
+            str: Formatted plain-text cancellation message.
+        """
         return f"""
 Dear Guest,
 
@@ -703,7 +819,18 @@ The Remote Check-in Team
         """.strip()
 
     def _create_reservation_cancellation_html(self, reservation_data: Dict[str, Any]) -> str:
-        """Create HTML body for reservation cancellation."""
+        """
+        Return an HTML-formatted email body for a reservation cancellation.
+        
+        Parameters:
+            reservation_data (dict): Mapping with reservation fields used to populate the template.
+                Expected keys (optional): 'reservation_number', 'guest_name', 'start_date',
+                'end_date', 'room_name'. Missing keys will be rendered as 'N/A'.
+        
+        Returns:
+            str: Complete HTML string for the cancellation email body (UTF-8, safe to embed
+            in a multipart message as the HTML part).
+        """
         return f"""
 <!DOCTYPE html>
 <html>
@@ -812,7 +939,20 @@ The Remote Check-in Team
             }
 
     def _create_admin_checkin_notification_text(self, checkin_data: Dict[str, Any]) -> str:
-        """Create plain text version of admin check-in notification email."""
+        """
+        Builds the plain-text body for an admin notification email when a client completes check-in.
+        
+        Parameters:
+            checkin_data (dict): Mapping containing reservation and client fields used to populate the message. Expected keys include:
+                - reservation_number, guest_name, start_date, end_date, room_name
+                - client_name, client_surname, client_email, client_phone
+                - document_type, document_number
+                - has_front_image, has_back_image, has_selfie
+                Missing keys are rendered as 'N/A'; boolean document flags control uploaded/missing markers.
+        
+        Returns:
+            str: Rendered plain-text email body.
+        """
         return f"""
 New Check-in Completed
 
@@ -845,7 +985,19 @@ Remote Check-in System
         """.strip()
 
     def _create_admin_checkin_notification_html(self, checkin_data: Dict[str, Any]) -> str:
-        """Create HTML version of admin check-in notification email."""
+        """
+        Builds an HTML-formatted admin notification for a completed check-in.
+        
+        Parameters:
+            checkin_data (Dict[str, Any]): Mapping with reservation and client fields used to populate the template. Expected keys (all optional; missing values render as "N/A"):
+                - reservation_number, guest_name, start_date, end_date, room_name
+                - client_name, client_surname, client_email, client_phone
+                - document_type, document_number
+                - has_front_image, has_back_image, has_selfie (booleans indicating uploaded document status)
+        
+        Returns:
+            str: Complete HTML document as a string suitable for use as an email body (includes inline styles and status indicators for uploaded/missing documents).
+        """
         return f"""
 <!DOCTYPE html>
 <html>
@@ -1025,14 +1177,24 @@ Remote Check-in System
         reservation_data: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
-        Send reservation approval notification to client.
-
-        Args:
-            client_email: Client's email address
-            reservation_data: Dictionary containing reservation information
-
+        Send a reservation approval email to the client and return the send result.
+        
+        Validates the provided client_email (strict validation). Builds a subject using
+        reservation_data['reservation_number'] (falls back to 'N/A' if missing) and
+        generates both plain-text and HTML bodies via the approval templates, then
+        sends the email through the configured provider.
+        
+        Parameters:
+            client_email (str): Recipient email address.
+            reservation_data (dict): Reservation details used to populate templates.
+                Expected keys (used by templates): 'reservation_number', 'guest_name',
+                'start_date', 'end_date', 'room_name' (any missing keys are tolerated
+                but may result in placeholders like 'N/A').
+        
         Returns:
-            Dictionary with status and message
+            dict: Result returned from send_email on success (typically contains
+            provider-specific metadata). On failure returns a dict with "status":
+            "error" and a "message" describing the validation or send failure.
         """
         try:
             # Validate email address
@@ -1067,14 +1229,9 @@ Remote Check-in System
         reservation_data: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
-        Send reservation revision notification to client.
-
-        Args:
-            client_email: Client's email address
-            reservation_data: Dictionary containing reservation information
-
-        Returns:
-            Dictionary with status and message
+        Send a "reservation requires revision" notification to a client.
+        
+        Validates client_email (strict validation), builds text and HTML bodies from reservation_data templates, constructs an EmailData payload, and sends it via the configured provider. Returns a status dictionary with keys like "status" and "message" describing success or failure. The function catches validation errors and other exceptions and returns an error status instead of raising.
         """
         try:
             # Validate email address
@@ -1104,7 +1261,17 @@ Remote Check-in System
             return {"status": "error", "message": f"Failed to send revision notification: {str(e)}"}
 
     def _create_reservation_approval_text(self, reservation_data: Dict[str, Any]) -> str:
-        """Create plain text template for reservation approval notification."""
+        """
+        Return a plain-text reservation approval message populated from reservation_data.
+        
+        Parameters:
+            reservation_data (Dict[str, Any]): Mapping with optional keys:
+                - 'guest_name', 'reservation_number', 'start_date', 'end_date', 'room_name'.
+                Missing keys are replaced with sensible defaults ('Guest' or 'N/A').
+        
+        Returns:
+            str: Formatted plain-text approval notification suitable for sending as the email body.
+        """
         return f"""
 Dear {reservation_data.get('guest_name', 'Guest')},
 
@@ -1127,7 +1294,20 @@ The Management Team
         """.strip()
 
     def _create_reservation_approval_html(self, reservation_data: Dict[str, Any]) -> str:
-        """Create HTML template for reservation approval notification."""
+        """
+        Return an HTML-formatted email body for a reservation approval notification.
+        
+        The HTML includes a header, a success message, and a reservation details block.
+        Expects `reservation_data` to be a mapping containing (optional) keys:
+        - 'guest_name' (str): guest display name, defaults to 'Guest'
+        - 'reservation_number' (str): reservation identifier, defaults to 'N/A'
+        - 'start_date' (str): check-in date, defaults to 'N/A'
+        - 'end_date' (str): check-out date, defaults to 'N/A'
+        - 'room_name' (str): room name, defaults to 'N/A'
+        
+        Returns:
+            str: Complete HTML string suitable for use as an email body.
+        """
         return f"""
 <!DOCTYPE html>
 <html>
@@ -1191,7 +1371,19 @@ The Management Team
         """.strip()
 
     def _create_reservation_revision_text(self, reservation_data: Dict[str, Any]) -> str:
-        """Create plain text template for reservation revision notification."""
+        """
+        Create the plain-text body for a reservation revision notification.
+        
+        Expected keys in reservation_data (defaults used if missing):
+        - reservation_number: reservation identifier (defaults to 'N/A')
+        - guest_name: guest display name (defaults to 'Guest')
+        - start_date: check-in date (defaults to 'N/A')
+        - end_date: check-out date (defaults to 'N/A')
+        - room_name: room or unit name (defaults to 'N/A')
+        
+        Returns:
+            str: Formatted plain-text message ready to send to the guest.
+        """
         return f"""
 Dear {reservation_data.get('guest_name', 'Guest')},
 
@@ -1212,7 +1404,19 @@ The Management Team
         """.strip()
 
     def _create_reservation_revision_html(self, reservation_data: Dict[str, Any]) -> str:
-        """Create HTML template for reservation revision notification."""
+        """
+        Return an HTML email body for a "reservation requires revision" notification.
+        
+        The returned HTML includes a styled header, reservation summary, an action block asking the guest to contact management, and a footer. The function reads these keys from reservation_data (all optional; defaults shown in the output):
+        - 'guest_name'
+        - 'reservation_number'
+        - 'start_date'
+        - 'end_date'
+        - 'room_name'
+        
+        Returns:
+            str: Complete HTML document as a string.
+        """
         return f"""
 <!DOCTYPE html>
 <html>
@@ -1280,15 +1484,17 @@ The Management Team
 # Legacy function for backward compatibility
 def send_reservation_email(client_email: str, reservation_details: str, user_id: int = None) -> dict:
     """
-    Legacy function for backward compatibility.
-
-    Args:
-        client_email: Client's email address
-        reservation_details: Reservation details as string
-        user_id: User ID to get email configuration from database
-
+    Send a reservation confirmation using legacy behavior for backward compatibility.
+    
+    This convenience wrapper looks up the active EmailConfig for the given user_id, builds a minimal reservation_data dictionary (attempting to extract a reservation number from reservation_details when the pattern "Reservation #<number>" appears), creates an EmailService using the user's configuration and encryption key, and forwards a reservation confirmation to client_email. Intended only for legacy callers; new code should use EmailService directly.
+    
+    Parameters:
+        client_email (str): Recipient email address.
+        reservation_details (str): Free-form reservation string; if it contains "Reservation #<number>" the number will be extracted.
+        user_id (int, optional): Required user identifier used to find the user's email configuration in the database.
+    
     Returns:
-        Dictionary with status and message
+        dict: Result object with at least a "status" key ("success" or "error") and a "message" or provider-specific details. On failure this function returns an error dict rather than raising.
     """
     try:
         logger.warning("Using legacy send_reservation_email function. Consider using EmailService instead.")
