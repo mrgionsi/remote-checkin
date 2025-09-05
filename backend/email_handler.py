@@ -15,10 +15,7 @@ import requests
 
 from models import EmailConfig
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class EmailData:
