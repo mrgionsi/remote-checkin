@@ -3,7 +3,7 @@ Tests for the email handler module.
 
 This module tests the EmailService class and related functionality.
 """
-#pylint: disable=C0301,E0611,E0401,W0718,R0914,E0401,C0411,W0212
+#pylint: disable=C0301,E0611,E0401,W0718,R0914,E0401,C0411,W0212,E1101
 from unittest.mock import Mock, patch
 import pytest
 from flask_mail import Mail

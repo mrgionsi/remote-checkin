@@ -17,10 +17,10 @@ from sqlalchemy.sql import extract
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from models import Reservation, Room, Structure, StructureReservationsView, EmailConfig
-from database import SessionLocal
 from email_handler import EmailService
 from routes.email_config_routes import get_encryption_key
 from utils.email_utils import get_admin_email_config
+from database import SessionLocal
 
 
 class EmailConfigurationError(Exception):

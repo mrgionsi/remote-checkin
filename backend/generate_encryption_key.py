@@ -11,7 +11,7 @@ Usage:
 Then add the output to your .env file:
     EMAIL_ENCRYPTION_KEY=your_generated_key_here
 """
-
+#pylint: disable=C0301,E0611,E0401,W0718,R0914
 import base64
 import secrets
 

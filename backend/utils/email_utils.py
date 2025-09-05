@@ -4,8 +4,8 @@ Email utilities for the remote check-in system.
 This module provides common email-related functions used across different routes.
 """
 
-from database import SessionLocal
 from models import EmailConfig, User, AdminStructure
+from database import SessionLocal
 
 
 def get_admin_email_config(reservation):
@@ -37,7 +37,6 @@ def get_admin_email_config(reservation):
                 EmailConfig.is_active.is_(True)
             ).first()
             return email_config, admin_user
-        
         return None, None
     finally:
         email_session.close()
