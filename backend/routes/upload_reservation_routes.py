@@ -147,15 +147,14 @@ def upload_file():
                         encryption_key = get_encryption_key()
                         email_service = EmailService(config=email_config, encryption_key=encryption_key)
 
-                        # Use admin's email from user table, email config, or fallback
+                        # Use admin's email from user table or email config default sender
                         admin_email = None
                         if hasattr(admin_user, 'email') and admin_user.email:
                             admin_email = admin_user.email
                         elif email_config.mail_default_sender_email:
                             admin_email = email_config.mail_default_sender_email
-                        else:
-                            admin_email = email_config.mail_username  # Fallback to SMTP username
 
+                        # Only attempt to send email if we have a valid admin email
                         if admin_email:
                             email_result = email_service.send_admin_checkin_notification(admin_email, checkin_data)
 
@@ -164,7 +163,7 @@ def upload_file():
                             else:
                                 print(f"Failed to send admin notification: {email_result.get('message', 'Unknown error')}")
                         else:
-                            print("No valid admin email address found")
+                            print("No valid admin email address found - skipping notification")
                     else:
                         print(f"No email configuration found for admin user {admin_user.id}")
                 else:
