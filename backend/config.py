@@ -6,6 +6,7 @@ This file contains classes for configuring the production and testing environmen
 # pylint: disable=R0903
 
 import os
+from typing import ClassVar
 from dotenv import load_dotenv
 
 # Load the environment variables from .env file
@@ -42,7 +43,7 @@ class Config:
     MAIL_MAX_EMAILS = int(os.getenv('MAIL_MAX_EMAILS', '100'))
     MAIL_ASCII_ATTACHMENTS = os.getenv('MAIL_ASCII_ATTACHMENTS', 'False').lower() == 'true'
     # Email templates
-    EMAIL_TEMPLATES = {
+    EMAIL_TEMPLATES: ClassVar[dict] = {
         'reservation_confirmation': {
             'subject': 'Reservation Confirmation - {reservation_number}',
             'template': 'reservation_confirmation.html'
