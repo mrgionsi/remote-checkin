@@ -144,6 +144,7 @@ def create_admin_user():
         }), 201
 
     except Exception as e:
+        db_session.rollback()
         logging.error("Errore durante la creazione utente: %s", e)
         return jsonify({"error": f"Errore durante la creazione utente: {str(e)}"}), 500
     finally:
