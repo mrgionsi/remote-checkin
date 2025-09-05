@@ -1,0 +1,424 @@
+# routes/email_config_routes.py
+# pylint: disable=C0301,E0611,E0401,W0718
+
+"""
+Email Configuration Routes for handling email configuration requests.
+
+This module defines the routes and logic for managing user email configurations,
+including CRUD operations and testing email settings.
+"""
+
+import json
+import logging
+
+from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from sqlalchemy.exc import IntegrityError
+from email_handler import EmailService
+from utils.encryption_utils import get_encryption_key, encrypt_password, decrypt_password
+from models import EmailConfig
+from database import SessionLocal
+
+# Configure logging
+logger = logging.getLogger(__name__)
+
+# Create a blueprint for email configuration
+email_config_bp = Blueprint("email_config", __name__, url_prefix="/api/v1")
+
+# Email provider presets
+EMAIL_PROVIDER_PRESETS = {
+    'gmail': {
+        'name': 'Gmail',
+        'mail_server': 'smtp.gmail.com',
+        'mail_port': 587,
+        'mail_use_tls': True,
+        'mail_use_ssl': False,
+        'instructions': 'Use App Password, not regular password. Enable 2FA and generate App Password.'
+    },
+    'outlook': {
+        'name': 'Outlook/Hotmail',
+        'mail_server': 'smtp-mail.outlook.com',
+        'mail_port': 587,
+        'mail_use_tls': True,
+        'mail_use_ssl': False,
+        'instructions': 'Use your Outlook email and password.'
+    },
+    'yahoo': {
+        'name': 'Yahoo',
+        'mail_server': 'smtp.mail.yahoo.com',
+        'mail_port': 587,
+        'mail_use_tls': True,
+        'mail_use_ssl': False,
+        'instructions': 'Use App Password for Yahoo accounts.'
+    },
+    'mailgun': {
+        'name': 'Mailgun',
+        'mail_server': 'smtp.mailgun.org',
+        'mail_port': 587,
+        'mail_use_tls': True,
+        'mail_use_ssl': False,
+        'provider_type': 'mailgun',
+        'instructions': 'Use your Mailgun SMTP credentials.'
+    },
+    'sendgrid': {
+        'name': 'SendGrid',
+        'mail_server': 'smtp.sendgrid.net',
+        'mail_port': 587,
+        'mail_use_tls': True,
+        'mail_use_ssl': False,
+        'provider_type': 'sendgrid',
+        'instructions': 'Use your SendGrid API key as password.'
+    },
+    'custom': {
+        'name': 'Custom SMTP',
+        'mail_server': '',
+        'mail_port': 587,
+        'mail_use_tls': True,
+        'mail_use_ssl': False,
+        'instructions': 'Enter your custom SMTP server details.'
+    }
+}
+
+
+
+
+
+
+
+
+@email_config_bp.route("/email-config", methods=["GET"])
+@jwt_required()
+def get_email_config():
+    """
+    Return the current user's active EmailConfig as JSON.
+    
+    By default returns a representation with the password masked. If the query parameter
+    `include_password=true` is provided, this attempts to decrypt and include the
+    plaintext password; if decryption fails the returned `mail_password` will be an
+    empty string. If no active configuration exists a 404 response is returned.
+    
+    Query Parameters:
+        include_password (bool): When true, include the decrypted `mail_password`
+            in the response (default: false).
+    
+    Returns:
+        Flask JSON response containing the email configuration or an error payload
+        with an appropriate HTTP status code (404 if not found, 500 on server error).
+    """
+    current_user_id = get_jwt_identity()
+    session = SessionLocal()
+
+    try:
+        config = session.query(EmailConfig).filter(
+            EmailConfig.user_id == current_user_id,
+            EmailConfig.is_active.is_(True)
+        ).first()
+
+        if not config:
+            return jsonify({"error": "No email configuration found"}), 404
+
+        # Check if password should be included
+        include_password = request.args.get('include_password', 'false').lower() == 'true'
+        logger.info("Email config request - include_password: %s", include_password)
+
+        if include_password:
+            # Return config with decrypted password for editing
+            config_dict = config.to_dict(include_password=True)
+            try:
+                decrypted_password = decrypt_password(config.mail_password)
+                config_dict['mail_password'] = decrypted_password
+                logger.info("Password decrypted successfully, length: %d", len(decrypted_password))
+            except Exception as e:
+                logger.error("Error decrypting password: %s", str(e))
+                config_dict['mail_password'] = ""  # Return empty string if decryption fails
+            return jsonify(config_dict)
+
+        # Return config with masked password (default behavior)
+        logger.info("Returning config with masked password")
+        return jsonify(config.to_dict(include_password=False))
+
+    except Exception as e:
+        logger.error("Error getting email config: %s", str(e))
+        return jsonify({"error": "Failed to retrieve email configuration"}), 500
+    finally:
+        session.close()
+
+
+@email_config_bp.route("/email-config", methods=["POST"])
+@jwt_required()
+def create_or_update_email_config():
+    """
+    Create or update the current user's email configuration.
+    
+    Validates required fields (mail_server, mail_port, mail_username, mail_password, mail_default_sender_email), encrypts the provided password, and persists the configuration to the database for the authenticated user. If an existing EmailConfig exists for the user it is updated; otherwise a new record is created and activated. Optional fields supported: mail_use_tls (defaults True), mail_use_ssl (defaults False), mail_default_sender_name, provider_type (defaults "smtp"), and provider_config (stored as JSON).
+    
+    Returns:
+        A Flask JSON response containing either:
+        - On success: {"message": "Email configuration saved successfully", "config": <config_dict>} (HTTP 200)
+        - On validation or integrity error: {"error": <message>} (HTTP 400)
+        - On unexpected failure: {"error": "Failed to save email configuration"} (HTTP 500)
+    
+    Side effects:
+        - Encrypts mail_password via encrypt_password before saving.
+        - Commits changes to the database session (or rolls back on errors).
+    """
+    current_user_id = get_jwt_identity()
+    data = request.get_json()
+    session = SessionLocal()
+
+    try:
+        # Validate required fields
+        required_fields = ["mail_server", "mail_port", "mail_username", "mail_password", "mail_default_sender_email"]
+        for field in required_fields:
+            if field not in data or not data[field]:
+                return jsonify({"error": f"Missing required field: {field}"}), 400
+
+        # Find existing config or create new one
+        config = session.query(EmailConfig).filter(
+            EmailConfig.user_id == current_user_id
+        ).first()
+
+        if not config:
+            config = EmailConfig(user_id=current_user_id)
+            session.add(config)
+
+        # Update fields
+        config.mail_server = data['mail_server']
+        config.mail_port = int(data['mail_port'])
+        config.mail_use_tls = data.get('mail_use_tls', True)
+        config.mail_use_ssl = data.get('mail_use_ssl', False)
+        config.mail_username = data['mail_username']
+        config.mail_password = encrypt_password(data['mail_password'])
+        config.mail_default_sender_name = data.get('mail_default_sender_name', '')
+        config.mail_default_sender_email = data['mail_default_sender_email']
+        config.provider_type = data.get('provider_type', 'smtp')
+        config.provider_config = json.dumps(data.get('provider_config', {}))
+        config.is_active = True
+
+        session.commit()
+
+        return jsonify({
+            "message": "Email configuration saved successfully",
+            "config": config.to_dict()
+        })
+
+    except ValueError as e:
+        session.rollback()
+        return jsonify({"error": f"Invalid data: {str(e)}"}), 400
+    except IntegrityError:
+        session.rollback()
+        return jsonify({"error": "Database integrity error"}), 400
+    except Exception as e:
+        session.rollback()
+        logger.error("Error saving email config: %s", str(e))
+        return jsonify({"error": "Failed to save email configuration"}), 500
+    finally:
+        session.close()
+
+
+@email_config_bp.route("/email-config/test", methods=["POST"])
+@jwt_required()
+def test_email_config():
+    """
+    Send a test reservation confirmation email using the current user's active email configuration.
+    
+    Looks for `test_email` in the JSON body or query string, loads the authenticated user's active EmailConfig from the database, constructs an EmailService (using the app encryption key) and sends a reservation-confirmation style test message. Returns JSON with a success message and the underlying service result on success (HTTP 200), a 400 when `test_email` is missing or sending fails, a 404 if no active email configuration exists, and a 500 for unexpected errors.
+    """
+    current_user_id = get_jwt_identity()
+    data = request.get_json()
+    session = SessionLocal()
+
+    try:
+        # Get test email address from request body or query parameter
+        test_email = data.get('test_email') if data else None
+        if not test_email:
+            test_email = request.args.get('test_email')
+        if not test_email:
+            return jsonify({"error": "Test email address is required"}), 400
+
+        # Get user's email config
+        config = session.query(EmailConfig).filter(
+            EmailConfig.user_id == current_user_id,
+            EmailConfig.is_active.is_(True)
+        ).first()
+
+        if not config:
+            return jsonify({"error": "No email configuration found"}), 404
+
+        # Create temporary email service with user's config
+        encryption_key = get_encryption_key()
+        email_service = EmailService(config=config, encryption_key=encryption_key)
+
+        # Send test email
+        test_data = {
+            'reservation_number': 'TEST123',
+            'guest_name': 'Test User',
+            'start_date': '2024-01-01',
+            'end_date': '2024-01-03',
+            'room_name': 'Test Room'
+        }
+
+        result = email_service.send_reservation_confirmation(test_email, test_data)
+
+        if result['status'] == 'success':
+            return jsonify({
+                "message": "Test email sent successfully",
+                "result": result
+            })
+
+        return jsonify({
+            "error": "Failed to send test email",
+            "result": result
+        }), 400
+
+    except Exception as e:
+        logger.error("Error testing email config: %s", str(e))
+        return jsonify({"error": f"Test failed: {str(e)}"}), 500
+    finally:
+        session.close()
+
+
+@email_config_bp.route("/email-config/presets", methods=["GET"])
+@jwt_required()
+def get_email_presets():
+    """
+    Get available email provider presets.
+
+    Returns:
+        JSON response with email provider presets.
+    """
+    return jsonify(EMAIL_PROVIDER_PRESETS)
+
+
+@email_config_bp.route("/email-config/preset/<preset_name>", methods=["GET"])
+@jwt_required()
+def get_email_preset(preset_name):
+    """
+    Return the email provider preset configuration for a given preset name.
+    
+    Parameters:
+        preset_name (str): Preset identifier (e.g., 'gmail', 'outlook', 'yahoo', 'mailgun', 'sendgrid', 'custom').
+    
+    Returns:
+        Flask Response: JSON payload with the preset configuration on success, or a 400 JSON error response if the preset_name is invalid.
+    """
+    if preset_name not in EMAIL_PROVIDER_PRESETS:
+        return jsonify({"error": "Invalid preset name"}), 400
+
+    return jsonify(EMAIL_PROVIDER_PRESETS[preset_name])
+
+
+@email_config_bp.route("/email-config", methods=["DELETE"])
+@jwt_required()
+def delete_email_config():
+    """
+    Delete the current user's email configuration.
+    
+    Removes the authenticated user's EmailConfig record from the database. Requires a valid JWT identity (the function reads the current user via get_jwt_identity()).
+    
+    Returns:
+        A Flask JSON response and HTTP status code:
+        - 200: {"message": "Email configuration deleted successfully"} on successful deletion.
+        - 404: {"error": "No email configuration found"} if no config exists for the user.
+        - 500: {"error": "Failed to delete email configuration"} on unexpected server/database errors.
+    """
+    current_user_id = get_jwt_identity()
+    session = SessionLocal()
+
+    try:
+        config = session.query(EmailConfig).filter(
+            EmailConfig.user_id == current_user_id
+        ).first()
+
+        if not config:
+            return jsonify({"error": "No email configuration found"}), 404
+
+        session.delete(config)
+        session.commit()
+
+        return jsonify({"message": "Email configuration deleted successfully"})
+
+    except Exception as e:
+        session.rollback()
+        logger.error("Error deleting email config: %s", str(e))
+        return jsonify({"error": "Failed to delete email configuration"}), 500
+    finally:
+        session.close()
+
+
+@email_config_bp.route("/email-config/migrate", methods=["POST"])
+@jwt_required()
+def migrate_to_external_provider():
+    """
+    Migrate the current user's SMTP configuration to an external email provider (e.g., Mailgun or SendGrid).
+    
+    Expects a JSON body with:
+    - provider_type (str, required): target provider name. Supported values: "mailgun", "sendgrid".
+    - For "mailgun": optional "domain" and "api_key".
+    - For "sendgrid": optional "api_key".
+    
+    Behavior:
+    - Loads the authenticated user's active EmailConfig and updates its provider_type.
+    - Applies provider-specific SMTP defaults and stores provider-specific settings in EmailConfig.provider_config (JSON string).
+      - mailgun: sets mail_server to "smtp.mailgun.org", mail_port to 587, TLS enabled, provider_config contains {"domain": ..., "api_key": ...}.
+      - sendgrid: sets mail_server to "smtp.sendgrid.net", mail_port to 587, TLS enabled, provider_config contains {"api_key": ...}.
+    - Commits the updated EmailConfig and returns the updated config dictionary.
+    
+    Returns:
+    - 200: JSON { "message": "...", "config": <config.to_dict()> } on success.
+    - 400: JSON error when required input (provider_type) is missing or invalid.
+    - 404: JSON error when no existing email configuration is found for the user.
+    - 500: JSON error on unexpected failures (transaction rolled back).
+    """
+    current_user_id = get_jwt_identity()
+    data = request.get_json()
+    session = SessionLocal()
+
+    try:
+        provider_type = data.get('provider_type')
+        if not provider_type:
+            return jsonify({"error": "Provider type is required"}), 400
+
+        # Get current config
+        config = session.query(EmailConfig).filter(
+            EmailConfig.user_id == current_user_id
+        ).first()
+
+        if not config:
+            return jsonify({"error": "No email configuration found"}), 404
+
+        # Update provider type and configuration
+        config.provider_type = provider_type
+
+        # Provider-specific configuration
+        if provider_type == 'mailgun':
+            config.mail_server = 'smtp.mailgun.org'
+            config.mail_port = 587
+            config.mail_use_tls = True
+            config.mail_use_ssl = False
+            config.provider_config = json.dumps({
+                'domain': data.get('domain'),
+                'api_key': data.get('api_key')
+            })
+        elif provider_type == 'sendgrid':
+            config.mail_server = 'smtp.sendgrid.net'
+            config.mail_port = 587
+            config.mail_use_tls = True
+            config.mail_use_ssl = False
+            config.provider_config = json.dumps({
+                'api_key': data.get('api_key')
+            })
+
+        session.commit()
+
+        return jsonify({
+            "message": f"Successfully migrated to {provider_type}",
+            "config": config.to_dict()
+        })
+
+    except Exception as e:
+        session.rollback()
+        logger.error("Error migrating email config: %s", str(e))
+        return jsonify({"error": f"Migration failed: {str(e)}"}), 500
+    finally:
+        session.close()

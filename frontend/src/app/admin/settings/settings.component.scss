@@ -1,0 +1,100 @@
+// Email Settings Form Styling
+.email-settings {
+    .field {
+        margin-bottom: 1.5rem;
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        small {
+            display: block;
+            margin-top: 0.25rem;
+            color: var(--text-color-secondary);
+            font-size: 0.875rem;
+        }
+    }
+
+
+
+    .security-options {
+        .p-checkbox {
+            margin-right: 0.5rem;
+        }
+    }
+
+    .provider-config {
+        background: var(--surface-50);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+
+    .action-buttons {
+        border-top: 1px solid var(--surface-border);
+        padding-top: 1rem;
+        margin-top: 1rem;
+    }
+}
+
+// Card header styling
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+
+    i {
+        color: var(--primary-color);
+    }
+
+    h3 {
+        margin: 0;
+        color: var(--text-color);
+    }
+}
+
+// Section dividers
+.section-divider {
+    border-top: 1px solid var(--surface-border);
+    margin: 1.5rem 0;
+    padding-top: 1rem;
+}
+
+// Form grid improvements
+.p-formgrid {
+
+    .col-12,
+    .col-6,
+    .col-3,
+    .md\:col-6,
+    .md\:col-3 {
+        padding: 0.5rem;
+    }
+}
+
+// Input field improvements
+.p-inputtext {
+    width: 100%;
+
+    &:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem var(--primary-color-text);
+    }
+}
+
+// Button styling
+.p-button {
+    &.p-button-outlined {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+
+        &:hover {
+            background: var(--primary-color);
+            color: var(--primary-color-text);
+        }
+    }
+}

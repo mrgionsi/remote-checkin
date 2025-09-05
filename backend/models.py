@@ -1,15 +1,14 @@
+#pylint: disable=C0303,C0301,E0611
 """
 Models module for the remote check-in system.
 
-This module defines the SQLAlchemy models used for the application's database, 
+This module defines the SQLAlchemy models used for the application's database,
 including Room, Client, Reservation, and others.
 """
 
-from datetime import date
-from sqlalchemy import Column, Integer, BigInteger, String, Date, ForeignKey, Sequence
+from datetime import date, datetime
+from sqlalchemy import Column, Integer, BigInteger, String, Date, ForeignKey, Sequence, Boolean, DateTime
 from sqlalchemy.orm import relationship
-#pylint: disable=C0303
-#pylint: disable=E0611
 from database import Base
 
 
@@ -183,6 +182,8 @@ class Reservation(Base):
     id_room = Column(BigInteger, ForeignKey("room.id"))
     status = Column(String, default='Pending') #Approved, Pending, Declined, Sent back to customer
     name_reference = Column(String, default='Not available')
+    email = Column(String, nullable=False)
+    telephone = Column(String, default='')
 
 
     room = relationship("Room", lazy="joined")
@@ -191,7 +192,26 @@ class Reservation(Base):
     )
 
     def to_dict(self):
-        """Return a dictionary representation of the Reservation instance."""
+        """
+        Return a serializable dict representing this Reservation.
+        
+        The returned dictionary contains the reservation's identifiers, date range,
+        status and contact info. If the related Room is loaded, its full serialized
+        dictionary is included under the "room" key; otherwise "room" is None.
+        
+        Returns:
+            dict: {
+                "id": int,
+                "id_reference": str,
+                "start_date": datetime,
+                "end_date": datetime,
+                "room": dict | None,
+                "status": str,
+                "name_reference": str,
+                "email": str,
+                "telephone": str
+            }
+        """
         return {
             "id": self.id,
             "id_reference": self.id_reference,
@@ -199,10 +219,20 @@ class Reservation(Base):
             "end_date": self.end_date,
             "room": self.room.to_dict() if self.room else None,  # Include full room details
             "status": self.status,
-            "name_reference": self.name_reference
+            "name_reference": self.name_reference,
+            'email': self.email,
+            'telephone': self.telephone
         }
 
     def __repr__(self):
+        """
+        Return a concise, unambiguous string representation of the Reservation for debugging.
+        
+        The representation includes the reservation's primary key (`id`) and its `id_reference`.
+        
+        Returns:
+            str: A developer-facing string like "<Reservation(id=..., id_reference=...)>".
+        """
         return f"<Reservation(id={self.id}, id_reference={self.id_reference})>"
 
 
@@ -214,24 +244,39 @@ class User(Base):
         id (int): Unique identifier for the user.
         name (str): User's name.
         surname (str): User's surname.
+        email (str): User's email address.
+        telephone (str): User's telephone number.
     """
     __tablename__ = "user"
 
     id = Column(BigInteger, Sequence("user_id_seq"), primary_key=True, index=True)
     name = Column(String)
     surname = Column(String)
+    email = Column(String)
+    telephone = Column(String)
     password = Column(String)
     username = Column(String)
     id_role = Column(Integer, ForeignKey("role.id"))
 
     role = relationship("Role")
+    email_config = relationship("EmailConfig", back_populates="user", uselist=False)
 
     def to_dict(self):
-        """Return a dictionary representation of the User instance."""
+        """
+        Return a serializable dictionary of the User suitable for API responses.
+        
+        The dictionary includes the user's primary fields:
+        - id, name, surname, email, telephone, username, id_role
+        
+        Returns:
+            dict: Mapping of the above field names to their values.
+        """
         return {
             "id": self.id,
             "name": self.name,
             "surname": self.surname,
+            "email": self.email,
+            "telephone": self.telephone,
             "username": self.username,
             "id_role": self.id_role,
         }
@@ -249,6 +294,7 @@ class Structure(Base):
         name (str): Name of the structure.
         street (str): Street address of the structure.
         city (str): City of the structure.
+        cin (str): CIN (Codice Identificativo Nazionale) of the structure.
     """
     __tablename__ = "structure"
 
@@ -256,19 +302,34 @@ class Structure(Base):
     name = Column(String)
     street = Column(String)
     city = Column(String)
+    cin = Column(String)
 
     rooms = relationship("Room", back_populates="structure")
 
     def to_dict(self):
-        """Return a dictionary representation of the Structure instance."""
+        """
+        Return a dictionary of the Structure's public fields.
+        
+        Includes the instance's id, name, street, city, and cin; suitable for JSON serialization.
+        Returns:
+            dict: Mapping with keys "id", "name", "street", "city", and "cin".
+        """
         return {
             "id": self.id,
             "name": self.name,
             "street": self.street,
             "city": self.city,
+            "cin": self.cin,
         }
 
     def __repr__(self):
+        """
+        Return a developer-friendly string representation of the Structure instance.
+        
+        The returned string includes the structure's id, name, and city and is intended for debugging/logging.
+        Returns:
+            str: Formatted representation like '<Structure(id=..., name=..., city=...)>'.
+        """
         return f"<Structure(id={self.id}, name={self.name}, city={self.city})>"
 
 class StructureReservationsView(Base):
@@ -304,6 +365,12 @@ class StructureReservationsView(Base):
         }
 
     def __repr__(self):
+        """
+        Return a developer-facing string representation of the StructureReservationsView instance.
+        
+        Includes the view's key fields: structure_id, structure_name, reservation_id, id_reference,
+        start_date, end_date, room_id, room_name, and status.
+        """
         return (
             f"<StructureReservationsView(structure_id={self.structure_id}, "
             f"structure_name='{self.structure_name}', reservation_id={self.reservation_id}, "
@@ -311,3 +378,90 @@ class StructureReservationsView(Base):
             f"end_date={self.end_date}, room_id={self.room_id}, room_name='{self.room_name}', "
             f"status='{self.status}')>"
         )
+
+
+class EmailConfig(Base):
+    """
+    Represents email configuration for a user.
+
+    Attributes:
+        id (int): Unique identifier for the email configuration.
+        user_id (int): Foreign key referencing the user.
+        mail_server (str): SMTP server address.
+        mail_port (int): SMTP server port.
+        mail_use_tls (bool): Whether to use TLS encryption.
+        mail_use_ssl (bool): Whether to use SSL encryption.
+        mail_username (str): Email username/address.
+        mail_password (str): Encrypted email password.
+        mail_default_sender_name (str): Default sender name.
+        mail_default_sender_email (str): Default sender email.
+        provider_type (str): Type of email provider (smtp, mailgun, sendgrid, etc.).
+        provider_config (str): JSON string for provider-specific configuration.
+        is_active (bool): Whether this configuration is active.
+        created_at (datetime): When the configuration was created.
+        updated_at (datetime): When the configuration was last updated.
+    """
+    __tablename__ = "email_config"
+
+    id = Column(Integer, Sequence("email_config_id_seq"), primary_key=True, index=True)
+    user_id = Column(BigInteger, ForeignKey("user.id"), nullable=False)
+    mail_server = Column(String, nullable=False)
+    mail_port = Column(Integer, nullable=False)
+    mail_use_tls = Column(Boolean, default=True)
+    mail_use_ssl = Column(Boolean, default=False)
+    mail_username = Column(String, nullable=False)
+    mail_password = Column(String, nullable=False)  # Encrypted
+    mail_default_sender_name = Column(String)
+    mail_default_sender_email = Column(String, nullable=False)
+    provider_type = Column(String, default='smtp')  # smtp, mailgun, sendgrid, etc.
+    provider_config = Column(String)  # JSON string for provider-specific settings
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationship
+    user = relationship("User", back_populates="email_config")
+
+    def to_dict(self, include_password=False):
+        """
+        Return a dictionary representation of the EmailConfig instance.
+        
+        By default the returned `mail_password` is masked as `"***"`. Set `include_password=True`
+        to include the actual password. `created_at` and `updated_at` are converted to ISO 8601
+        strings or None if not set.
+        
+        Parameters:
+            include_password (bool): If True, include the actual `mail_password`; otherwise mask it.
+        
+        Returns:
+            dict: Serialized fields of the EmailConfig, including `id`, `user_id`, SMTP/provider
+            settings, `is_active`, and `created_at`/`updated_at` as ISO 8601 strings or None.
+        """
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "mail_server": self.mail_server,
+            "mail_port": self.mail_port,
+            "mail_use_tls": self.mail_use_tls,
+            "mail_use_ssl": self.mail_use_ssl,
+            "mail_username": self.mail_username,
+            "mail_password": self.mail_password if include_password else "***",  # Include password only if requested
+            "mail_default_sender_name": self.mail_default_sender_name,
+            "mail_default_sender_email": self.mail_default_sender_email,
+            "provider_type": self.provider_type,
+            "provider_config": self.provider_config,
+            "is_active": self.is_active,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None
+        }
+
+    def __repr__(self):
+        """
+        Return a concise developer-facing representation of the EmailConfig.
+        
+        The string includes the instance's id, user_id, and provider_type and is intended for debugging/logging.
+        
+        Returns:
+            str: Representation in the form "<EmailConfig(id=<id>, user_id=<user_id>, provider_type=<provider_type>)>"
+        """
+        return f"<EmailConfig(id={self.id}, user_id={self.user_id}, provider_type={self.provider_type})>"

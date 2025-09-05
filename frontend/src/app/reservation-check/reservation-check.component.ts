@@ -38,7 +38,7 @@ export class ReservationCheckComponent implements OnInit {
   goToCheckIn() {
     var _ = this;
 
-    this.reservationService.checkReservationById(Number(this.reservationId)).subscribe({
+    this.reservationService.checkReservationById((this.reservationId)).subscribe({
       next: (val) => {
         if (val && val.id_reference) {
           _.messageService.add({

@@ -1,13 +1,168 @@
-<div class="card p-4 max-w-md mx-auto">
-    <h2 class="mb-4">{{ 'settings-title' | transloco }}</h2>
-    <div class="field mb-4">
-        <label for="langSelect" class="font-semibold mb-2">{{ 'select-language-label' | transloco }}</label>
-        <p-dropdown id="langSelect" [options]="languages" [(ngModel)]="selectedLang" optionLabel="label"
-            optionValue="value" [placeholder]="'select-language-placeholder' | transloco" styleClass="w-full">
-        </p-dropdown>
+<div class="max-w-4xl mx-auto p-4">
+    <h2 class="mb-6">{{ 'settings-title' | transloco }}</h2>
+
+    <!-- Language Settings -->
+    <div class="card p-4 mb-2">
+        <h3 class="mb-4">{{ 'language-settings-title' | transloco }}</h3>
+        <div class="field mb-4">
+            <label for="langSelect" class="font-semibold mb-2">{{ 'select-language-label' | transloco }}</label>
+            <p-dropdown id="langSelect" [options]="languages" [(ngModel)]="selectedLang" optionLabel="label"
+                optionValue="value" [placeholder]="'select-language-placeholder' | transloco" styleClass="w-full">
+            </p-dropdown>
+        </div>
+        <div class="flex justify-end">
+            <p-button type="button" [label]="'save-btn' | transloco" (onClick)="saveLanguage()" />
+        </div>
+        <p *ngIf="saved" class="text-green-600 mt-3">{{ 'settings-saved-message' | transloco }}</p>
     </div>
-    <div class="flex justify-end">
-        <p-button type="button" [label]="'save-btn' | transloco" (onClick)="saveLanguage()" />
+
+    <!-- Email Settings -->
+    <div class="card p-4 border-top-1 surface-border">
+        <div class="flex align-items-center gap-2 mb-4 ">
+            <i class="pi pi-envelope text-2xl text-primary"></i>
+            <h3 class="mb-0 mt-0">{{ 'email-configuration-title' | transloco }}</h3>
+        </div>
+
+        <div class="p-fluid p-formgrid grid" [formGroup]="emailForm">
+            <!-- Provider Preset Section -->
+            <div class="col-12">
+                <div class="field">
+                    <label for="preset" class="font-semibold">{{ 'provider-preset-label' | transloco }}</label>
+                    <p-dropdown id="preset" #presetSel [options]="presets" optionLabel="label" optionValue="key"
+                        [placeholder]="'provider-preset-placeholder' | transloco" formControlName="preset"
+                        (onChange)="applyEmailPreset(presetSel.value)" styleClass="w-full">
+                    </p-dropdown>
+                    <small class="text-600">{{ 'provider-preset-help' | transloco }}</small>
+                </div>
+            </div>
+
+            <!-- Provider Type -->
+            <div class="col-12 md:col-6">
+                <div class="field">
+                    <label for="provider_type" class="font-semibold">{{ 'provider-type-label' | transloco }}</label>
+                    <input pInputText id="provider_type" type="text" formControlName="provider_type"
+                        [placeholder]="'provider-type-placeholder' | transloco">
+                </div>
+            </div>
+
+            <!-- SMTP Server -->
+            <div class="col-12 md:col-6">
+                <div class="field">
+                    <label for="mail_server" class="font-semibold">{{ 'smtp-server-label' | transloco }}</label>
+                    <input pInputText id="mail_server" type="text" formControlName="mail_server"
+                        [placeholder]="'smtp-server-placeholder' | transloco">
+                </div>
+            </div>
+
+            <!-- Port and Security -->
+            <div class="col-12 md:col-3">
+                <div class="field">
+                    <label for="mail_port" class="font-semibold">{{ 'port-label' | transloco }}</label>
+                    <input pInputText id="mail_port" type="number" formControlName="mail_port"
+                        [placeholder]="'port-placeholder' | transloco">
+                </div>
+            </div>
+
+            <div class="col-12 md:col-9">
+                <div class="field">
+                    <label class="font-semibold">{{ 'security-label' | transloco }}</label>
+                    <div class="flex gap-3 align-items-center mt-2">
+                        <div class="flex align-items-center">
+                            <p-checkbox formControlName="mail_use_tls" [binary]="true" inputId="tls"></p-checkbox>
+                            <label for="tls" class="ml-2">{{ 'tls-label' | transloco }}</label>
+                        </div>
+                        <div class="flex align-items-center">
+                            <p-checkbox formControlName="mail_use_ssl" [binary]="true" inputId="ssl"></p-checkbox>
+                            <label for="ssl" class="ml-2">{{ 'ssl-label' | transloco }}</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Credentials -->
+            <div class="col-12 md:col-6">
+                <div class="field">
+                    <label for="mail_username" class="font-semibold">{{ 'username-email-label' | transloco }}</label>
+                    <input pInputText id="mail_username" type="email" formControlName="mail_username"
+                        [placeholder]="'username-email-placeholder' | transloco">
+                </div>
+            </div>
+
+            <div class="col-12 md:col-6">
+                <div class="field">
+                    <label for="mail_password" class="font-semibold">{{ 'password-app-password-label' | transloco
+                        }}</label>
+                    <p-password id="mail_password" formControlName="mail_password"
+                        [placeholder]="'password-placeholder' | transloco" [toggleMask]="true" styleClass="w-full"
+                        inputStyleClass="w-full" [feedback]="false">
+                    </p-password>
+                    <small class="text-600" [innerHTML]="'password-help' | transloco"></small>
+                </div>
+            </div>
+
+            <!-- Sender Information -->
+            <div class="col-12 md:col-6">
+                <div class="field">
+                    <label for="mail_default_sender_name" class="font-semibold">{{ 'sender-name-label' | transloco
+                        }}</label>
+                    <input pInputText id="mail_default_sender_name" type="text"
+                        formControlName="mail_default_sender_name"
+                        [placeholder]="'sender-name-placeholder' | transloco">
+                    <small class="text-600">{{ 'sender-name-help' | transloco }}</small>
+                </div>
+            </div>
+
+            <div class="col-12 md:col-6">
+                <div class="field">
+                    <label for="mail_default_sender_email" class="font-semibold">{{ 'sender-email-label' | transloco
+                        }}</label>
+                    <input pInputText id="mail_default_sender_email" type="email"
+                        formControlName="mail_default_sender_email"
+                        [placeholder]="'sender-email-placeholder' | transloco">
+                </div>
+            </div>
+
+            <!-- Provider Config Section -->
+            <div class="col-12" formGroupName="provider_config" *ngIf="provider_config">
+                <div class="border-top-1 surface-border pt-4 mt-4">
+                    <div class="flex align-items-center gap-2 mb-3">
+                        <i class="pi pi-cog text-lg text-primary"></i>
+                        <h4 class="mb-0">{{ 'provider-config-title' | transloco }}</h4>
+                    </div>
+                    <small class="text-600 mb-3 block">{{ 'provider-config-help' | transloco }}</small>
+
+                    <div class="grid">
+                        <div class="col-12 md:col-6">
+                            <div class="field">
+                                <label for="domain" class="font-semibold">{{ 'domain-label' | transloco }}</label>
+                                <input pInputText id="domain" type="text" formControlName="domain"
+                                    [placeholder]="'domain-placeholder' | transloco">
+                            </div>
+                        </div>
+                        <div class="col-12 md:col-6">
+                            <div class="field">
+                                <label for="api_key" class="font-semibold">{{ 'api-key-label' | transloco }}</label>
+                                <input pInputText id="api_key" type="text" formControlName="api_key"
+                                    [placeholder]="'api-key-placeholder' | transloco">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="col-12 border-top-1 surface-border">
+                <div class="flex gap-2 justify-content-end mt-4 pt-3 ">
+                    <p-button type="button" [label]="'test-configuration-btn' | transloco" icon="pi pi-send"
+                        (onClick)="testEmailConfig()" styleClass="p-button-outlined p-button-secondary">
+                    </p-button>
+                    <p-button type="button" [label]="'save-configuration-btn' | transloco" icon="pi pi-save"
+                        (onClick)="saveEmailConfig()" styleClass="p-button-success">
+                    </p-button>
+                </div>
+            </div>
+        </div>
     </div>
-    <p *ngIf="saved" class="text-green-600 mt-3">{{ 'settings-saved-message' | transloco }}</p>
 </div>
+
+<p-toast></p-toast>
