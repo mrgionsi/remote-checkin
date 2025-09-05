@@ -90,7 +90,7 @@
                     <!-- Show status as text when not in edit mode -->
                     <div *ngIf="!editMode" class="status-display">
                         <div class="flex align-items-center p-2 border-round"
-                            [ngClass]="'status-' + (reservation_status?.value || 'pending').toLowerCase().replace(' ', '-')">
+                            [ngClass]="statusClass(reservation_status?.value || 'pending')">
                             <i [class]="reservation_status?.icon || 'pi pi-clock'" class="mr-2"></i>
                             <span class="font-medium">{{ reservation_status?.label || 'Pending' | transloco }}</span>
                         </div>

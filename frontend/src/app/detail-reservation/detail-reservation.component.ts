@@ -442,4 +442,19 @@ export class DetailReservationComponent implements OnInit {
       }
     });
   }
+
+  /**
+   * Generate a CSS class name for status values.
+   * Converts the status value to lowercase, trims whitespace, and replaces all whitespace with hyphens.
+   * 
+   * @param value - The status value to convert to a CSS class
+   * @returns A CSS class string in the format 'status-{normalized-value}'
+   */
+  statusClass(value: string): string {
+    if (!value) {
+      return 'status-pending';
+    }
+    const normalized = value.toLowerCase().trim().replace(/\s+/g, '-');
+    return `status-${normalized}`;
+  }
 }
