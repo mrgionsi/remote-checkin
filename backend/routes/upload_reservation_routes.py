@@ -22,7 +22,20 @@ UPLOAD_FOLDER = 'uploads/'
 @upload_bp.route('/upload', methods=['POST'])
 def upload_file():
     """
-    Upload and validate identity documents for a reservation.
+    Handle POST uploads of identity documents for a reservation.
+    
+    Accepts three image files in the request.files ('frontimage', 'backimage', 'selfie') and form fields including reservationId, name, surname, birthday, street, city, province, cap, telephone, document_type, document_number, and cf. Saves files under uploads/<reservationId>, runs OCR validation on front/back images, creates or updates the client record, links the client to the reservation, and returns a JSON response with saved filenames, per-file OCR validation results, client summary, and reservation summary.
+    
+    Side effects:
+    - Persists uploaded files to disk.
+    - Creates/updates client and links it to the reservation in the database.
+    - Attempts to send an admin notification email (best-effort; failures do not affect the main operation).
+    
+    Responses:
+    - 200: JSON with message, files, validation, client, and reservation data on success.
+    - 400: Missing/invalid files or required form fields (BadRequest).
+    - 404: Reservation not found or missing files referenced on disk.
+    - 500: Internal server error for unexpected failures.
     """
     try:
         # Required files and form fields

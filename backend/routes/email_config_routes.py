@@ -82,7 +82,18 @@ EMAIL_PROVIDER_PRESETS = {
 
 
 def get_encryption_key():
-    """Get or create encryption key for email passwords."""
+    """
+    Return a Fernet-compatible encryption key from app config or environment, creating and caching one if needed.
+    
+    Checks current_app.config['EMAIL_ENCRYPTION_KEY'] first. If missing, attempts to read the string value from the EMAIL_ENCRYPTION_KEY environment variable (interpreted as a base64-encoded key and encoded to bytes). If neither is present, generates a new key with Fernet.generate_key() and stores it in current_app.config['EMAIL_ENCRYPTION_KEY'].
+    
+    Returns:
+        bytes: A base64-url-safe 32-byte key suitable for cryptography.fernet.Fernet.
+    
+    Notes:
+        - The key is cached in the Flask app config for the process lifetime.
+        - Generating a new key will make previously encrypted passwords unreadable unless the original key is preserved and reused (e.g., via the EMAIL_ENCRYPTION_KEY environment variable).
+    """
     # First try to get from Flask app config (in-memory)
     key = current_app.config.get('EMAIL_ENCRYPTION_KEY')
 
@@ -107,7 +118,22 @@ def get_encryption_key():
 
 
 def encrypt_password(password: str) -> str:
-    """Encrypt password for storage."""
+    """
+    Encrypt a plaintext password for safe storage.
+    
+    If `password` is falsy (empty or None) this returns an empty string. Otherwise the function
+    derives the Fernet key via `get_encryption_key()` and returns the URL-safe base64-encoded
+    encrypted token as a str.
+    
+    Parameters:
+        password (str): Plaintext password to encrypt.
+    
+    Returns:
+        str: Encrypted password token (URL-safe base64 string), or an empty string when input is falsy.
+    
+    Raises:
+        Exception: Re-raises any exception encountered during key retrieval or encryption.
+    """
     if not password:
         logger.warning("Password is empty or None")
         return ""
@@ -124,7 +150,24 @@ def encrypt_password(password: str) -> str:
 
 
 def decrypt_password(encrypted_password: str) -> str:
-    """Decrypt password for use."""
+    """
+    Decrypt a Fernet-encrypted password token and return the plaintext password.
+    
+    Decryption expects `encrypted_password` to be a non-empty URL-safe base64 Fernet token
+    as produced by `encrypt_password` (Fernet.encrypt()). The function returns the
+    original plaintext password string.
+    
+    Parameters:
+        encrypted_password (str): Fernet token string to decrypt.
+    
+    Returns:
+        str: Decrypted plaintext password.
+    
+    Raises:
+        ValueError: If `encrypted_password` is empty or None.
+        cryptography.fernet.InvalidToken: If the token is invalid or tampered with.
+        Exception: Re-raises other unexpected exceptions encountered during decryption.
+    """
     if not encrypted_password:
         raise ValueError("Encrypted password is empty or None")
 
@@ -149,13 +192,20 @@ def decrypt_password(encrypted_password: str) -> str:
 @jwt_required()
 def get_email_config():
     """
-    Get current user's email configuration.
-
+    Return the current user's active EmailConfig as JSON.
+    
+    By default returns a representation with the password masked. If the query parameter
+    `include_password=true` is provided, this attempts to decrypt and include the
+    plaintext password; if decryption fails the returned `mail_password` will be an
+    empty string. If no active configuration exists a 404 response is returned.
+    
     Query Parameters:
-        include_password (bool): If true, returns decrypted password. Default: false.
-
+        include_password (bool): When true, include the decrypted `mail_password`
+            in the response (default: false).
+    
     Returns:
-        JSON response with email configuration or 404 if not found.
+        Flask JSON response containing the email configuration or an error payload
+        with an appropriate HTTP status code (404 if not found, 500 on server error).
     """
     current_user_id = get_jwt_identity()
     session = SessionLocal()
@@ -200,10 +250,19 @@ def get_email_config():
 @jwt_required()
 def create_or_update_email_config():
     """
-    Create or update current user's email configuration.
-
+    Create or update the current user's email configuration.
+    
+    Validates required fields (mail_server, mail_port, mail_username, mail_password, mail_default_sender_email), encrypts the provided password, and persists the configuration to the database for the authenticated user. If an existing EmailConfig exists for the user it is updated; otherwise a new record is created and activated. Optional fields supported: mail_use_tls (defaults True), mail_use_ssl (defaults False), mail_default_sender_name, provider_type (defaults "smtp"), and provider_config (stored as JSON).
+    
     Returns:
-        JSON response with success message or error.
+        A Flask JSON response containing either:
+        - On success: {"message": "Email configuration saved successfully", "config": <config_dict>} (HTTP 200)
+        - On validation or integrity error: {"error": <message>} (HTTP 400)
+        - On unexpected failure: {"error": "Failed to save email configuration"} (HTTP 500)
+    
+    Side effects:
+        - Encrypts mail_password via encrypt_password before saving.
+        - Commits changes to the database session (or rolls back on errors).
     """
     current_user_id = get_jwt_identity()
     data = request.get_json()
@@ -263,10 +322,9 @@ def create_or_update_email_config():
 @jwt_required()
 def test_email_config():
     """
-    Test email configuration by sending a test email.
-
-    Returns:
-        JSON response with test result.
+    Send a test reservation confirmation email using the current user's active email configuration.
+    
+    Looks for `test_email` in the JSON body or query string, loads the authenticated user's active EmailConfig from the database, constructs an EmailService (using the app encryption key) and sends a reservation-confirmation style test message. Returns JSON with a success message and the underlying service result on success (HTTP 200), a 400 when `test_email` is missing or sending fails, a 404 if no active email configuration exists, and a 500 for unexpected errors.
     """
     current_user_id = get_jwt_identity()
     data = request.get_json()
@@ -338,13 +396,13 @@ def get_email_presets():
 @jwt_required()
 def get_email_preset(preset_name):
     """
-    Get specific email provider preset.
-
-    Args:
-        preset_name: Name of the preset (gmail, outlook, yahoo, etc.)
-
+    Return the email provider preset configuration for a given preset name.
+    
+    Parameters:
+        preset_name (str): Preset identifier (e.g., 'gmail', 'outlook', 'yahoo', 'mailgun', 'sendgrid', 'custom').
+    
     Returns:
-        JSON response with preset configuration.
+        Flask Response: JSON payload with the preset configuration on success, or a 400 JSON error response if the preset_name is invalid.
     """
     if preset_name not in EMAIL_PROVIDER_PRESETS:
         return jsonify({"error": "Invalid preset name"}), 400
@@ -356,10 +414,15 @@ def get_email_preset(preset_name):
 @jwt_required()
 def delete_email_config():
     """
-    Delete current user's email configuration.
-
+    Delete the current user's email configuration.
+    
+    Removes the authenticated user's EmailConfig record from the database. Requires a valid JWT identity (the function reads the current user via get_jwt_identity()).
+    
     Returns:
-        JSON response with success message.
+        A Flask JSON response and HTTP status code:
+        - 200: {"message": "Email configuration deleted successfully"} on successful deletion.
+        - 404: {"error": "No email configuration found"} if no config exists for the user.
+        - 500: {"error": "Failed to delete email configuration"} on unexpected server/database errors.
     """
     current_user_id = get_jwt_identity()
     session = SessionLocal()
@@ -389,10 +452,25 @@ def delete_email_config():
 @jwt_required()
 def migrate_to_external_provider():
     """
-    Migrate from SMTP to external email provider (Mailgun, SendGrid, etc.).
-
+    Migrate the current user's SMTP configuration to an external email provider (e.g., Mailgun or SendGrid).
+    
+    Expects a JSON body with:
+    - provider_type (str, required): target provider name. Supported values: "mailgun", "sendgrid".
+    - For "mailgun": optional "domain" and "api_key".
+    - For "sendgrid": optional "api_key".
+    
+    Behavior:
+    - Loads the authenticated user's active EmailConfig and updates its provider_type.
+    - Applies provider-specific SMTP defaults and stores provider-specific settings in EmailConfig.provider_config (JSON string).
+      - mailgun: sets mail_server to "smtp.mailgun.org", mail_port to 587, TLS enabled, provider_config contains {"domain": ..., "api_key": ...}.
+      - sendgrid: sets mail_server to "smtp.sendgrid.net", mail_port to 587, TLS enabled, provider_config contains {"api_key": ...}.
+    - Commits the updated EmailConfig and returns the updated config dictionary.
+    
     Returns:
-        JSON response with migration result.
+    - 200: JSON { "message": "...", "config": <config.to_dict()> } on success.
+    - 400: JSON error when required input (provider_type) is missing or invalid.
+    - 404: JSON error when no existing email configuration is found for the user.
+    - 500: JSON error on unexpected failures (transaction rolled back).
     """
     current_user_id = get_jwt_identity()
     data = request.get_json()

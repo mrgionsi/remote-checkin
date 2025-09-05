@@ -25,11 +25,18 @@ admin_bp = Blueprint("admin", __name__, url_prefix="/api/v1")
 @admin_bp.route("/admin/login", methods=["POST"])
 def admin_login():
     """
-    Authenticates an admin user by verifying credentials and role, returning a JWT token and associated structures on success.
-
-    Returns:
-        JSON response with JWT access token, user information, and associated structures if authentication is successful.
-        Returns HTTP 400 if username or password is missing, 401 if credentials are invalid, 403 if the user is not an admin, or 500 on server error.
+    Authenticate an admin user and return a JWT access token with the user's profile and associated structures.
+    
+    Expects a JSON body with `username` and `password`. On success returns HTTP 200 with a JSON object containing:
+    - `access_token`: JWT (expires in 2 hours) whose identity is the user ID and includes `username` and `role` claims.
+    - `user`: object with `id`, `username`, `name`, `surname`, `email`, `telephone`, `structures` (list of {id, name}), and `role`.
+    
+    Possible responses:
+    - 200: Authentication successful.
+    - 400: Missing `username` or `password`.
+    - 401: Invalid credentials.
+    - 403: Authenticated user does not have an admin role.
+    - 500: Server error.
     """
     data = request.get_json()
     username = data.get("username")
@@ -92,12 +99,9 @@ def admin_login():
 @admin_bp.route("/admin/create", methods=["POST"])
 def create_admin_user():
     """
-    Creates a new admin user with the specified username, password, and role.
-
-    Accepts a JSON request body containing the new user's credentials and optional profile information. Returns a JSON response with the created user's details on success, or an error message if required fields are missing or the username already exists.
-
-    Returns:
-        Response: JSON with user info and HTTP 201 on success, or error message with appropriate status code on failure.
+    Create a new admin user from a JSON request.
+    
+    Expects a JSON body with required fields: `username`, `password`, and `id_role`; optional fields: `name`, `surname`, `email`, and `telephone`. On success inserts a new User record (password is stored hashed) and returns HTTP 201 with the created user's data (id, username, name, surname, email, telephone, id_role). Returns HTTP 400 when required fields are missing or the username already exists, and HTTP 500 for unexpected server errors.
     """
     data = request.get_json()
     username = data.get("username")
@@ -154,11 +158,24 @@ def create_admin_user():
 @jwt_required()
 def get_admin_info():
     """
-    Retrieves the authenticated admin user's profile and associated structures.
-
+    Return the authenticated admin user's profile and associated structures.
+    
+    Requires a valid JWT (identity is the user id). Queries the database for the user and their AdminStructure->Structure associations and returns a JSON response with the user's fields and a list of structures.
+    
     Returns:
-        200: JSON object containing the user's ID, username, name, surname, role, and a list of associated structures.
-        404: If the user is not found.
+        tuple: (Flask Response, int) JSON payload and HTTP status code.
+            Success (200) JSON structure:
+                {
+                    "id": int,
+                    "username": str,
+                    "name": str | None,
+                    "surname": str | None,
+                    "email": str | None,
+                    "telephone": str | None,
+                    "role": str,
+                    "structures": [{"id": int, "name": str}, ...]
+                }
+            Not found (404): {"error": "Utente non trovato"}
     """
     db_session = SessionLocal()
     try:
