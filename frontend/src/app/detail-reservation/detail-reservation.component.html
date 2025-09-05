@@ -1,6 +1,11 @@
 <p-toast></p-toast>
 
-<p-card class="mb-4">
+<div *ngIf="loading" class="flex justify-content-center align-items-center" style="height: 200px;">
+    <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+    <span class="ml-2">Loading reservation details...</span>
+</div>
+
+<p-card class="mb-4" *ngIf="!loading">
     <ng-template pTemplate="title">
         <i class="pi pi-calendar"></i> {{ 'reservation-details-title' | transloco }}
     </ng-template>
@@ -62,13 +67,46 @@
                         formControlName="name_reference" [placeholder]="'guest-placeholder' | transloco" />
                 </div>
 
+                <!-- Email -->
+                <div [formGroup]="form" class="field col-12 md:col-6">
+                    <label for="email" class="font-bold text-600">{{ 'email-label' | transloco }}</label>
+                    <div *ngIf="!editMode">{{ reservation_details?.email }}</div>
+                    <input *ngIf="editMode" type="email" id="email" class="p-inputtext w-full" formControlName="email"
+                        [placeholder]="'email-placeholder' | transloco" />
+                </div>
+
+                <!-- Telephone -->
+                <div [formGroup]="form" class="field col-12 md:col-6">
+                    <label for="telephone" class="font-bold text-600">{{ 'telephone-label' | transloco }}</label>
+                    <div *ngIf="!editMode">{{ reservation_details?.telephone }}</div>
+                    <input *ngIf="editMode" type="tel" id="telephone" class="p-inputtext w-full"
+                        formControlName="telephone" [placeholder]="'telephone-placeholder' | transloco" />
+                </div>
+
                 <!-- Status -->
                 <div class="field col-12 md:col-6">
                     <label for="status_select" class="font-bold text-600 mb-2">{{ 'status-label' | transloco }}</label>
-                    <p-select id="status_select" [options]="statusOptions" [(ngModel)]="reservation_status"
-                        optionLabel="label" dataKey="value" (onChange)="onStatusChange($event.value)"
-                        styleClass="w-full" [showClear]="false" [placeholder]="'status-placeholder' | transloco">
+
+                    <!-- Show status as text when not in edit mode -->
+                    <div *ngIf="!editMode" class="status-display">
+                        <div class="flex align-items-center p-2 border-round"
+                            [ngClass]="statusClass(reservation_status?.value || 'pending')">
+                            <i [class]="reservation_status?.icon || 'pi pi-clock'" class="mr-2"></i>
+                            <span class="font-medium">{{ reservation_status?.label || 'Pending' | transloco }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Show status select box when in edit mode -->
+                    <p-select *ngIf="editMode" id="status_select" [options]="statusOptions"
+                        [(ngModel)]="reservation_status" optionLabel="label" dataKey="value" styleClass="w-full"
+                        [showClear]="false" [placeholder]="'status-placeholder' | transloco">
                         <ng-template pTemplate="item" let-option>
+                            <div class="flex align-items-center">
+                                <i [class]="option.icon" class="mr-2"></i>
+                                {{ option.label | transloco }}
+                            </div>
+                        </ng-template>
+                        <ng-template pTemplate="selectedItem" let-option>
                             <div class="flex align-items-center">
                                 <i [class]="option.icon" class="mr-2"></i>
                                 {{ option.label | transloco }}
@@ -88,7 +126,8 @@
 
             <p-button *ngIf="editMode" [label]="'save-btn' | transloco" icon="pi pi-check"
                 class="p-button-sm text-white" (click)="saveReservation()" (keydown.enter)="saveReservation()"
-                (keydown.space)="saveReservation()" severity="success" [disabled]="form.invalid">
+                (keydown.space)="saveReservation()" severity="success" [disabled]="form.invalid || saving"
+                [loading]="saving">
             </p-button>
 
             <p-button *ngIf="editMode" [label]="'cancel-btn' | transloco" icon="pi pi-times"

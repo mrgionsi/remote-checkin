@@ -10,3 +10,43 @@
     font-size: small;
     color: red;
 }
+
+/* Custom wide input for reservation number */
+.wide-input {
+    width: 100% !important;
+    min-width: 400px !important;
+    max-width: 600px !important;
+}
+
+/* Custom wide input for PrimeNG datepicker */
+.wide-input .p-inputtext {
+    width: 100% !important;
+    min-width: 400px !important;
+    max-width: 600px !important;
+}
+
+/* Alternative approach for datepicker */
+.p-datepicker.wide-input {
+    width: 100% !important;
+    min-width: 400px !important;
+    max-width: 600px !important;
+}
+
+.p-datepicker.wide-input .p-inputtext {
+    width: 100% !important;
+    min-width: 400px !important;
+    max-width: 600px !important;
+}
+
+/* More specific targeting for datepicker */
+:host ::ng-deep .wide-input.p-datepicker {
+    width: 100% !important;
+    min-width: 400px !important;
+    max-width: 600px !important;
+}
+
+:host ::ng-deep .wide-input.p-datepicker .p-inputtext {
+    width: 100% !important;
+    min-width: 400px !important;
+    max-width: 600px !important;
+}

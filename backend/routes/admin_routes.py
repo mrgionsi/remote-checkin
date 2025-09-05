@@ -15,21 +15,51 @@ from datetime import timedelta
 import logging
 from flask import Blueprint, request, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request, get_jwt
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from models import User, AdminStructure, Structure
 from database import SessionLocal
 
 # Blueprint setup
 admin_bp = Blueprint("admin", __name__, url_prefix="/api/v1")
 
+def verify_admin_access():
+    """
+    Verify JWT authentication and admin role access.
+    
+    Returns:
+        tuple: (error_response, error_code) if verification fails, (None, None) if successful
+    """
+    try:
+        verify_jwt_in_request()
+    except Exception:
+        return jsonify({"error": "Token di autenticazione mancante o non valido"}), 401
+
+    try:
+        claims = get_jwt()
+        user_role = claims.get("role", "").lower()
+        if user_role not in ["admin", "superadmin", "administrator"]:
+            return jsonify({"error": "Permessi insufficienti. È richiesto un ruolo amministratore"}), 403
+    except Exception:
+        return jsonify({"error": "Errore durante la verifica dei permessi"}), 403
+
+    return None, None
+
 @admin_bp.route("/admin/login", methods=["POST"])
 def admin_login():
     """
-    Authenticates an admin user by verifying credentials and role, returning a JWT token and associated structures on success.
+    Authenticate an admin user and return a JWT access token with the user's profile and associated structures.
     
-    Returns:
-        JSON response with JWT access token, user information, and associated structures if authentication is successful.
-        Returns HTTP 400 if username or password is missing, 401 if credentials are invalid, 403 if the user is not an admin, or 500 on server error.
+    Expects a JSON body with `username` and `password`. On success returns HTTP 200 with a JSON object containing:
+    - `access_token`: JWT (expires in 2 hours) whose identity is the user ID and includes `username` and `role` claims.
+    - `user`: object with `id`, `username`, `name`, `surname`, `email`, `telephone`, `structures` (list of {id, name}), and `role`.
+    
+    Possible responses:
+    - 200: Authentication successful.
+    - 400: Missing `username` or `password`.
+    - 401: Invalid credentials.
+    - 403: Authenticated user does not have an admin role.
+    - 500: Server error.
     """
     data = request.get_json()
     username = data.get("username")
@@ -76,6 +106,8 @@ def admin_login():
                 "username": user.username,
                 "name": user.name,
                 "surname": user.surname,
+                "email": user.email,
+                "telephone": user.telephone,
                 "structures": structures_list,
                 "role": user.role.name
             }
@@ -87,30 +119,35 @@ def admin_login():
     finally:
         db_session.close()
 
+#pylint: disable=W0703,R0911
 @admin_bp.route("/admin/create", methods=["POST"])
 def create_admin_user():
     """
-    Creates a new admin user with the specified username, password, and role.
+    Create a new admin user from a JSON request.
     
-    Accepts a JSON request body containing the new user's credentials and optional profile information. Returns a JSON response with the created user's details on success, or an error message if required fields are missing or the username already exists.
-    
-    Returns:
-        Response: JSON with user info and HTTP 201 on success, or error message with appropriate status code on failure.
+    Requires JWT authentication and admin role. Expects a JSON body with required fields: `username`, `password`, and `id_role`; optional fields: `name`, `surname`, `email`, and `telephone`. On success inserts a new User record (password is stored hashed) and returns HTTP 201 with the created user's data (id, username, name, surname, email, telephone, id_role). Returns HTTP 400 when required fields are missing or the username already exists, HTTP 401 for missing/invalid JWT, HTTP 403 for insufficient permissions, and HTTP 500 for unexpected server errors.
     """
+    # Verify JWT authentication and admin role
+    error_response, error_code = verify_admin_access()
+    if error_response:
+        return error_response, error_code
+
     data = request.get_json()
     username = data.get("username")
     password = data.get("password")
     name = data.get("name")
     surname = data.get("surname")
+    email = data.get("email")
+    telephone = data.get("telephone")
     id_role = data.get("id_role")
 
     if not username or not password or not id_role:
-        return jsonify({"error": "username, password e id_role sono obbligatori"}), 400
+        return jsonify({"error": "username, password and id_role are required"}), 400
 
     db_session = SessionLocal()
     try:
         if db_session.query(User).filter_by(username=username).first():
-            return jsonify({"error": "Username gia' esistente"}), 400
+            return jsonify({"error": "Username already exists"}), 400
 
         hashed_password = generate_password_hash(password)
 
@@ -119,25 +156,38 @@ def create_admin_user():
             password=hashed_password,
             name=name,
             surname=surname,
+            email=email,
+            telephone=telephone,
             id_role=id_role
         )
         db_session.add(new_user)
         db_session.commit()
 
         return jsonify({
-            "message": "Utente creato con successo",
+            "message": "User created successfully",
             "user": {
                 "id": new_user.id,
                 "username": new_user.username,
                 "name": new_user.name,
                 "surname": new_user.surname,
+                "email": new_user.email,
+                "telephone": new_user.telephone,
                 "id_role": new_user.id_role
             }
         }), 201
-
-    except Exception as e:
-        logging.error("Errore durante la creazione utente: %s", e)
-        return jsonify({"error": f"Errore durante la creazione utente: {str(e)}"}), 500
+#pylint: disable=W0703,R0911
+    except IntegrityError:
+        db_session.rollback()
+        logging.exception("Database integrity error during user creation")
+        return jsonify({"error": "User creation failed due to data constraint violation"}), 400
+    except SQLAlchemyError:
+        db_session.rollback()
+        logging.exception("Database error during user creation")
+        return jsonify({"error": "An error occurred while creating the user"}), 500
+    except Exception:
+        db_session.rollback()
+        logging.exception("Unexpected error during user creation")
+        return jsonify({"error": "An unexpected error occurred"}), 500
     finally:
         db_session.close()
 
@@ -145,18 +195,41 @@ def create_admin_user():
 @jwt_required()
 def get_admin_info():
     """
-    Retrieves the authenticated admin user's profile and associated structures.
+    Return the authenticated admin user's profile and associated structures.
+    
+    Admin-only access (requires role: admin). Requires a valid JWT (identity is the user id). Queries the database for the user and their AdminStructure->Structure associations and returns a JSON response with the user's fields and a list of structures.
     
     Returns:
-        200: JSON object containing the user's ID, username, name, surname, role, and a list of associated structures.
-        404: If the user is not found.
+        tuple: (Flask Response, int) JSON payload and HTTP status code.
+            Success (200) JSON structure:
+                {
+                    "id": int,
+                    "username": str,
+                    "name": str | None,
+                    "surname": str | None,
+                    "email": str | None,
+                    "telephone": str | None,
+                    "role": str,
+                    "structures": [{"id": int, "name": str}, ...]
+                }
+            Access denied (403): {"error": "Access denied"}
+            Not found (404): {"error": "User not found"}
     """
+    # Check admin role before proceeding
+    try:
+        claims = get_jwt()
+        user_role = claims.get("role", "").lower()
+        if user_role != "admin":
+            return jsonify({"error": "Access denied"}), 403
+    except Exception:
+        return jsonify({"error": "Access denied"}), 403
+
     db_session = SessionLocal()
     try:
         user_id = get_jwt_identity()
         user = db_session.query(User).filter_by(id=int(user_id)).first()
         if not user:
-            return jsonify({"error": "Utente non trovato"}), 404
+            return jsonify({"error": "User not found"}), 404
 
         structures = (
             db_session.query(AdminStructure.id_structure, Structure.name)
@@ -171,6 +244,8 @@ def get_admin_info():
             "username": user.username,
             "name": user.name,
             "surname": user.surname,
+            "email": user.email,
+            "telephone": user.telephone,
             "role": user.role.name,
             "structures": structures_list
         }), 200

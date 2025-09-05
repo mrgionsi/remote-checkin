@@ -8,13 +8,19 @@ Functions:
 """
 
 
-#pylint: disable=C0301,E0401,R0914,W0718,W0612
+#pylint: disable=C0301,E0401,R0914,W0718,W0612,E0611,R0912,R0915,R1702
 import os
+import traceback
+
 from flask import Blueprint, request, jsonify
 from werkzeug.exceptions import BadRequest
+
 from utils.file_utils import allowed_file, sanitize_filename, save_file
 from utils.ocr_utils import validate_document
 from utils.db_utils import get_reservation_by_id, get_client_by_cf, add_or_update_client, link_client_to_reservation
+from utils.email_utils import get_admin_email_config
+from email_handler import EmailService
+from routes.email_config_routes import get_encryption_key
 
 upload_bp = Blueprint('upload', __name__, url_prefix="/api/v1")
 UPLOAD_FOLDER = 'uploads/'
@@ -22,13 +28,26 @@ UPLOAD_FOLDER = 'uploads/'
 @upload_bp.route('/upload', methods=['POST'])
 def upload_file():
     """
-    Upload and validate identity documents for a reservation.
+    Handle POST uploads of identity documents for a reservation.
+    
+    Accepts three image files in the request.files ('frontimage', 'backimage', 'selfie') and form fields including reservationId, name, surname, birthday, street, city, province, cap, telephone, document_type, document_number, and cf. Saves files under uploads/<reservationId>, runs OCR validation on front/back images, creates or updates the client record, links the client to the reservation, and returns a JSON response with saved filenames, per-file OCR validation results, client summary, and reservation summary.
+    
+    Side effects:
+    - Persists uploaded files to disk.
+    - Creates/updates client and links it to the reservation in the database.
+    - Attempts to send an admin notification email (best-effort; failures do not affect the main operation).
+    
+    Responses:
+    - 200: JSON with message, files, validation, client, and reservation data on success.
+    - 400: Missing/invalid files or required form fields (BadRequest).
+    - 404: Reservation not found or missing files referenced on disk.
+    - 500: Internal server error for unexpected failures.
     """
     try:
         # Required files and form fields
         required_files = ['frontimage', 'backimage', 'selfie']
         required_fields = ['reservationId', 'name', 'surname', 'birthday', 'street',
-                           'city', 'province', 'cap', 'telephone', 'document_type', 'document_number', 'cf']        
+                           'city', 'province', 'cap', 'telephone', 'document_type', 'document_number', 'cf']
 
         # Check if required files are in request
         if any(file_key not in request.files for file_key in required_files):
@@ -81,6 +100,59 @@ def upload_file():
         client = get_client_by_cf(cf)
         client = add_or_update_client(form_data, client)
         link_client_to_reservation(reservation.id, client.id)
+
+        # Send admin notification about completed check-in
+        try:
+            # Get admin email configuration
+            email_config, admin_user = get_admin_email_config(reservation)
+
+            if email_config:
+                # Prepare check-in data for admin notification
+                checkin_data = {
+                    'reservation_number': reservation.id_reference,
+                    'guest_name': reservation.name_reference,
+                    'start_date': reservation.start_date.strftime('%Y-%m-%d') if reservation.start_date else 'N/A',
+                    'end_date': reservation.end_date.strftime('%Y-%m-%d') if reservation.end_date else 'N/A',
+                    'room_name': reservation.room.name if reservation.room else 'N/A',
+                    'client_name': client.name,
+                    'client_surname': client.surname,
+                    'client_email': form_data.get('email', 'N/A'),
+                    'client_phone': client.telephone,
+                    'document_type': client.document_type,
+                    'document_number': client.document_number,
+                    'has_front_image': 'frontimage' in files,
+                    'has_back_image': 'backimage' in files,
+                    'has_selfie': 'selfie' in files
+                }
+
+                # Send admin notification
+                encryption_key = get_encryption_key()
+                email_service = EmailService(config=email_config, encryption_key=encryption_key)
+
+                # Use admin's email from user table or email config default sender
+                admin_email = None
+                if hasattr(admin_user, 'email') and admin_user.email:
+                    admin_email = admin_user.email
+                elif email_config.mail_default_sender_email:
+                    admin_email = email_config.mail_default_sender_email
+
+                # Only attempt to send email if we have a valid admin email
+                if admin_email:
+                    email_result = email_service.send_admin_checkin_notification(admin_email, checkin_data)
+
+                    if email_result.get('status') == 'success':
+                        print(f"Admin notification sent successfully to {admin_email}")
+                    else:
+                        print(f"Failed to send admin notification: {email_result.get('message', 'Unknown error')}")
+                else:
+                    print("No valid admin email address found - skipping notification")
+            else:
+                print(f"No email configuration found for admin user {admin_user.id if admin_user else 'None'}")
+
+        except Exception as e:
+            # Don't fail the upload if email notification fails
+            print(f"Error sending admin notification: {str(e)}")
+            print(f"Traceback: {traceback.format_exc()}")
 
         return jsonify({
             "message": "Files uploaded successfully and client linked to reservation",

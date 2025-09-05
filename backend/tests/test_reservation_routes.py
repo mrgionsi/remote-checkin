@@ -25,12 +25,24 @@ def client(app):
 
 @pytest.fixture
 def init_db():
-    """Ensure a clean database before each test by removing existing data."""
+    """
+    Prepare and provide a clean test database session.
+    
+    This fixture-like helper clears relevant tables and a view, commits the empty state, then seeds a test Structure (id "1") and a Room ("Test Room") linked to that Structure. It yields an active SQLAlchemy Session for use by tests and closes the session after the caller finishes.
+    
+    Side effects:
+    - Drops the `structure_reservations` view if it exists.
+    - Deletes rows from AdminStructure, User, ClientReservations, Reservation, Room, Structure, Client, and Role.
+    - Inserts a Structure with id "1" and a Room named "Test Room".
+    
+    Yields:
+        sqlalchemy.orm.Session: An initialized session connected to the cleaned and seeded test database.
+    """
     db = SessionLocal()
     db.execute(text('DROP VIEW IF EXISTS structure_reservations;'))  # Use CASCADE to remove dependent objects
 
     # Remove data from dependent tables first
-    db.query(AdminStructure).delete()    
+    db.query(AdminStructure).delete()
     db.query(User).delete()
     db.query(ClientReservations).delete()
     db.query(Reservation).delete()
@@ -175,7 +187,7 @@ def test_get_reservations_per_month_basic(client, init_db):
     db.commit()
 
     response = client.get(f"/api/v1/reservations/monthly/{structure_id}")
-    
+
     assert response.status_code == 200
     data = response.get_json()
     assert isinstance(data, list)
@@ -190,7 +202,7 @@ def test_get_reservations_per_month_no_reservations(client, init_db):
     structure_id = db.query(Structure).first().id
 
     response = client.get(f"/api/v1/reservations/monthly/{structure_id}")
-    
+
     assert response.status_code == 200
     data = response.get_json()
     assert isinstance(data, list)
@@ -203,7 +215,7 @@ def test_get_reservations_per_month_invalid_structure_id(client, init_db):
     invalid_structure_id = 9999  # Assuming this structure ID doesn't exist
 
     response = client.get(f"/api/v1/reservations/monthly/{invalid_structure_id}")
-    
+
     assert response.status_code == 404
     data = response.get_json()
     assert data["message"] == "Structure not found"  # Ensure the message matches the error returned
