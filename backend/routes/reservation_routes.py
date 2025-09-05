@@ -126,9 +126,6 @@ def create_reservation():
                 # Use database configuration
                 current_app.logger.info("Using database email configuration")
                 encryption_key = get_encryption_key()
-                current_app.logger.info(f"Encryption key type: {type(encryption_key)}")
-                current_app.logger.info(f"Email config mail_password type: {type(email_config.mail_password)}")
-                current_app.logger.info(f"Email config mail_password length: {len(email_config.mail_password) if email_config.mail_password else 'None'}")
                 email_service = EmailService(config=email_config, encryption_key=encryption_key)
 
             finally:
