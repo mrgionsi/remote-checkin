@@ -110,15 +110,24 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 ```
 
-### Testing Email Service
+from backend.email_handler import EmailService  # or 'email_handler' if run from backend/
+from backend.email_handler import EmailData
 
-You can test the email service using the provided test methods:
+# Minimal constructor example (adjust to your EmailService signature)
+service = EmailService(
+    provider="smtp",
+    server="localhost",
+    port=1025,
+    use_tls=False,
+    use_ssl=False
+)
+print(service.validate_email_address("test@example.com"))
 
-```python
-from email_handler import EmailService
-
-# Test email validation
-email_service = EmailService(mail_instance)
-result = email_service.validate_email_address("test@example.com")
-print(result)
-```
+# Example send
+service.send_email(EmailData(
+    to=["test@example.com"],
+    subject="Test",
+    body="Hello from Remote Check-in",
+    sender_email="noreply@example.com",
+    sender_name="Remote Check-in System"
+))
