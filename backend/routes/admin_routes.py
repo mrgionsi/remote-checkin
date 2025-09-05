@@ -15,7 +15,7 @@ from datetime import timedelta
 import logging
 from flask import Blueprint, request, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request, get_jwt
 from models import User, AdminStructure, Structure
 from database import SessionLocal
 
@@ -101,8 +101,23 @@ def create_admin_user():
     """
     Create a new admin user from a JSON request.
     
-    Expects a JSON body with required fields: `username`, `password`, and `id_role`; optional fields: `name`, `surname`, `email`, and `telephone`. On success inserts a new User record (password is stored hashed) and returns HTTP 201 with the created user's data (id, username, name, surname, email, telephone, id_role). Returns HTTP 400 when required fields are missing or the username already exists, and HTTP 500 for unexpected server errors.
+    Requires JWT authentication and admin role. Expects a JSON body with required fields: `username`, `password`, and `id_role`; optional fields: `name`, `surname`, `email`, and `telephone`. On success inserts a new User record (password is stored hashed) and returns HTTP 201 with the created user's data (id, username, name, surname, email, telephone, id_role). Returns HTTP 400 when required fields are missing or the username already exists, HTTP 401 for missing/invalid JWT, HTTP 403 for insufficient permissions, and HTTP 500 for unexpected server errors.
     """
+    # Verify JWT authentication
+    try:
+        verify_jwt_in_request()
+    except Exception:
+        return jsonify({"error": "Token di autenticazione mancante o non valido"}), 401
+    
+    # Check admin role
+    try:
+        claims = get_jwt()
+        user_role = claims.get("role", "").lower()
+        if user_role not in ["admin", "superadmin", "administrator"]:
+            return jsonify({"error": "Permessi insufficienti. È richiesto un ruolo amministratore"}), 403
+    except Exception:
+        return jsonify({"error": "Errore durante la verifica dei permessi"}), 403
+    
     data = request.get_json()
     username = data.get("username")
     password = data.get("password")
