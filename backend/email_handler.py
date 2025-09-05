@@ -22,10 +22,9 @@ from email_validator import validate_email, EmailNotValidError
 from flask import current_app
 from cryptography.fernet import Fernet
 import requests
-
+from utils.encryption_utils import get_encryption_key
 from models import EmailConfig
 from database import SessionLocal
-from utils.encryption_utils import get_encryption_key
 
 logger = logging.getLogger(__name__)
 

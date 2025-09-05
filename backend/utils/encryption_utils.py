@@ -3,7 +3,7 @@ Encryption utilities for the remote check-in system.
 
 This module provides functions for handling encryption keys and password encryption/decryption.
 """
-
+#pylint: disable=C0301,E0611,E0401,W0718,R0914
 import os
 import logging
 from flask import current_app

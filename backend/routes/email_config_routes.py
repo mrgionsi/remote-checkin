@@ -14,11 +14,10 @@ import logging
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy.exc import IntegrityError
-
-from models import EmailConfig
-from database import SessionLocal
 from email_handler import EmailService
 from utils.encryption_utils import get_encryption_key, encrypt_password, decrypt_password
+from models import EmailConfig
+from database import SessionLocal
 
 # Configure logging
 logger = logging.getLogger(__name__)

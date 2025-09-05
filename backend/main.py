@@ -4,7 +4,7 @@ Main module for the remote check-in system.
 This module initializes the Flask app, sets up database tables,
 and registers blueprints for routing.
 """
-# pylint: disable=C0303,E0401,W0718
+# pylint: disable=C0303,E0401,W0718,C0301
 import os
 import re
 
