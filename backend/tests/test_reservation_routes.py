@@ -25,7 +25,19 @@ def client(app):
 
 @pytest.fixture
 def init_db():
-    """Ensure a clean database before each test by removing existing data."""
+    """
+    Prepare and provide a clean test database session.
+    
+    This fixture-like helper clears relevant tables and a view, commits the empty state, then seeds a test Structure (id "1") and a Room ("Test Room") linked to that Structure. It yields an active SQLAlchemy Session for use by tests and closes the session after the caller finishes.
+    
+    Side effects:
+    - Drops the `structure_reservations` view if it exists.
+    - Deletes rows from AdminStructure, User, ClientReservations, Reservation, Room, Structure, Client, and Role.
+    - Inserts a Structure with id "1" and a Room named "Test Room".
+    
+    Yields:
+        sqlalchemy.orm.Session: An initialized session connected to the cleaned and seeded test database.
+    """
     db = SessionLocal()
     db.execute(text('DROP VIEW IF EXISTS structure_reservations;'))  # Use CASCADE to remove dependent objects
 

@@ -88,9 +88,14 @@ UPLOAD_FOLDER = "uploads/"  # Base directory for uploaded images
 @jwt_required()
 def check_images(reservation_id):
     """
-    Checks for the existence of client identity images associated with a specific reservation and client details.
-
-    Validates that the reservation exists and the client is linked to it, then inspects the reservation's upload folder for the expected identity image files. Returns a JSON object with URLs to available images (`back_image`, `front_image`, `selfie`) or `null` for missing files. Responds with appropriate error messages for missing fields, non-existent reservation, client not associated, or missing folder.
+    Check whether identity images (back, front, selfie) exist for a given reservation and client.
+    
+    Validates required JSON fields ("name", "surname", "cf"), confirms the reservation (matched against Reservation.id_reference) and that the client is associated with that reservation, then inspects the reservation's upload folder (UPLOAD_FOLDER/<reservation_id>) for three expected files named `<name>-<surname>-<cf>-backimage.jpg`, `-frontimage.jpg`, and `-selfie.jpg` (name/surname/cf are sanitized). Returns a JSON object with keys "back_image", "front_image", and "selfie" mapped to the API URL for the file if present ("/api/v1/images/<reservation_id>/<filename>") or null if missing.
+    
+    Responses:
+    - 200: JSON object with the three keys and URL or null values.
+    - 400: Missing required fields in the request JSON.
+    - 404: Reservation not found, client not associated with the reservation, or reservation upload folder not found.
     """
     data = request.get_json()
     name = data.get("name")
@@ -153,15 +158,16 @@ def check_images(reservation_id):
 @client_reservation_bp.route("/images/<string:reservation_id>/<path:filename>", methods=["GET", "OPTIONS"])
 def get_image(reservation_id, filename):
     """
-    Serve images from the uploads folder.
-
-    Args:
-        reservation_id (str): The reservation ID (can be string reference ID).
-        filename (str): The image file name.
-
+    Serve a client identity image file for a reservation or respond to CORS preflight.
+    
+    For GET requests this endpoint requires a valid JWT. If the reservation folder or requested file does not exist, returns a JSON 404 error. For OPTIONS requests it returns an empty JSON body with permissive CORS headers.
+    
+    Parameters:
+        reservation_id (str): Reservation reference used to locate the uploads subfolder.
+        filename (str): File name (including extension) inside the reservation folder.
+    
     Returns:
-        - The image file if found.
-        - 404 error if the file does not exist.
+        A Flask response containing the requested file on success, or a JSON error response with HTTP 404 when the folder or file is missing. OPTIONS requests return a 200 response with CORS headers.
     """
     # Handle OPTIONS request for CORS preflight
     if request.method == 'OPTIONS':

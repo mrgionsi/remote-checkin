@@ -39,9 +39,8 @@ class Config:
     #    os.getenv('MAIL_DEFAULT_SENDER_NAME', 'Remote Check-in'),
     #    os.getenv('MAIL_DEFAULT_SENDER_EMAIL')
     #)
-    MAIL_MAX_EMAILS = int(os.getenv('MAIL_MAX_EMAILS', 100))
+    MAIL_MAX_EMAILS = int(os.getenv('MAIL_MAX_EMAILS', '100'))
     MAIL_ASCII_ATTACHMENTS = os.getenv('MAIL_ASCII_ATTACHMENTS', 'False').lower() == 'true'
-
     # Email templates
     EMAIL_TEMPLATES = {
         'reservation_confirmation': {
