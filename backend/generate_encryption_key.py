@@ -16,7 +16,12 @@ import base64
 import secrets
 
 def generate_encryption_key():
-    """Generate a new Fernet encryption key."""
+    """
+    Generate a new Fernet-compatible encryption key and print installation instructions.
+    
+    Returns:
+        str: URL-safe base64-encoded string representing 32 random bytes (Fernet key). The function also prints a formatted block showing the key and how to add it as EMAIL_ENCRYPTION_KEY in a .env file.
+    """
     # Generate 32 random bytes (Fernet key length)
     key_bytes = secrets.token_bytes(32)
 

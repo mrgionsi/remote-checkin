@@ -27,13 +27,15 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 def allowed_file(filename):
     """
-    Check if the uploaded file has an allowed extension.
-
+    Return True if the filename is a simple name (not a path) and has an allowed image extension.
+    
+    Performs two checks: rejects filenames that are not equal to os.path.basename(filename) (simple guard against basic directory traversal), and verifies the extension after the last dot (case-insensitive) is contained in ALLOWED_EXTENSIONS.
+    
     Parameters:
-        filename (str): The name of the uploaded file.
-
+        filename (str): The filename to validate.
+    
     Returns:
-        bool: True if file extension is allowed, False otherwise.
+        bool: True if the filename is a bare name and its extension is allowed; False otherwise.
     """
         # Check for directory traversal attempts
     if os.path.basename(filename) != filename:
@@ -42,19 +44,17 @@ def allowed_file(filename):
 
 def save_file(file, folder, filename):
     """
-    Save the uploaded file to the specified folder with the given filename.
-
+    Save an uploaded file into the given folder using a sanitized filename.
+    
+    Creates the target folder if it does not exist, uses os.path.basename(filename)
+    to avoid directory traversal, writes the file using file.save(), and returns the
+    full path to the saved file. On failure (filesystem error) returns None.
     Parameters:
-        file (FileStorage): The file to be saved.
-        folder (str): The target folder where the file will be saved.
-        filename (str): The name of the file to be saved.
-
+        file: File-like object providing a .save(path) method (e.g., Werkzeug FileStorage).
+        folder (str): Destination directory path; will be created if missing.
+        filename (str): Desired filename (only the basename is used).
     Returns:
-        str: The path to the saved file on success, None on failure.
-
-    Raises:
-        OSError: If the folder doesn't exist or cannot be created.
-        IOError: If the file cannot be saved.
+        str|None: Full path to the saved file on success, or None if saving failed.
     """
     try:
         # Ensure target folder exists
@@ -71,20 +71,21 @@ def save_file(file, folder, filename):
 
 def sanitize_filename(name, surname, cf, suffix, extension="jpg"):
     """
-    Sanitize the input for filename creation, allowing only certain characters and limiting length.
-
-    Parameters:
-        name (str): The name part of the filename.
-        surname (str): The surname part of the filename.
-        cf (str): The cf part of the filename (fiscal code or similar).
-        suffix (str): The suffix to be added at the end of the filename (e.g., 'selfie', 'frontimage').
-        extension (str): The file extension (default 'jpg').
-
+    Build a sanitized filename from name, surname, fiscal code, and suffix.
+    
+    Each component is reduced to the set of allowed characters (letters, digits, space, hyphen, underscore), trimmed, and truncated to a maximum of 32 characters if longer. The extension is normalized to lowercase with any leading dot removed. The resulting filename has the form:
+        "<name>-<surname>-<cf>-<suffix>.<extension>"
+    
+    Parameters that are not obvious:
+        cf (str): Fiscal code or similar identifier to include in the filename.
+        suffix (str): Descriptor appended to the filename (e.g., "selfie", "frontimage").
+        extension (str): File extension (default "jpg"); leading dot is ignored.
+    
     Returns:
-        str: A sanitized filename.
-
+        str: The assembled, sanitized filename.
+    
     Raises:
-        ValueError: If any sanitized component is empty or exceeds length limits.
+        ValueError: If any component becomes empty after removing disallowed characters.
     """
     allowed = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 -_")
     max_len = 32

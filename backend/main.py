@@ -89,7 +89,12 @@ def home():
 
 @app.before_request
 def handle_preflight():
-    """Handle CORS preflight requests."""
+    """
+    Return an empty permissive CORS preflight response when the incoming request is an OPTIONS preflight.
+    
+    This function is intended to be used as a Flask `before_request` handler. If the request method is OPTIONS it returns an empty response with
+    Access-Control-Allow-Origin, Access-Control-Allow-Headers, and Access-Control-Allow-Methods set to "*" to satisfy CORS preflight checks. For non-OPTIONS requests it does nothing (continues normal request handling).
+    """
     if request.method == "OPTIONS":
         response = make_response()
         response.headers.add("Access-Control-Allow-Origin", "*")
@@ -100,7 +105,19 @@ def handle_preflight():
 @app.route("/test-email-config")
 def test_email_config():
     """
-    Test route to check if email configuration is working.
+    Return JSON indicating whether Flask-Mail is configured and available.
+    
+    Checks the application's extensions for the 'mail' extension and returns a JSON-serializable
+    dictionary describing the result.
+    
+    Returns:
+    	A dict with at least the following keys:
+    		- "status" (str): "success" if the mail extension is present, otherwise "error".
+    		- "message" (str): Human-readable description of the outcome.
+    	If the mail extension is present, the response also includes:
+    		- "mail_type" (str): The Python type of the mail extension as a string.
+    		- "extensions" (list): List of currently registered extension names (app.extensions keys).
+    	On unexpected failures, returns an error dictionary with the exception message.
     """
     try:
         if 'mail' not in app.extensions:
