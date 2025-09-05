@@ -302,26 +302,26 @@ class EmailService:
                     )
                     msg.attach(part)
 
-            # Connect to SMTP server
-            if self.config.mail_use_ssl:
-                server = smtplib.SMTP_SSL(self.config.mail_server, self.config.mail_port)
-            else:
-                server = smtplib.SMTP(self.config.mail_server, self.config.mail_port)
-                if self.config.mail_use_tls:
-                    server.starttls()
-
-            # Login and send
-            server.login(self.config.mail_username, self.decrypted_password)
-
-            # Prepare recipients list
+            # Prepare recipients list before connecting
             recipients = [email_data.to_email]
             if email_data.cc:
                 recipients.extend(email_data.cc)
             if email_data.bcc:
                 recipients.extend(email_data.bcc)
 
-            server.send_message(msg, to_addrs=recipients)
-            server.quit()
+            # Connect to SMTP server using context manager with timeout
+            timeout = getattr(self.config, 'mail_timeout', 30)  # Default 30 seconds if not configured
+            
+            if self.config.mail_use_ssl:
+                with smtplib.SMTP_SSL(self.config.mail_server, self.config.mail_port, timeout=timeout) as server:
+                    server.login(self.config.mail_username, self.decrypted_password)
+                    server.send_message(msg, to_addrs=recipients)
+            else:
+                with smtplib.SMTP(self.config.mail_server, self.config.mail_port, timeout=timeout) as server:
+                    if self.config.mail_use_tls:
+                        server.starttls()
+                    server.login(self.config.mail_username, self.decrypted_password)
+                    server.send_message(msg, to_addrs=recipients)
 
             logger.info(f"Email sent successfully via SMTP to: {email_data.to_email}")
             return {
