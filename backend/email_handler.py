@@ -1,3 +1,4 @@
+# pylint: disable=C0301,E0611,E0401,W0718,R0914,C0302,W0107,C0303
 """
 Email handling module for the remote check-in system.
 
@@ -7,13 +8,24 @@ including reservation confirmations, updates, and cancellations.
 
 import logging
 import json
+import re
+import smtplib
+import traceback
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
-from flask import current_app
+from email import encoders
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.utils import formataddr
 from email_validator import validate_email, EmailNotValidError
+from flask import current_app
+from cryptography.fernet import Fernet
 import requests
 
 from models import EmailConfig
+from database import SessionLocal
+from utils.encryption_utils import get_encryption_key
 
 logger = logging.getLogger(__name__)
 
@@ -100,8 +112,6 @@ class EmailService:
             return ""
 
         try:
-            from cryptography.fernet import Fernet
-
             # Use encryption key passed to constructor, or try to get from current app context
             key = self.encryption_key
             if not key:
@@ -123,9 +133,10 @@ class EmailService:
             f = Fernet(key)
             return f.decrypt(encrypted_password.encode()).decode()
         except Exception as e:
-            logger.error(f"Failed to decrypt password: {str(e)}")
-            logger.error(f"Encrypted password type: {type(encrypted_password)}, length: {len(encrypted_password) if encrypted_password else 'None'}")
-            logger.error(f"Key type: {type(key) if 'key' in locals() else 'None'}")
+            logger.error("Failed to decrypt password: %s", str(e))
+            logger.error("Encrypted password type: %s, length: %s",
+                        type(encrypted_password), len(encrypted_password) if encrypted_password else 'None')
+            logger.error("Key type: %s", type(key) if 'key' in locals() else 'None')
             raise e
 
     def validate_email_address(self, email: str) -> str:
@@ -149,7 +160,7 @@ class EmailService:
             validated_email = validate_email(email, check_deliverability=False)
             return validated_email.normalized
         except EmailNotValidError as e:
-            raise EmailValidationError(f"Invalid email address: {str(e)}")
+            raise EmailValidationError(f"Invalid email address: {str(e)}") from e
 
     def validate_email_address_lenient(self, email: str) -> str:
         """
@@ -218,26 +229,25 @@ class EmailService:
             Dict[str, Any]: Result dictionary with at least "status" ("success" or "error") and "message"; may include provider-specific details or an "error_type" on failure.
         """
         try:
-            logger.info(f"Preparing to send email to: {email_data.to_email} using {self.provider_type}")
+            logger.info("Preparing to send email to: %s using %s", email_data.to_email, self.provider_type)
 
             # Route to appropriate provider
             if self.provider_type == 'mailgun':
                 return self._send_via_mailgun(email_data)
-            elif self.provider_type == 'sendgrid':
+            if self.provider_type == 'sendgrid':
                 return self._send_via_sendgrid(email_data)
-            else:
-                # Default to SMTP
-                return self._send_via_smtp(email_data)
+            # Default to SMTP
+            return self._send_via_smtp(email_data)
 
         except EmailValidationError as e:
-            logger.error(f"Email validation error: {str(e)}")
+            logger.error("Email validation error: %s", str(e))
             return {
                 "status": "error",
                 "message": f"Email validation failed: {str(e)}",
                 "error_type": "validation_error"
             }
         except Exception as e:
-            logger.error(f"Failed to send email to {email_data.to_email}: {str(e)}")
+            logger.error("Failed to send email to %s: %s", email_data.to_email, str(e))
             return {
                 "status": "error",
                 "message": f"Failed to send email: {str(e)}",
@@ -256,10 +266,6 @@ class EmailService:
         Raises:
             EmailServiceError: If any error occurs while constructing the message, connecting, authenticating, or sending.
         """
-        import smtplib
-        from email.mime.text import MIMEText
-        from email.mime.multipart import MIMEMultipart
-        from email.utils import formataddr
 
         try:
             # Create message
@@ -290,8 +296,6 @@ class EmailService:
             # Add attachments if provided
             if email_data.attachments:
                 for attachment in email_data.attachments:
-                    from email.mime.base import MIMEBase
-                    from email import encoders
 
                     part = MIMEBase('application', 'octet-stream')
                     part.set_payload(attachment['data'])
@@ -311,7 +315,7 @@ class EmailService:
 
             # Connect to SMTP server using context manager with timeout
             timeout = getattr(self.config, 'mail_timeout', 30)  # Default 30 seconds if not configured
-            
+
             if self.config.mail_use_ssl:
                 with smtplib.SMTP_SSL(self.config.mail_server, self.config.mail_port, timeout=timeout) as server:
                     server.login(self.config.mail_username, self.decrypted_password)
@@ -323,7 +327,7 @@ class EmailService:
                     server.login(self.config.mail_username, self.decrypted_password)
                     server.send_message(msg, to_addrs=recipients)
 
-            logger.info(f"Email sent successfully via SMTP to: {email_data.to_email}")
+            logger.info("Email sent successfully via SMTP to: %s", email_data.to_email)
             return {
                 "status": "success",
                 "message": "Email sent successfully",
@@ -333,8 +337,8 @@ class EmailService:
             }
 
         except Exception as e:
-            logger.error(f"SMTP error: {str(e)}")
-            raise EmailServiceError(f"Failed to send email via SMTP: {str(e)}")
+            logger.error("SMTP error: %s", str(e))
+            raise EmailServiceError(f"Failed to send email via SMTP: {str(e)}") from e
 
     def _send_via_mailgun(self, email_data: EmailData) -> Dict[str, Any]:
         """
@@ -374,7 +378,7 @@ class EmailService:
         )
 
         if response.status_code == 200:
-            logger.info(f"Email sent successfully via Mailgun to: {email_data.to_email}")
+            logger.info("Email sent successfully via Mailgun to: %s", email_data.to_email)
             return {
                 "status": "success",
                 "message": "Email sent successfully via Mailgun",
@@ -383,8 +387,7 @@ class EmailService:
                 "provider": "mailgun",
                 "response": response.json()
             }
-        else:
-            raise EmailServiceError(f"Mailgun API error: {response.status_code} - {response.text}")
+        raise EmailServiceError(f"Mailgun API error: {response.status_code} - {response.text}")
 
     def _send_via_sendgrid(self, email_data: EmailData) -> Dict[str, Any]:
         """
@@ -436,7 +439,7 @@ class EmailService:
         response = requests.post(url, json=payload, headers=headers, timeout=30)
 
         if response.status_code == 202:
-            logger.info(f"Email sent successfully via SendGrid to: {email_data.to_email}")
+            logger.info("Email sent successfully via SendGrid to: %s", email_data.to_email)
             return {
                 "status": "success",
                 "message": "Email sent successfully via SendGrid",
@@ -444,8 +447,7 @@ class EmailService:
                 "subject": email_data.subject,
                 "provider": "sendgrid"
             }
-        else:
-            raise EmailServiceError(f"SendGrid API error: {response.status_code} - {response.text}")
+        raise EmailServiceError(f"SendGrid API error: {response.status_code} - {response.text}")
 
     def send_reservation_confirmation(
         self,
@@ -468,15 +470,15 @@ class EmailService:
             # Validate client email first
             try:
                 validated_email = self.validate_email_address(client_email)
-                logger.info(f"Email validation successful: {client_email} -> {validated_email}")
+                logger.info("Email validation successful: %s -> %s", client_email, validated_email)
             except EmailValidationError as e:
-                logger.warning(f"Strict email validation failed for {client_email}: {str(e)}")
+                logger.warning("Strict email validation failed for %s: %s", client_email, str(e))
                 # Try lenient validation as fallback
                 try:
                     validated_email = self.validate_email_address_lenient(client_email)
-                    logger.info(f"Lenient email validation successful: {client_email} -> {validated_email}")
+                    logger.info("Lenient email validation successful: %s -> %s", client_email, validated_email)
                 except EmailValidationError as e2:
-                    logger.error(f"Both strict and lenient email validation failed for {client_email}: {str(e2)}")
+                    logger.error("Both strict and lenient email validation failed for %s: %s", client_email, str(e2))
                     return {
                         "status": "error",
                         "message": f"Invalid email address: {str(e2)}",
@@ -500,13 +502,12 @@ class EmailService:
                 html_body=html_body
             )
 
-            logger.info(f"Sending reservation confirmation to: {validated_email}")
+            logger.info("Sending reservation confirmation to: %s", validated_email)
             return self.send_email(email_data)
 
         except Exception as e:
-            logger.error(f"Error creating reservation confirmation email: {str(e)}")
-            import traceback
-            logger.error(f"Traceback: {traceback.format_exc()}")
+            logger.error("Error creating reservation confirmation email: %s", str(e))
+            logger.error("Traceback: %s", traceback.format_exc())
             return {
                 "status": "error",
                 "message": f"Error creating email: {str(e)}",
@@ -546,7 +547,7 @@ class EmailService:
             return self.send_email(email_data)
 
         except Exception as e:
-            logger.error(f"Error creating reservation update email: {str(e)}")
+            logger.error("Error creating reservation update email: %s", str(e))
             return {
                 "status": "error",
                 "message": f"Error creating email: {str(e)}",
@@ -586,7 +587,7 @@ class EmailService:
             return self.send_email(email_data)
 
         except Exception as e:
-            logger.error(f"Error creating reservation cancellation email: {str(e)}")
+            logger.error("Error creating reservation cancellation email: %s", str(e))
             return {
                 "status": "error",
                 "message": f"Error creating email: {str(e)}",
@@ -890,15 +891,15 @@ The Remote Check-in Team
             # Validate admin email first
             try:
                 validated_email = self.validate_email_address(admin_email)
-                logger.info(f"Admin email validation successful: {admin_email} -> {validated_email}")
+                logger.info("Admin email validation successful: %s -> %s", admin_email, validated_email)
             except EmailValidationError as e:
-                logger.warning(f"Strict email validation failed for admin {admin_email}: {str(e)}")
+                logger.warning("Strict email validation failed for admin %s: %s", admin_email, str(e))
                 # Try lenient validation as fallback
                 try:
                     validated_email = self.validate_email_address_lenient(admin_email)
-                    logger.info(f"Lenient admin email validation successful: {admin_email} -> {validated_email}")
+                    logger.info("Lenient admin email validation successful: %s -> %s", admin_email, validated_email)
                 except EmailValidationError as e2:
-                    logger.error(f"Both strict and lenient email validation failed for admin {admin_email}: {str(e2)}")
+                    logger.error("Both strict and lenient email validation failed for admin %s: %s", admin_email, str(e2))
                     return {
                         "status": "error",
                         "message": f"Invalid admin email address: {str(e2)}",
@@ -922,13 +923,12 @@ The Remote Check-in Team
                 html_body=html_body
             )
 
-            logger.info(f"Sending admin check-in notification to: {validated_email}")
+            logger.info("Sending admin check-in notification to: %s", validated_email)
             return self.send_email(email_data)
 
         except Exception as e:
-            logger.error(f"Error creating admin check-in notification email: {str(e)}")
-            import traceback
-            logger.error(f"Traceback: {traceback.format_exc()}")
+            logger.error("Error creating admin check-in notification email: %s", str(e))
+            logger.error("Traceback: %s", traceback.format_exc())
             return {
                 "status": "error",
                 "message": f"Error creating admin notification email: {str(e)}",
@@ -1214,10 +1214,10 @@ Remote Check-in System
             return self.send_email(email_data)
 
         except EmailValidationError as e:
-            logger.error(f"Email validation error: {str(e)}")
+            logger.error("Email validation error: %s", str(e))
             return {"status": "error", "message": f"Invalid email address: {str(e)}"}
         except Exception as e:
-            logger.error(f"Error sending reservation approval notification: {str(e)}")
+            logger.error("Error sending reservation approval notification: %s", str(e))
             return {"status": "error", "message": f"Failed to send approval notification: {str(e)}"}
 
     def send_reservation_revision_notification(
@@ -1251,10 +1251,10 @@ Remote Check-in System
             return self.send_email(email_data)
 
         except EmailValidationError as e:
-            logger.error(f"Email validation error: {str(e)}")
+            logger.error("Email validation error: %s", str(e))
             return {"status": "error", "message": f"Invalid email address: {str(e)}"}
         except Exception as e:
-            logger.error(f"Error sending reservation revision notification: {str(e)}")
+            logger.error("Error sending reservation revision notification: %s", str(e))
             return {"status": "error", "message": f"Failed to send revision notification: {str(e)}"}
 
     def _create_reservation_approval_text(self, reservation_data: Dict[str, Any]) -> str:
@@ -1511,21 +1511,17 @@ def send_reservation_email(client_email: str, reservation_details: str, user_id:
         # Try to extract information from reservation_details string
         if 'Reservation #' in reservation_details:
             # Extract reservation number
-            import re
             match = re.search(r'Reservation #(\d+)', reservation_details)
             if match:
                 reservation_data['reservation_number'] = match.group(1)
 
         # Get email configuration from database
-        from models import EmailConfig
-        from database import SessionLocal
-        from routes.email_config_routes import get_encryption_key
 
         session = SessionLocal()
         try:
             email_config = session.query(EmailConfig).filter(
                 EmailConfig.user_id == user_id,
-                EmailConfig.is_active == True
+                EmailConfig.is_active.is_(True)
             ).first()
 
             if not email_config:
@@ -1540,5 +1536,5 @@ def send_reservation_email(client_email: str, reservation_details: str, user_id:
             session.close()
 
     except Exception as e:
-        logger.error(f"Error in legacy send_reservation_email: {str(e)}")
+        logger.error("Error in legacy send_reservation_email: %s", str(e))
         return {"status": "error", "message": str(e)}

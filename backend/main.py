@@ -4,20 +4,22 @@ Main module for the remote check-in system.
 This module initializes the Flask app, sets up database tables,
 and registers blueprints for routing.
 """
-# pylint: disable=C0303,E0401
+# pylint: disable=C0303,E0401,W0718
 import os
 import re
-from flask_jwt_extended import JWTManager
+
 from flask import Flask, make_response, request
 from flask_cors import CORS
+from flask_jwt_extended import JWTManager
+from flask_mail import Mail
+
+from config import Config
 from routes.email_config_routes import email_config_bp
 from routes.admin_routes import admin_bp
 from routes.room_routes import room_bp
 from routes.reservation_routes import reservation_bp
 from routes.upload_reservation_routes import upload_bp
 from routes.client_reservation_routes import client_reservation_bp
-from flask_mail import Mail
-from config import Config
 
 app = Flask(__name__)
 
@@ -93,7 +95,8 @@ def handle_preflight():
     Return an empty permissive CORS preflight response when the incoming request is an OPTIONS preflight.
     
     This function is intended to be used as a Flask `before_request` handler. If the request method is OPTIONS it returns an empty response with
-    Access-Control-Allow-Origin, Access-Control-Allow-Headers, and Access-Control-Allow-Methods set to "*" to satisfy CORS preflight checks. For non-OPTIONS requests it does nothing (continues normal request handling).
+    Access-Control-Allow-Origin, Access-Control-Allow-Headers, and Access-Control-Allow-Methods set to "*" to satisfy CORS preflight checks. 
+    For non-OPTIONS requests it does nothing (continues normal request handling).
     """
     if request.method == "OPTIONS":
         response = make_response()
@@ -101,6 +104,7 @@ def handle_preflight():
         response.headers.add('Access-Control-Allow-Headers', "*")
         response.headers.add('Access-Control-Allow-Methods', "*")
         return response
+    return None
 
 @app.route("/test-email-config")
 def test_email_config():
@@ -123,11 +127,11 @@ def test_email_config():
         if 'mail' not in app.extensions:
             return {"status": "error", "message": "Flask-Mail extension not found"}
 
-        mail = app.extensions['mail']
+        mail_extension = app.extensions['mail']
         return {
             "status": "success",
             "message": "Email configuration is available",
-            "mail_type": str(type(mail)),
+            "mail_type": str(type(mail_extension)),
             "extensions": list(app.extensions.keys())
         }
     except Exception as e:

@@ -10,15 +10,15 @@ including CRUD operations and testing email settings.
 
 import json
 import logging
-from flask import Blueprint, request, jsonify, current_app
+
+from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy.exc import IntegrityError
+
 from models import EmailConfig
 from database import SessionLocal
 from email_handler import EmailService
-from cryptography.fernet import Fernet
-import base64
-import os
+from utils.encryption_utils import get_encryption_key, encrypt_password, decrypt_password
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -81,111 +81,10 @@ EMAIL_PROVIDER_PRESETS = {
 }
 
 
-def get_encryption_key():
-    """
-    Return a Fernet-compatible encryption key from app config or environment, creating and caching one if needed.
-    
-    Checks current_app.config['EMAIL_ENCRYPTION_KEY'] first. If missing, attempts to read the string value from the EMAIL_ENCRYPTION_KEY environment variable (interpreted as a base64-encoded key and encoded to bytes). If neither is present, generates a new key with Fernet.generate_key() and stores it in current_app.config['EMAIL_ENCRYPTION_KEY'].
-    
-    Returns:
-        bytes: A base64-url-safe 32-byte key suitable for cryptography.fernet.Fernet.
-    
-    Notes:
-        - The key is cached in the Flask app config for the process lifetime.
-        - Generating a new key will make previously encrypted passwords unreadable unless the original key is preserved and reused (e.g., via the EMAIL_ENCRYPTION_KEY environment variable).
-    """
-    # First try to get from Flask app config (in-memory)
-    key = current_app.config.get('EMAIL_ENCRYPTION_KEY')
-
-    if not key:
-        # Try to get from environment variable
-        import os
-        key_string = os.getenv('EMAIL_ENCRYPTION_KEY')
-        print(key_string)
-        if key_string:
-            # Use the key string directly (Fernet expects base64-encoded string)
-            key = key_string.encode('utf-8')
-            current_app.config['EMAIL_ENCRYPTION_KEY'] = key
-            logger.info("Using EMAIL_ENCRYPTION_KEY from environment variable")
-        else:
-            # Generate a new key if none exists
-            key = Fernet.generate_key()
-            current_app.config['EMAIL_ENCRYPTION_KEY'] = key
-            logger.warning("Generated new EMAIL_ENCRYPTION_KEY - existing encrypted passwords may not be readable")
-            logger.warning("Set EMAIL_ENCRYPTION_KEY environment variable to maintain consistency across restarts")
-
-    return key
 
 
-def encrypt_password(password: str) -> str:
-    """
-    Encrypt a plaintext password for safe storage.
-    
-    If `password` is falsy (empty or None) this returns an empty string. Otherwise the function
-    derives the Fernet key via `get_encryption_key()` and returns the URL-safe base64-encoded
-    encrypted token as a str.
-    
-    Parameters:
-        password (str): Plaintext password to encrypt.
-    
-    Returns:
-        str: Encrypted password token (URL-safe base64 string), or an empty string when input is falsy.
-    
-    Raises:
-        Exception: Re-raises any exception encountered during key retrieval or encryption.
-    """
-    if not password:
-        logger.warning("Password is empty or None")
-        return ""
-
-    try:
-        key = get_encryption_key()
-        f = Fernet(key)
-        encrypted = f.encrypt(password.encode()).decode()
-        logger.info(f"Password encrypted successfully, original length: {len(password)}, encrypted length: {len(encrypted)}")
-        return encrypted
-    except Exception as e:
-        logger.error(f"Failed to encrypt password: {str(e)}")
-        raise e
 
 
-def decrypt_password(encrypted_password: str) -> str:
-    """
-    Decrypt a Fernet-encrypted password token and return the plaintext password.
-    
-    Decryption expects `encrypted_password` to be a non-empty URL-safe base64 Fernet token
-    as produced by `encrypt_password` (Fernet.encrypt()). The function returns the
-    original plaintext password string.
-    
-    Parameters:
-        encrypted_password (str): Fernet token string to decrypt.
-    
-    Returns:
-        str: Decrypted plaintext password.
-    
-    Raises:
-        ValueError: If `encrypted_password` is empty or None.
-        cryptography.fernet.InvalidToken: If the token is invalid or tampered with.
-        Exception: Re-raises other unexpected exceptions encountered during decryption.
-    """
-    if not encrypted_password:
-        raise ValueError("Encrypted password is empty or None")
-
-    try:
-        key = get_encryption_key()
-        logger.info(f"Key type: {type(key)}, Key length: {len(key) if key else 'None'}")
-        logger.info(f"Encrypted password first 20 chars: {encrypted_password[:20] if len(encrypted_password) > 20 else encrypted_password}")
-
-        f = Fernet(key)
-        decrypted = f.decrypt(encrypted_password.encode()).decode()
-        logger.info(f"Decryption successful, decrypted length: {len(decrypted)}")
-        return decrypted
-    except Exception as e:
-        logger.error(f"Decryption failed - encrypted_password type: {type(encrypted_password)}, length: {len(encrypted_password) if encrypted_password else 'None'}")
-        logger.error(f"Key type: {type(key) if 'key' in locals() else 'None'}")
-        logger.error(f"Exception type: {type(e)}, Exception message: '{str(e)}'")
-        logger.error(f"Exception args: {e.args if hasattr(e, 'args') else 'No args'}")
-        raise e
 
 
 @email_config_bp.route("/email-config", methods=["GET"])
@@ -213,7 +112,7 @@ def get_email_config():
     try:
         config = session.query(EmailConfig).filter(
             EmailConfig.user_id == current_user_id,
-            EmailConfig.is_active == True
+            EmailConfig.is_active.is_(True)
         ).first()
 
         if not config:
@@ -221,7 +120,7 @@ def get_email_config():
 
         # Check if password should be included
         include_password = request.args.get('include_password', 'false').lower() == 'true'
-        logger.info(f"Email config request - include_password: {include_password}")
+        logger.info("Email config request - include_password: %s", include_password)
 
         if include_password:
             # Return config with decrypted password for editing
@@ -229,18 +128,18 @@ def get_email_config():
             try:
                 decrypted_password = decrypt_password(config.mail_password)
                 config_dict['mail_password'] = decrypted_password
-                logger.info(f"Password decrypted successfully, length: {len(decrypted_password)}")
+                logger.info("Password decrypted successfully, length: %d", len(decrypted_password))
             except Exception as e:
-                logger.error(f"Error decrypting password: {str(e)}")
+                logger.error("Error decrypting password: %s", str(e))
                 config_dict['mail_password'] = ""  # Return empty string if decryption fails
             return jsonify(config_dict)
-        else:
-            # Return config with masked password (default behavior)
-            logger.info("Returning config with masked password")
-            return jsonify(config.to_dict(include_password=False))
+
+        # Return config with masked password (default behavior)
+        logger.info("Returning config with masked password")
+        return jsonify(config.to_dict(include_password=False))
 
     except Exception as e:
-        logger.error(f"Error getting email config: {str(e)}")
+        logger.error("Error getting email config: %s", str(e))
         return jsonify({"error": "Failed to retrieve email configuration"}), 500
     finally:
         session.close()
@@ -307,12 +206,12 @@ def create_or_update_email_config():
     except ValueError as e:
         session.rollback()
         return jsonify({"error": f"Invalid data: {str(e)}"}), 400
-    except IntegrityError as e:
+    except IntegrityError:
         session.rollback()
         return jsonify({"error": "Database integrity error"}), 400
     except Exception as e:
         session.rollback()
-        logger.error(f"Error saving email config: {str(e)}")
+        logger.error("Error saving email config: %s", str(e))
         return jsonify({"error": "Failed to save email configuration"}), 500
     finally:
         session.close()
@@ -341,7 +240,7 @@ def test_email_config():
         # Get user's email config
         config = session.query(EmailConfig).filter(
             EmailConfig.user_id == current_user_id,
-            EmailConfig.is_active == True
+            EmailConfig.is_active.is_(True)
         ).first()
 
         if not config:
@@ -367,14 +266,14 @@ def test_email_config():
                 "message": "Test email sent successfully",
                 "result": result
             })
-        else:
-            return jsonify({
-                "error": "Failed to send test email",
-                "result": result
-            }), 400
+
+        return jsonify({
+            "error": "Failed to send test email",
+            "result": result
+        }), 400
 
     except Exception as e:
-        logger.error(f"Error testing email config: {str(e)}")
+        logger.error("Error testing email config: %s", str(e))
         return jsonify({"error": f"Test failed: {str(e)}"}), 500
     finally:
         session.close()
@@ -442,7 +341,7 @@ def delete_email_config():
 
     except Exception as e:
         session.rollback()
-        logger.error(f"Error deleting email config: {str(e)}")
+        logger.error("Error deleting email config: %s", str(e))
         return jsonify({"error": "Failed to delete email configuration"}), 500
     finally:
         session.close()
@@ -520,7 +419,7 @@ def migrate_to_external_provider():
 
     except Exception as e:
         session.rollback()
-        logger.error(f"Error migrating email config: {str(e)}")
+        logger.error("Error migrating email config: %s", str(e))
         return jsonify({"error": f"Migration failed: {str(e)}"}), 500
     finally:
         session.close()

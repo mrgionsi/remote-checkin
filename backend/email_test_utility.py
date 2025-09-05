@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pylint: disable=C0301,E0611,E0401,W0718,R0914
 """
 Email Test Utility
 
@@ -54,7 +55,7 @@ def get_user_email_config(user_id: int):
     try:
         config = session.query(EmailConfig).filter(
             EmailConfig.user_id == user_id,
-            EmailConfig.is_active == True
+            EmailConfig.is_active.is_(True)
         ).first()
         return config
     finally:
@@ -64,7 +65,9 @@ def test_basic_email():
     """
     Send a test email using the database-backed email configuration for a chosen user.
     
-    Prompts for a user ID and recipient email, loads the user's active EmailConfig from the database within a minimal Flask app context, constructs an EmailService (using the app's encryption key), and sends a simple test message. If no active configuration is found for the provided user ID, returns an error dictionary.
+    Prompts for a user ID and recipient email, loads the user's active EmailConfig from the database within a minimal Flask app context, 
+    constructs an EmailService (using the app's encryption key), and sends a simple test message. 
+    If no active configuration is found for the provided user ID, returns an error dictionary.
     
     Returns:
         The result returned by EmailService.send_email (typically a dict or service-specific response), or an error dict with keys "status" and "message" when no configuration is found.
@@ -269,11 +272,13 @@ def test_reservation_status_notifications():
     """
     Send test reservation status emails (approval and revision) using the user's stored email configuration.
     
-    This function prompts for a user ID and client email, loads the active EmailConfig for that user from the database, creates an EmailService with the application's encryption key, and sends two test notifications:
+    This function prompts for a user ID and client email, loads the active EmailConfig for that user from the database, 
+    creates an EmailService with the application's encryption key, and sends two test notifications:
     1) reservation approval notification
     2) reservation revision notification
     
-    It prints interim status and returns a dictionary with the results of each send. If no active email configuration is found for the provided user ID, it returns {"status": "error", "message": "No email configuration found"}.
+    It prints interim status and returns a dictionary with the results of each send. 
+    If no active email configuration is found for the provided user ID, it returns {"status": "error", "message": "No email configuration found"}.
     
     Returns:
         dict: On success, a dict with keys "approval" and "revision" containing whatever the EmailService methods return.
