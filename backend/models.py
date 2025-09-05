@@ -8,8 +8,7 @@ including Room, Client, Reservation, and others.
 from datetime import date, datetime
 from sqlalchemy import Column, Integer, BigInteger, String, Date, ForeignKey, Sequence, Boolean, DateTime
 from sqlalchemy.orm import relationship
-#pylint: disable=C0303
-#pylint: disable=E0611
+#pylint: disable=C0303,C0301,E0611
 from database import Base
 
 
