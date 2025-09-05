@@ -16,6 +16,7 @@ import logging
 from flask import Blueprint, request, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request, get_jwt
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from models import User, AdminStructure, Structure
 from database import SessionLocal
 
@@ -128,12 +129,12 @@ def create_admin_user():
     id_role = data.get("id_role")
 
     if not username or not password or not id_role:
-        return jsonify({"error": "username, password e id_role sono obbligatori"}), 400
+        return jsonify({"error": "username, password and id_role are required"}), 400
 
     db_session = SessionLocal()
     try:
         if db_session.query(User).filter_by(username=username).first():
-            return jsonify({"error": "Username gia' esistente"}), 400
+            return jsonify({"error": "Username already exists"}), 400
 
         hashed_password = generate_password_hash(password)
 
@@ -150,7 +151,7 @@ def create_admin_user():
         db_session.commit()
 
         return jsonify({
-            "message": "Utente creato con successo",
+            "message": "User created successfully",
             "user": {
                 "id": new_user.id,
                 "username": new_user.username,
@@ -162,10 +163,18 @@ def create_admin_user():
             }
         }), 201
 
+    except IntegrityError as e:
+        db_session.rollback()
+        logging.exception("Database integrity error during user creation")
+        return jsonify({"error": "User creation failed due to data constraint violation"}), 400
+    except SQLAlchemyError as e:
+        db_session.rollback()
+        logging.exception("Database error during user creation")
+        return jsonify({"error": "An error occurred while creating the user"}), 500
     except Exception as e:
         db_session.rollback()
-        logging.error("Errore durante la creazione utente: %s", e)
-        return jsonify({"error": f"Errore durante la creazione utente: {str(e)}"}), 500
+        logging.exception("Unexpected error during user creation")
+        return jsonify({"error": "An unexpected error occurred"}), 500
     finally:
         db_session.close()
 
