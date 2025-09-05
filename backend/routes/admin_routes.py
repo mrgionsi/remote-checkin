@@ -184,7 +184,7 @@ def get_admin_info():
     """
     Return the authenticated admin user's profile and associated structures.
     
-    Requires a valid JWT (identity is the user id). Queries the database for the user and their AdminStructure->Structure associations and returns a JSON response with the user's fields and a list of structures.
+    Admin-only access (requires role: admin). Requires a valid JWT (identity is the user id). Queries the database for the user and their AdminStructure->Structure associations and returns a JSON response with the user's fields and a list of structures.
     
     Returns:
         tuple: (Flask Response, int) JSON payload and HTTP status code.
@@ -199,14 +199,24 @@ def get_admin_info():
                     "role": str,
                     "structures": [{"id": int, "name": str}, ...]
                 }
-            Not found (404): {"error": "Utente non trovato"}
+            Access denied (403): {"error": "Access denied"}
+            Not found (404): {"error": "User not found"}
     """
+    # Check admin role before proceeding
+    try:
+        claims = get_jwt()
+        user_role = claims.get("role", "").lower()
+        if user_role != "admin":
+            return jsonify({"error": "Access denied"}), 403
+    except Exception:
+        return jsonify({"error": "Access denied"}), 403
+
     db_session = SessionLocal()
     try:
         user_id = get_jwt_identity()
         user = db_session.query(User).filter_by(id=int(user_id)).first()
         if not user:
-            return jsonify({"error": "Utente non trovato"}), 404
+            return jsonify({"error": "User not found"}), 404
 
         structures = (
             db_session.query(AdminStructure.id_structure, Structure.name)
