@@ -417,10 +417,11 @@ export class DetailReservationComponent implements OnInit {
           }
         }
 
+        // Show error toast for refresh failure
         this.messageService.add({
-          severity: 'success',
-          summary: 'Updated',
-          detail: 'Reservation has been successfully updated.'
+          severity: 'warn',
+          summary: 'Partial Update',
+          detail: 'Reservation was updated locally but failed to refresh from server. Data may not be fully synchronized.'
         });
       }
     });
