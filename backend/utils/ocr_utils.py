@@ -24,13 +24,21 @@ import pytesseract
 
 def validate_document(image_path):
     """
-    Validate the document by extracting text using OCR.
-
+    Validate a document image by running OCR and return extracted text or an error message.
+    
+    Attempts to load an image from image_path, convert it to grayscale, and extract text using pytesseract.
+    Returns a tuple (bool, str): the boolean is True when OCR produced more than 10 non-whitespace characters; otherwise False.
+    On failure the string contains a concise error message such as:
+    - "Error: Could not load image. File may be corrupted or unsupported format." (image read failed)
+    - "Error: Failed to process image. <exception message>" (cv2 conversion failure)
+    - "OCR processing error: <error message>" (pytesseract failure)
+    - "No valid text detected" (OCR ran but produced insufficient text)
+    
     Parameters:
-        image_path (str): The file path of the uploaded document.
-
+        image_path (str): Path to the image file to validate and OCR.
+    
     Returns:
-        tuple: (bool, str) where bool indicates validity and str contains extracted text.
+        tuple: (is_valid: bool, result: str) — is_valid indicates success; result is extracted text or an error message.
     """
     # Load the image
     image = cv2.imread(image_path)
