@@ -90,7 +90,7 @@ export class EmailConfigService {
      * Get specific email provider preset
      */
     getEmailPreset(presetName: string): Observable<EmailProviderPreset> {
-        return this.http.get<EmailProviderPreset>(`${this.apiUrl}/email-config/preset/${presetName}`);
+        return this.http.get<EmailProviderPreset>(`${this.apiUrl}/email-config/preset/${presetName}`, { headers: this.authService.getAuthHeaders() });
     }
 
     /**
@@ -107,6 +107,6 @@ export class EmailConfigService {
         return this.http.post(`${this.apiUrl}/email-config/migrate`, {
             provider_type: providerType,
             ...config
-        });
+        }, { headers: this.authService.getAuthHeaders() });
     }
 }
