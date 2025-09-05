@@ -62,7 +62,7 @@ def encrypt_password(password: str) -> str:
     """
     if not password:
         return ""
-    
+
     key = get_encryption_key()
     f = Fernet(key)
     encrypted = f.encrypt(password.encode())
@@ -84,7 +84,7 @@ def decrypt_password(encrypted_password: str) -> str:
     """
     if not encrypted_password:
         return ""
-    
+
     key = get_encryption_key()
     f = Fernet(key)
     return f.decrypt(encrypted_password.encode()).decode()
