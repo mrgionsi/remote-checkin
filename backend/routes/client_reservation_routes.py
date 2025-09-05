@@ -39,11 +39,12 @@ Usage:
 
 """
 
-import os
 from pathlib import Path
+
 from flask import Blueprint, jsonify, request, send_from_directory
+from flask_jwt_extended import jwt_required, verify_jwt_in_request
+
 from models import Client, ClientReservations, Reservation
-from flask_jwt_extended import jwt_required
 from database import SessionLocal
 
 # Blueprint setup
@@ -95,16 +96,16 @@ def sanitize_filename(filename: str) -> str:
     """
     if not filename:
         raise ValueError("Filename cannot be empty")
-    
+
     # Check for path traversal attempts
     if '..' in filename or '/' in filename or '\\' in filename:
         raise ValueError("Filename contains invalid characters")
-    
+
     # Additional sanitization - remove any remaining dangerous characters
     sanitized = "".join(c for c in filename if c.isalnum() or c in '.-_').strip()
     if not sanitized:
         raise ValueError("Filename contains no valid characters")
-    
+
     return sanitized
 
 def get_secure_file_path(reservation_id: str, filename: str) -> Path:
@@ -115,27 +116,27 @@ def get_secure_file_path(reservation_id: str, filename: str) -> Path:
     Args:
         reservation_id: The reservation ID (will be sanitized)
         filename: The filename (will be sanitized)
-        
+
     Returns:
         Path: The resolved and validated file path
-        
+
     Raises:
         ValueError: If path traversal is detected or filename is invalid
     """
     # Sanitize inputs
     safe_reservation_id = sanitize_filename(str(reservation_id))
     safe_filename = sanitize_filename(filename)
-    
+
     # Build the path using pathlib
     target_path = BASE_UPLOAD_DIR / safe_reservation_id / safe_filename
     resolved_target = target_path.resolve()
-    
+
     # Ensure the target is within the base directory
     try:
         resolved_target.relative_to(BASE_UPLOAD_DIR)
-    except ValueError:
-        raise ValueError("Path traversal detected")
-    
+    except ValueError as exc:
+        raise ValueError("Path traversal detected") from exc
+
     return resolved_target
 
 def safe_file_exists(file_path: Path) -> bool:
@@ -209,7 +210,7 @@ def check_images(reservation_id):
                 result[key] = f"/api/v1/images/{reservation_id}/{file_name}"
             else:
                 result[key] = None  # File not found
-        except ValueError as e:
+        except ValueError:
             # If path traversal is detected, treat as file not found
             result[key] = None
 
@@ -239,7 +240,6 @@ def get_image(reservation_id, filename):
         return response
 
     # For GET requests, require JWT authentication
-    from flask_jwt_extended import verify_jwt_in_request
     verify_jwt_in_request()
 
     try:
@@ -255,10 +255,10 @@ def get_image(reservation_id, filename):
         # Get the directory and filename for send_from_directory
         folder_path = str(file_path.parent)
         safe_filename = file_path.name
-        
+
         # Set proper headers for image serving
         response = send_from_directory(folder_path, safe_filename)
-        
+
     except ValueError as e:
         print(f"Path traversal detected: {e}")
         return jsonify({"error": "Invalid file path"}), 400

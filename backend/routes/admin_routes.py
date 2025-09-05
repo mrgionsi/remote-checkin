@@ -23,6 +23,28 @@ from database import SessionLocal
 # Blueprint setup
 admin_bp = Blueprint("admin", __name__, url_prefix="/api/v1")
 
+def verify_admin_access():
+    """
+    Verify JWT authentication and admin role access.
+    
+    Returns:
+        tuple: (error_response, error_code) if verification fails, (None, None) if successful
+    """
+    try:
+        verify_jwt_in_request()
+    except Exception:
+        return jsonify({"error": "Token di autenticazione mancante o non valido"}), 401
+
+    try:
+        claims = get_jwt()
+        user_role = claims.get("role", "").lower()
+        if user_role not in ["admin", "superadmin", "administrator"]:
+            return jsonify({"error": "Permessi insufficienti. È richiesto un ruolo amministratore"}), 403
+    except Exception:
+        return jsonify({"error": "Errore durante la verifica dei permessi"}), 403
+
+    return None, None
+
 @admin_bp.route("/admin/login", methods=["POST"])
 def admin_login():
     """
@@ -97,6 +119,7 @@ def admin_login():
     finally:
         db_session.close()
 
+#pylint: disable=W0703,R0911
 @admin_bp.route("/admin/create", methods=["POST"])
 def create_admin_user():
     """
@@ -104,21 +127,11 @@ def create_admin_user():
     
     Requires JWT authentication and admin role. Expects a JSON body with required fields: `username`, `password`, and `id_role`; optional fields: `name`, `surname`, `email`, and `telephone`. On success inserts a new User record (password is stored hashed) and returns HTTP 201 with the created user's data (id, username, name, surname, email, telephone, id_role). Returns HTTP 400 when required fields are missing or the username already exists, HTTP 401 for missing/invalid JWT, HTTP 403 for insufficient permissions, and HTTP 500 for unexpected server errors.
     """
-    # Verify JWT authentication
-    try:
-        verify_jwt_in_request()
-    except Exception:
-        return jsonify({"error": "Token di autenticazione mancante o non valido"}), 401
-    
-    # Check admin role
-    try:
-        claims = get_jwt()
-        user_role = claims.get("role", "").lower()
-        if user_role not in ["admin", "superadmin", "administrator"]:
-            return jsonify({"error": "Permessi insufficienti. È richiesto un ruolo amministratore"}), 403
-    except Exception:
-        return jsonify({"error": "Errore durante la verifica dei permessi"}), 403
-    
+    # Verify JWT authentication and admin role
+    error_response, error_code = verify_admin_access()
+    if error_response:
+        return error_response, error_code
+
     data = request.get_json()
     username = data.get("username")
     password = data.get("password")
@@ -162,16 +175,16 @@ def create_admin_user():
                 "id_role": new_user.id_role
             }
         }), 201
-
-    except IntegrityError as e:
+#pylint: disable=W0703,R0911
+    except IntegrityError:
         db_session.rollback()
         logging.exception("Database integrity error during user creation")
         return jsonify({"error": "User creation failed due to data constraint violation"}), 400
-    except SQLAlchemyError as e:
+    except SQLAlchemyError:
         db_session.rollback()
         logging.exception("Database error during user creation")
         return jsonify({"error": "An error occurred while creating the user"}), 500
-    except Exception as e:
+    except Exception:
         db_session.rollback()
         logging.exception("Unexpected error during user creation")
         return jsonify({"error": "An unexpected error occurred"}), 500

@@ -3,9 +3,10 @@ Tests for the email handler module.
 
 This module tests the EmailService class and related functionality.
 """
-
-import pytest
+#pylint: disable=C0301,E0611,E0401,W0718,R0914,E0401,C0411,W0212
 from unittest.mock import Mock, patch
+import pytest
+from flask_mail import Mail
 from email_handler import (
     EmailService,
     EmailData,
@@ -13,7 +14,6 @@ from email_handler import (
     EmailServiceError,
     send_reservation_email
 )
-from flask_mail import Mail
 
 
 class TestEmailData:
