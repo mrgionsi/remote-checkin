@@ -59,7 +59,15 @@ export class EmailConfigService {
      * Create or update email configuration
      */
     saveEmailConfig(config: EmailConfig): Observable<any> {
-        return this.http.post(`${this.apiUrl}/email-config`, config, { headers: this.authService.getAuthHeaders() });
+        const payload = { ...config };
+        if (payload.mail_password === '***' || payload.mail_password === '') {
+            delete (payload as any).mail_password;
+        }
+        return this.http.post(
+            `${this.apiUrl}/email-config`,
+            payload,
+            { headers: this.authService.getAuthHeaders() }
+        );
     }
 
     /**
