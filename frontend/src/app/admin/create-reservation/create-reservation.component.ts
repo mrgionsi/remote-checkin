@@ -70,15 +70,27 @@ export class CreateReservationComponent implements OnInit {
 
   // Method to validate number of people against room capacity
   validateNumberOfPeople(): void {
-    const roomName = this.reservationForm.get('roomName')?.value;
+    const selectedRoom = this.reservationForm.get('roomName')?.value;
     const numberOfPeople = this.reservationForm.get('numberOfPeople')?.value;
 
-    if (roomName && numberOfPeople) {
-      const selectedRoom = this.rooms.find(room => room.name === roomName);
-      if (selectedRoom && numberOfPeople > selectedRoom.capacity) {
+    if (selectedRoom && numberOfPeople) {
+      let roomCapacity = 0;
+
+      // If selectedRoom is an object (from p-select), get capacity directly
+      if (typeof selectedRoom === 'object' && selectedRoom.capacity) {
+        roomCapacity = selectedRoom.capacity;
+      }
+      // If selectedRoom is a string (room name), find it in the rooms array
+      else if (typeof selectedRoom === 'string' && this.rooms && this.rooms.length > 0) {
+        const room = this.rooms.find(room => room.name === selectedRoom);
+        roomCapacity = room ? room.capacity : 0;
+      }
+
+      // Allow numberOfPeople to equal roomCapacity, but not exceed it
+      if (roomCapacity > 0 && numberOfPeople > roomCapacity) {
         this.reservationForm.get('numberOfPeople')?.setErrors({
           'exceedsCapacity': true,
-          'maxCapacity': selectedRoom.capacity
+          'maxCapacity': roomCapacity
         });
       } else {
         const currentErrors = this.reservationForm.get('numberOfPeople')?.errors;
@@ -95,11 +107,19 @@ export class CreateReservationComponent implements OnInit {
 
   // Method to get selected room capacity for display
   getSelectedRoomCapacity(): number {
-    const roomName = this.reservationForm.get('roomName')?.value;
-    if (roomName) {
-      const selectedRoom = this.rooms.find(room => room.name === roomName);
-      return selectedRoom ? selectedRoom.capacity : 0;
+    const selectedRoom = this.reservationForm.get('roomName')?.value;
+
+    // If selectedRoom is an object (from p-select), return its capacity directly
+    if (selectedRoom && typeof selectedRoom === 'object' && selectedRoom.capacity) {
+      return selectedRoom.capacity;
     }
+
+    // If selectedRoom is a string (room name), find it in the rooms array
+    if (selectedRoom && typeof selectedRoom === 'string' && this.rooms && this.rooms.length > 0) {
+      const room = this.rooms.find(room => room.name === selectedRoom);
+      return room ? room.capacity : 0;
+    }
+
     return 0;
   }
 

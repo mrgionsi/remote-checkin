@@ -138,7 +138,7 @@
             </label>
             <div class="p-col-12 p-md-10">
                 <input id="numberOfPeople" pInputText formControlName="numberOfPeople" type="number" min="1"
-                    [placeholder]="'number-of-people-placeholder' | transloco"
+                    max="{{getSelectedRoomCapacity()}}" [placeholder]="'number-of-people-placeholder' | transloco"
                     [class.p-invalid]="reservationForm.get('numberOfPeople')?.invalid && reservationForm.get('numberOfPeople')?.touched"
                     class="wide-input" />
                 <p *ngIf="reservationForm.get('numberOfPeople')?.invalid && reservationForm.get('numberOfPeople')?.touched"
