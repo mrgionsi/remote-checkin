@@ -77,4 +77,9 @@ export class ReservationService {
     }
     return this.http.delete(this.apiUrl + '/' + reservationId, { headers: this.authService.getAuthHeaders() });
   }
+
+  getClientsByReservationId(reservationId: number): Observable<any> {
+    // This endpoint is public, so we do not check authentication
+    return this.http.get(`${this.apiUrl}/${reservationId}/clients`);
+  }
 }
