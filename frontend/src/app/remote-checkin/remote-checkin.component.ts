@@ -17,6 +17,7 @@ import { ToastModule } from 'primeng/toast';
 import { DialogModule } from 'primeng/dialog';
 import { DocumentTypeLabelPipe } from '../pipes/document-type-label.pipe';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { ReservationService } from '../services/reservation.service';
 
 
 @Component({
@@ -40,10 +41,13 @@ export class RemoteCheckinComponent implements OnInit {
   languageCode: string | null = '';
   reservationId: string | null = '';
   showConfirmationDialog: boolean = false;
+  reservationDetails: any = null;
+  registeredClientsCount: number = 0;
+  canRegister: boolean = true;
 
   constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder,
     private readonly messageService: MessageService, private uploadService: UploadService,
-    private readonly translocoService: TranslocoService
+    private readonly translocoService: TranslocoService, private reservationService: ReservationService
   ) {
     this.uploadForm = this.fb.group({
       frontimage: [null, Validators.required],
@@ -79,10 +83,63 @@ export class RemoteCheckinComponent implements OnInit {
         this.router.navigate(['/reservation-check', params['code']]);
       } else {
         this.reservationId = this.route.snapshot.paramMap.get('id');
+        // Load reservation details and check capacity
+        this.loadReservationDetails();
       }
     });
   }
 
+  // Method to load reservation details and check capacity
+  loadReservationDetails() {
+    if (!this.reservationId) return;
+
+    this.reservationService.getReservationById(this.reservationId).subscribe({
+      next: (reservation) => {
+        this.reservationDetails = reservation;
+        this.checkRegistrationCapacity();
+      },
+      error: (error) => {
+        console.error('Error loading reservation details:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to load reservation details'
+        });
+      }
+    });
+  }
+
+  // Method to check if registration is still available
+  checkRegistrationCapacity() {
+    if (!this.reservationDetails) return;
+
+    // Get current registered clients count
+    this.reservationService.getClientsByReservationId(this.reservationDetails.id).subscribe({
+      next: (clients) => {
+        this.registeredClientsCount = clients.length;
+        const maxPeople = this.reservationDetails.number_of_people || 1;
+
+        if (this.registeredClientsCount >= maxPeople) {
+          this.canRegister = false;
+          this.messageService.add({
+            severity: 'warn',
+            summary: this.translocoService.translate('registration-full'),
+            detail: this.translocoService.translate('reservation-capacity-status', {
+              registered: this.registeredClientsCount,
+              max: maxPeople
+            })
+          });
+        } else {
+          this.canRegister = true;
+        }
+      },
+      error: (error) => {
+        console.error('Error checking registration capacity:', error);
+        // Allow registration if we can't check capacity
+        this.canRegister = true;
+      }
+    });
+  }
 
   // Method to handle FormData received from the child
   handleFormData(formData: FormGroup) {
@@ -98,6 +155,16 @@ export class RemoteCheckinComponent implements OnInit {
 
   uploadReservationData() {
     console.log("uploadReservationData called");  // For debugging
+
+    // Check if registration is still available
+    if (!this.canRegister) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: this.translocoService.translate('registration-full'),
+        detail: this.translocoService.translate('reservation-full-message')
+      });
+      return;
+    }
 
     if (this.uploadForm.invalid || this.clientForm.invalid) {
       this.messageService.add({ severity: 'error', summary: 'Error', detail: 'All fields and images are required' });
