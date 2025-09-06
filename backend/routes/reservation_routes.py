@@ -101,7 +101,7 @@ def create_reservation():
             id_reference=data["reservationNumber"],
             start_date=start_date,
             end_date=end_date,
-            name_reference = data["nameReference"],
+            name_reference = data.get("nameReference"),
             email=data["email"],
             telephone=data.get("telephone", ""),  # Optional field with default empty string
             number_of_people=number_of_people,
@@ -194,7 +194,7 @@ def create_reservation():
                         "email": new_reservation.email,
                         "telephone": new_reservation.telephone,
                         "numberOfPeople": new_reservation.number_of_people,
-                        "roomName": new_reservation.room.to_dict(),
+                        "roomName": room.to_dict(),
                     },
                 }
             ),
@@ -297,6 +297,7 @@ def update_reservation(reservation_id):
                 "startDate": reservation.start_date.strftime("%Y-%m-%d"),
                 "endDate": reservation.end_date.strftime("%Y-%m-%d"),
                 "name_reference": reservation.name_reference,
+                "numberOfPeople": reservation.number_of_people,
                 "roomName": reservation.room.to_dict(),
             }
         }), 200
@@ -554,6 +555,9 @@ def update_reservation_status(reservation_id):
         if not reservation:
             return jsonify({"error": f"Reservation with ID {reservation_id} not found"}), 404
 
+        # Fetch room separately to avoid lazy loading issues
+        room = db.query(Room).filter(Room.id == reservation.id_room).first()
+
         old_status = reservation.status
         reservation.status = new_status
         db.commit()
@@ -612,7 +616,7 @@ def update_reservation_status(reservation_id):
                 "status": reservation.status,
                 "startDate": reservation.start_date.strftime("%Y-%m-%d"),
                 "endDate": reservation.end_date.strftime("%Y-%m-%d"),
-                "roomName": reservation.room.to_dict(),
+                "roomName": room.to_dict() if room else {},
             }
         }), 200
 
