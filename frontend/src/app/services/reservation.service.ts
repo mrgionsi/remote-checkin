@@ -47,9 +47,9 @@ export class ReservationService {
     return this.http.get(`${this.apiUrl}/monthly/${id_structure}`, { headers: this.authService.getAuthHeaders() });
   }
 
-  getReservationById(id_structure: number): Observable<any> {
+  getReservationById(reservation_reference: string): Observable<any> {
     // This endpoint is public, so we do not check authentication
-    return this.http.get(`${this.apiUrl}/${id_structure}`);
+    return this.http.get(`${this.apiUrl}/check/${reservation_reference}`);
   }
   checkReservationById(id_reference: string): Observable<any> {
     // This endpoint is public, so we do not check authentication

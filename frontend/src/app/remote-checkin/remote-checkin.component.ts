@@ -93,7 +93,7 @@ export class RemoteCheckinComponent implements OnInit {
   loadReservationDetails() {
     if (!this.reservationId) return;
 
-    this.reservationService.getReservationById(Number(this.reservationId)).subscribe({
+    this.reservationService.getReservationById(this.reservationId).subscribe({
       next: (reservation) => {
         this.reservationDetails = reservation;
         this.checkRegistrationCapacity();
@@ -113,32 +113,23 @@ export class RemoteCheckinComponent implements OnInit {
   checkRegistrationCapacity() {
     if (!this.reservationDetails) return;
 
-    // Get current registered clients count
-    this.reservationService.getClientsByReservationId(this.reservationDetails.id).subscribe({
-      next: (clients) => {
-        this.registeredClientsCount = clients.length;
-        const maxPeople = this.reservationDetails.number_of_people || 1;
+    // Use the data already returned from the reservation check
+    this.registeredClientsCount = this.reservationDetails.registered_clients_count || 0;
+    const maxPeople = this.reservationDetails.number_of_people || 1;
 
-        if (this.registeredClientsCount >= maxPeople) {
-          this.canRegister = false;
-          this.messageService.add({
-            severity: 'warn',
-            summary: this.translocoService.translate('registration-full'),
-            detail: this.translocoService.translate('reservation-capacity-status', {
-              registered: this.registeredClientsCount,
-              max: maxPeople
-            })
-          });
-        } else {
-          this.canRegister = true;
-        }
-      },
-      error: (error) => {
-        console.error('Error checking registration capacity:', error);
-        // Allow registration if we can't check capacity
-        this.canRegister = true;
-      }
-    });
+    if (this.registeredClientsCount >= maxPeople) {
+      this.canRegister = false;
+      this.messageService.add({
+        severity: 'warn',
+        summary: this.translocoService.translate('registration-full'),
+        detail: this.translocoService.translate('reservation-capacity-status', {
+          registered: this.registeredClientsCount,
+          max: maxPeople
+        })
+      });
+    } else {
+      this.canRegister = true;
+    }
   }
 
   // Method to handle FormData received from the child

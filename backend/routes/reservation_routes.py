@@ -16,7 +16,7 @@ from sqlalchemy import  func
 from sqlalchemy.sql import extract
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
-from models import Reservation, Room, Structure, StructureReservationsView, EmailConfig
+from models import Reservation, Room, Structure, StructureReservationsView, EmailConfig,Client, ClientReservations
 from email_handler import EmailService
 from routes.email_config_routes import get_encryption_key
 from utils.email_utils import get_admin_email_config
@@ -425,12 +425,13 @@ def get_admin_reservations_by_id(reservation_id):
 def check_get_reservations_by_id(reservation_id):
     """
     Check whether a reservation exists by its reference ID and return the reference when found.
+    Also returns capacity information needed for client registration.
     
     Parameters:
         reservation_id (str): The reservation reference (id_reference) to look up.
     
     Returns:
-        Flask Response: JSON with {"id_reference": <reservation_id>} and HTTP 200 if found;
+        Flask Response: JSON with reservation details including capacity info and HTTP 200 if found;
         JSON error and HTTP 404 if not found; JSON error and HTTP 500 on unexpected errors.
     """
     db = SessionLocal()
@@ -444,7 +445,21 @@ def check_get_reservations_by_id(reservation_id):
         if not reservation:
             return jsonify({"error": f"Reservation with ID {reservation_id} not found"}), 404
 
-        return jsonify({'id_reference':reservation_id}), 200
+        # Get count of clients linked to the reservation
+        client_count = (
+            db.query(Client)
+            .join(ClientReservations, Client.id == ClientReservations.id_client)
+            .filter(ClientReservations.id_reservation == reservation.id)
+            .count()
+        )
+
+        return jsonify({
+            'id': reservation.id,
+            'id_reference': reservation_id,
+            'number_of_people': reservation.number_of_people or 1,
+            'status': reservation.status,
+            'registered_clients_count': client_count
+        }), 200
     except Exception as e:
         return jsonify({"error": f"Error retrieving reservation: {str(e)}"}), 500
     finally:
