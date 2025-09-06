@@ -119,6 +119,7 @@ export class RemoteCheckinComponent implements OnInit {
 
     if (this.registeredClientsCount >= maxPeople) {
       this.canRegister = false;
+      this.disableFormControls();
       this.messageService.add({
         severity: 'warn',
         summary: this.translocoService.translate('registration-full'),
@@ -129,7 +130,20 @@ export class RemoteCheckinComponent implements OnInit {
       });
     } else {
       this.canRegister = true;
+      this.enableFormControls();
     }
+  }
+
+  // Method to disable all form controls when registration is full
+  private disableFormControls() {
+    this.clientForm.disable();
+    this.uploadForm.disable();
+  }
+
+  // Method to enable all form controls when registration is available
+  private enableFormControls() {
+    this.clientForm.enable();
+    this.uploadForm.enable();
   }
 
   // Method to handle FormData received from the child
