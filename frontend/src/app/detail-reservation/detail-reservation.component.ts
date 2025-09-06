@@ -71,6 +71,7 @@ export class DetailReservationComponent implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       telephone: [''],
       status: [''],
+      number_of_people: [1, [Validators.required, Validators.min(1)]],
     }, { validators: this.dateRangeValidator });
   }
 
@@ -182,9 +183,41 @@ export class DetailReservationComponent implements OnInit {
       })
     })
 
+    // Add validation for number of people against room capacity
+    this.form.get('room')?.valueChanges.subscribe(() => {
+      this.validateNumberOfPeople();
+    });
+
+    this.form.get('number_of_people')?.valueChanges.subscribe(() => {
+      this.validateNumberOfPeople();
+    });
+
   }
 
+  // Method to validate number of people against room capacity
+  validateNumberOfPeople(): void {
+    const room = this.form.get('room')?.value;
+    const numberOfPeople = this.form.get('number_of_people')?.value;
 
+    if (room && numberOfPeople) {
+      const selectedRoom = this.roomList?.find((r: any) => r.id === room.id);
+      if (selectedRoom && numberOfPeople > selectedRoom.capacity) {
+        this.form.get('number_of_people')?.setErrors({
+          'exceedsCapacity': true,
+          'maxCapacity': selectedRoom.capacity
+        });
+      } else {
+        const currentErrors = this.form.get('number_of_people')?.errors;
+        if (currentErrors) {
+          delete currentErrors['exceedsCapacity'];
+          delete currentErrors['maxCapacity'];
+          this.form.get('number_of_people')?.setErrors(
+            Object.keys(currentErrors).length > 0 ? currentErrors : null
+          );
+        }
+      }
+    }
+  }
 
   editReservation() {
 
@@ -209,6 +242,7 @@ export class DetailReservationComponent implements OnInit {
       email: this.reservation_details.email,
       telephone: this.reservation_details.telephone,
       status: this.reservation_details.status,
+      number_of_people: this.reservation_details.number_of_people || 1,
     });
 
     // Update room selection (will work if roomList is already loaded)
