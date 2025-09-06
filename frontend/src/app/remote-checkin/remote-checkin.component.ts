@@ -115,7 +115,10 @@ export class RemoteCheckinComponent implements OnInit {
 
     // Use the data already returned from the reservation check
     this.registeredClientsCount = this.reservationDetails.registered_clients_count || 0;
-    const maxPeople = this.reservationDetails.number_of_people || 1;
+
+    // Safely coerce number_of_people to numeric type
+    const rawMaxPeople = this.reservationDetails.number_of_people;
+    const maxPeople = Number(rawMaxPeople) || 1;
 
     if (this.registeredClientsCount >= maxPeople) {
       this.canRegister = false;
