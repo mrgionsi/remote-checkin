@@ -81,7 +81,7 @@ export class CreateReservationComponent implements OnInit {
 
     // Coerce numberOfPeople to numeric type and validate
     const numericNumberOfPeople = Number(numberOfPeople);
-    
+
     // Check if the conversion resulted in NaN or invalid number
     if (isNaN(numericNumberOfPeople) || !isFinite(numericNumberOfPeople)) {
       numberOfPeopleControl.setErrors({
