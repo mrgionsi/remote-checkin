@@ -5,16 +5,40 @@
     <p-stepper [value]="1" class="basis-[80rem]">
         <p-step-list>
             <p-step [value]="1">{{ 'client-information' | transloco }}</p-step>
-            <p-step [disabled]="clientForm.invalid" [value]="2">{{ 'upload-images-step' | transloco }}</p-step>
-            <p-step [disabled]="uploadForm.invalid" [value]="3">{{ 'confirm-data-step' | transloco }}</p-step>
+            <p-step [disabled]="clientForm.invalid" [value]="2">{{ 'upload-images-step' | transloco
+                }}</p-step>
+            <p-step [disabled]="uploadForm.invalid" [value]="3">{{ 'confirm-data-step' | transloco
+                }}</p-step>
         </p-step-list>
+
+        <!-- Capacity Status Indicator -->
+        <div *ngIf="reservationDetails" class="mb-6 flex justify-center" aria-live="polite">
+            <div class="p-6 border-round shadow-2 max-w-md w-full text-center"
+                [ngClass]="canRegister ? 'bg-green-50 border-green-300 border-1' : 'bg-red-50 border-red-300 border-1'">
+                <div class="flex flex-column align-items-center">
+                    <i class="mb-3 text-4xl"
+                        [ngClass]="canRegister ? 'pi pi-check-circle text-green-600' : 'pi pi-times-circle text-red-600'"></i>
+                    <span class="font-bold text-xl mb-2" [ngClass]="canRegister ? 'text-green-800' : 'text-red-800'">
+                        {{ (canRegister ? 'registration-available' : 'registration-full') | transloco }}
+                    </span>
+                    <div class="text-sm mb-2" [ngClass]="canRegister ? 'text-green-700' : 'text-red-700'">
+                        {{ 'capacity-status' | transloco: {registered: registeredClientsCount, max:
+                        reservationDetails.number_of_people || 1} }}
+                    </div>
+                    <div *ngIf="!canRegister" class="text-sm text-red-600 font-medium">
+                        {{ 'reservation-full-message' | transloco }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <p-step-panels>
             <p-step-panel [value]="1">
                 <ng-template #content let-activateCallback="activateCallback">
                     <div class="flex flex-col h-48">
                         <div class="flex-auto justify-center items-center font-medium">
                             <p-card header="{{ 'client-information' | transloco }}">
-                                <form [formGroup]="clientForm" class="p-fluid">
+                                <form [formGroup]="clientForm" class="p-fluid" [class.opacity-50]="!canRegister">
                                     <div class="grid">
                                         <!-- Column 1 -->
                                         <div class="col-12 md:col-6">
@@ -118,7 +142,7 @@
 
             <p-step-panel [value]="2">
                 <ng-template #content let-activateCallback="activateCallback">
-                    <div class="flex flex-col h-48">
+                    <div class="flex flex-col h-48" [class.opacity-50]="!canRegister">
                         <div class="flex-auto justify-center items-center font-medium">
                             <app-upload-identity (formDataEmitter)="handleFormData($event)"></app-upload-identity>
                         </div>

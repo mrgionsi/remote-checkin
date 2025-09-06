@@ -83,6 +83,18 @@
                         formControlName="telephone" [placeholder]="'telephone-placeholder' | transloco" />
                 </div>
 
+                <!-- Number of People -->
+                <div [formGroup]="form" class="field col-12 md:col-6">
+                    <label for="number_of_people" class="font-bold text-600">{{ 'number-of-people-label' | transloco
+                        }}</label>
+                    <div *ngIf="!editMode">{{ reservation_details?.number_of_people || 1 }}</div>
+                    <input *ngIf="editMode" type="number" id="number_of_people" class="p-inputtext w-full" min="1"
+                        formControlName="number_of_people" [placeholder]="'number-of-people-placeholder' | transloco" />
+                    <small *ngIf="editMode && reservation_details?.room" class="p-text-secondary">
+                        {{ 'room-capacity-info' | transloco }}: {{ reservation_details?.room?.capacity }}
+                    </small>
+                </div>
+
                 <!-- Status -->
                 <div class="field col-12 md:col-6">
                     <label for="status_select" class="font-bold text-600 mb-2">{{ 'status-label' | transloco }}</label>

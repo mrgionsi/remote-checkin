@@ -16,7 +16,7 @@ from sqlalchemy import  func
 from sqlalchemy.sql import extract
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
-from models import Reservation, Room, Structure, StructureReservationsView, EmailConfig
+from models import Reservation, Room, Structure, StructureReservationsView, EmailConfig,Client, ClientReservations
 from email_handler import EmailService
 from routes.email_config_routes import get_encryption_key
 from utils.email_utils import get_admin_email_config
@@ -46,6 +46,7 @@ def create_reservation():
     Optional fields:
       - nameReference (str)
       - telephone (str)
+      - numberOfPeople (int): number of people for this reservation (default: 1, max: room capacity)
     
     Behavior:
       - Validates required fields and parses dates (format YYYY-MM-DD).
@@ -82,20 +83,35 @@ def create_reservation():
             current_app.logger.error(f"Date parsing error: {e}")
             current_app.logger.error(f"startDate: '{data['startDate']}', endDate: '{data['endDate']}'")
             return jsonify({"error": f"Invalid date format. Expected YYYY-MM-DD, got startDate: '{data['startDate']}', endDate: '{data['endDate']}'"}), 400
-
+        # Ensure a valid date range
+        if end_date < start_date:
+            return jsonify({"error": "endDate must be on or after startDate"}), 400
         # Find room ID by name
         room = session.query(Room).filter(Room.name == data["roomName"]).first()
         if not room:
             return jsonify({"error": "Room not found"}), 404
+
+        # Validate number_of_people if provided - safely coerce to int
+        raw_number_of_people = data.get("numberOfPeople", 1)
+        try:
+            number_of_people = int(raw_number_of_people)
+        except (ValueError, TypeError):
+            return jsonify({"error": f"Invalid number of people: '{raw_number_of_people}'. Must be a valid integer."}), 400
+
+        if number_of_people < 1:
+            return jsonify({"error": "Number of people must be at least 1"}), 400
+        if number_of_people > room.capacity:
+            return jsonify({"error": f"Number of people ({number_of_people}) cannot exceed room capacity ({room.capacity})"}), 400
 
         # Create a new reservation entry
         new_reservation = Reservation(
             id_reference=data["reservationNumber"],
             start_date=start_date,
             end_date=end_date,
-            name_reference = data["nameReference"],
+            name_reference = data.get("nameReference"),
             email=data["email"],
             telephone=data.get("telephone", ""),  # Optional field with default empty string
+            number_of_people=number_of_people,
             id_room=room.id,
         )
 
@@ -184,7 +200,8 @@ def create_reservation():
                         "nameReference": new_reservation.name_reference,
                         "email": new_reservation.email,
                         "telephone": new_reservation.telephone,
-                        "roomName": new_reservation.room.to_dict(),
+                        "numberOfPeople": new_reservation.number_of_people,
+                        "roomName": room.to_dict(),
                     },
                 }
             ),
@@ -219,6 +236,7 @@ def update_reservation(reservation_id):
     - email (str)
     - telephone (str)
     - status (str)
+    - number_of_people (int): number of people for this reservation (max: room capacity)
     - room: object containing "id" (int) — if provided, the referenced Room must exist.
     
     Behavior:
@@ -257,11 +275,49 @@ def update_reservation(reservation_id):
             reservation.telephone = data["telephone"]
         if "status" in data:
             reservation.status = data["status"]
+        # Handle number_of_people and room changes atomically
+        new_number_of_people = None
+        target_room = None
+        # Parse and validate number_of_people if provided
+        if "number_of_people" in data:
+            raw_number_of_people = data["number_of_people"]
+
+            if raw_number_of_people is None:
+                return jsonify({"error": "Number of people cannot be null"}), 400
+
+            # Safely coerce to int
+            try:
+                new_number_of_people = int(raw_number_of_people)
+            except (ValueError, TypeError):
+                return jsonify({"error": f"Invalid number of people: '{raw_number_of_people}'. Must be a valid integer."}), 400
+
+# Validate minimum value
+            if new_number_of_people < 1:
+                return jsonify({"error": "Number of people must be at least 1"}), 400
+
+# Determine target room atomically
         if "room" in data and isinstance(data["room"], dict) and "id" in data["room"]:
-            room = db.query(Room).filter(Room.id == data["room"]["id"]).first()
-            if not room:
-                return jsonify({"error": "Room not found"}), 404
-            reservation.id_room = room.id
+            # Use new room if provided
+            target_room = db.query(Room).filter(Room.id == data["room"]["id"]).first()
+            if not target_room:
+                return jsonify({"error": "Target room not found"}), 404
+        else:
+            # Use current room if no room change
+            target_room = db.query(Room).filter(Room.id == reservation.id_room).first()
+            if not target_room:
+                return jsonify({"error": "Current room not found"}), 404
+
+        # Validate number_of_people against target room capacity
+        if new_number_of_people is not None:
+            if new_number_of_people > target_room.capacity:
+                return jsonify({"error": f"Number of people ({new_number_of_people}) cannot exceed room capacity ({target_room.capacity})"}), 400
+
+        # Apply changes only after all validations pass
+        if new_number_of_people is not None:
+            reservation.number_of_people = new_number_of_people
+
+        if "room" in data and isinstance(data["room"], dict) and "id" in data["room"]:
+            reservation.id_room = target_room.id
 
         db.commit()
 
@@ -274,6 +330,7 @@ def update_reservation(reservation_id):
                 "startDate": reservation.start_date.strftime("%Y-%m-%d"),
                 "endDate": reservation.end_date.strftime("%Y-%m-%d"),
                 "name_reference": reservation.name_reference,
+                "numberOfPeople": reservation.number_of_people,
                 "roomName": reservation.room.to_dict(),
             }
         }), 200
@@ -402,12 +459,13 @@ def get_admin_reservations_by_id(reservation_id):
 def check_get_reservations_by_id(reservation_id):
     """
     Check whether a reservation exists by its reference ID and return the reference when found.
+    Also returns capacity information needed for client registration.
     
     Parameters:
         reservation_id (str): The reservation reference (id_reference) to look up.
     
     Returns:
-        Flask Response: JSON with {"id_reference": <reservation_id>} and HTTP 200 if found;
+        Flask Response: JSON with reservation details including capacity info and HTTP 200 if found;
         JSON error and HTTP 404 if not found; JSON error and HTTP 500 on unexpected errors.
     """
     db = SessionLocal()
@@ -421,7 +479,21 @@ def check_get_reservations_by_id(reservation_id):
         if not reservation:
             return jsonify({"error": f"Reservation with ID {reservation_id} not found"}), 404
 
-        return jsonify({'id_reference':reservation_id}), 200
+        # Get count of clients linked to the reservation
+        client_count = (
+            db.query(Client)
+            .join(ClientReservations, Client.id == ClientReservations.id_client)
+            .filter(ClientReservations.id_reservation == reservation.id)
+            .count()
+        )
+
+        return jsonify({
+            'id': reservation.id,
+            'id_reference': reservation_id,
+            'number_of_people': reservation.number_of_people or 1,
+            'status': reservation.status,
+            'registered_clients_count': client_count
+        }), 200
     except Exception as e:
         return jsonify({"error": f"Error retrieving reservation: {str(e)}"}), 500
     finally:
@@ -516,6 +588,9 @@ def update_reservation_status(reservation_id):
         if not reservation:
             return jsonify({"error": f"Reservation with ID {reservation_id} not found"}), 404
 
+        # Fetch room separately to avoid lazy loading issues
+        room = db.query(Room).filter(Room.id == reservation.id_room).first()
+
         old_status = reservation.status
         reservation.status = new_status
         db.commit()
@@ -574,7 +649,7 @@ def update_reservation_status(reservation_id):
                 "status": reservation.status,
                 "startDate": reservation.start_date.strftime("%Y-%m-%d"),
                 "endDate": reservation.end_date.strftime("%Y-%m-%d"),
-                "roomName": reservation.room.to_dict(),
+                "roomName": room.to_dict() if room else {},
             }
         }), 200
 
