@@ -138,9 +138,11 @@
             </label>
             <div class="p-col-12 p-md-10">
                 <input id="numberOfPeople" pInputText formControlName="numberOfPeople" type="number" min="1"
-                    max="{{getSelectedRoomCapacity()}}" [placeholder]="'number-of-people-placeholder' | transloco"
+                    [max]="getSelectedRoomCapacity() > 0 ? getSelectedRoomCapacity() : null"
+                    [disabled]="!reservationForm.get('roomName')?.value"
+                    [placeholder]="'number-of-people-placeholder' | transloco"
                     [class.p-invalid]="reservationForm.get('numberOfPeople')?.invalid && reservationForm.get('numberOfPeople')?.touched"
-                    class="wide-input" />
+                    step="1" inputmode="numeric" class="wide-input" />
                 <p *ngIf="reservationForm.get('numberOfPeople')?.invalid && reservationForm.get('numberOfPeople')?.touched"
                     class="p-error mt-2">
                     <span *ngIf="reservationForm.get('numberOfPeople')?.errors?.['required']">
@@ -154,7 +156,8 @@
                         reservationForm.get('numberOfPeople')?.errors?.['maxCapacity'] }})
                     </span>
                 </p>
-                <small *ngIf="reservationForm.get('roomName')?.value" class="p-text-secondary">
+                <small *ngIf="reservationForm.get('roomName')?.value && getSelectedRoomCapacity() > 0"
+                    class="p-text-secondary">
                     {{ 'room-capacity-info' | transloco }}: {{ getSelectedRoomCapacity() }}
                 </small>
             </div>
