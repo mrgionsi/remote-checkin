@@ -37,6 +37,7 @@ export class CreateReservationComponent implements OnInit {
       nameReference: ['', Validators.required], // New field added
       email: ['', [Validators.required, Validators.email]], // Email field with validation
       telephone: ['', Validators.required], // Telephone field
+      numberOfPeople: [1, [Validators.required, Validators.min(1)]], // Number of people field
     }, { validators: dateRangeValidator }
     )
   }
@@ -45,6 +46,14 @@ export class CreateReservationComponent implements OnInit {
   ngOnInit(): void {
     this.getRooms();
 
+    // Add validation for number of people against room capacity
+    this.reservationForm.get('roomName')?.valueChanges.subscribe(() => {
+      this.validateNumberOfPeople();
+    });
+
+    this.reservationForm.get('numberOfPeople')?.valueChanges.subscribe(() => {
+      this.validateNumberOfPeople();
+    });
   }
   // Method to get rooms from the backend
   getRooms(): void {
@@ -57,6 +66,41 @@ export class CreateReservationComponent implements OnInit {
         console.error('Error fetching rooms:', error);
       }
     });
+  }
+
+  // Method to validate number of people against room capacity
+  validateNumberOfPeople(): void {
+    const roomName = this.reservationForm.get('roomName')?.value;
+    const numberOfPeople = this.reservationForm.get('numberOfPeople')?.value;
+
+    if (roomName && numberOfPeople) {
+      const selectedRoom = this.rooms.find(room => room.name === roomName);
+      if (selectedRoom && numberOfPeople > selectedRoom.capacity) {
+        this.reservationForm.get('numberOfPeople')?.setErrors({
+          'exceedsCapacity': true,
+          'maxCapacity': selectedRoom.capacity
+        });
+      } else {
+        const currentErrors = this.reservationForm.get('numberOfPeople')?.errors;
+        if (currentErrors) {
+          delete currentErrors['exceedsCapacity'];
+          delete currentErrors['maxCapacity'];
+          this.reservationForm.get('numberOfPeople')?.setErrors(
+            Object.keys(currentErrors).length > 0 ? currentErrors : null
+          );
+        }
+      }
+    }
+  }
+
+  // Method to get selected room capacity for display
+  getSelectedRoomCapacity(): number {
+    const roomName = this.reservationForm.get('roomName')?.value;
+    if (roomName) {
+      const selectedRoom = this.rooms.find(room => room.name === roomName);
+      return selectedRoom ? selectedRoom.capacity : 0;
+    }
+    return 0;
   }
 
   onSubmit(): void {
