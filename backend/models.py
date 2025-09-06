@@ -184,6 +184,7 @@ class Reservation(Base):
     name_reference = Column(String, default='Not available')
     email = Column(String, nullable=False)
     telephone = Column(String, default='')
+    number_of_people = Column(Integer, default=1, nullable=False)
 
 
     room = relationship("Room", lazy="joined")
@@ -221,7 +222,8 @@ class Reservation(Base):
             "status": self.status,
             "name_reference": self.name_reference,
             'email': self.email,
-            'telephone': self.telephone
+            'telephone': self.telephone,
+            'number_of_people': self.number_of_people
         }
 
     def __repr__(self):
