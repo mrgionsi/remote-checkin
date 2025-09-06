@@ -83,7 +83,9 @@ def create_reservation():
             current_app.logger.error(f"Date parsing error: {e}")
             current_app.logger.error(f"startDate: '{data['startDate']}', endDate: '{data['endDate']}'")
             return jsonify({"error": f"Invalid date format. Expected YYYY-MM-DD, got startDate: '{data['startDate']}', endDate: '{data['endDate']}'"}), 400
-
+        # Ensure a valid date range
+        if end_date < start_date:
+            return jsonify({"error": "endDate must be on or after startDate"}), 400
         # Find room ID by name
         room = session.query(Room).filter(Room.name == data["roomName"]).first()
         if not room:
