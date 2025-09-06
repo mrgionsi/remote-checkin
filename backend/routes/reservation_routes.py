@@ -276,26 +276,24 @@ def update_reservation(reservation_id):
         # Handle number_of_people and room changes atomically
         new_number_of_people = None
         target_room = None
-        
         # Parse and validate number_of_people if provided
         if "number_of_people" in data:
             raw_number_of_people = data["number_of_people"]
-            
-            # Check if not None
+
             if raw_number_of_people is None:
                 return jsonify({"error": "Number of people cannot be null"}), 400
-            
+
             # Safely coerce to int
             try:
                 new_number_of_people = int(raw_number_of_people)
             except (ValueError, TypeError):
                 return jsonify({"error": f"Invalid number of people: '{raw_number_of_people}'. Must be a valid integer."}), 400
-            
-            # Validate minimum value
+
+# Validate minimum value
             if new_number_of_people < 1:
                 return jsonify({"error": "Number of people must be at least 1"}), 400
-        
-        # Determine target room atomically
+
+# Determine target room atomically
         if "room" in data and isinstance(data["room"], dict) and "id" in data["room"]:
             # Use new room if provided
             target_room = db.query(Room).filter(Room.id == data["room"]["id"]).first()
@@ -306,16 +304,16 @@ def update_reservation(reservation_id):
             target_room = db.query(Room).filter(Room.id == reservation.id_room).first()
             if not target_room:
                 return jsonify({"error": "Current room not found"}), 404
-        
+
         # Validate number_of_people against target room capacity
         if new_number_of_people is not None:
             if new_number_of_people > target_room.capacity:
                 return jsonify({"error": f"Number of people ({new_number_of_people}) cannot exceed room capacity ({target_room.capacity})"}), 400
-        
+
         # Apply changes only after all validations pass
         if new_number_of_people is not None:
             reservation.number_of_people = new_number_of_people
-        
+
         if "room" in data and isinstance(data["room"], dict) and "id" in data["room"]:
             reservation.id_room = target_room.id
 
