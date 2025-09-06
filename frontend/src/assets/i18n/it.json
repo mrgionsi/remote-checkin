@@ -218,6 +218,8 @@
     "reservation-full-message": "Questa prenotazione è piena e non accetta più nuove registrazioni",
     "reservation-capacity-status": "Questa prenotazione è piena ({{registered}}/{{max}} persone registrate)",
     "registration-available": "Registrazione Disponibile",
+    "registration-unavailable": "Registrazione Non Disponibile",
+    "capacity-verification-failed": "Impossibile verificare la capienza della prenotazione. La registrazione è temporaneamente disabilitata.",
     "capacity-status": "{{registered}}/{{max}} persone registrate",
     "settings": {
         "presetApplied": "Preimpostazione Applicata",

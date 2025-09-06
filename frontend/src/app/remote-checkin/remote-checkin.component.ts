@@ -99,11 +99,16 @@ export class RemoteCheckinComponent implements OnInit {
         this.checkRegistrationCapacity();
       },
       error: (error) => {
-        console.error('Error loading reservation details:', error);
+        console.warn('Error loading reservation details:', error);
+
+        // Block registration when capacity cannot be verified
+        this.canRegister = false;
+        this.disableFormControls();
+
         this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to load reservation details'
+          severity: 'warn',
+          summary: this.translocoService.translate('registration-unavailable'),
+          detail: this.translocoService.translate('capacity-verification-failed')
         });
       }
     });
