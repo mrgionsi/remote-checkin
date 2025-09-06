@@ -46,6 +46,7 @@ def create_reservation():
     Optional fields:
       - nameReference (str)
       - telephone (str)
+      - numberOfPeople (int): number of people for this reservation (default: 1, max: room capacity)
     
     Behavior:
       - Validates required fields and parses dates (format YYYY-MM-DD).
@@ -88,6 +89,13 @@ def create_reservation():
         if not room:
             return jsonify({"error": "Room not found"}), 404
 
+        # Validate number_of_people if provided
+        number_of_people = data.get("numberOfPeople", 1)
+        if number_of_people < 1:
+            return jsonify({"error": "Number of people must be at least 1"}), 400
+        if number_of_people > room.capacity:
+            return jsonify({"error": f"Number of people ({number_of_people}) cannot exceed room capacity ({room.capacity})"}), 400
+
         # Create a new reservation entry
         new_reservation = Reservation(
             id_reference=data["reservationNumber"],
@@ -96,6 +104,7 @@ def create_reservation():
             name_reference = data["nameReference"],
             email=data["email"],
             telephone=data.get("telephone", ""),  # Optional field with default empty string
+            number_of_people=number_of_people,
             id_room=room.id,
         )
 
@@ -184,6 +193,7 @@ def create_reservation():
                         "nameReference": new_reservation.name_reference,
                         "email": new_reservation.email,
                         "telephone": new_reservation.telephone,
+                        "numberOfPeople": new_reservation.number_of_people,
                         "roomName": new_reservation.room.to_dict(),
                     },
                 }
@@ -219,6 +229,7 @@ def update_reservation(reservation_id):
     - email (str)
     - telephone (str)
     - status (str)
+    - number_of_people (int): number of people for this reservation (max: room capacity)
     - room: object containing "id" (int) — if provided, the referenced Room must exist.
     
     Behavior:
@@ -257,10 +268,22 @@ def update_reservation(reservation_id):
             reservation.telephone = data["telephone"]
         if "status" in data:
             reservation.status = data["status"]
+        if "number_of_people" in data:
+            number_of_people = data["number_of_people"]
+            if number_of_people < 1:
+                return jsonify({"error": "Number of people must be at least 1"}), 400
+            # Get current room to check capacity
+            current_room = db.query(Room).filter(Room.id == reservation.id_room).first()
+            if number_of_people > current_room.capacity:
+                return jsonify({"error": f"Number of people ({number_of_people}) cannot exceed room capacity ({current_room.capacity})"}), 400
+            reservation.number_of_people = number_of_people
         if "room" in data and isinstance(data["room"], dict) and "id" in data["room"]:
             room = db.query(Room).filter(Room.id == data["room"]["id"]).first()
             if not room:
                 return jsonify({"error": "Room not found"}), 404
+            # If changing room, validate number_of_people against new room capacity
+            if reservation.number_of_people > room.capacity:
+                return jsonify({"error": f"Current number of people ({reservation.number_of_people}) cannot exceed new room capacity ({room.capacity})"}), 400
             reservation.id_room = room.id
 
         db.commit()
