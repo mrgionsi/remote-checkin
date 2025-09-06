@@ -4,25 +4,31 @@
 <div class="card justify-center" *ngIf="!showConfirmationDialog">
     <p-stepper [value]="1" class="basis-[80rem]">
         <p-step-list>
-            <p-step [value]="1">{{ 'client-information' | transloco }}</p-step>
-            <p-step [disabled]="clientForm.invalid" [value]="2">{{ 'upload-images-step' | transloco }}</p-step>
-            <p-step [disabled]="uploadForm.invalid" [value]="3">{{ 'confirm-data-step' | transloco }}</p-step>
+            <p-step [value]="1" [disabled]="!canRegister">{{ 'client-information' | transloco }}</p-step>
+            <p-step [disabled]="clientForm.invalid || !canRegister" [value]="2">{{ 'upload-images-step' | transloco
+                }}</p-step>
+            <p-step [disabled]="uploadForm.invalid || !canRegister" [value]="3">{{ 'confirm-data-step' | transloco
+                }}</p-step>
         </p-step-list>
 
         <!-- Capacity Status Indicator -->
-        <div *ngIf="reservationDetails" class="mb-4 p-3 border-round"
-            [ngClass]="canRegister ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'">
-            <div class="flex align-items-center">
-                <i [class]="canRegister ? 'pi pi-check-circle text-green-600' : 'pi pi-times-circle text-red-600'"
-                    class="mr-2"></i>
-                <span [class]="canRegister ? 'text-green-800' : 'text-red-800'" class="font-medium">
-                    {{ (canRegister ? 'registration-available' : 'registration-full') | transloco }}
-                </span>
-            </div>
-            <div *ngIf="reservationDetails" class="mt-2 text-sm"
-                [class]="canRegister ? 'text-green-700' : 'text-red-700'">
-                {{ 'capacity-status' | transloco: {registered: registeredClientsCount, max:
-                reservationDetails.number_of_people || 1} }}
+        <div *ngIf="reservationDetails" class="mb-6 flex justify-center">
+            <div class="p-6 border-round shadow-2 max-w-md w-full text-center"
+                [ngClass]="canRegister ? 'bg-green-50 border-green-300 border-1' : 'bg-red-50 border-red-300 border-1'">
+                <div class="flex flex-column align-items-center">
+                    <i [class]="canRegister ? 'pi pi-check-circle text-green-600' : 'pi pi-times-circle text-red-600'"
+                        class="mb-3 text-4xl"></i>
+                    <span [class]="canRegister ? 'text-green-800' : 'text-red-800'" class="font-bold text-xl mb-2">
+                        {{ (canRegister ? 'registration-available' : 'registration-full') | transloco }}
+                    </span>
+                    <div class="text-sm mb-2" [class]="canRegister ? 'text-green-700' : 'text-red-700'">
+                        {{ 'capacity-status' | transloco: {registered: registeredClientsCount, max:
+                        reservationDetails.number_of_people || 1} }}
+                    </div>
+                    <div *ngIf="!canRegister" class="text-sm text-red-600 font-medium">
+                        {{ 'reservation-full-message' | transloco }}
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -32,40 +38,46 @@
                     <div class="flex flex-col h-48">
                         <div class="flex-auto justify-center items-center font-medium">
                             <p-card header="{{ 'client-information' | transloco }}">
-                                <form [formGroup]="clientForm" class="p-fluid">
+                                <form [formGroup]="clientForm" class="p-fluid" [class.opacity-50]="!canRegister">
                                     <div class="grid">
                                         <!-- Column 1 -->
                                         <div class="col-12 md:col-6">
                                             <div class="field">
                                                 <label for="name">{{ 'name-label' | transloco }}</label>
                                                 <input pInputText id="name" formControlName="name"
-                                                    [placeholder]="'namePlaceholder' | transloco" />
+                                                    [placeholder]="'namePlaceholder' | transloco"
+                                                    [disabled]="!canRegister" />
                                             </div>
                                             <div class="field">
                                                 <label for="surname">{{ 'surname-label' | transloco }}</label>
                                                 <input pInputText id="surname" formControlName="surname"
-                                                    [placeholder]="'surnamePlaceholder' | transloco" />
+                                                    [placeholder]="'surnamePlaceholder' | transloco"
+                                                    [disabled]="!canRegister" />
                                             </div>
                                             <div class="field">
                                                 <label for="birthday">{{ 'birthday-label' | transloco }}</label>
                                                 <p-datePicker id="birthday" formControlName="birthday" showIcon
                                                     dateFormat="dd/mm/yy"
-                                                    [placeholder]="'birthdayPlaceholder' | transloco"></p-datePicker>
+                                                    [placeholder]="'birthdayPlaceholder' | transloco"
+                                                    [disabled]="!canRegister"></p-datePicker>
                                             </div>
                                             <div class="field">
                                                 <label for="street">{{ 'street-label' | transloco }}</label>
                                                 <input pInputText id="street" formControlName="street"
-                                                    [placeholder]="'streetPlaceholder' | transloco" />
+                                                    [placeholder]="'streetPlaceholder' | transloco"
+                                                    [disabled]="!canRegister" />
                                             </div>
                                             <div class="field">
                                                 <label for="city">{{ 'city-label' | transloco }}</label>
                                                 <input pInputText id="city" formControlName="city"
-                                                    [placeholder]="'cityPlaceholder' | transloco" />
+                                                    [placeholder]="'cityPlaceholder' | transloco"
+                                                    [disabled]="!canRegister" />
                                             </div>
                                             <div class="field">
                                                 <label for="cap">{{ 'cap-label' | transloco }}</label>
                                                 <input pInputText id="cap" formControlName="cap"
-                                                    [placeholder]="'capPlaceholder' | transloco" />
+                                                    [placeholder]="'capPlaceholder' | transloco"
+                                                    [disabled]="!canRegister" />
                                                 <small
                                                     *ngIf="clientForm.get('cap')?.invalid && clientForm.get('cap')?.touched"
                                                     class="p-error">
@@ -79,17 +91,20 @@
                                             <div class="field">
                                                 <label for="province">{{ 'province-label' | transloco }}</label>
                                                 <input pInputText id="province" formControlName="province"
-                                                    [placeholder]="'provincePlaceholder' | transloco" />
+                                                    [placeholder]="'provincePlaceholder' | transloco"
+                                                    [disabled]="!canRegister" />
                                             </div>
                                             <div class="field">
                                                 <label for="number_city">{{ 'number-city-label' | transloco }}</label>
                                                 <input pInputText id="number_city" formControlName="number_city"
-                                                    [placeholder]="'numberCityPlaceholder' | transloco" />
+                                                    [placeholder]="'numberCityPlaceholder' | transloco"
+                                                    [disabled]="!canRegister" />
                                             </div>
                                             <div class="field">
                                                 <label for="telephone">{{ 'telephone-label' | transloco }}</label>
                                                 <input pInputText id="telephone" formControlName="telephone"
-                                                    [placeholder]="'telephonePlaceholder' | transloco" />
+                                                    [placeholder]="'telephonePlaceholder' | transloco"
+                                                    [disabled]="!canRegister" />
                                             </div>
                                             <div class="field">
                                                 <label for="document_type">{{ 'document-type-label' | transloco
@@ -97,18 +112,20 @@
                                                 <p-select id="document_type" formControlName="document_type"
                                                     [options]="documentTypes"
                                                     [placeholder]="'documentTypePlaceholder' | transloco"
-                                                    class="w-16rem"></p-select>
+                                                    [disabled]="!canRegister" class="w-16rem"></p-select>
                                             </div>
                                             <div class="field">
                                                 <label for="document_number">{{ 'document-number-label' | transloco
                                                     }}</label>
                                                 <input pInputText id="document_number" formControlName="document_number"
-                                                    [placeholder]="'documentNumberPlaceholder' | transloco" />
+                                                    [placeholder]="'documentNumberPlaceholder' | transloco"
+                                                    [disabled]="!canRegister" />
                                             </div>
                                             <div class="field">
                                                 <label for="cf">{{ 'cf-label' | transloco }}</label>
                                                 <input pInputText id="cf" formControlName="cf"
-                                                    [placeholder]="'cfPlaceholder' | transloco" />
+                                                    [placeholder]="'cfPlaceholder' | transloco"
+                                                    [disabled]="!canRegister" />
                                                 <small
                                                     *ngIf="clientForm.get('cf')?.invalid && clientForm.get('cf')?.touched"
                                                     class="p-error">
@@ -129,24 +146,24 @@
                     </div>
                     <div class="flex  pt-6 justify-content-end">
                         <p-button [label]="'next' | transloco" icon="pi pi-arrow-right" iconPos="right"
-                            (onClick)="activateCallback(2)" />
+                            [disabled]="!canRegister" (onClick)="activateCallback(2)" />
                     </div>
                 </ng-template>
             </p-step-panel>
 
             <p-step-panel [value]="2">
                 <ng-template #content let-activateCallback="activateCallback">
-                    <div class="flex flex-col h-48">
+                    <div class="flex flex-col h-48" [class.opacity-50]="!canRegister">
                         <div class="flex-auto justify-center items-center font-medium">
                             <app-upload-identity (formDataEmitter)="handleFormData($event)"></app-upload-identity>
                         </div>
                     </div>
                     <div class="flex justify-space-between w-full pt-6">
                         <p-button [label]="'back' | transloco" severity="secondary" icon="pi pi-arrow-left"
-                            (onClick)="activateCallback(1)" />
+                            [disabled]="!canRegister" (onClick)="activateCallback(1)" />
 
                         <p-button [label]="'next' | transloco" icon="pi pi-arrow-right" iconPos="right"
-                            [disabled]="uploadForm.invalid" (onClick)="activateCallback(3)" />
+                            [disabled]="uploadForm.invalid || !canRegister" (onClick)="activateCallback(3)" />
                     </div>
                 </ng-template>
             </p-step-panel>
@@ -218,12 +235,12 @@
                     <!-- Submit Button Section - Centered -->
                     <div class="flex justify-center pt-4 w-full">
                         <p-button [label]="'submit' | transloco" icon="pi pi-check" class="p-button-lg"
-                            (onClick)="uploadReservationData()"></p-button>
+                            [disabled]="!canRegister" (onClick)="uploadReservationData()"></p-button>
                     </div>
 
                     <div class="flex pt-6 justify-start">
                         <p-button [label]="'back' | transloco" icon="pi pi-arrow-left" iconPos="right"
-                            (onClick)="activateCallback(2)" />
+                            [disabled]="!canRegister" (onClick)="activateCallback(2)" />
                     </div>
                 </ng-template>
             </p-step-panel>
