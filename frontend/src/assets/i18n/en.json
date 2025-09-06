@@ -209,6 +209,7 @@
     "number-of-people-placeholder": "Enter number of people",
     "number-of-people-required": "Number of people is required.",
     "number-of-people-min": "Number of people must be at least 1.",
+    "number-of-people-invalid": "Please enter a valid number.",
     "number-of-people-exceeds-capacity": "Number of people cannot exceed room capacity",
     "room-capacity-info": "Room capacity",
     "registration-full": "Registration Full",
