@@ -102,7 +102,11 @@ export class SettingsComponent implements OnInit {
       mail_use_ssl: preset.mail_use_ssl,
       provider_type: preset.provider_type ?? 'smtp'
     });
-    this.messageService.add({ severity: 'info', summary: 'Preset Applied', detail: preset.instructions });
+    this.messageService.add({
+      severity: 'info',
+      summary: this.translocoService.translate('settings.presetApplied'),
+      detail: this.translocoService.translate('settings.presetInstructions', { instructions: preset.instructions })
+    });
   }
 
   loadEmailConfig(): void {
@@ -138,7 +142,11 @@ export class SettingsComponent implements OnInit {
   saveEmailConfig(): void {
     if (this.emailForm.invalid) {
       this.emailForm.markAllAsTouched();
-      this.messageService.add({ severity: 'warn', summary: 'Validation', detail: 'Please fill required fields.' });
+      this.messageService.add({
+        severity: 'warn',
+        summary: this.translocoService.translate('settings.validation'),
+        detail: this.translocoService.translate('settings.fillRequiredFields')
+      });
       return;
     }
     const payload: EmailConfig = {
@@ -146,26 +154,50 @@ export class SettingsComponent implements OnInit {
       is_active: true
     };
     this.emailConfigService.saveEmailConfig(payload).subscribe({
-      next: () => this.messageService.add({ severity: 'success', summary: 'Saved', detail: 'Email configuration saved.' }),
-      error: (e) => this.messageService.add({ severity: 'error', summary: 'Error', detail: e?.error?.error || 'Save failed' })
+      next: () => this.messageService.add({
+        severity: 'success',
+        summary: this.translocoService.translate('settings.saved'),
+        detail: this.translocoService.translate('settings.emailConfigSaved')
+      }),
+      error: (e) => this.messageService.add({
+        severity: 'error',
+        summary: this.translocoService.translate('settings.error'),
+        detail: e?.error?.error || this.translocoService.translate('settings.saveFailed')
+      })
     });
   }
 
   testEmailConfig(): void {
     const to = this.emailForm.get('mail_username')?.value || this.emailForm.get('mail_default_sender_email')?.value;
     if (!to) {
-      this.messageService.add({ severity: 'warn', summary: 'Test Email', detail: 'Set a test recipient email first.' });
+      this.messageService.add({
+        severity: 'warn',
+        summary: this.translocoService.translate('settings.testEmail'),
+        detail: this.translocoService.translate('settings.setTestRecipientFirst')
+      });
       return;
     }
     this.emailConfigService.testEmailConfig(to).subscribe({
       next: (res) => {
         if (res.status === 'success' || (res as any).message?.includes('success')) {
-          this.messageService.add({ severity: 'success', summary: 'Test Email', detail: 'Test email sent successfully.' });
+          this.messageService.add({
+            severity: 'success',
+            summary: this.translocoService.translate('settings.testEmail'),
+            detail: this.translocoService.translate('settings.testEmailSentSuccessfully')
+          });
         } else {
-          this.messageService.add({ severity: 'warn', summary: 'Test Email', detail: 'Test email failed.' });
+          this.messageService.add({
+            severity: 'warn',
+            summary: this.translocoService.translate('settings.testEmail'),
+            detail: this.translocoService.translate('settings.testEmailFailed')
+          });
         }
       },
-      error: (e) => this.messageService.add({ severity: 'error', summary: 'Test Email', detail: e?.error?.error || 'Test failed' })
+      error: (e) => this.messageService.add({
+        severity: 'error',
+        summary: this.translocoService.translate('settings.testEmail'),
+        detail: e?.error?.error || this.translocoService.translate('settings.testFailed')
+      })
     });
   }
 

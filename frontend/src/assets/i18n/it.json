@@ -206,5 +206,20 @@
     "api-key-placeholder": "La tua chiave API",
     "test-configuration-btn": "Verifica configurazione",
     "save-configuration-btn": "Salva Configurazione",
-    "language-settings-title": "Impostazioni lingua"
+    "language-settings-title": "Impostazioni lingua",
+    "settings": {
+        "presetApplied": "Preimpostazione Applicata",
+        "presetInstructions": "Istruzioni: {{instructions}}",
+        "validation": "Validazione",
+        "fillRequiredFields": "Compila i campi obbligatori.",
+        "saved": "Salvato",
+        "emailConfigSaved": "Configurazione email salvata.",
+        "error": "Errore",
+        "saveFailed": "Salvataggio fallito",
+        "testEmail": "Email di Test",
+        "setTestRecipientFirst": "Imposta prima un destinatario di test.",
+        "testEmailSentSuccessfully": "Email di test inviata con successo.",
+        "testEmailFailed": "Email di test fallita.",
+        "testFailed": "Test fallito"
+    }
 }

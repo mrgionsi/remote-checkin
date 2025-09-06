@@ -204,5 +204,20 @@
     "api-key-placeholder": "Your API key",
     "test-configuration-btn": "Test Configuration",
     "save-configuration-btn": "Save Configuration",
-    "language-settings-title": "Language Settings"
+    "language-settings-title": "Language Settings",
+    "settings": {
+        "presetApplied": "Preset Applied",
+        "presetInstructions": "Instructions: {{instructions}}",
+        "validation": "Validation",
+        "fillRequiredFields": "Please fill required fields.",
+        "saved": "Saved",
+        "emailConfigSaved": "Email configuration saved.",
+        "error": "Error",
+        "saveFailed": "Save failed",
+        "testEmail": "Test Email",
+        "setTestRecipientFirst": "Set a test recipient email first.",
+        "testEmailSentSuccessfully": "Test email sent successfully.",
+        "testEmailFailed": "Test email failed.",
+        "testFailed": "Test failed"
+    }
 }
