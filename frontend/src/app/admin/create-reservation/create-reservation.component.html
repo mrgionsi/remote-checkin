@@ -109,6 +109,35 @@
             </div>
         </div>
 
+        <!-- Number of People Field -->
+        <div class="p-field p-grid align-items-center p-mb-3">
+            <label for="numberOfPeople" class="p-col-12 p-md-2 text-right">
+                {{ 'number-of-people-label' | transloco }}
+            </label>
+            <div class="p-col-12 p-md-10">
+                <input id="numberOfPeople" pInputText formControlName="numberOfPeople" type="number" min="1"
+                    [placeholder]="'number-of-people-placeholder' | transloco"
+                    [class.p-invalid]="reservationForm.get('numberOfPeople')?.invalid && reservationForm.get('numberOfPeople')?.touched"
+                    class="wide-input" />
+                <p *ngIf="reservationForm.get('numberOfPeople')?.invalid && reservationForm.get('numberOfPeople')?.touched"
+                    class="p-error mt-2">
+                    <span *ngIf="reservationForm.get('numberOfPeople')?.errors?.['required']">
+                        {{ 'number-of-people-required' | transloco }}
+                    </span>
+                    <span *ngIf="reservationForm.get('numberOfPeople')?.errors?.['min']">
+                        {{ 'number-of-people-min' | transloco }}
+                    </span>
+                    <span *ngIf="reservationForm.get('numberOfPeople')?.errors?.['exceedsCapacity']">
+                        {{ 'number-of-people-exceeds-capacity' | transloco }} ({{
+                        reservationForm.get('numberOfPeople')?.errors?.['maxCapacity'] }})
+                    </span>
+                </p>
+                <small *ngIf="reservationForm.get('roomName')?.value" class="p-text-secondary">
+                    {{ 'room-capacity-info' | transloco }}: {{ getSelectedRoomCapacity() }}
+                </small>
+            </div>
+        </div>
+
         <!-- Room Name Field -->
         <div class="p-field p-grid align-items-center p-mb-3">
             <label for="roomName" class="p-col-12 p-md-2 text-right">
