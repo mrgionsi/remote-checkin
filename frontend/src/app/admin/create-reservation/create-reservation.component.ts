@@ -71,33 +71,53 @@ export class CreateReservationComponent implements OnInit {
   // Method to validate number of people against room capacity
   validateNumberOfPeople(): void {
     const selectedRoom = this.reservationForm.get('roomName')?.value;
-    const numberOfPeople = this.reservationForm.get('numberOfPeople')?.value;
+    const numberOfPeopleControl = this.reservationForm.get('numberOfPeople');
+    const numberOfPeople = numberOfPeopleControl?.value;
 
-    if (selectedRoom && numberOfPeople) {
-      let roomCapacity = 0;
+    // Check if form controls exist
+    if (!selectedRoom || !numberOfPeopleControl || numberOfPeople === null || numberOfPeople === undefined) {
+      return;
+    }
 
-      // If selectedRoom is an object (from p-select), get capacity directly
-      if (typeof selectedRoom === 'object' && selectedRoom.capacity) {
-        roomCapacity = selectedRoom.capacity;
-      }
-      // If selectedRoom is a string (room name), find it in the rooms array
-      else if (typeof selectedRoom === 'string' && this.rooms && this.rooms.length > 0) {
-        const room = this.rooms.find(room => room.name === selectedRoom);
-        roomCapacity = room ? room.capacity : 0;
-      }
+    // Coerce numberOfPeople to numeric type and validate
+    const numericNumberOfPeople = Number(numberOfPeople);
+    
+    // Check if the conversion resulted in NaN or invalid number
+    if (isNaN(numericNumberOfPeople) || !isFinite(numericNumberOfPeople)) {
+      numberOfPeopleControl.setErrors({
+        'invalidNumber': true
+      });
+      return;
+    }
 
+    // Get room capacity with proper fallback
+    let roomCapacity = 0;
+
+    // If selectedRoom is an object (from p-select), get capacity directly
+    if (typeof selectedRoom === 'object' && selectedRoom.capacity !== undefined) {
+      roomCapacity = Number(selectedRoom.capacity) || 0;
+    }
+    // If selectedRoom is a string (room name), find it in the rooms array
+    else if (typeof selectedRoom === 'string' && this.rooms && this.rooms.length > 0) {
+      const room = this.rooms.find(room => room.name === selectedRoom);
+      roomCapacity = room && room.capacity !== undefined ? Number(room.capacity) || 0 : 0;
+    }
+
+    // Only perform capacity validation if room capacity is defined and valid
+    if (roomCapacity > 0) {
       // Allow numberOfPeople to equal roomCapacity, but not exceed it
-      if (roomCapacity > 0 && numberOfPeople > roomCapacity) {
-        this.reservationForm.get('numberOfPeople')?.setErrors({
+      if (numericNumberOfPeople > roomCapacity) {
+        numberOfPeopleControl.setErrors({
           'exceedsCapacity': true,
           'maxCapacity': roomCapacity
         });
       } else {
-        const currentErrors = this.reservationForm.get('numberOfPeople')?.errors;
+        // Clear capacity-related errors if validation passes
+        const currentErrors = numberOfPeopleControl.errors;
         if (currentErrors) {
           delete currentErrors['exceedsCapacity'];
           delete currentErrors['maxCapacity'];
-          this.reservationForm.get('numberOfPeople')?.setErrors(
+          numberOfPeopleControl.setErrors(
             Object.keys(currentErrors).length > 0 ? currentErrors : null
           );
         }

@@ -211,6 +211,7 @@
     "number-of-people-placeholder": "Inserisci numero di persone",
     "number-of-people-required": "Il numero di persone è obbligatorio.",
     "number-of-people-min": "Il numero di persone deve essere almeno 1.",
+    "number-of-people-invalid": "Inserisci un numero valido.",
     "number-of-people-exceeds-capacity": "Il numero di persone non può superare la capienza della stanza",
     "room-capacity-info": "Capienza stanza",
     "registration-full": "Registrazione Completa",
