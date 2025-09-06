@@ -8,6 +8,24 @@
             <p-step [disabled]="clientForm.invalid" [value]="2">{{ 'upload-images-step' | transloco }}</p-step>
             <p-step [disabled]="uploadForm.invalid" [value]="3">{{ 'confirm-data-step' | transloco }}</p-step>
         </p-step-list>
+
+        <!-- Capacity Status Indicator -->
+        <div *ngIf="reservationDetails" class="mb-4 p-3 border-round"
+            [ngClass]="canRegister ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'">
+            <div class="flex align-items-center">
+                <i [class]="canRegister ? 'pi pi-check-circle text-green-600' : 'pi pi-times-circle text-red-600'"
+                    class="mr-2"></i>
+                <span [class]="canRegister ? 'text-green-800' : 'text-red-800'" class="font-medium">
+                    {{ (canRegister ? 'registration-available' : 'registration-full') | transloco }}
+                </span>
+            </div>
+            <div *ngIf="reservationDetails" class="mt-2 text-sm"
+                [class]="canRegister ? 'text-green-700' : 'text-red-700'">
+                {{ 'capacity-status' | transloco: {registered: registeredClientsCount, max:
+                reservationDetails.number_of_people || 1} }}
+            </div>
+        </div>
+
         <p-step-panels>
             <p-step-panel [value]="1">
                 <ng-template #content let-activateCallback="activateCallback">
