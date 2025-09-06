@@ -93,7 +93,7 @@ export class RemoteCheckinComponent implements OnInit {
   loadReservationDetails() {
     if (!this.reservationId) return;
 
-    this.reservationService.getReservationById(this.reservationId).subscribe({
+    this.reservationService.getReservationById(Number(this.reservationId)).subscribe({
       next: (reservation) => {
         this.reservationDetails = reservation;
         this.checkRegistrationCapacity();
