@@ -108,7 +108,29 @@
                 </p>
             </div>
         </div>
-
+        <!-- Room Name Field -->
+        <div class="p-field p-grid align-items-center p-mb-3">
+            <label for="roomName" class="p-col-12 p-md-2 text-right">
+                {{ 'room-name-label' | transloco }}
+            </label>
+            <div class="p-col-12 p-md-10">
+                <p-select id="roomSelect" formControlName="roomName" [options]="rooms" optionLabel="name"
+                    [placeholder]="'room-name-placeholder' | transloco"
+                    [class.p-invalid]="reservationForm.get('roomName')?.invalid && reservationForm.get('roomName')?.touched"
+                    styleClass="wide-input">
+                </p-select>
+                <p *ngIf="reservationForm.get('roomName')?.invalid && reservationForm.get('roomName')?.touched"
+                    class="p-error">
+                    {{ 'room-name-required' | transloco }}
+                </p>
+                <!-- Error Message -->
+                <div *ngIf="reservationForm.errors?.['dateRangeInvalid']">
+                    <p style="color: red;">
+                        {{ 'date-range-invalid' | transloco }}
+                    </p>
+                </div>
+            </div>
+        </div>
         <!-- Number of People Field -->
         <div class="p-field p-grid align-items-center p-mb-3">
             <label for="numberOfPeople" class="p-col-12 p-md-2 text-right">
@@ -138,29 +160,7 @@
             </div>
         </div>
 
-        <!-- Room Name Field -->
-        <div class="p-field p-grid align-items-center p-mb-3">
-            <label for="roomName" class="p-col-12 p-md-2 text-right">
-                {{ 'room-name-label' | transloco }}
-            </label>
-            <div class="p-col-12 p-md-10">
-                <p-select id="roomSelect" formControlName="roomName" [options]="rooms" optionLabel="name"
-                    [placeholder]="'room-name-placeholder' | transloco"
-                    [class.p-invalid]="reservationForm.get('roomName')?.invalid && reservationForm.get('roomName')?.touched"
-                    styleClass="wide-input">
-                </p-select>
-                <p *ngIf="reservationForm.get('roomName')?.invalid && reservationForm.get('roomName')?.touched"
-                    class="p-error">
-                    {{ 'room-name-required' | transloco }}
-                </p>
-                <!-- Error Message -->
-                <div *ngIf="reservationForm.errors?.['dateRangeInvalid']">
-                    <p style="color: red;">
-                        {{ 'date-range-invalid' | transloco }}
-                    </p>
-                </div>
-            </div>
-        </div>
+
 
         <!-- Submit Button -->
         <div class="text-center">
