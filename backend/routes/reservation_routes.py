@@ -89,8 +89,13 @@ def create_reservation():
         if not room:
             return jsonify({"error": "Room not found"}), 404
 
-        # Validate number_of_people if provided
-        number_of_people = data.get("numberOfPeople", 1)
+        # Validate number_of_people if provided - safely coerce to int
+        raw_number_of_people = data.get("numberOfPeople", 1)
+        try:
+            number_of_people = int(raw_number_of_people)
+        except (ValueError, TypeError):
+            return jsonify({"error": f"Invalid number of people: '{raw_number_of_people}'. Must be a valid integer."}), 400
+        
         if number_of_people < 1:
             return jsonify({"error": "Number of people must be at least 1"}), 400
         if number_of_people > room.capacity:
