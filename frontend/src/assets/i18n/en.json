@@ -216,6 +216,8 @@
     "reservation-full-message": "This reservation is full and no longer accepting new registrations",
     "reservation-capacity-status": "This reservation is full ({{registered}}/{{max}} people registered)",
     "registration-available": "Registration Available",
+    "registration-unavailable": "Registration Unavailable",
+    "capacity-verification-failed": "Unable to verify reservation capacity. Registration is temporarily disabled.",
     "capacity-status": "{{registered}}/{{max}} people registered",
     "settings": {
         "presetApplied": "Preset Applied",
