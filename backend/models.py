@@ -184,7 +184,7 @@ class Reservation(Base):
     name_reference = Column(String, default='Not available')
     email = Column(String, nullable=False)
     telephone = Column(String, default='')
-    number_of_people = Column(Integer, default=1, nullable=False)
+    number_of_people = Column(Integer, default=1, nullable=False,server_default='1')
 
 
     room = relationship("Room", lazy="joined")
