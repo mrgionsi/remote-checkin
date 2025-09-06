@@ -274,13 +274,32 @@ def update_reservation(reservation_id):
         if "status" in data:
             reservation.status = data["status"]
         if "number_of_people" in data:
-            number_of_people = data["number_of_people"]
+            raw_number_of_people = data["number_of_people"]
+            
+            # Check if not None
+            if raw_number_of_people is None:
+                return jsonify({"error": "Number of people cannot be null"}), 400
+            
+            # Safely coerce to int
+            try:
+                number_of_people = int(raw_number_of_people)
+            except (ValueError, TypeError):
+                return jsonify({"error": f"Invalid number of people: '{raw_number_of_people}'. Must be a valid integer."}), 400
+            
+            # Validate minimum value
             if number_of_people < 1:
                 return jsonify({"error": "Number of people must be at least 1"}), 400
+            
             # Get current room to check capacity
             current_room = db.query(Room).filter(Room.id == reservation.id_room).first()
+            if not current_room:
+                return jsonify({"error": "Current room not found"}), 404
+            
+            # Validate against room capacity
             if number_of_people > current_room.capacity:
                 return jsonify({"error": f"Number of people ({number_of_people}) cannot exceed room capacity ({current_room.capacity})"}), 400
+            
+            # Only assign after all validations pass
             reservation.number_of_people = number_of_people
         if "room" in data and isinstance(data["room"], dict) and "id" in data["room"]:
             room = db.query(Room).filter(Room.id == data["room"]["id"]).first()
