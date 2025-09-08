@@ -1,123 +1,132 @@
-
+md
 # Remote Check-in
 
-Remote check-in is a self-hosted to handle the check-in for a B&B remotely. 
+Remote check-in is a self-hosted solution designed to handle the check-in process for Bed and Breakfasts (B&Bs) remotely. This system allows you to manage your properties and rooms, create reservations, and collect necessary guest information, documents, and photos before arrival.
 
-Setting up your structures (B&Bs) and relative rooms, you can add a reservation and ask clients to fill in mandatory informations and upload documents and selfie. 
+## Key Features & Benefits
 
+*   **Remote Check-in:** Guests can complete their check-in process remotely, saving time and streamlining operations.
+*   **Structure Management:** Easily manage your B&B locations, rooms, and associated details.
+*   **Reservation Management:** Create, update, and track reservations efficiently.
+*   **Information Collection:** Securely collect mandatory guest information, including documents and self-portraits.
+*   **Self-Hosted:** Maintain complete control over your data and system.
+*   **Customizable:** Flexible configuration options to tailor the system to your specific needs.
 
+## Prerequisites & Dependencies
 
+Before installing and setting up Remote Check-in, ensure you have the following tools and dependencies:
 
-## Documentation
+*   **Python:** Version 3.7 or higher
+*   **Node.js:** Latest LTS version
+*   **Docker:** Docker Engine installed and running
+*   **Docker Compose:** (Optional, but recommended)
+*   **Database:**  PostgreSQL or similar (configure through environment variables)
+*   **SMTP Server:** For email functionality (e.g., Gmail, Sendgrid)
 
-[Documentation](https://tbd)
-
-
-## Environment Variables
-
-To run this project, you will need to add the following environment variables to your .env file
-
-`DATABASE_IP`
-
-`DATABASE_PORT`
-
-`DATABASE_USERNAME`
-
-`DATABASE_PASSWORD`
-## Contributing
-
-Contributions are always welcome!
-
-See `contributing.md` for ways to get started.
-
-Please adhere to this project's `code of conduct`.
-
-
-## Run Locally
-
-Clone the project
+**Python Packages (install using pip):**
 
 ```bash
-  git clone https://github.com/mrgionsi/remote-checkin.git
+pip install -r backend/requirements.txt
 ```
 
-Go to the project directory
+**Node.js Packages:**
 
 ```bash
-  cd remote-checkin/frontend
-  npm install remote-checkin
-  npm start
-```
-```bash
-  cd remote-checkin/backend
-  pip install -r requirements.txt
-  python main.py
+# Navigate to the frontend directory if needed, and then install the required packages
+npm install
 ```
 
+## Installation & Setup Instructions
 
-## Running Tests
+Follow these steps to install and set up Remote Check-in:
 
-To run tests, run the following command
+1.  **Clone the Repository:**
 
-```bash
-  npm run test
-```
+    ```bash
+    git clone https://github.com/mrgionsi/remote-checkin.git
+    cd remote-checkin
+    ```
 
+2.  **Configure Environment Variables:**
 
-## Usage/Examples
+    Create a `.env` file in the root directory and populate it with the necessary environment variables:
 
-```javascript
-import Component from 'my-project'
+    ```
+    DATABASE_IP=<your_database_ip>
+    DATABASE_PORT=<your_database_port>
+    DATABASE_USERNAME=<your_database_username>
+    DATABASE_PASSWORD=<your_database_password>
+    DATABASE_NAME=<your_database_name>
+    DATABASE_TYPE=<your_database_type> # e.g., postgresql
 
-function App() {
-  return <Component />
-}
-```
+    MAIL_SERVER=<your_mail_server>
+    MAIL_PORT=<your_mail_port>
+    MAIL_USERNAME=<your_mail_username>
+    MAIL_PASSWORD=<your_mail_password>
+    MAIL_DEFAULT_SENDER=<your_default_sender_email>
 
+    # Other necessary environment variables...
+    ```
+    Refer to `backend/EMAIL_CONFIG.md` and other configuration files for a comprehensive list of required variables.
 
-## Add Pre-commit hooks
-1. Install Pre-Commit
-```bash
-pip install pre-commit
-```
+3.  **Build and Run with Docker Compose (Recommended):**
 
-2. Create the Validation Script
-Save the following as .git/hooks/commit-msg-check.py and make it executable:
-```python
-#!/usr/bin/env python3
-import sys
-import re
+    ```bash
+    docker-compose up --build
+    ```
 
-# Allowed commit types
-ALLOWED_TYPES = {"feat", "fix", "perf", "refactor", "style", "test", "build", "ops", "docs", "merge"}
+4. **Alternative Run using Docker**
+    ```bash
+    # Build the docker image
+    docker build -t remote-checkin-backend backend/
+    # Run the docker image
+    docker run -p 8000:8000 remote-checkin-backend
+    ```
 
-# Commit message pattern
-COMMIT_REGEX = re.compile(rf"^({'|'.join(ALLOWED_TYPES)})(\(.+\))?: .+")
+    This command builds the Docker images and starts the application containers. Access the application through your web browser.  Refer to the Dockerfile for port configurations.
 
-# Read the commit message
-commit_msg_file = sys.argv[1]
-with open(commit_msg_file, "r") as file:
-    commit_msg = file.readline().strip()
+5.  **Manual Setup (Without Docker):**
 
-if not COMMIT_REGEX.match(commit_msg):
-    print(f"❌ ERROR: Invalid commit message format.\n")
-    print("✅ Allowed format: `<type>(<scope>): <description>`")
-    print(f"✅ Allowed types: {', '.join(ALLOWED_TYPES)}")
-    print("💡 Example: `feat(ui): add dark mode toggle`")
-    sys.exit(1)
+    a.  Navigate to the `backend` directory.
 
-sys.exit(0)
+    b.  Install Python dependencies: `pip install -r requirements.txt`
 
-```
+    c.  Configure the database connection in `backend/config.py` (or through environment variables).
 
-4. Make the Script Executable
-Run:
-```bash
-chmod +x .git/hooks/commit-msg-check.py
-```
+    d.  Run the backend application: `python main.py` (or the appropriate entry point for your application).
 
-5. Install the Hook
-Run:
-```bash
-pre-commit install --hook-type commit-msg
-```
+## Usage Examples & API Documentation
+
+Detailed API documentation and usage examples will be available at [Documentation](https://tbd) once finalized. This documentation will cover:
+
+*   API endpoints for managing structures, rooms, and reservations.
+*   Data models and schemas.
+*   Authentication and authorization procedures.
+*   Sample code snippets for common use cases.
+
+## Configuration Options
+
+The Remote Check-in system offers various configuration options, including:
+
+*   **Database Configuration:**  Specify database connection details (IP, port, username, password, database name, type) via environment variables.  Supported database types include PostgreSQL, MySQL, and SQLite.
+*   **Email Configuration:**  Configure SMTP server settings (server, port, username, password, sender address) for sending email notifications.  Refer to `backend/EMAIL_CONFIG.md` for detailed instructions and environment variables.
+*   **Application Settings:**  Customize application-specific settings (e.g., image storage location, allowed file types) through environment variables or configuration files.
+
+## Contributing Guidelines
+
+We welcome contributions to the Remote Check-in project! To contribute, please follow these guidelines:
+
+1.  Fork the repository.
+2.  Create a new branch for your feature or bug fix.
+3.  Implement your changes, adhering to coding standards.
+4.  Write clear and concise commit messages.
+5.  Submit a pull request with a detailed description of your changes.
+
+## License Information
+
+This project is licensed under the [GNU Affero General Public License v3.0](https://www.gnu.org/licenses/agpl-3.0.en.html). See the `LICENSE` file for more information.
+
+## Acknowledgments
+
+*   This project utilizes various open-source libraries and frameworks, including Python, TypeScript, and [list any other significant libraries].
+*   We thank the open-source community for their contributions to these essential tools.
