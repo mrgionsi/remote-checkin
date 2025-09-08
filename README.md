@@ -11,31 +11,22 @@ Remote check-in is a self-hosted solution designed to handle the check-in proces
 *   **Self-Hosted:** Maintain complete control over your data and system.
 *   **Customizable:** Flexible configuration options to tailor the system to your specific needs.
 
-## Prerequisites & Dependencies
+## Deployment
+
+Follow this chapter to get the Remote Check-In app up and running in your environment.
+
+### Prerequisites & Dependencies
 
 Before installing and setting up Remote Check-in, ensure you have the following tools and dependencies:
 
-*   **Python:** Version 3.7 or higher
-*   **Node.js:** Latest LTS version
-*   **Docker:** Docker Engine installed and running
-*   **Docker Compose:** (Optional, but recommended)
-*   **Database:**  PostgreSQL or similar (configure through environment variables)
-*   **SMTP Server:** For email functionality (e.g., Gmail, Sendgrid)
+* **Python:** Version 3.7 or higher
+* **Node.js:** Latest LTS version
+* **Docker:** Docker Engine installed and running
+  * **Docker Compose** is optional, but recommended 
+* **Database:** PostgreSQL or similar (configure through environment variables)
+* **SMTP Server:** For email functionality (e.g., Gmail, Sendgrid)
 
-**Python Packages (install using pip):**
-
-```bash
-pip install -r backend/requirements.txt
-```
-
-**Node.js Packages:**
-
-```bash
-# Navigate to the frontend directory if needed, and then install the required packages
-npm install
-```
-
-## Installation & Setup Instructions
+### Installation & Setup Instructions
 
 Follow these steps to install and set up Remote Check-in:
 
@@ -68,13 +59,22 @@ Follow these steps to install and set up Remote Check-in:
     ```
     Refer to `backend/EMAIL_CONFIG.md` and other configuration files for a comprehensive list of required variables.
 
-3.  **Build and Run with Docker Compose (Recommended):**
+3. **Install the project dependencies:**
+
+    ```bash
+    # Backend Python dependencies
+    $ pip install -r backend/requirements.txt
+    # Frontend Node.js dependencies
+    $ cd frontend && npm install
+    ```
+
+4.  **Build and Run with Docker Compose (Recommended):**
 
     ```bash
     docker-compose up --build
     ```
 
-4. **Alternative Run using Docker**
+5. **Alternative Run using Docker**
     ```bash
     # Build the docker image
     docker build -t remote-checkin-backend backend/
@@ -84,15 +84,13 @@ Follow these steps to install and set up Remote Check-in:
 
     This command builds the Docker images and starts the application containers. Access the application through your web browser.  Refer to the Dockerfile for port configurations.
 
-5.  **Manual Setup (Without Docker):**
+6.  **Manual Setup (without Docker):**
 
-    a.  Navigate to the `backend` directory.
+    a. Configure the database connection in `backend/config.py` (or through environment variables).
 
-    b.  Install Python dependencies: `pip install -r requirements.txt`
+    b. Run the backend application: `python main.py`.
 
-    c.  Configure the database connection in `backend/config.py` (or through environment variables).
-
-    d.  Run the backend application: `python main.py` (or the appropriate entry point for your application).
+    c. Run the frontend application
 
 ## Usage Examples & API Documentation
 
