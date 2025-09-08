@@ -1,9 +1,9 @@
 ---
 name: 🛠️ Feature Request
-description: Suggest an idea to help us improve W&B
+description: Suggest an idea to help us improve Remote Checkin app
 title: "[Feature]: "
 labels:
-  - "ty:feature"
+  - "enhancement"
 
 body:
   - type: markdown

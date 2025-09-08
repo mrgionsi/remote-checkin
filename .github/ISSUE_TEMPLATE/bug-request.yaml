@@ -3,7 +3,7 @@ name: 🐞 Bug Report
 description: Use this template to report a bug in the Remote Checkin app
 title: "[Bug]: "
 labels:
-  - "ty:bug"
+  - "bug"
 
 body:
   - type: markdown
