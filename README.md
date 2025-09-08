@@ -1,4 +1,3 @@
-md
 # Remote Check-in
 
 Remote check-in is a self-hosted solution designed to handle the check-in process for Bed and Breakfasts (B&Bs) remotely. This system allows you to manage your properties and rooms, create reservations, and collect necessary guest information, documents, and photos before arrival.
