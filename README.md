@@ -4,12 +4,12 @@ Remote check-in is a self-hosted solution designed to handle the check-in proces
 
 ## Key Features & Benefits
 
-*   **Remote Check-in:** Guests can complete their check-in process remotely, saving time and streamlining operations.
-*   **Structure Management:** Easily manage your B&B locations, rooms, and associated details.
-*   **Reservation Management:** Create, update, and track reservations efficiently.
-*   **Information Collection:** Securely collect mandatory guest information, including documents and self-portraits.
-*   **Self-Hosted:** Maintain complete control over your data and system.
-*   **Customizable:** Flexible configuration options to tailor the system to your specific needs.
+* **Remote Check-in:** Guests can complete their check-in process remotely, saving time and streamlining operations.
+* **Structure Management:** Easily manage your B&B locations, rooms, and associated details.
+* **Reservation Management:** Create, update, and track reservations efficiently.
+* **Information Collection:** Securely collect mandatory guest information, including documents and self-portraits.
+* **Self-Hosted:** Maintain complete control over your data and system.
+* **Customizable:** Flexible configuration options to tailor the system to your specific needs.
 
 ## Deployment
 
@@ -96,28 +96,28 @@ Follow these steps to install and set up Remote Check-in:
 
 Detailed API documentation and usage examples will be available at [Documentation](https://tbd) once finalized. This documentation will cover:
 
-*   API endpoints for managing structures, rooms, and reservations.
-*   Data models and schemas.
-*   Authentication and authorization procedures.
-*   Sample code snippets for common use cases.
+* API endpoints for managing structures, rooms, and reservations.
+* Data models and schemas.
+* Authentication and authorization procedures.
+* Sample code snippets for common use cases.
 
 ## Configuration Options
 
 The Remote Check-in system offers various configuration options, including:
 
-*   **Database Configuration:**  Specify database connection details (IP, port, username, password, database name, type) via environment variables.  Supported database types include PostgreSQL, MySQL, and SQLite.
-*   **Email Configuration:**  Configure SMTP server settings (server, port, username, password, sender address) for sending email notifications.  Refer to `backend/EMAIL_CONFIG.md` for detailed instructions and environment variables.
-*   **Application Settings:**  Customize application-specific settings (e.g., image storage location, allowed file types) through environment variables or configuration files.
+* **Database Configuration:** Specify database connection details (IP, port, username, password, database name, type) via environment variables. Supported database types include PostgreSQL, MySQL, and SQLite.
+* **Email Configuration:** Configure SMTP server settings (server, port, username, password, sender address) for sending email notifications. Refer to `backend/EMAIL_CONFIG.md` for detailed instructions and environment variables.
+* **Application Settings:** Customize application-specific settings (e.g., image storage location, allowed file types) through environment variables or configuration files.
 
 ## Contributing Guidelines
 
 We welcome contributions to the Remote Check-in project! To contribute, please follow these guidelines:
 
-1.  Fork the repository.
-2.  Create a new branch for your feature or bug fix.
-3.  Implement your changes, adhering to coding standards.
-4.  Write clear and concise commit messages.
-5.  Submit a pull request with a detailed description of your changes.
+1. Fork the repository.
+2. Create a new branch for your feature or bug fix.
+3. Implement your changes, adhering to coding standards.
+4. Write clear and concise commit messages.
+5. Submit a pull request with a detailed description of your changes.
 
 ## License Information
 
@@ -125,5 +125,5 @@ This project is licensed under the [GNU Affero General Public License v3.0](http
 
 ## Acknowledgments
 
-*   This project utilizes various open-source libraries and frameworks, including Python, TypeScript, and [list any other significant libraries].
-*   We thank the open-source community for their contributions to these essential tools.
+* This project utilizes various open-source libraries and frameworks, including Python, TypeScript, and [list any other significant libraries].
+* We thank the open-source community for their contributions to these essential tools.
