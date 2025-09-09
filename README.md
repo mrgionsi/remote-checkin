@@ -1,8 +1,8 @@
-# Remote Check-in
+# 📲 Remote Check-in
 
 Remote check-in is a self-hosted solution designed to handle the check-in process for Bed and Breakfasts (B&Bs) remotely. This system allows you to manage your properties and rooms, create reservations, and collect necessary guest information, documents, and photos before arrival.
 
-## Key Features & Benefits
+## ⚡️ Key Features & Benefits
 
 * **Remote Check-in:** Guests can complete their check-in process remotely, saving time and streamlining operations.
 * **Structure Management:** Easily manage your B&B locations, rooms, and associated details.
@@ -11,7 +11,7 @@ Remote check-in is a self-hosted solution designed to handle the check-in proces
 * **Self-Hosted:** Maintain complete control over your data and system.
 * **Customizable:** Flexible configuration options to tailor the system to your specific needs.
 
-## Deployment
+## 🚀 Deployment
 
 Follow this chapter to get the Remote Check-In app up and running in your environment.
 
@@ -92,7 +92,7 @@ Follow these steps to install and set up Remote Check-in:
 
     c. Run the frontend application
 
-## Usage Examples & API Documentation
+## 📄 Usage Examples & API Documentation
 
 Detailed API documentation and usage examples will be available at [Documentation](https://tbd) once finalized. This documentation will cover:
 
@@ -101,7 +101,7 @@ Detailed API documentation and usage examples will be available at [Documentatio
 * Authentication and authorization procedures.
 * Sample code snippets for common use cases.
 
-## Configuration Options
+## 📝 Configuration Options
 
 The Remote Check-in system offers various configuration options, including:
 
@@ -109,7 +109,7 @@ The Remote Check-in system offers various configuration options, including:
 * **Email Configuration:** Configure SMTP server settings (server, port, username, password, sender address) for sending email notifications. Refer to `backend/EMAIL_CONFIG.md` for detailed instructions and environment variables.
 * **Application Settings:** Customize application-specific settings (e.g., image storage location, allowed file types) through environment variables or configuration files.
 
-## Contributing Guidelines
+## 👥 Contributing Guidelines
 
 We welcome contributions to the Remote Check-in project! To contribute, please follow these guidelines:
 
@@ -119,7 +119,7 @@ We welcome contributions to the Remote Check-in project! To contribute, please f
 4. Write clear and concise commit messages.
 5. Submit a pull request with a detailed description of your changes.
 
-## License Information
+## 📜 License Information
 
 This project is licensed under the [GNU Affero General Public License v3.0](https://www.gnu.org/licenses/agpl-3.0.en.html). See the `LICENSE` file for more information.
 
