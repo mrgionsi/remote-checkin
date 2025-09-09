@@ -42,11 +42,11 @@ Follow these steps to install and set up Remote Check-in:
     Create a `.env` file in the root directory and populate it with the necessary environment variables:
 
     ```
-    DATABASE_IP=<your_database_ip>
-    DATABASE_PORT=<your_database_port>
-    DATABASE_USERNAME=<your_database_username>
-    DATABASE_PASSWORD=<your_database_password>
-    DATABASE_NAME=<your_database_name>
+    DB_HOST=<your_database_host>
+    DB_PORT=<your_database_port>
+    DB_USER=<your_database_username>
+    DB_PASSWORD=<your_database_password>
+    DB_NAME=<your_database_name>
     DATABASE_TYPE=<your_database_type> # e.g., postgresql
 
     MAIL_SERVER=<your_mail_server>
