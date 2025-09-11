@@ -1,6 +1,12 @@
-# 📲 Remote Check-in
+# 📲 Remote Check-in <span align="left">
 
 Remote check-in is a self-hosted solution designed to handle the check-in process for Bed and Breakfasts (B&Bs) remotely. This system allows you to manage your properties and rooms, create reservations, and collect necessary guest information, documents, and photos before arrival.
+
+<p>
+ <a href="https://github.com/mrgionsi/remote-checkin/releases"><img alt="GitHub Release" src="https://img.shields.io/github/v/release/mrgionsi/remote-checkin" hspace="6px" vspace="2px"></a>
+ <a href="https://github.com/mrgionsi/remote-checkin/releases"><img alt="Project Build Workflow" src="https://img.shields.io/github/actions/workflow/status/mrgionsi/remote-checkin/build.yml" vspace="2px"></a>
+ <a href="https://github.com/mrgionsi/remote-checkin/issues"><img alt="GitHub Issues" src="https://img.shields.io/github/issues/mrgionsi/remote-checkin" hspace="6px" vspace="2px"></a>
+</p>
 
 ## ⚡️ Key Features & Benefits
 
