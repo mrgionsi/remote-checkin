@@ -251,7 +251,6 @@
     "registration-unavailable": "Registration Unavailable",
     "capacity-verification-failed": "Unable to verify reservation capacity. Registration is temporarily disabled.",
     "capacity-status": "{{registered}}/{{max}} people registered",
-    "settings": {
         "presetApplied": "Preset Applied",
         "presetInstructions": "Instructions: {{instructions}}",
         "validation": "Validation",
@@ -281,5 +280,5 @@
         "residence-country-header": "Residence Country",
         "male": "Male",
         "female": "Female"
-    }
+    
 }
