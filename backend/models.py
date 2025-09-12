@@ -119,6 +119,32 @@ class Client(Base):
         id (int): Unique identifier for the client.
         name (str): Client's name.
         surname (str): Client's surname.
+        birthday (Date): Client's birth date.
+        street (str): Client's street address.
+        number_city (str): Client's street number.
+        city (str): Client's city.
+        province (str): Client's province.
+        cap (str): Client's postal code.
+        telephone (str): Client's phone number.
+        document_number (str): Client's document number.
+        cf (str): Client's tax code (codice fiscale).
+        document_type (str): Type of document.
+        
+        # Portale Alloggi required fields
+        sesso (int): Gender (1=Male, 2=Female).
+        nazionalita (str): Nationality/country code.
+        email (str): Email address.
+        comune_nascita (str): Birth municipality code.
+        provincia_nascita (str): Birth province code.
+        stato_nascita (str): Birth country code.
+        cittadinanza (str): Citizenship code.
+        luogo_emissione (str): Document issue place.
+        data_emissione (Date): Document issue date.
+        data_scadenza (Date): Document expiry date.
+        autorita_rilascio (str): Issuing authority.
+        comune_residenza (str): Residence municipality code.
+        provincia_residenza (str): Residence province code.
+        stato_residenza (str): Residence country code.
     """
     __tablename__ = "client"
 
@@ -135,6 +161,22 @@ class Client(Base):
     document_number = Column(String)
     cf = Column(String)
     document_type = Column(String)
+    
+    # Portale Alloggi required fields
+    sesso = Column(Integer, nullable=True)  # 1=Male, 2=Female
+    nazionalita = Column(String(9), nullable=True)  # Country code
+    email = Column(String(50), nullable=True)  # Email address
+    comune_nascita = Column(String(9), nullable=True)  # Birth municipality code
+    provincia_nascita = Column(String(2), nullable=True)  # Birth province code
+    stato_nascita = Column(String(9), nullable=True)  # Birth country code
+    cittadinanza = Column(String(9), nullable=True)  # Citizenship code
+    luogo_emissione = Column(String(9), nullable=True)  # Document issue place
+    data_emissione = Column(Date, nullable=True)  # Document issue date
+    data_scadenza = Column(Date, nullable=True)  # Document expiry date
+    autorita_rilascio = Column(String(40), nullable=True)  # Issuing authority
+    comune_residenza = Column(String(9), nullable=True)  # Residence municipality
+    provincia_residenza = Column(String(2), nullable=True)  # Residence province
+    stato_residenza = Column(String(9), nullable=True)  # Residence country
 
     reservations = relationship(
         "Reservation", secondary="client_reservations", back_populates="clients"
@@ -156,6 +198,21 @@ class Client(Base):
             "document_number": self.document_number,
             "document_type": self.document_type,
             "cf": self.cf,
+            # Portale Alloggi fields
+            "sesso": self.sesso,
+            "nazionalita": self.nazionalita,
+            "email": self.email,
+            "comune_nascita": self.comune_nascita,
+            "provincia_nascita": self.provincia_nascita,
+            "stato_nascita": self.stato_nascita,
+            "cittadinanza": self.cittadinanza,
+            "luogo_emissione": self.luogo_emissione,
+            "data_emissione": self.data_emissione,
+            "data_scadenza": self.data_scadenza,
+            "autorita_rilascio": self.autorita_rilascio,
+            "comune_residenza": self.comune_residenza,
+            "provincia_residenza": self.provincia_residenza,
+            "stato_residenza": self.stato_residenza,
         }
 
     def __repr__(self):
