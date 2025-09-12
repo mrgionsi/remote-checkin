@@ -267,6 +267,22 @@
         "setTestRecipientFirst": "Imposta prima un destinatario di test.",
         "testEmailSentSuccessfully": "Email di test inviata con successo.",
         "testEmailFailed": "Email di test fallita.",
-        "testFailed": "Test fallito"
+        "testFailed": "Test fallito",
+        "gender-header": "Sesso",
+        "nationality-header": "Nazionalità",
+        "email-header": "Email",
+        "birth-municipality-header": "Comune di Nascita",
+        "birth-province-header": "Provincia di Nascita",
+        "birth-country-header": "Stato di Nascita",
+        "citizenship-header": "Cittadinanza",
+        "document-issue-place-header": "Luogo di Emissione",
+        "document-issue-date-header": "Data di Emissione",
+        "document-expiry-date-header": "Data di Scadenza",
+        "issuing-authority-header": "Autorità Rilascio",
+        "residence-municipality-header": "Comune di Residenza",
+        "residence-province-header": "Provincia di Residenza",
+        "residence-country-header": "Stato di Residenza",
+        "male": "Maschio",
+        "female": "Femmina"
     }
 }

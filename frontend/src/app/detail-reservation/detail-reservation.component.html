@@ -175,6 +175,21 @@
             <th scope="col">{{ 'document-number-header' | transloco }}</th>
             <th scope="col">{{ 'cf-header' | transloco }}</th>
             <th scope="col">{{ 'document-type-header' | transloco }}</th>
+            <!-- Portale Alloggi fields -->
+            <th scope="col">{{ 'gender-header' | transloco }}</th>
+            <th scope="col">{{ 'nationality-header' | transloco }}</th>
+            <th scope="col">{{ 'email-header' | transloco }}</th>
+            <th scope="col">{{ 'birth-municipality-header' | transloco }}</th>
+            <th scope="col">{{ 'birth-province-header' | transloco }}</th>
+            <th scope="col">{{ 'birth-country-header' | transloco }}</th>
+            <th scope="col">{{ 'citizenship-header' | transloco }}</th>
+            <th scope="col">{{ 'document-issue-place-header' | transloco }}</th>
+            <th scope="col">{{ 'document-issue-date-header' | transloco }}</th>
+            <th scope="col">{{ 'document-expiry-date-header' | transloco }}</th>
+            <th scope="col">{{ 'issuing-authority-header' | transloco }}</th>
+            <th scope="col">{{ 'residence-municipality-header' | transloco }}</th>
+            <th scope="col">{{ 'residence-province-header' | transloco }}</th>
+            <th scope="col">{{ 'residence-country-header' | transloco }}</th>
         </tr>
     </ng-template>
     <ng-template pTemplate="body" let-person>
@@ -211,6 +226,21 @@
             <td>{{ person.document_number }}</td>
             <td>{{ person.cf }}</td>
             <td>{{ person.document_type | documentTypeLabel | transloco }}</td>
+            <!-- Portale Alloggi fields -->
+            <td>{{ person.sesso === 1 ? ('male' | transloco) : person.sesso === 2 ? ('female' | transloco) : '-' }}</td>
+            <td>{{ person.nazionalita || '-' }}</td>
+            <td>{{ person.email || '-' }}</td>
+            <td>{{ person.comune_nascita || '-' }}</td>
+            <td>{{ person.provincia_nascita || '-' }}</td>
+            <td>{{ person.stato_nascita || '-' }}</td>
+            <td>{{ person.cittadinanza || '-' }}</td>
+            <td>{{ person.luogo_emissione || '-' }}</td>
+            <td>{{ person.data_emissione ? (person.data_emissione | date:'dd-MM-yyyy') : '-' }}</td>
+            <td>{{ person.data_scadenza ? (person.data_scadenza | date:'dd-MM-yyyy') : '-' }}</td>
+            <td>{{ person.autorita_rilascio || '-' }}</td>
+            <td>{{ person.comune_residenza || '-' }}</td>
+            <td>{{ person.provincia_residenza || '-' }}</td>
+            <td>{{ person.stato_residenza || '-' }}</td>
         </tr>
     </ng-template>
 </p-table>

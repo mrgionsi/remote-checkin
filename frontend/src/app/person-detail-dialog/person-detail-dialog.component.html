@@ -85,6 +85,73 @@
                     <strong>{{ 'document-type-label' | transloco }}</strong> {{ person.document_type | documentTypeLabel
                     | transloco }}
                 </div>
+
+                <!-- Portale Alloggi Fields Section -->
+                <div class="detail-section">
+                    <h4>{{ 'portale-alloggi-fields' | transloco }}</h4>
+                </div>
+
+                <div class="detail-item">
+                    <i class="pi pi-users"></i>
+                    <strong>{{ 'gender-label' | transloco }}</strong> {{ person.sesso === 1 ? ('male' | transloco) :
+                    person.sesso === 2 ? ('female' | transloco) : '-' }}
+                </div>
+                <div class="detail-item">
+                    <i class="pi pi-flag"></i>
+                    <strong>{{ 'nationality-label' | transloco }}</strong> {{ person.nazionalita || '-' }}
+                </div>
+                <div class="detail-item">
+                    <i class="pi pi-envelope"></i>
+                    <strong>{{ 'email-label' | transloco }}</strong> {{ person.email || '-' }}
+                </div>
+                <div class="detail-item">
+                    <i class="pi pi-map-marker"></i>
+                    <strong>{{ 'birth-municipality-label' | transloco }}</strong> {{ person.comune_nascita || '-' }}
+                </div>
+                <div class="detail-item">
+                    <i class="pi pi-globe"></i>
+                    <strong>{{ 'birth-province-label' | transloco }}</strong> {{ person.provincia_nascita || '-' }}
+                </div>
+                <div class="detail-item">
+                    <i class="pi pi-flag"></i>
+                    <strong>{{ 'birth-country-label' | transloco }}</strong> {{ person.stato_nascita || '-' }}
+                </div>
+                <div class="detail-item">
+                    <i class="pi pi-id-card"></i>
+                    <strong>{{ 'citizenship-label' | transloco }}</strong> {{ person.cittadinanza || '-' }}
+                </div>
+                <div class="detail-item">
+                    <i class="pi pi-map-marker"></i>
+                    <strong>{{ 'document-issue-place-label' | transloco }}</strong> {{ person.luogo_emissione || '-' }}
+                </div>
+                <div class="detail-item">
+                    <i class="pi pi-calendar"></i>
+                    <strong>{{ 'document-issue-date-label' | transloco }}</strong> {{ person.data_emissione ?
+                    (person.data_emissione | date:'dd-MM-yyyy') : '-' }}
+                </div>
+                <div class="detail-item">
+                    <i class="pi pi-calendar-times"></i>
+                    <strong>{{ 'document-expiry-date-label' | transloco }}</strong> {{ person.data_scadenza ?
+                    (person.data_scadenza | date:'dd-MM-yyyy') : '-' }}
+                </div>
+                <div class="detail-item">
+                    <i class="pi pi-building"></i>
+                    <strong>{{ 'issuing-authority-label' | transloco }}</strong> {{ person.autorita_rilascio || '-' }}
+                </div>
+                <div class="detail-item">
+                    <i class="pi pi-home"></i>
+                    <strong>{{ 'residence-municipality-label' | transloco }}</strong> {{ person.comune_residenza || '-'
+                    }}
+                </div>
+                <div class="detail-item">
+                    <i class="pi pi-globe"></i>
+                    <strong>{{ 'residence-province-label' | transloco }}</strong> {{ person.provincia_residenza || '-'
+                    }}
+                </div>
+                <div class="detail-item">
+                    <i class="pi pi-flag"></i>
+                    <strong>{{ 'residence-country-label' | transloco }}</strong> {{ person.stato_residenza || '-' }}
+                </div>
             </div>
         </ng-template>
     </p-card>
