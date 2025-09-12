@@ -254,14 +254,12 @@
     "registration-unavailable": "Registrazione Non Disponibile",
     "capacity-verification-failed": "Impossibile verificare la capienza della prenotazione. La registrazione è temporaneamente disabilitata.",
     "capacity-status": "{{registered}}/{{max}} persone registrate",
-    "settings": {
         "presetApplied": "Preimpostazione Applicata",
         "presetInstructions": "Istruzioni: {{instructions}}",
         "validation": "Validazione",
         "fillRequiredFields": "Compila i campi obbligatori.",
         "saved": "Salvato",
         "emailConfigSaved": "Configurazione email salvata.",
-        "error": "Errore",
         "saveFailed": "Salvataggio fallito",
         "testEmail": "Email di Test",
         "setTestRecipientFirst": "Imposta prima un destinatario di test.",
@@ -284,5 +282,5 @@
         "residence-country-header": "Stato di Residenza",
         "male": "Maschio",
         "female": "Femmina"
-    }
+    
 }
