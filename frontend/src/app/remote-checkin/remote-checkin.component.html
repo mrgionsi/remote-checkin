@@ -124,6 +124,123 @@
                                         </div>
                                     </div>
 
+                                    <!-- Portale Alloggi Required Fields -->
+                                    <div class="card">
+                                        <h3>{{ 'portale-alloggi-fields' | transloco }}</h3>
+                                        <div class="grid">
+                                            <div class="col-12 md:col-6">
+                                                <div class="field">
+                                                    <label for="sesso">{{ 'gender-label' | transloco }}</label>
+                                                    <p-select id="sesso" formControlName="sesso"
+                                                        [options]="genderOptions"
+                                                        [placeholder]="'genderPlaceholder' | transloco"
+                                                        class="w-16rem"></p-select>
+                                                </div>
+                                                <div class="field">
+                                                    <label for="nazionalita">{{ 'nationality-label' | transloco
+                                                        }}</label>
+                                                    <p-select id="nazionalita" formControlName="nazionalita"
+                                                        [options]="countryOptions"
+                                                        [placeholder]="'nationalityPlaceholder' | transloco"
+                                                        class="w-16rem"></p-select>
+                                                </div>
+                                                <div class="field">
+                                                    <label for="email">{{ 'email-label' | transloco }}</label>
+                                                    <input pInputText id="email" formControlName="email" type="email"
+                                                        [placeholder]="'emailPlaceholder' | transloco" />
+                                                    <small
+                                                        *ngIf="clientForm.get('email')?.invalid && clientForm.get('email')?.touched"
+                                                        class="p-error">
+                                                        {{ 'email-error' | transloco }}
+                                                    </small>
+                                                </div>
+                                                <div class="field">
+                                                    <label for="comune_nascita">{{ 'birth-municipality-label' |
+                                                        transloco }}</label>
+                                                    <input pInputText id="comune_nascita"
+                                                        formControlName="comune_nascita"
+                                                        [placeholder]="'birthMunicipalityPlaceholder' | transloco" />
+                                                </div>
+                                                <div class="field">
+                                                    <label for="provincia_nascita">{{ 'birth-province-label' | transloco
+                                                        }}</label>
+                                                    <p-select id="provincia_nascita" formControlName="provincia_nascita"
+                                                        [options]="provinceOptions"
+                                                        [placeholder]="'birthProvincePlaceholder' | transloco"
+                                                        class="w-16rem"></p-select>
+                                                </div>
+                                                <div class="field">
+                                                    <label for="stato_nascita">{{ 'birth-country-label' | transloco
+                                                        }}</label>
+                                                    <p-select id="stato_nascita" formControlName="stato_nascita"
+                                                        [options]="countryOptions"
+                                                        [placeholder]="'birthCountryPlaceholder' | transloco"
+                                                        class="w-16rem"></p-select>
+                                                </div>
+                                                <div class="field">
+                                                    <label for="cittadinanza">{{ 'citizenship-label' | transloco
+                                                        }}</label>
+                                                    <p-select id="cittadinanza" formControlName="cittadinanza"
+                                                        [options]="countryOptions"
+                                                        [placeholder]="'citizenshipPlaceholder' | transloco"
+                                                        class="w-16rem"></p-select>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 md:col-6">
+                                                <div class="field">
+                                                    <label for="luogo_emissione">{{ 'document-issue-place-label' |
+                                                        transloco }}</label>
+                                                    <input pInputText id="luogo_emissione"
+                                                        formControlName="luogo_emissione"
+                                                        [placeholder]="'documentIssuePlacePlaceholder' | transloco" />
+                                                </div>
+                                                <div class="field">
+                                                    <label for="data_emissione">{{ 'document-issue-date-label' |
+                                                        transloco }}</label>
+                                                    <p-calendar id="data_emissione" formControlName="data_emissione"
+                                                        dateFormat="yy-mm-dd" class="w-16rem"></p-calendar>
+                                                </div>
+                                                <div class="field">
+                                                    <label for="data_scadenza">{{ 'document-expiry-date-label' |
+                                                        transloco }}</label>
+                                                    <p-calendar id="data_scadenza" formControlName="data_scadenza"
+                                                        dateFormat="yy-mm-dd" class="w-16rem"></p-calendar>
+                                                </div>
+                                                <div class="field">
+                                                    <label for="autorita_rilascio">{{ 'issuing-authority-label' |
+                                                        transloco }}</label>
+                                                    <input pInputText id="autorita_rilascio"
+                                                        formControlName="autorita_rilascio"
+                                                        [placeholder]="'issuingAuthorityPlaceholder' | transloco" />
+                                                </div>
+                                                <div class="field">
+                                                    <label for="comune_residenza">{{ 'residence-municipality-label' |
+                                                        transloco }}</label>
+                                                    <input pInputText id="comune_residenza"
+                                                        formControlName="comune_residenza"
+                                                        [placeholder]="'residenceMunicipalityPlaceholder' | transloco" />
+                                                </div>
+                                                <div class="field">
+                                                    <label for="provincia_residenza">{{ 'residence-province-label' |
+                                                        transloco }}</label>
+                                                    <p-select id="provincia_residenza"
+                                                        formControlName="provincia_residenza"
+                                                        [options]="provinceOptions"
+                                                        [placeholder]="'residenceProvincePlaceholder' | transloco"
+                                                        class="w-16rem"></p-select>
+                                                </div>
+                                                <div class="field">
+                                                    <label for="stato_residenza">{{ 'residence-country-label' |
+                                                        transloco }}</label>
+                                                    <p-select id="stato_residenza" formControlName="stato_residenza"
+                                                        [options]="countryOptions"
+                                                        [placeholder]="'residenceCountryPlaceholder' | transloco"
+                                                        class="w-16rem"></p-select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div class="flex justify-content-end">
                                         <!--                    <p-button type="submit" label="Submit" [disabled]="clientForm.invalid"
                                             icon="pi pi-check"></p-button> -->
