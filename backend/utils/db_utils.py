@@ -77,21 +77,30 @@ def add_or_update_client(form_data, client=None):
                 # Update existing client
                 for key, value in form_data.items():
                     if hasattr(client, key) and key != 'reservationId':
-                        if key == 'birthday':
+                        # Handle date fields
+                        if key in ['birthday', 'data_emissione', 'data_scadenza']:
                             try:
-                                value = datetime.strptime(value, "%Y-%m-%d")
+                                if value:  # Only convert if value is not None/empty
+                                    value = datetime.strptime(value, "%Y-%m-%d")
+                                else:
+                                    value = None
                             except ValueError:
-                                raise ValueError(f"Invalid date format for birthday: {value}") from None
+                                raise ValueError(f"Invalid date format for {key}: {value}") from None
                         setattr(client, key, value)
                 db.commit()  # Commit the updates
                 db.refresh(client)  # Refresh to get the latest values
 
             else:
                 # Create new client
-                try:
-                    form_data['birthday'] = datetime.strptime(form_data['birthday'], "%Y-%m-%d")
-                except ValueError as e:
-                    raise ValueError(f"Invalid date format for birthday: {form_data.get('birthday')}") from e
+                # Handle date fields for new client
+                date_fields = ['birthday', 'data_emissione', 'data_scadenza']
+                for date_field in date_fields:
+                    if date_field in form_data and form_data[date_field]:
+                        try:
+                            form_data[date_field] = datetime.strptime(form_data[date_field], "%Y-%m-%d")
+                        except ValueError as e:
+                            raise ValueError(f"Invalid date format for {date_field}: {form_data.get(date_field)}") from e
+                
                 form_data.pop('reservationId', None)  # Remove if present
                 print(form_data)
                 client = Client(**form_data)
