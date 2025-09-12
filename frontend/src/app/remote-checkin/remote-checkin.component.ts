@@ -18,6 +18,7 @@ import { DialogModule } from 'primeng/dialog';
 import { DocumentTypeLabelPipe } from '../pipes/document-type-label.pipe';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { ReservationService } from '../services/reservation.service';
+import { HttpClient } from '@angular/common/http';
 
 
 @Component({
@@ -44,43 +45,10 @@ export class RemoteCheckinComponent implements OnInit {
     { label: 'Female', value: '2' }
   ];
 
-  countryOptions = [
-    { label: 'Italy', value: 'IT' },
-    { label: 'United States', value: 'US' },
-    { label: 'United Kingdom', value: 'GB' },
-    { label: 'France', value: 'FR' },
-    { label: 'Germany', value: 'DE' },
-    { label: 'Spain', value: 'ES' },
-    { label: 'Portugal', value: 'PT' },
-    { label: 'Netherlands', value: 'NL' },
-    { label: 'Belgium', value: 'BE' },
-    { label: 'Switzerland', value: 'CH' },
-    { label: 'Austria', value: 'AT' },
-    { label: 'Other', value: 'XX' }
-  ];
-
-  provinceOptions = [
-    { label: 'Roma (RM)', value: 'RM' },
-    { label: 'Milano (MI)', value: 'MI' },
-    { label: 'Napoli (NA)', value: 'NA' },
-    { label: 'Torino (TO)', value: 'TO' },
-    { label: 'Palermo (PA)', value: 'PA' },
-    { label: 'Genova (GE)', value: 'GE' },
-    { label: 'Bologna (BO)', value: 'BO' },
-    { label: 'Firenze (FI)', value: 'FI' },
-    { label: 'Bari (BA)', value: 'BA' },
-    { label: 'Catania (CT)', value: 'CT' },
-    { label: 'Venezia (VE)', value: 'VE' },
-    { label: 'Verona (VR)', value: 'VR' },
-    { label: 'Messina (ME)', value: 'ME' },
-    { label: 'Padova (PD)', value: 'PD' },
-    { label: 'Trieste (TS)', value: 'TS' },
-    { label: 'Brescia (BS)', value: 'BS' },
-    { label: 'Parma (PR)', value: 'PR' },
-    { label: 'Taranto (TA)', value: 'TA' },
-    { label: 'Prato (PO)', value: 'PO' },
-    { label: 'Modena (MO)', value: 'MO' }
-  ];
+  // Reference data loaded from JSON files
+  countryOptions: any[] = [];
+  provinceOptions: any[] = [];
+  municipalityOptions: any[] = [];
 
   languageCode: string | null = '';
   reservationId: string | null = '';
@@ -91,7 +59,8 @@ export class RemoteCheckinComponent implements OnInit {
 
   constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder,
     private readonly messageService: MessageService, private uploadService: UploadService,
-    private readonly translocoService: TranslocoService, private reservationService: ReservationService
+    private readonly translocoService: TranslocoService, private reservationService: ReservationService,
+    private http: HttpClient
   ) {
     this.uploadForm = this.fb.group({
       frontimage: [null, Validators.required],
@@ -136,6 +105,9 @@ export class RemoteCheckinComponent implements OnInit {
       { label: this.translocoService.translate('driver-license-label'), value: 'driver_license' },
       { label: this.translocoService.translate('passport-label'), value: 'passport' }
     ];
+
+    // Load reference data from JSON files
+    this.loadReferenceData();
 
     this.languageCode = this.route.snapshot.paramMap.get('code');
     this.route.params.subscribe(params => {
@@ -212,6 +184,60 @@ export class RemoteCheckinComponent implements OnInit {
   private enableFormControls() {
     this.clientForm.enable();
     this.uploadForm.enable();
+  }
+
+  // Load reference data from JSON files
+  private loadReferenceData() {
+    // Load countries
+    this.http.get<any[]>('/assets/data/countries.json').subscribe({
+      next: (countries) => {
+        this.countryOptions = countries;
+      },
+      error: (error) => {
+        console.error('Error loading countries:', error);
+        // Fallback to basic countries
+        this.countryOptions = [
+          { label: 'Italy', value: 'IT' },
+          { label: 'United States', value: 'US' },
+          { label: 'United Kingdom', value: 'GB' },
+          { label: 'Other', value: 'XX' }
+        ];
+      }
+    });
+
+    // Load Italian provinces
+    this.http.get<any[]>('/assets/data/italian-provinces.json').subscribe({
+      next: (provinces) => {
+        this.provinceOptions = provinces;
+      },
+      error: (error) => {
+        console.error('Error loading provinces:', error);
+        // Fallback to basic provinces
+        this.provinceOptions = [
+          { label: 'Roma (RM)', value: 'RM' },
+          { label: 'Milano (MI)', value: 'MI' },
+          { label: 'Napoli (NA)', value: 'NA' },
+          { label: 'Torino (TO)', value: 'TO' }
+        ];
+      }
+    });
+
+    // Load Italian municipalities
+    this.http.get<any[]>('/assets/data/italian-municipalities.json').subscribe({
+      next: (municipalities) => {
+        this.municipalityOptions = municipalities;
+      },
+      error: (error) => {
+        console.error('Error loading municipalities:', error);
+        // Fallback to basic municipalities
+        this.municipalityOptions = [
+          { label: 'Roma', value: 'H501' },
+          { label: 'Milano', value: 'F205' },
+          { label: 'Napoli', value: 'F839' },
+          { label: 'Torino', value: 'L219' }
+        ];
+      }
+    });
   }
 
   // Method to handle FormData received from the child
