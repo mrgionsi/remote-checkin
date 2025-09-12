@@ -103,6 +103,8 @@
                                                 <p-select id="document_type" formControlName="document_type"
                                                     [options]="documentTypes"
                                                     [placeholder]="'documentTypePlaceholder' | transloco"
+                                                    [filter]="true" filterBy="label"
+                                                    filterPlaceholder="Search document types..." [showClear]="true"
                                                     class="w-16rem"></p-select>
                                             </div>
                                             <div class="field">
@@ -133,8 +135,8 @@
                                                     <label for="sesso">{{ 'gender-label' | transloco }}</label>
                                                     <p-select id="sesso" formControlName="sesso"
                                                         [options]="genderOptions"
-                                                        [placeholder]="'genderPlaceholder' | transloco"
-                                                        class="w-16rem"></p-select>
+                                                        [placeholder]="'genderPlaceholder' | transloco" [filter]="true"
+                                                        filterBy="label" class="w-16rem"></p-select>
                                                 </div>
                                                 <div class="field">
                                                     <label for="nazionalita">{{ 'nationality-label' | transloco
@@ -142,6 +144,8 @@
                                                     <p-select id="nazionalita" formControlName="nazionalita"
                                                         [options]="countryOptions"
                                                         [placeholder]="'nationalityPlaceholder' | transloco"
+                                                        [filter]="true" filterBy="label"
+                                                        filterPlaceholder="Search countries..." [showClear]="true"
                                                         class="w-16rem"></p-select>
                                                 </div>
                                                 <div class="field">
@@ -167,6 +171,8 @@
                                                     <p-select id="provincia_nascita" formControlName="provincia_nascita"
                                                         [options]="provinceOptions"
                                                         [placeholder]="'birthProvincePlaceholder' | transloco"
+                                                        [filter]="true" filterBy="label"
+                                                        filterPlaceholder="Search provinces..." [showClear]="true"
                                                         class="w-16rem"></p-select>
                                                 </div>
                                                 <div class="field">
@@ -175,6 +181,8 @@
                                                     <p-select id="stato_nascita" formControlName="stato_nascita"
                                                         [options]="countryOptions"
                                                         [placeholder]="'birthCountryPlaceholder' | transloco"
+                                                        [filter]="true" filterBy="label"
+                                                        filterPlaceholder="Search countries..." [showClear]="true"
                                                         class="w-16rem"></p-select>
                                                 </div>
                                                 <div class="field">
@@ -183,6 +191,8 @@
                                                     <p-select id="cittadinanza" formControlName="cittadinanza"
                                                         [options]="countryOptions"
                                                         [placeholder]="'citizenshipPlaceholder' | transloco"
+                                                        [filter]="true" filterBy="label"
+                                                        filterPlaceholder="Search countries..." [showClear]="true"
                                                         class="w-16rem"></p-select>
                                                 </div>
                                             </div>
@@ -227,6 +237,8 @@
                                                         formControlName="provincia_residenza"
                                                         [options]="provinceOptions"
                                                         [placeholder]="'residenceProvincePlaceholder' | transloco"
+                                                        [filter]="true" filterBy="label"
+                                                        filterPlaceholder="Search provinces..." [showClear]="true"
                                                         class="w-16rem"></p-select>
                                                 </div>
                                                 <div class="field">
@@ -235,6 +247,8 @@
                                                     <p-select id="stato_residenza" formControlName="stato_residenza"
                                                         [options]="countryOptions"
                                                         [placeholder]="'residenceCountryPlaceholder' | transloco"
+                                                        [filter]="true" filterBy="label"
+                                                        filterPlaceholder="Search countries..." [showClear]="true"
                                                         class="w-16rem"></p-select>
                                                 </div>
                                             </div>
