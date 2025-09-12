@@ -38,6 +38,50 @@ export class RemoteCheckinComponent implements OnInit {
   uploadForm: FormGroup;
   documentTypes = [{}];
 
+  // Portale Alloggi options
+  genderOptions = [
+    { label: 'Male', value: '1' },
+    { label: 'Female', value: '2' }
+  ];
+
+  countryOptions = [
+    { label: 'Italy', value: 'IT' },
+    { label: 'United States', value: 'US' },
+    { label: 'United Kingdom', value: 'GB' },
+    { label: 'France', value: 'FR' },
+    { label: 'Germany', value: 'DE' },
+    { label: 'Spain', value: 'ES' },
+    { label: 'Portugal', value: 'PT' },
+    { label: 'Netherlands', value: 'NL' },
+    { label: 'Belgium', value: 'BE' },
+    { label: 'Switzerland', value: 'CH' },
+    { label: 'Austria', value: 'AT' },
+    { label: 'Other', value: 'XX' }
+  ];
+
+  provinceOptions = [
+    { label: 'Roma (RM)', value: 'RM' },
+    { label: 'Milano (MI)', value: 'MI' },
+    { label: 'Napoli (NA)', value: 'NA' },
+    { label: 'Torino (TO)', value: 'TO' },
+    { label: 'Palermo (PA)', value: 'PA' },
+    { label: 'Genova (GE)', value: 'GE' },
+    { label: 'Bologna (BO)', value: 'BO' },
+    { label: 'Firenze (FI)', value: 'FI' },
+    { label: 'Bari (BA)', value: 'BA' },
+    { label: 'Catania (CT)', value: 'CT' },
+    { label: 'Venezia (VE)', value: 'VE' },
+    { label: 'Verona (VR)', value: 'VR' },
+    { label: 'Messina (ME)', value: 'ME' },
+    { label: 'Padova (PD)', value: 'PD' },
+    { label: 'Trieste (TS)', value: 'TS' },
+    { label: 'Brescia (BS)', value: 'BS' },
+    { label: 'Parma (PR)', value: 'PR' },
+    { label: 'Taranto (TA)', value: 'TA' },
+    { label: 'Prato (PO)', value: 'PO' },
+    { label: 'Modena (MO)', value: 'MO' }
+  ];
+
   languageCode: string | null = '';
   reservationId: string | null = '';
   showConfirmationDialog: boolean = false;
@@ -64,9 +108,25 @@ export class RemoteCheckinComponent implements OnInit {
       province: ['', Validators.required],
       cap: ['', [Validators.required, Validators.pattern('^[0-9]{5}$')]],
       telephone: ['', [Validators.required, Validators.pattern('^[0-9]+$')]],
-      document_type: ['', Validators.required],  // New field
+      document_type: ['', Validators.required],
       document_number: ['', Validators.required],
       cf: ['', [Validators.required, Validators.pattern('^[A-Z0-9]{16}$')]],
+
+      // Portale Alloggi required fields
+      sesso: ['', Validators.required],
+      nazionalita: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      comune_nascita: ['', Validators.required],
+      provincia_nascita: ['', Validators.required],
+      stato_nascita: ['', Validators.required],
+      cittadinanza: ['', Validators.required],
+      luogo_emissione: ['', Validators.required],
+      data_emissione: ['', Validators.required],
+      data_scadenza: ['', Validators.required],
+      autorita_rilascio: ['', Validators.required],
+      comune_residenza: ['', Validators.required],
+      provincia_residenza: ['', Validators.required],
+      stato_residenza: ['', Validators.required],
     });
   }
 
@@ -195,14 +255,19 @@ export class RemoteCheckinComponent implements OnInit {
     const formFields = [
       'name', 'surname', 'birthday', 'street', 'number_city',
       'city', 'province', 'cap', 'telephone', 'document_type',
-      'document_number', 'cf'
+      'document_number', 'cf',
+      // Portale Alloggi required fields
+      'sesso', 'nazionalita', 'email', 'comune_nascita',
+      'provincia_nascita', 'stato_nascita', 'cittadinanza',
+      'luogo_emissione', 'data_emissione', 'data_scadenza',
+      'autorita_rilascio', 'comune_residenza', 'provincia_residenza', 'stato_residenza'
     ];
 
     formFields.forEach(field => {
       let value = this.clientForm.get(field)?.value;
 
-      // If the field is 'birthday', format it to 'YYYY-MM-DD' to ensure compliance
-      if (field === 'birthday' && value) {
+      // If the field is a date field, format it to 'YYYY-MM-DD' to ensure compliance
+      if (['birthday', 'data_emissione', 'data_scadenza'].includes(field) && value) {
         if (value instanceof Date) {
           // Use local timezone to avoid day shift issues
           value = this.formatDateToLocalString(value);
