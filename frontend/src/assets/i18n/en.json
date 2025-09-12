@@ -58,7 +58,6 @@
     "gender-female": "Female",
     "nationality-label": "Nationality",
     "nationalityPlaceholder": "Select Nationality",
-    "email-label": "Email Address",
     "emailPlaceholder": "Enter Email Address",
     "email-error": "Invalid email format",
     "birth-municipality-label": "Birth Municipality Code",
@@ -265,6 +264,22 @@
         "setTestRecipientFirst": "Set a test recipient email first.",
         "testEmailSentSuccessfully": "Test email sent successfully.",
         "testEmailFailed": "Test email failed.",
-        "testFailed": "Test failed"
+        "testFailed": "Test failed",
+        "gender-header": "Gender",
+        "nationality-header": "Nationality",
+        "email-header": "Email",
+        "birth-municipality-header": "Birth Municipality",
+        "birth-province-header": "Birth Province",
+        "birth-country-header": "Birth Country",
+        "citizenship-header": "Citizenship",
+        "document-issue-place-header": "Issue Place",
+        "document-issue-date-header": "Issue Date",
+        "document-expiry-date-header": "Expiry Date",
+        "issuing-authority-header": "Issuing Authority",
+        "residence-municipality-header": "Residence Municipality",
+        "residence-province-header": "Residence Province",
+        "residence-country-header": "Residence Country",
+        "male": "Male",
+        "female": "Female"
     }
 }

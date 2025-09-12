@@ -133,6 +133,21 @@
     font-size: 1.2em;
 }
 
+.detail-section {
+    margin: 20px 0 10px 0;
+    padding: 10px;
+    background: #e3f2fd;
+    border-radius: 8px;
+    border-left: 4px solid #2196f3;
+}
+
+.detail-section h4 {
+    margin: 0;
+    color: #1976d2;
+    font-size: 1.1em;
+    font-weight: 600;
+}
+
 
 .dialog-container {
     display: flex;
