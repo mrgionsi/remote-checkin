@@ -48,15 +48,44 @@ def upload_file():
         required_files = ['frontimage', 'backimage', 'selfie']
         required_fields = ['reservationId', 'name', 'surname', 'birthday', 'street',
                            'city', 'province', 'cap', 'telephone', 'document_type', 'document_number', 'cf']
+        
+        # Portale Alloggi required fields
+        portale_required_fields = ['sesso', 'nazionalita', 'email', 'comune_nascita', 
+                                  'provincia_nascita', 'stato_nascita', 'cittadinanza',
+                                  'luogo_emissione', 'data_emissione', 'data_scadenza',
+                                  'autorita_rilascio', 'comune_residenza', 'provincia_residenza', 'stato_residenza']
 
         # Check if required files are in request
         if any(file_key not in request.files for file_key in required_files):
             raise BadRequest("Missing one or more required image files")
 
         # Extract form data
-        form_data = {field: request.form.get(field) for field in required_fields}
+        all_required_fields = required_fields + portale_required_fields
+        form_data = {field: request.form.get(field) for field in all_required_fields}
         if any(value is None for value in form_data.values()):
             raise BadRequest("Missing one or more required fields")
+        
+        # Validate Portale Alloggi specific fields
+        try:
+            # Validate gender (sesso)
+            if form_data['sesso'] not in ['1', '2']:
+                raise BadRequest("Invalid gender value. Must be 1 (Male) or 2 (Female)")
+            
+            # Validate email format
+            if form_data['email'] and '@' not in form_data['email']:
+                raise BadRequest("Invalid email format")
+                
+            # Validate date formats
+            from datetime import datetime
+            if form_data['data_emissione']:
+                datetime.strptime(form_data['data_emissione'], '%Y-%m-%d')
+            if form_data['data_scadenza']:
+                datetime.strptime(form_data['data_scadenza'], '%Y-%m-%d')
+                
+        except ValueError as e:
+            raise BadRequest(f"Invalid date format: {str(e)}")
+        except Exception as e:
+            raise BadRequest(f"Validation error: {str(e)}")
 
         reservation_id = form_data['reservationId']
         cf = form_data['cf']
@@ -116,13 +145,27 @@ def upload_file():
                     'room_name': reservation.room.name if reservation.room else 'N/A',
                     'client_name': client.name,
                     'client_surname': client.surname,
-                    'client_email': form_data.get('email', 'N/A'),
+                    'client_email': client.email or form_data.get('email', 'N/A'),
                     'client_phone': client.telephone,
                     'document_type': client.document_type,
                     'document_number': client.document_number,
                     'has_front_image': 'frontimage' in files,
                     'has_back_image': 'backimage' in files,
-                    'has_selfie': 'selfie' in files
+                    'has_selfie': 'selfie' in files,
+                    # Portale Alloggi fields for admin notification
+                    'client_gender': 'Male' if client.sesso == 1 else 'Female' if client.sesso == 2 else 'N/A',
+                    'client_nationality': client.nazionalita or 'N/A',
+                    'client_birth_municipality': client.comune_nascita or 'N/A',
+                    'client_birth_province': client.provincia_nascita or 'N/A',
+                    'client_birth_country': client.stato_nascita or 'N/A',
+                    'client_citizenship': client.cittadinanza or 'N/A',
+                    'client_document_issue_place': client.luogo_emissione or 'N/A',
+                    'client_document_issue_date': client.data_emissione.strftime('%Y-%m-%d') if client.data_emissione else 'N/A',
+                    'client_document_expiry_date': client.data_scadenza.strftime('%Y-%m-%d') if client.data_scadenza else 'N/A',
+                    'client_issuing_authority': client.autorita_rilascio or 'N/A',
+                    'client_residence_municipality': client.comune_residenza or 'N/A',
+                    'client_residence_province': client.provincia_residenza or 'N/A',
+                    'client_residence_country': client.stato_residenza or 'N/A'
                 }
 
                 # Send admin notification
@@ -158,19 +201,7 @@ def upload_file():
             "message": "Files uploaded successfully and client linked to reservation",
             "files": files,
             "validation": validation_results,
-            "client": {
-                "id": client.id,
-                "name": client.name,
-                "surname": client.surname,
-                "birthday": client.birthday,
-                "street": client.street,
-                "city": client.city,
-                "province": client.province,
-                "cap": client.cap,
-                "telephone": client.telephone,
-                "document_number": client.document_number,
-                "cf": client.cf
-            },
+            "client": client.to_dict(),  # Use the model's to_dict() method which includes all Portale Alloggi fields
             "reservation": {
                 "reservation_id": reservation.id,
                 "id_reference": reservation.id_reference,
