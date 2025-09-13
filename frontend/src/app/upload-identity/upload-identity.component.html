@@ -1,53 +1,161 @@
-<p-card [header]="'identity-document-upload-title' | transloco">
+<div class="upload-container">
+    <!-- Header Section -->
+    <div class="text-center mb-6">
+        <div class="upload-icon mb-3">
+            <i class="pi pi-cloud-upload text-6xl text-primary"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-900 mb-2">{{ 'identity-document-upload-title' | transloco }}</h2>
+        <p class="text-600 text-lg">{{ 'upload-instructions' | transloco }}</p>
+    </div>
+
     <form [formGroup]="uploadForm" class="p-fluid">
         <div class="grid">
+            <!-- Front Image Upload -->
             <div class="col-12 md:col-4">
-                <div class="field">
-                    <label for="frontimage">{{ 'front-image-label' | transloco }}</label>
-                    <p-fileupload name="frontimage" (onSelect)="onFileSelect($event, 'frontimage')"
-                        accept="image/jpeg,image/png,image/gif" [maxFileSize]="5000000" mode="basic"
-                        [showUploadButton]="false" [invalidFileSizeMessageSummary]="'file-size-exceeds' | transloco"
-                        [invalidFileTypeMessageSummary]="'only-images-allowed' | transloco">
-                    </p-fileupload>
-                </div>
-                <div *ngIf="uploadForm.get('frontimage')?.value?.objectURL" class="pt-3">
-                    <p><strong>{{ 'front-image-label' | transloco }}</strong></p>
-                    <img [src]="uploadForm.get('frontimage')?.value?.objectURL" [alt]="'front-image-label' | transloco"
-                        class="image-preview w-32 h-32 object-cover rounded-md shadow-md border border-gray-300">
+                <div class="upload-card" [class.uploaded]="uploadForm.get('frontimage')?.value"
+                    [class.error]="uploadForm.get('frontimage')?.invalid && uploadForm.get('frontimage')?.touched">
+                    <div class="upload-header">
+                        <i class="pi pi-id-card text-2xl text-primary mb-2"></i>
+                        <h3 class="text-lg font-semibold mb-1">{{ 'front-image-label' | transloco }}</h3>
+                        <p class="text-sm text-600 mb-3">{{ 'front-image-description' | transloco }}</p>
+                    </div>
+
+                    <div class="upload-area" *ngIf="!uploadForm.get('frontimage')?.value">
+                        <p-fileupload name="frontimage" (onSelect)="onFileSelect($event, 'frontimage')"
+                            accept="image/jpeg,image/png,image/gif" [maxFileSize]="5000000" mode="basic"
+                            [showUploadButton]="false" [invalidFileSizeMessageSummary]="'file-size-exceeds' | transloco"
+                            [invalidFileTypeMessageSummary]="'only-images-allowed' | transloco"
+                            styleClass="upload-button">
+                            <ng-template pTemplate="content">
+                                <div class="upload-placeholder">
+                                    <i class="pi pi-plus text-3xl text-400 mb-2"></i>
+                                    <p class="text-sm text-500">{{ 'click-to-upload' | transloco }}</p>
+                                </div>
+                            </ng-template>
+                        </p-fileupload>
+                    </div>
+
+                    <div class="image-preview-container" *ngIf="uploadForm.get('frontimage')?.value">
+                        <div class="preview-header">
+                            <span class="text-sm font-medium text-green-600">
+                                <i class="pi pi-check-circle mr-1"></i>{{ 'uploaded' | transloco }}
+                            </span>
+                            <p-button icon="pi pi-times" severity="danger" size="small"
+                                (onClick)="removeImage('frontimage')" [text]="true" [rounded]="true"
+                                [attr.aria-label]="'remove-image' | transloco">
+                            </p-button>
+                        </div>
+                        <img [src]="getImagePreview('frontimage')" [alt]="'front-image-label' | transloco"
+                            class="preview-image">
+                    </div>
+
+                    <small *ngIf="uploadForm.get('frontimage')?.invalid && uploadForm.get('frontimage')?.touched"
+                        class="p-error mt-2 block">
+                        {{ 'front-image-required' | transloco }}
+                    </small>
                 </div>
             </div>
 
+            <!-- Back Image Upload -->
             <div class="col-12 md:col-4">
-                <div class="field">
-                    <label for="backimage">{{ 'back-image-label' | transloco }}</label>
-                    <p-fileupload name="backimage" (onSelect)="onFileSelect($event, 'backimage')" accept="image/*"
-                        mode="basic">
-                    </p-fileupload>
-                </div>
-                <div *ngIf="uploadForm?.get('backimage')?.value?.objectURL" class="pt-3">
-                    <p><strong>{{ 'back-image-label' | transloco }}</strong></p>
-                    <img [src]="uploadForm.get('backimage')?.value?.objectURL" [alt]="'back-image-label' | transloco"
-                        class="image-preview w-32 h-32 object-cover rounded-md shadow-md border border-gray-300">
+                <div class="upload-card" [class.uploaded]="uploadForm.get('backimage')?.value"
+                    [class.error]="uploadForm.get('backimage')?.invalid && uploadForm.get('backimage')?.touched">
+                    <div class="upload-header">
+                        <i class="pi pi-id-card text-2xl text-primary mb-2"></i>
+                        <h3 class="text-lg font-semibold mb-1">{{ 'back-image-label' | transloco }}</h3>
+                        <p class="text-sm text-600 mb-3">{{ 'back-image-description' | transloco }}</p>
+                    </div>
+
+                    <div class="upload-area" *ngIf="!uploadForm.get('backimage')?.value">
+                        <p-fileupload name="backimage" (onSelect)="onFileSelect($event, 'backimage')"
+                            accept="image/jpeg,image/png,image/gif" [maxFileSize]="5000000" mode="basic"
+                            [showUploadButton]="false" [invalidFileSizeMessageSummary]="'file-size-exceeds' | transloco"
+                            [invalidFileTypeMessageSummary]="'only-images-allowed' | transloco"
+                            styleClass="upload-button">
+                            <ng-template pTemplate="content">
+                                <div class="upload-placeholder">
+                                    <i class="pi pi-plus text-3xl text-400 mb-2"></i>
+                                    <p class="text-sm text-500">{{ 'click-to-upload' | transloco }}</p>
+                                </div>
+                            </ng-template>
+                        </p-fileupload>
+                    </div>
+
+                    <div class="image-preview-container" *ngIf="uploadForm.get('backimage')?.value">
+                        <div class="preview-header">
+                            <span class="text-sm font-medium text-green-600">
+                                <i class="pi pi-check-circle mr-1"></i>{{ 'uploaded' | transloco }}
+                            </span>
+                            <p-button icon="pi pi-times" severity="danger" size="small"
+                                (onClick)="removeImage('backimage')" [text]="true" [rounded]="true"
+                                [attr.aria-label]="'remove-image' | transloco">
+                            </p-button>
+                        </div>
+                        <img [src]="getImagePreview('backimage')" [alt]="'back-image-label' | transloco"
+                            class="preview-image">
+                    </div>
+
+                    <small *ngIf="uploadForm.get('backimage')?.invalid && uploadForm.get('backimage')?.touched"
+                        class="p-error mt-2 block">
+                        {{ 'back-image-required' | transloco }}
+                    </small>
                 </div>
             </div>
 
+            <!-- Selfie Upload -->
             <div class="col-12 md:col-4">
-                <div class="field">
-                    <label for="selfie">{{ 'selfie-with-document-label' | transloco }}</label>
-                    <p-fileupload name="selfie" (onSelect)="onFileSelect($event, 'selfie')" accept="image/*"
-                        mode="basic">
-                    </p-fileupload>
-                </div>
-                <div *ngIf="uploadForm?.get('selfie')?.value?.objectURL" class="pt-3">
-                    <p><strong>{{ 'selfie-image-label' | transloco }}</strong></p>
-                    <img [src]="uploadForm.get('selfie')?.value?.objectURL" [alt]="'selfie-image-label' | transloco"
-                        class="image-preview w-32 h-32 object-cover rounded-md shadow-md border border-gray-300">
+                <div class="upload-card" [class.uploaded]="uploadForm.get('selfie')?.value"
+                    [class.error]="uploadForm.get('selfie')?.invalid && uploadForm.get('selfie')?.touched">
+                    <div class="upload-header">
+                        <i class="pi pi-camera text-2xl text-primary mb-2"></i>
+                        <h3 class="text-lg font-semibold mb-1">{{ 'selfie-with-document-label' | transloco }}</h3>
+                        <p class="text-sm text-600 mb-3">{{ 'selfie-description' | transloco }}</p>
+                    </div>
+
+                    <div class="upload-area" *ngIf="!uploadForm.get('selfie')?.value">
+                        <p-fileupload name="selfie" (onSelect)="onFileSelect($event, 'selfie')"
+                            accept="image/jpeg,image/png,image/gif" [maxFileSize]="5000000" mode="basic"
+                            [showUploadButton]="false" [invalidFileSizeMessageSummary]="'file-size-exceeds' | transloco"
+                            [invalidFileTypeMessageSummary]="'only-images-allowed' | transloco"
+                            styleClass="upload-button">
+                            <ng-template pTemplate="content">
+                                <div class="upload-placeholder">
+                                    <i class="pi pi-plus text-3xl text-400 mb-2"></i>
+                                    <p class="text-sm text-500">{{ 'click-to-upload' | transloco }}</p>
+                                </div>
+                            </ng-template>
+                        </p-fileupload>
+                    </div>
+
+                    <div class="image-preview-container" *ngIf="uploadForm.get('selfie')?.value">
+                        <div class="preview-header">
+                            <span class="text-sm font-medium text-green-600">
+                                <i class="pi pi-check-circle mr-1"></i>{{ 'uploaded' | transloco }}
+                            </span>
+                            <p-button icon="pi pi-times" severity="danger" size="small"
+                                (onClick)="removeImage('selfie')" [text]="true" [rounded]="true"
+                                [attr.aria-label]="'remove-image' | transloco">
+                            </p-button>
+                        </div>
+                        <img [src]="getImagePreview('selfie')" [alt]="'selfie-image-label' | transloco"
+                            class="preview-image">
+                    </div>
+
+                    <small *ngIf="uploadForm.get('selfie')?.invalid && uploadForm.get('selfie')?.touched"
+                        class="p-error mt-2 block">
+                        {{ 'selfie-required' | transloco }}
+                    </small>
                 </div>
             </div>
         </div>
 
-        <!-- <div class="flex justify-content-end">
-            <p-button type="submit" [label]="'submit' | transloco" [disabled]="uploadForm.invalid" icon="pi pi-check"></p-button>
-        </div> -->
+        <!-- Progress Indicator -->
+        <div class="upload-progress mt-6" *ngIf="getUploadProgress() > 0">
+            <div class="flex align-items-center justify-content-between mb-2">
+                <span class="text-sm font-medium">{{ 'upload-progress' | transloco }}</span>
+                <span class="text-sm text-600">{{ getUploadProgress() }}/3 {{ 'images-uploaded' | transloco }}</span>
+            </div>
+            <p-progressBar [value]="(getUploadProgress() / 3) * 100" [showValue]="false"></p-progressBar>
+        </div>
     </form>
-</p-card>
+</div>

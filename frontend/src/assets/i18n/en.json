@@ -312,6 +312,18 @@
         "complete-all-fields-step1": "Please complete all required fields to continue",
         "upload-all-images-step2": "Please upload all required images to continue",
         "complete-all-data-step3": "Please complete all required information to submit",
-        "gender-not-specified": "Not specified"
+        "gender-not-specified": "Not specified",
+        "upload-instructions": "Please upload clear photos of your identity document and a selfie",
+        "front-image-description": "Upload the front side of your ID document",
+        "back-image-description": "Upload the back side of your ID document", 
+        "selfie-description": "Take a selfie while holding your ID document",
+        "click-to-upload": "Click to upload",
+        "uploaded": "Uploaded",
+        "remove-image": "Remove image",
+        "front-image-required": "Front image is required",
+        "back-image-required": "Back image is required",
+        "selfie-required": "Selfie is required",
+        "upload-progress": "Upload Progress",
+        "images-uploaded": "images uploaded"
     
 }

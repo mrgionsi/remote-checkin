@@ -289,10 +289,8 @@
 
             <p-step-panel [value]="2">
                 <ng-template #content let-activateCallback="activateCallback">
-                    <div class="flex flex-col h-48" [class.opacity-50]="!canRegister">
-                        <div class="flex-auto justify-center items-center font-medium">
-                            <app-upload-identity (formDataEmitter)="handleFormData($event)"></app-upload-identity>
-                        </div>
+                    <div class="step-content" [class.opacity-50]="!canRegister">
+                        <app-upload-identity (formDataEmitter)="handleFormData($event)"></app-upload-identity>
                     </div>
                     <div class="flex justify-space-between w-full pt-6">
                         <p-button [label]="'back' | transloco" severity="secondary" icon="pi pi-arrow-left"

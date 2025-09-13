@@ -313,5 +313,17 @@
         "complete-all-fields-step1": "Completa tutti i campi obbligatori per continuare",
         "upload-all-images-step2": "Carica tutte le immagini richieste per continuare",
         "complete-all-data-step3": "Completa tutte le informazioni richieste per inviare",
-        "gender-not-specified": "Non specificato"
+        "gender-not-specified": "Non specificato",
+        "upload-instructions": "Carica foto chiare del tuo documento d'identità e un selfie",
+        "front-image-description": "Carica il lato anteriore del tuo documento d'identità",
+        "back-image-description": "Carica il lato posteriore del tuo documento d'identità",
+        "selfie-description": "Scatta un selfie tenendo in mano il tuo documento d'identità",
+        "click-to-upload": "Clicca per caricare",
+        "uploaded": "Caricato",
+        "remove-image": "Rimuovi immagine",
+        "front-image-required": "L'immagine frontale è obbligatoria",
+        "back-image-required": "L'immagine posteriore è obbligatoria",
+        "selfie-required": "Il selfie è obbligatorio",
+        "upload-progress": "Progresso Caricamento",
+        "images-uploaded": "immagini caricate"
 }
