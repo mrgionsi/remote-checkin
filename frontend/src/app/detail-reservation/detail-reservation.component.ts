@@ -19,12 +19,14 @@ import { DocumentTypeLabelPipe } from "../pipes/document-type-label.pipe";
 import { DatePickerModule } from 'primeng/datepicker';
 import { RoomService } from '../services/room.service';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { DialogModule } from 'primeng/dialog';
 import { HttpClient } from '@angular/common/http';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { PortaleAlloggiService } from '../services/portale-alloggi.service';
 
 @Component({
   selector: 'app-detail-reservation',
-  imports: [ToastModule, TranslocoPipe, CommonModule, TableModule, ConfirmDialogModule, CardModule, ButtonModule, FormsModule, SelectModule, DatePickerModule, ReactiveFormsModule, DocumentTypeLabelPipe],
+  imports: [ToastModule, TranslocoPipe, CommonModule, TableModule, ConfirmDialogModule, CardModule, ButtonModule, FormsModule, SelectModule, DatePickerModule, ReactiveFormsModule, DocumentTypeLabelPipe, DialogModule],
   templateUrl: './detail-reservation.component.html',
   styleUrl: './detail-reservation.component.scss',
   providers: [MessageService, DialogService, ConfirmationService]
@@ -49,6 +51,10 @@ export class DetailReservationComponent implements OnInit {
   editMode = false;
   form: FormGroup;
 
+  // Portale Alloggi modal
+  showPortaleAlloggiModal = false;
+  sendingToPortaleAlloggi = false;
+
 
   constructor(
     private messageService: MessageService,
@@ -60,6 +66,8 @@ export class DetailReservationComponent implements OnInit {
     private readonly roomService: RoomService,
     private readonly confirmationService: ConfirmationService,
     private readonly router: Router,
+    private readonly translocoService: TranslocoService,
+    private readonly portaleAlloggiService: PortaleAlloggiService,
     private http: HttpClient
   ) {
     this.form = this.fb.group({
@@ -491,5 +499,47 @@ export class DetailReservationComponent implements OnInit {
     }
     const normalized = value.toLowerCase().trim().replace(/\s+/g, '-');
     return `status-${normalized}`;
+  }
+
+  // Portale Alloggi modal methods
+  openPortaleAlloggiModal(): void {
+    if (this.people.length === 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Warning',
+        detail: this.translocoService.translate('no-guests-to-send')
+      });
+      return;
+    }
+    this.showPortaleAlloggiModal = true;
+  }
+
+  closePortaleAlloggiModal(): void {
+    this.showPortaleAlloggiModal = false;
+  }
+
+  sendToPortaleAlloggi(): void {
+    this.sendingToPortaleAlloggi = true;
+
+    this.portaleAlloggiService.sendReservationData(this.reservationId).subscribe({
+      next: (response) => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: this.translocoService.translate('data-sent-success')
+        });
+        this.sendingToPortaleAlloggi = false;
+        this.closePortaleAlloggiModal();
+      },
+      error: (error) => {
+        console.error('Error sending to Portale Alloggi:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: error.error?.error || this.translocoService.translate('data-send-failed')
+        });
+        this.sendingToPortaleAlloggi = false;
+      }
+    });
   }
 }

@@ -93,8 +93,13 @@
 
                 <div class="detail-item">
                     <i class="pi pi-users"></i>
-                    <strong>{{ 'gender-label' | transloco }}</strong> {{ person.sesso === 1 ? ('male' | transloco) :
-                    person.sesso === 2 ? ('female' | transloco) : '-' }}
+                    <strong>{{ 'gender-label' | transloco }}</strong>
+                    <!-- Debug: {{ person.sesso }} ({{ typeof person.sesso }}) -->
+                    <span *ngIf="person.sesso == 1 || person.sesso === '1'">{{ 'male' | transloco }}</span>
+                    <span *ngIf="person.sesso == 2 || person.sesso === '2'">{{ 'female' | transloco }}</span>
+                    <span
+                        *ngIf="person.sesso == null || person.sesso === undefined || person.sesso === '' || (person.sesso != 1 && person.sesso !== '1' && person.sesso != 2 && person.sesso !== '2')">{{
+                        'gender-not-specified' | transloco }}</span>
                 </div>
                 <div class="detail-item">
                     <i class="pi pi-flag"></i>
