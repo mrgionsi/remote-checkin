@@ -163,6 +163,71 @@
             </div>
         </div>
     </div>
+
+    <!-- Portale Alloggi Configuration -->
+    <div class="card p-4 border-top-1 surface-border">
+        <div class="flex align-items-center gap-2 mb-4">
+            <i class="pi pi-globe text-2xl text-primary"></i>
+            <h3 class="mb-0 mt-0">{{ 'portale-alloggi-configuration-title' | transloco }}</h3>
+        </div>
+
+        <div class="p-fluid p-formgrid grid" [formGroup]="portaleForm">
+            <!-- Help Text -->
+            <div class="col-12">
+                <div class="field">
+                    <small class="text-600">{{ 'portale-alloggi-help' | transloco }}</small>
+                </div>
+            </div>
+
+            <!-- Username -->
+            <div class="col-12 md:col-6">
+                <div class="field">
+                    <label for="portale_username" class="font-semibold">{{ 'portale-alloggi-username-label' | transloco
+                        }}</label>
+                    <input pInputText id="portale_username" type="text" formControlName="portale_username"
+                        [placeholder]="'portale-alloggi-username-placeholder' | transloco" styleClass="w-full">
+                </div>
+            </div>
+
+            <!-- Password -->
+            <div class="col-12 md:col-6">
+                <div class="field">
+                    <label for="portale_password" class="font-semibold">{{ 'portale-alloggi-password-label' | transloco
+                        }}</label>
+                    <p-password id="portale_password" formControlName="portale_password"
+                        [placeholder]="'portale-alloggi-password-placeholder' | transloco" [feedback]="false"
+                        [toggleMask]="true" styleClass="w-full" inputStyleClass="w-full">
+                    </p-password>
+                    <small class="text-600">
+                        {{ 'portale-alloggi-password-help' | transloco }}
+                    </small>
+                </div>
+            </div>
+
+            <!-- Web Service Key -->
+            <div class="col-12">
+                <div class="field">
+                    <label for="portale_wskey" class="font-semibold">{{ 'portale-alloggi-wskey-label' | transloco
+                        }}</label>
+                    <input pInputText id="portale_wskey" type="text" formControlName="portale_wskey"
+                        [placeholder]="'portale-alloggi-wskey-placeholder' | transloco" styleClass="w-full">
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="col-12">
+                <div class="flex gap-2 justify-content-end">
+                    <p-button [label]="'test-portale-connection-btn' | transloco" icon="pi pi-check"
+                        severity="secondary" size="small" (onClick)="testPortaleConnection()"
+                        [loading]="testingPortale">
+                    </p-button>
+                    <p-button [label]="'save-portale-config-btn' | transloco" icon="pi pi-save" severity="success"
+                        size="small" (onClick)="savePortaleConfig()" [loading]="savingPortale">
+                    </p-button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <p-toast></p-toast>
