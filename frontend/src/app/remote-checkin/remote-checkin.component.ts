@@ -40,10 +40,7 @@ export class RemoteCheckinComponent implements OnInit {
   documentTypes = [{}];
 
   // Portale Alloggi options
-  genderOptions = [
-    { label: 'Male', value: '1' },
-    { label: 'Female', value: '2' }
-  ];
+  genderOptions: { label: string; value: string }[] = [];
 
   // Reference data loaded from JSON files
   countryOptions: any[] = [];
@@ -96,7 +93,70 @@ export class RemoteCheckinComponent implements OnInit {
       comune_residenza: ['', Validators.required],
       provincia_residenza: ['', Validators.required],
       stato_residenza: ['', Validators.required],
-    });
+    }, { validators: this.documentDateValidator });
+  }
+
+  // Custom validator to ensure document expiry date is after issue date
+  documentDateValidator(form: FormGroup) {
+    const issueDate = form.get('data_emissione')?.value;
+    const expiryDate = form.get('data_scadenza')?.value;
+
+    if (!issueDate || !expiryDate) {
+      return null; // Don't validate if either date is missing
+    }
+
+    try {
+      // Convert to Date objects if they're strings
+      let issue: Date;
+      let expiry: Date;
+
+      if (issueDate instanceof Date) {
+        issue = issueDate;
+      } else if (typeof issueDate === 'string') {
+        // Handle different date formats
+        issue = new Date(issueDate);
+      } else {
+        return null; // Invalid date format
+      }
+
+      if (expiryDate instanceof Date) {
+        expiry = expiryDate;
+      } else if (typeof expiryDate === 'string') {
+        // Handle different date formats
+        expiry = new Date(expiryDate);
+      } else {
+        return null; // Invalid date format
+      }
+
+      // Check if dates are valid
+      if (isNaN(issue.getTime()) || isNaN(expiry.getTime())) {
+        return null; // Invalid dates
+      }
+
+      // Set time to start of day for accurate comparison
+      issue.setHours(0, 0, 0, 0);
+      expiry.setHours(0, 0, 0, 0);
+
+      // Check if expiry date is after issue date (not equal or before)
+      if (expiry <= issue) {
+        return { documentDateInvalid: true };
+      }
+
+      return null;
+    } catch (error) {
+      console.error('Error in date validation:', error);
+      return null; // Don't block submission on validation errors
+    }
+  }
+
+  // Method to handle date changes and trigger validation
+  onDateChange() {
+    // Mark both date fields as touched to trigger validation display
+    this.clientForm.get('data_emissione')?.markAsTouched();
+    this.clientForm.get('data_scadenza')?.markAsTouched();
+
+    // Trigger form validation to update the documentDateInvalid error
+    this.clientForm.updateValueAndValidity();
   }
 
   ngOnInit() {
@@ -104,6 +164,12 @@ export class RemoteCheckinComponent implements OnInit {
       { label: this.translocoService.translate('identity-card-label'), value: 'identity_card' },
       { label: this.translocoService.translate('driver-license-label'), value: 'driver_license' },
       { label: this.translocoService.translate('passport-label'), value: 'passport' }
+    ];
+
+    // Initialize gender options with translations
+    this.genderOptions = [
+      { label: this.translocoService.translate('gender-male'), value: '1' },
+      { label: this.translocoService.translate('gender-female'), value: '2' }
     ];
 
     // Load reference data from JSON files
@@ -191,7 +257,11 @@ export class RemoteCheckinComponent implements OnInit {
     // Load countries
     this.http.get<any[]>('/assets/data/countries.json').subscribe({
       next: (countries) => {
-        this.countryOptions = countries;
+        // Transform the data to match the expected format
+        this.countryOptions = countries.map(country => ({
+          label: country.name,
+          value: country.code
+        }));
       },
       error: (error) => {
         console.error('Error loading countries:', error);
@@ -208,7 +278,11 @@ export class RemoteCheckinComponent implements OnInit {
     // Load Italian provinces
     this.http.get<any[]>('/assets/data/italian-provinces.json').subscribe({
       next: (provinces) => {
-        this.provinceOptions = provinces;
+        // Transform the data to match the expected format
+        this.provinceOptions = provinces.map(province => ({
+          label: province.name,
+          value: province.code
+        }));
       },
       error: (error) => {
         console.error('Error loading provinces:', error);
@@ -225,7 +299,11 @@ export class RemoteCheckinComponent implements OnInit {
     // Load Italian municipalities
     this.http.get<any[]>('/assets/data/italian-municipalities.json').subscribe({
       next: (municipalities) => {
-        this.municipalityOptions = municipalities;
+        // Transform the data to match the expected format
+        this.municipalityOptions = municipalities.map(municipality => ({
+          label: municipality.name,
+          value: municipality.code
+        }));
       },
       error: (error) => {
         console.error('Error loading municipalities:', error);
@@ -266,7 +344,16 @@ export class RemoteCheckinComponent implements OnInit {
     }
 
     if (this.uploadForm.invalid || this.clientForm.invalid) {
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'All fields and images are required' });
+      // Check for specific validation errors
+      if (this.clientForm.hasError('documentDateInvalid')) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Validation Error',
+          detail: this.translocoService.translate('document-expiry-date-error')
+        });
+      } else {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: this.translocoService.translate('all-fields-required-error') });
+      }
       return;
     }
 

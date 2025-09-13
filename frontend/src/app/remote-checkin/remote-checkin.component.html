@@ -54,9 +54,8 @@
                                             </div>
                                             <div class="field">
                                                 <label for="birthday">{{ 'birthday-label' | transloco }}</label>
-                                                <p-datePicker id="birthday" formControlName="birthday" showIcon
-                                                    dateFormat="dd/mm/yy"
-                                                    [placeholder]="'birthdayPlaceholder' | transloco"></p-datePicker>
+                                                <p-datePicker id="birthday" formControlName="birthday" [showIcon]="true"
+                                                    dateFormat="dd/mm/yy" [readonlyInput]="true"></p-datePicker>
                                             </div>
                                             <div class="field">
                                                 <label for="street">{{ 'street-label' | transloco }}</label>
@@ -101,7 +100,7 @@
                                                 <label for="document_type">{{ 'document-type-label' | transloco
                                                     }}</label>
                                                 <p-select id="document_type" formControlName="document_type"
-                                                    [options]="documentTypes"
+                                                    [options]="documentTypes" optionLabel="label" optionValue="value"
                                                     [placeholder]="'documentTypePlaceholder' | transloco"
                                                     [filter]="true" filterBy="label"
                                                     filterPlaceholder="Search document types..." [showClear]="true"
@@ -128,13 +127,15 @@
 
                                     <!-- Portale Alloggi Required Fields -->
                                     <div class="card">
-                                        <h3>{{ 'portale-alloggi-fields' | transloco }}</h3>
+                                        <!--                                         <h3>{{ 'portale-alloggi-fields' | transloco }}</h3>
+ -->
                                         <div class="grid">
                                             <div class="col-12 md:col-6">
                                                 <div class="field">
                                                     <label for="sesso">{{ 'gender-label' | transloco }}</label>
                                                     <p-select id="sesso" formControlName="sesso"
-                                                        [options]="genderOptions"
+                                                        [options]="genderOptions" optionLabel="label"
+                                                        optionValue="value"
                                                         [placeholder]="'genderPlaceholder' | transloco" [filter]="true"
                                                         filterBy="label" class="w-16rem"></p-select>
                                                 </div>
@@ -142,7 +143,8 @@
                                                     <label for="nazionalita">{{ 'nationality-label' | transloco
                                                         }}</label>
                                                     <p-select id="nazionalita" formControlName="nazionalita"
-                                                        [options]="countryOptions"
+                                                        [options]="countryOptions" optionLabel="label"
+                                                        optionValue="value"
                                                         [placeholder]="'nationalityPlaceholder' | transloco"
                                                         [filter]="true" filterBy="label"
                                                         filterPlaceholder="Search countries..." [showClear]="true"
@@ -169,7 +171,8 @@
                                                     <label for="provincia_nascita">{{ 'birth-province-label' | transloco
                                                         }}</label>
                                                     <p-select id="provincia_nascita" formControlName="provincia_nascita"
-                                                        [options]="provinceOptions"
+                                                        [options]="provinceOptions" optionLabel="label"
+                                                        optionValue="value"
                                                         [placeholder]="'birthProvincePlaceholder' | transloco"
                                                         [filter]="true" filterBy="label"
                                                         filterPlaceholder="Search provinces..." [showClear]="true"
@@ -179,7 +182,8 @@
                                                     <label for="stato_nascita">{{ 'birth-country-label' | transloco
                                                         }}</label>
                                                     <p-select id="stato_nascita" formControlName="stato_nascita"
-                                                        [options]="countryOptions"
+                                                        [options]="countryOptions" optionLabel="label"
+                                                        optionValue="value"
                                                         [placeholder]="'birthCountryPlaceholder' | transloco"
                                                         [filter]="true" filterBy="label"
                                                         filterPlaceholder="Search countries..." [showClear]="true"
@@ -189,7 +193,8 @@
                                                     <label for="cittadinanza">{{ 'citizenship-label' | transloco
                                                         }}</label>
                                                     <p-select id="cittadinanza" formControlName="cittadinanza"
-                                                        [options]="countryOptions"
+                                                        [options]="countryOptions" optionLabel="label"
+                                                        optionValue="value"
                                                         [placeholder]="'citizenshipPlaceholder' | transloco"
                                                         [filter]="true" filterBy="label"
                                                         filterPlaceholder="Search countries..." [showClear]="true"
@@ -207,14 +212,22 @@
                                                 <div class="field">
                                                     <label for="data_emissione">{{ 'document-issue-date-label' |
                                                         transloco }}</label>
-                                                    <p-calendar id="data_emissione" formControlName="data_emissione"
-                                                        dateFormat="yy-mm-dd" class="w-16rem"></p-calendar>
+                                                    <p-datePicker id="data_emissione" formControlName="data_emissione"
+                                                        dateFormat="yy-mm-dd" [showIcon]="true" [readonlyInput]="true"
+                                                        (onSelect)="onDateChange()" class="w-16rem"></p-datePicker>
                                                 </div>
                                                 <div class="field">
                                                     <label for="data_scadenza">{{ 'document-expiry-date-label' |
                                                         transloco }}</label>
-                                                    <p-calendar id="data_scadenza" formControlName="data_scadenza"
-                                                        dateFormat="yy-mm-dd" class="w-16rem"></p-calendar>
+                                                    <p-datePicker id="data_scadenza" formControlName="data_scadenza"
+                                                        dateFormat="yy-mm-dd" [showIcon]="true" [readonlyInput]="true"
+                                                        (onSelect)="onDateChange()" class="w-16rem"></p-datePicker>
+                                                    <small
+                                                        *ngIf="clientForm.hasError('documentDateInvalid') && 
+                                                        (clientForm.get('data_emissione')?.touched || clientForm.get('data_scadenza')?.touched)"
+                                                        class="p-error">
+                                                        {{ 'document-expiry-date-error' | transloco }}
+                                                    </small>
                                                 </div>
                                                 <div class="field">
                                                     <label for="autorita_rilascio">{{ 'issuing-authority-label' |
@@ -235,7 +248,8 @@
                                                         transloco }}</label>
                                                     <p-select id="provincia_residenza"
                                                         formControlName="provincia_residenza"
-                                                        [options]="provinceOptions"
+                                                        [options]="provinceOptions" optionLabel="label"
+                                                        optionValue="value"
                                                         [placeholder]="'residenceProvincePlaceholder' | transloco"
                                                         [filter]="true" filterBy="label"
                                                         filterPlaceholder="Search provinces..." [showClear]="true"
@@ -245,7 +259,8 @@
                                                     <label for="stato_residenza">{{ 'residence-country-label' |
                                                         transloco }}</label>
                                                     <p-select id="stato_residenza" formControlName="stato_residenza"
-                                                        [options]="countryOptions"
+                                                        [options]="countryOptions" optionLabel="label"
+                                                        optionValue="value"
                                                         [placeholder]="'residenceCountryPlaceholder' | transloco"
                                                         [filter]="true" filterBy="label"
                                                         filterPlaceholder="Search countries..." [showClear]="true"
@@ -266,7 +281,7 @@
                     </div>
                     <div class="flex  pt-6 justify-content-end">
                         <p-button [label]="'next' | transloco" icon="pi pi-arrow-right" iconPos="right"
-                            (onClick)="activateCallback(2)" />
+                            [disabled]="clientForm.invalid || !canRegister" (onClick)="activateCallback(2)" />
                     </div>
                 </ng-template>
             </p-step-panel>
@@ -283,7 +298,7 @@
                             (onClick)="activateCallback(1)" />
 
                         <p-button [label]="'next' | transloco" icon="pi pi-arrow-right" iconPos="right"
-                            [disabled]="uploadForm.invalid" (onClick)="activateCallback(3)" />
+                            [disabled]="uploadForm.invalid || !canRegister" (onClick)="activateCallback(3)" />
                     </div>
                 </ng-template>
             </p-step-panel>
@@ -319,6 +334,38 @@
                                         clientForm.get('document_number')?.value }}</p>
                                     <p><strong>{{ 'cf-label' | transloco }}</strong> {{ clientForm.get('cf')?.value }}
                                     </p>
+
+                                    <!-- Portale Alloggi Fields -->
+                                    <hr class="my-3">
+                                    <h4 class="mb-2">{{ 'portale-alloggi-fields' | transloco }}</h4>
+                                    <p><strong>{{ 'gender-label' | transloco }}</strong> {{
+                                        (clientForm.get('sesso')?.value === '1' ? 'male' : 'female') | transloco }}</p>
+                                    <p><strong>{{ 'nationality-label' | transloco }}</strong> {{
+                                        clientForm.get('nazionalita')?.value }}</p>
+                                    <p><strong>{{ 'email-label' | transloco }}</strong> {{
+                                        clientForm.get('email')?.value }}</p>
+                                    <p><strong>{{ 'birth-municipality-label' | transloco }}</strong> {{
+                                        clientForm.get('comune_nascita')?.value }}</p>
+                                    <p><strong>{{ 'birth-province-label' | transloco }}</strong> {{
+                                        clientForm.get('provincia_nascita')?.value }}</p>
+                                    <p><strong>{{ 'birth-country-label' | transloco }}</strong> {{
+                                        clientForm.get('stato_nascita')?.value }}</p>
+                                    <p><strong>{{ 'citizenship-label' | transloco }}</strong> {{
+                                        clientForm.get('cittadinanza')?.value }}</p>
+                                    <p><strong>{{ 'document-issue-place-label' | transloco }}</strong> {{
+                                        clientForm.get('luogo_emissione')?.value }}</p>
+                                    <p><strong>{{ 'document-issue-date-label' | transloco }}</strong> {{
+                                        clientForm.get('data_emissione')?.value | date }}</p>
+                                    <p><strong>{{ 'document-expiry-date-label' | transloco }}</strong> {{
+                                        clientForm.get('data_scadenza')?.value | date }}</p>
+                                    <p><strong>{{ 'issuing-authority-label' | transloco }}</strong> {{
+                                        clientForm.get('autorita_rilascio')?.value }}</p>
+                                    <p><strong>{{ 'residence-municipality-label' | transloco }}</strong> {{
+                                        clientForm.get('comune_residenza')?.value }}</p>
+                                    <p><strong>{{ 'residence-province-label' | transloco }}</strong> {{
+                                        clientForm.get('provincia_residenza')?.value }}</p>
+                                    <p><strong>{{ 'residence-country-label' | transloco }}</strong> {{
+                                        clientForm.get('stato_residenza')?.value }}</p>
                                 </div>
                             </p-card>
                         </div>
@@ -355,6 +402,7 @@
                     <!-- Submit Button Section - Centered -->
                     <div class="flex justify-center pt-4 w-full">
                         <p-button [label]="'submit' | transloco" icon="pi pi-check" class="p-button-lg"
+                            [disabled]="clientForm.invalid || uploadForm.invalid || !canRegister"
                             (onClick)="uploadReservationData()"></p-button>
                     </div>
 
