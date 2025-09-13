@@ -10,6 +10,8 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { PasswordModule } from 'primeng/password';
 import { MessageService } from 'primeng/api';
 import { EmailConfig, EmailConfigService, EmailProviderPreset } from '../../services/email-config.service';
+import { PortaleAlloggiService, PortaleAlloggiConfig } from '../../services/portale-alloggi.service';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-settings',
@@ -36,12 +38,19 @@ export class SettingsComponent implements OnInit {
   presetMap: { [key: string]: EmailProviderPreset } = {};
   provider_config: boolean = false;
 
+  // Portale Alloggi settings
+  portaleForm: FormGroup;
+  testingPortale = false;
+  savingPortale = false;
+
   constructor(
     private readonly translocoService: TranslocoService,
     @Inject(PLATFORM_ID) private readonly platformId: Object,
     private fb: FormBuilder,
     private emailConfigService: EmailConfigService,
-    private messageService: MessageService
+    private portaleAlloggiService: PortaleAlloggiService,
+    private messageService: MessageService,
+    private http: HttpClient
   ) {
     this.emailForm = this.fb.group({
       preset: [''], // Add preset as a form control
@@ -59,6 +68,13 @@ export class SettingsComponent implements OnInit {
         api_key: ['']
       })
     });
+
+    // Initialize Portale Alloggi form
+    this.portaleForm = this.fb.group({
+      portale_username: [''],
+      portale_password: [''],
+      portale_wskey: ['']
+    });
   }
 
   ngOnInit() {
@@ -69,6 +85,9 @@ export class SettingsComponent implements OnInit {
     // Load email settings
     this.loadEmailPresets();
     this.loadEmailConfig();
+
+    // Load Portale Alloggi settings
+    this.loadPortaleConfig();
   }
 
 
@@ -223,5 +242,98 @@ export class SettingsComponent implements OnInit {
       config.mail_use_ssl === preset.mail_use_ssl &&
       (config.provider_type === preset.provider_type ||
         (config.provider_type === 'smtp' && !preset.provider_type));
+  }
+
+  // Portale Alloggi methods
+  loadPortaleConfig(): void {
+    this.portaleAlloggiService.getConfig().subscribe({
+      next: (response) => {
+        if (response.config) {
+          this.portaleForm.patchValue({
+            portale_username: response.config.portale_username || '',
+            portale_password: '', // Don't load password for security - user needs to re-enter
+            portale_wskey: response.config.portale_wskey || ''
+          });
+
+          // Show info message if password exists but is masked
+          if (response.config.portale_password === '***') {
+            this.messageService.add({
+              severity: 'info',
+              summary: 'Info',
+              detail: this.translocoService.translate('portale-alloggi-password-configured-message')
+            });
+          }
+        }
+      },
+      error: (error) => {
+        console.error('Error loading Portale Alloggi config:', error);
+        // Don't show error message as this might be the first time setting up
+      }
+    });
+  }
+
+  savePortaleConfig(): void {
+    if (this.portaleForm.valid) {
+      this.savingPortale = true;
+
+      const formValue = this.portaleForm.value;
+
+      // Only include password if it's not empty (to avoid overwriting existing password)
+      const config: PortaleAlloggiConfig = {
+        portale_username: formValue.portale_username,
+        portale_wskey: formValue.portale_wskey,
+        portale_password: formValue.portale_password || '' // Include empty string if no password provided
+      };
+
+      this.portaleAlloggiService.saveConfig(config).subscribe({
+        next: (response) => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: this.translocoService.translate('portale-config-saved')
+          });
+          this.savingPortale = false;
+        },
+        error: (error) => {
+          console.error('Error saving Portale Alloggi config:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: error.error?.error || 'Failed to save Portale Alloggi configuration'
+          });
+          this.savingPortale = false;
+        }
+      });
+    } else {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Warning',
+        detail: 'Please fill in all required fields'
+      });
+    }
+  }
+
+  testPortaleConnection(): void {
+    this.testingPortale = true;
+
+    this.portaleAlloggiService.testConnection().subscribe({
+      next: (response) => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: this.translocoService.translate('portale-connection-success')
+        });
+        this.testingPortale = false;
+      },
+      error: (error) => {
+        console.error('Error testing Portale Alloggi connection:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: this.translocoService.translate('portale-connection-failed')
+        });
+        this.testingPortale = false;
+      }
+    });
   }
 }
