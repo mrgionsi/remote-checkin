@@ -55,7 +55,8 @@
                                             <div class="field">
                                                 <label for="birthday">{{ 'birthday-label' | transloco }}</label>
                                                 <p-datePicker id="birthday" formControlName="birthday" [showIcon]="true"
-                                                    dateFormat="dd/mm/yy" [readonlyInput]="true"></p-datePicker>
+                                                    dateFormat="dd/mm/yy" [readonlyInput]="true"
+                                                    styleClass="w-full"></p-datePicker>
                                             </div>
                                             <div class="field">
                                                 <label for="street">{{ 'street-label' | transloco }}</label>
@@ -104,7 +105,7 @@
                                                     [placeholder]="'documentTypePlaceholder' | transloco"
                                                     [filter]="true" filterBy="label"
                                                     filterPlaceholder="Search document types..." [showClear]="true"
-                                                    class="w-16rem"></p-select>
+                                                    styleClass="w-full"></p-select>
                                             </div>
                                             <div class="field">
                                                 <label for="document_number">{{ 'document-number-label' | transloco
@@ -137,7 +138,7 @@
                                                         [options]="genderOptions" optionLabel="label"
                                                         optionValue="value"
                                                         [placeholder]="'genderPlaceholder' | transloco" [filter]="true"
-                                                        filterBy="label" class="w-16rem"></p-select>
+                                                        filterBy="label" styleClass="w-full"></p-select>
                                                 </div>
                                                 <div class="field">
                                                     <label for="nazionalita">{{ 'nationality-label' | transloco
@@ -148,7 +149,7 @@
                                                         [placeholder]="'nationalityPlaceholder' | transloco"
                                                         [filter]="true" filterBy="label"
                                                         filterPlaceholder="Search countries..." [showClear]="true"
-                                                        class="w-16rem"></p-select>
+                                                        styleClass="w-full"></p-select>
                                                 </div>
                                                 <div class="field">
                                                     <label for="email">{{ 'email-label' | transloco }}</label>
@@ -176,7 +177,7 @@
                                                         [placeholder]="'birthProvincePlaceholder' | transloco"
                                                         [filter]="true" filterBy="label"
                                                         filterPlaceholder="Search provinces..." [showClear]="true"
-                                                        class="w-16rem"></p-select>
+                                                        styleClass="w-full"></p-select>
                                                 </div>
                                                 <div class="field">
                                                     <label for="stato_nascita">{{ 'birth-country-label' | transloco
@@ -187,7 +188,7 @@
                                                         [placeholder]="'birthCountryPlaceholder' | transloco"
                                                         [filter]="true" filterBy="label"
                                                         filterPlaceholder="Search countries..." [showClear]="true"
-                                                        class="w-16rem"></p-select>
+                                                        styleClass="w-full"></p-select>
                                                 </div>
                                                 <div class="field">
                                                     <label for="cittadinanza">{{ 'citizenship-label' | transloco
@@ -198,7 +199,7 @@
                                                         [placeholder]="'citizenshipPlaceholder' | transloco"
                                                         [filter]="true" filterBy="label"
                                                         filterPlaceholder="Search countries..." [showClear]="true"
-                                                        class="w-16rem"></p-select>
+                                                        styleClass="w-full"></p-select>
                                                 </div>
                                             </div>
                                             <div class="col-12 md:col-6">
@@ -214,14 +215,14 @@
                                                         transloco }}</label>
                                                     <p-datePicker id="data_emissione" formControlName="data_emissione"
                                                         dateFormat="yy-mm-dd" [showIcon]="true" [readonlyInput]="true"
-                                                        (onSelect)="onDateChange()" class="w-16rem"></p-datePicker>
+                                                        (onSelect)="onDateChange()" styleClass="w-full"></p-datePicker>
                                                 </div>
                                                 <div class="field">
                                                     <label for="data_scadenza">{{ 'document-expiry-date-label' |
                                                         transloco }}</label>
                                                     <p-datePicker id="data_scadenza" formControlName="data_scadenza"
                                                         dateFormat="yy-mm-dd" [showIcon]="true" [readonlyInput]="true"
-                                                        (onSelect)="onDateChange()" class="w-16rem"></p-datePicker>
+                                                        (onSelect)="onDateChange()" styleClass="w-full"></p-datePicker>
                                                     <small
                                                         *ngIf="clientForm.hasError('documentDateInvalid') && 
                                                         (clientForm.get('data_emissione')?.touched || clientForm.get('data_scadenza')?.touched)"
@@ -253,7 +254,7 @@
                                                         [placeholder]="'residenceProvincePlaceholder' | transloco"
                                                         [filter]="true" filterBy="label"
                                                         filterPlaceholder="Search provinces..." [showClear]="true"
-                                                        class="w-16rem"></p-select>
+                                                        styleClass="w-full"></p-select>
                                                 </div>
                                                 <div class="field">
                                                     <label for="stato_residenza">{{ 'residence-country-label' |
@@ -264,7 +265,7 @@
                                                         [placeholder]="'residenceCountryPlaceholder' | transloco"
                                                         [filter]="true" filterBy="label"
                                                         filterPlaceholder="Search countries..." [showClear]="true"
-                                                        class="w-16rem"></p-select>
+                                                        styleClass="w-full"></p-select>
                                                 </div>
                                             </div>
                                         </div>
