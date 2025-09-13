@@ -151,6 +151,12 @@
                 class="p-button-sm text-white" severity="danger" (click)="confirmDeleteReservation()"
                 (keydown.enter)="confirmDeleteReservation()" (keydown.space)="confirmDeleteReservation()">
             </p-button>
+
+            <p-button *ngIf="!editMode && reservation_status?.value === 'Approved'"
+                [label]="'send-to-portale-alloggi-btn' | transloco" icon="pi pi-send" class="p-button-sm text-white"
+                severity="info" (click)="openPortaleAlloggiModal()" (keydown.enter)="openPortaleAlloggiModal()"
+                (keydown.space)="openPortaleAlloggiModal()">
+            </p-button>
         </div>
 
     </ng-template>
@@ -227,7 +233,14 @@
             <td>{{ person.cf }}</td>
             <td>{{ person.document_type | documentTypeLabel | transloco }}</td>
             <!-- Portale Alloggi fields -->
-            <td>{{ person.sesso === 1 ? ('male' | transloco) : person.sesso === 2 ? ('female' | transloco) : '-' }}</td>
+            <td>
+                <!-- Debug: {{ person.sesso }} ({{ typeof person.sesso }}) -->
+                <span *ngIf="person.sesso == 1 || person.sesso === '1'">{{ 'male' | transloco }}</span>
+                <span *ngIf="person.sesso == 2 || person.sesso === '2'">{{ 'female' | transloco }}</span>
+                <span
+                    *ngIf="person.sesso == null || person.sesso === undefined || person.sesso === '' || (person.sesso != 1 && person.sesso !== '1' && person.sesso != 2 && person.sesso !== '2')">{{
+                    'gender-not-specified' | transloco }}</span>
+            </td>
             <td>{{ person.nazionalita || '-' }}</td>
             <td>{{ person.email || '-' }}</td>
             <td>{{ person.comune_nascita || '-' }}</td>
@@ -244,5 +257,83 @@
         </tr>
     </ng-template>
 </p-table>
+
+<!-- Portale Alloggi Send Modal -->
+<p-dialog [(visible)]="showPortaleAlloggiModal" [header]="'send-to-portale-alloggi-title' | transloco" [modal]="true"
+    [style]="{ width: '80vw', maxWidth: '1200px' }" [closable]="true">
+
+    <div class="p-4">
+        <p class="mb-4">{{ 'send-to-portale-alloggi-description' | transloco }}</p>
+
+        <!-- Reservation Information -->
+        <div class="mb-4">
+            <h4 class="mb-2">{{ 'reservation-info' | transloco }}</h4>
+            <div class="grid">
+                <div class="col-12 md:col-6">
+                    <strong>{{ 'reservation-id-label' | transloco }}:</strong> {{ reservation_details?.id_reference }}
+                </div>
+                <div class="col-12 md:col-6">
+                    <strong>{{ 'guest-label' | transloco }}:</strong> {{ reservation_details?.name_reference }}
+                </div>
+                <div class="col-12 md:col-6">
+                    <strong>{{ 'start-date-label' | transloco }}:</strong> {{ reservation_details?.start_date | date }}
+                </div>
+                <div class="col-12 md:col-6">
+                    <strong>{{ 'end-date-label' | transloco }}:</strong> {{ reservation_details?.end_date | date }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Guests to Send -->
+        <div class="mb-4">
+            <h4 class="mb-2">{{ 'guests-to-send' | transloco }} ({{ people.length }})</h4>
+            <div class="grid">
+                <div *ngFor="let person of people" class="col-12 md:col-6 lg:col-4">
+                    <p-card class="mb-2">
+                        <ng-template pTemplate="content">
+                            <div class="text-sm">
+                                <p><strong>{{ 'name-label' | transloco }}:</strong> {{ person.name }} {{ person.surname
+                                    }}</p>
+                                <p><strong>{{ 'birthday-label' | transloco }}:</strong> {{ person.birthday | date }}</p>
+                                <p><strong>{{ 'document-type-label' | transloco }}:</strong> {{ (person.document_type |
+                                    documentTypeLabel) | transloco }}</p>
+                                <p><strong>{{ 'document-number-label' | transloco }}:</strong> {{ person.document_number
+                                    }}</p>
+                                <p><strong>{{ 'cf-label' | transloco }}:</strong> {{ person.cf }}</p>
+                                <p><strong>{{ 'gender-label' | transloco }}:</strong>
+                                    <!-- Debug: Value: "{{ person.sesso }}" | Type: {{ typeof person.sesso }} | Null: {{ person.sesso === null }} | Undefined: {{ person.sesso === undefined }} -->
+                                    <span *ngIf="person.sesso == 1 || person.sesso === '1'">{{ 'male' | transloco
+                                        }}</span>
+                                    <span *ngIf="person.sesso == 2 || person.sesso === '2'">{{ 'female' | transloco
+                                        }}</span>
+                                    <span
+                                        *ngIf="person.sesso == null || person.sesso === undefined || person.sesso === '' || (person.sesso != 1 && person.sesso !== '1' && person.sesso != 2 && person.sesso !== '2')">{{
+                                        'gender-not-specified' | transloco }}</span>
+                                </p>
+                                <p><strong>{{ 'nationality-label' | transloco }}:</strong> {{ person.nazionalita }}</p>
+                            </div>
+                        </ng-template>
+                    </p-card>
+                </div>
+            </div>
+        </div>
+
+        <div *ngIf="people.length === 0" class="text-center p-4">
+            <i class="pi pi-exclamation-triangle text-orange-500 text-2xl mb-2"></i>
+            <p>{{ 'no-guests-to-send' | transloco }}</p>
+        </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+        <div class="flex justify-content-end gap-2">
+            <p-button [label]="'cancel-send' | transloco" icon="pi pi-times" severity="secondary"
+                (click)="closePortaleAlloggiModal()">
+            </p-button>
+            <p-button [label]="'confirm-send-data' | transloco" icon="pi pi-check" severity="success"
+                (click)="sendToPortaleAlloggi()" [disabled]="people.length === 0" [loading]="sendingToPortaleAlloggi">
+            </p-button>
+        </div>
+    </ng-template>
+</p-dialog>
 
 <p-confirmDialog></p-confirmDialog>
