@@ -316,21 +316,29 @@ class User(Base):
     password = Column(String)
     username = Column(String)
     id_role = Column(Integer, ForeignKey("role.id"))
+    # Portale Alloggi credentials
+    portale_username = Column(String)  # Username for Portale Alloggi
+    portale_password = Column(String)  # Encrypted password for Portale Alloggi
+    portale_wskey = Column(String)     # Web Service Key for Portale Alloggi
 
     role = relationship("Role")
     email_config = relationship("EmailConfig", back_populates="user", uselist=False)
 
-    def to_dict(self):
+    def to_dict(self, include_portale_credentials=False):
         """
         Return a serializable dictionary of the User suitable for API responses.
         
         The dictionary includes the user's primary fields:
         - id, name, surname, email, telephone, username, id_role
+        - portale_username, portale_password (masked), portale_wskey (if include_portale_credentials=True)
+        
+        Parameters:
+            include_portale_credentials (bool): If True, include Portale Alloggi credentials (password masked)
         
         Returns:
             dict: Mapping of the above field names to their values.
         """
-        return {
+        result = {
             "id": self.id,
             "name": self.name,
             "surname": self.surname,
@@ -339,6 +347,15 @@ class User(Base):
             "username": self.username,
             "id_role": self.id_role,
         }
+        
+        if include_portale_credentials:
+            result.update({
+                "portale_username": self.portale_username,
+                "portale_password": "***" if self.portale_password else None,  # Mask password
+                "portale_wskey": self.portale_wskey,
+            })
+        
+        return result
 
     def __repr__(self):
         return f"<User(id={self.id}, username={self.username})>"
