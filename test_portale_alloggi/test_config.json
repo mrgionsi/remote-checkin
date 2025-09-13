@@ -1,0 +1,33 @@
+{
+  "portale_alloggi": {
+    "username": "test",
+    "password": "test", 
+    "ws_key": "12345678910",
+    "test_mode": true
+  },
+  "test_data": {
+    "client": {
+      "name": "Mario",
+      "surname": "Rossi",
+      "sesso": 1,
+      "nazionalita": "IT",
+      "birthday": "15/03/1985",
+      "comune_nascita": "ROMA",
+      "provincia_nascita": "RM",
+      "stato_nascita": "IT",
+      "cittadinanza": "IT",
+      "document_number": "AB1234567",
+      "luogo_emissione": "ROMA",
+      "data_emissione": "01/01/2020",
+      "data_scadenza": "01/01/2030",
+      "autorita_rilascio": "COMUNE DI ROMA",
+      "comune_residenza": "ROMA",
+      "provincia_residenza": "RM",
+      "stato_residenza": "IT"
+    },
+    "reservation": {
+      "start_date": "15/01/2024",
+      "end_date": "20/01/2024"
+    }
+  }
+}
