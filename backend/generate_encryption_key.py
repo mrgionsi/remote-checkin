@@ -9,7 +9,7 @@ Usage:
     python generate_encryption_key.py
 
 Then add the output to your .env file:
-    EMAIL_ENCRYPTION_KEY=your_generated_key_here
+    ENCRYPTION_KEY=your_generated_key_here
 """
 #pylint: disable=C0301,E0611,E0401,W0718,R0914
 import base64
@@ -21,7 +21,7 @@ def generate_encryption_key():
     
     Returns:
         str: URL-safe base64-encoded string representing 32 random bytes (Fernet key). 
-        The function also prints a formatted block showing the key and how to add it as EMAIL_ENCRYPTION_KEY in a .env file.
+        The function also prints a formatted block showing the key and how to add it as ENCRYPTION_KEY in a .env file.
     """
     # Generate 32 random bytes (Fernet key length)
     key_bytes = secrets.token_bytes(32)
@@ -35,7 +35,7 @@ def generate_encryption_key():
     print(f"Key (base64): {key_string}")
     print()
     print("Add this to your .env file:")
-    print(f"EMAIL_ENCRYPTION_KEY={key_string}")
+    print(f"ENCRYPTION_KEY={key_string}")
     print()
     print("IMPORTANT:")
     print("- Keep this key secure and never commit it to version control")

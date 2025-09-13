@@ -104,7 +104,7 @@ class EmailService:
         """
         Decrypts an encrypted password string and returns the plaintext.
         
-        If encrypted_password is falsy (None or empty) returns an empty string. The method attempts to use the instance's encryption_key, falling back to the Flask app config key 'EMAIL_ENCRYPTION_KEY' when available. If no key is found, the function treats the provided value as already plaintext and returns it unchanged (backward compatibility). On decryption errors the underlying exception is re-raised.
+        If encrypted_password is falsy (None or empty) returns an empty string. The method attempts to use the instance's encryption_key, falling back to the Flask app config key 'ENCRYPTION_KEY' when available. If no key is found, the function treats the provided value as already plaintext and returns it unchanged (backward compatibility). On decryption errors the underlying exception is re-raised.
         """
         if not encrypted_password:
             logger.warning("Encrypted password is empty or None")
@@ -115,7 +115,7 @@ class EmailService:
             key = self.encryption_key
             if not key:
                 try:
-                    key = current_app.config.get('EMAIL_ENCRYPTION_KEY')
+                    key = current_app.config.get('ENCRYPTION_KEY')
                 except RuntimeError:
                     # current_app is not available in this context
                     logger.warning("No Flask app context available for decryption")

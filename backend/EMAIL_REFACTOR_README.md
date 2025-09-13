@@ -270,7 +270,7 @@ curl -X POST http://localhost:5000/api/v1/email-config \
 
 2. **"Failed to decrypt password"**
 
-   - Check if EMAIL_ENCRYPTION_KEY is set in Flask app config
+   - Check if ENCRYPTION_KEY is set in Flask app config
    - Key is automatically generated if not present
 
 3. **SMTP Authentication Failed**
