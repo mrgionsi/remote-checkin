@@ -435,4 +435,12 @@ export class RemoteCheckinComponent implements OnInit {
   closeDialog() {
   }
 
+  getImagePreview(type: 'frontimage' | 'backimage' | 'selfie'): string | null {
+    const file = this.uploadForm.get(type)?.value;
+    if (file && file.objectURL) {
+      return file.objectURL;
+    }
+    return null;
+  }
+
 }

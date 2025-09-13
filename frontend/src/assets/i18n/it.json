@@ -325,5 +325,9 @@
         "back-image-required": "L'immagine posteriore è obbligatoria",
         "selfie-required": "Il selfie è obbligatorio",
         "upload-progress": "Progresso Caricamento",
-        "images-uploaded": "immagini caricate"
+        "images-uploaded": "immagini caricate",
+        "review-summary-description": "Rivedi tutte le tue informazioni prima di inviare",
+        "personal-information": "Informazioni Personali",
+        "contact-information": "Informazioni di Contatto",
+        "document-information": "Informazioni Documento"
 }

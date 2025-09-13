@@ -304,97 +304,239 @@
 
             <p-step-panel [value]="3">
                 <ng-template #content let-activateCallback="activateCallback">
-                    <div class="grid">
-                        <!-- Form Recap Section -->
-                        <div class="col-6">
-                            <p-card header="{{ 'form-details' | transloco }}">
-                                <div class="form-recap p-3">
-                                    <p><strong>{{ 'reservation-id-label' | transloco }}</strong> {{ reservationId }}</p>
-                                    <p><strong>{{ 'name-label' | transloco }}</strong> {{ clientForm.get('name')?.value
-                                        }}</p>
-                                    <p><strong>{{ 'surname-label' | transloco }}</strong> {{
-                                        clientForm.get('surname')?.value }}</p>
-                                    <p><strong>{{ 'birthday-label' | transloco }}</strong> {{
-                                        clientForm.get('birthday')?.value | date }}</p>
-                                    <p><strong>{{ 'street-label' | transloco }}</strong> {{
-                                        clientForm.get('street')?.value }}</p>
-                                    <p><strong>{{ 'city-label' | transloco }}</strong> {{ clientForm.get('city')?.value
-                                        }}</p>
-                                    <p><strong>{{ 'province-label' | transloco }}</strong> {{
-                                        clientForm.get('province')?.value }}</p>
-                                    <p><strong>{{ 'cap-label' | transloco }}</strong> {{ clientForm.get('cap')?.value }}
-                                    </p>
-                                    <p><strong>{{ 'telephone-label' | transloco }}</strong> {{
-                                        clientForm.get('telephone')?.value }}</p>
-                                    <p><strong>{{ 'document-type-label' | transloco }}</strong>
-                                        {{ (clientForm.get('document_type')?.value | documentTypeLabel) | transloco }}
-                                    </p>
-                                    <p><strong>{{ 'document-number-label' | transloco }}</strong> {{
-                                        clientForm.get('document_number')?.value }}</p>
-                                    <p><strong>{{ 'cf-label' | transloco }}</strong> {{ clientForm.get('cf')?.value }}
-                                    </p>
-
-                                    <!-- Portale Alloggi Fields -->
-                                    <hr class="my-3">
-                                    <h4 class="mb-2">{{ 'portale-alloggi-fields' | transloco }}</h4>
-                                    <p><strong>{{ 'gender-label' | transloco }}</strong> {{
-                                        (clientForm.get('sesso')?.value === '1' ? 'male' : 'female') | transloco }}</p>
-                                    <p><strong>{{ 'nationality-label' | transloco }}</strong> {{
-                                        clientForm.get('nazionalita')?.value }}</p>
-                                    <p><strong>{{ 'email-label' | transloco }}</strong> {{
-                                        clientForm.get('email')?.value }}</p>
-                                    <p><strong>{{ 'birth-municipality-label' | transloco }}</strong> {{
-                                        clientForm.get('comune_nascita')?.value }}</p>
-                                    <p><strong>{{ 'birth-province-label' | transloco }}</strong> {{
-                                        clientForm.get('provincia_nascita')?.value }}</p>
-                                    <p><strong>{{ 'birth-country-label' | transloco }}</strong> {{
-                                        clientForm.get('stato_nascita')?.value }}</p>
-                                    <p><strong>{{ 'citizenship-label' | transloco }}</strong> {{
-                                        clientForm.get('cittadinanza')?.value }}</p>
-                                    <p><strong>{{ 'document-issue-place-label' | transloco }}</strong> {{
-                                        clientForm.get('luogo_emissione')?.value }}</p>
-                                    <p><strong>{{ 'document-issue-date-label' | transloco }}</strong> {{
-                                        clientForm.get('data_emissione')?.value | date }}</p>
-                                    <p><strong>{{ 'document-expiry-date-label' | transloco }}</strong> {{
-                                        clientForm.get('data_scadenza')?.value | date }}</p>
-                                    <p><strong>{{ 'issuing-authority-label' | transloco }}</strong> {{
-                                        clientForm.get('autorita_rilascio')?.value }}</p>
-                                    <p><strong>{{ 'residence-municipality-label' | transloco }}</strong> {{
-                                        clientForm.get('comune_residenza')?.value }}</p>
-                                    <p><strong>{{ 'residence-province-label' | transloco }}</strong> {{
-                                        clientForm.get('provincia_residenza')?.value }}</p>
-                                    <p><strong>{{ 'residence-country-label' | transloco }}</strong> {{
-                                        clientForm.get('stato_residenza')?.value }}</p>
-                                </div>
-                            </p-card>
+                    <!-- Summary Header -->
+                    <div class="summary-header text-center mb-6">
+                        <div class="summary-icon mb-3">
+                            <i class="pi pi-check-circle text-6xl text-green-500"></i>
                         </div>
+                        <h2 class="text-3xl font-bold text-900 mb-2">{{ 'confirm-data-step' | transloco }}</h2>
+                        <p class="text-600 text-lg">{{ 'review-summary-description' | transloco }}</p>
+                    </div>
 
-                        <!-- Image Upload Section -->
-                        <div class="col-6">
-                            <p-card header="{{ 'uploaded-images' | transloco }}">
-                                <div class="image-upload-section p-3 flex flex-col items-center">
-                                    <div *ngIf="uploadForm.get('frontimage')?.value['objectURL']" class="pt-3 pr-3">
-                                        <p><strong>{{ 'front-image-label' | transloco }}</strong></p>
-                                        <img [src]="uploadForm.get('frontimage')?.value['objectURL']"
-                                            [alt]="'front-image-label' | transloco"
-                                            class="image-preview w-32 h-32 object-cover rounded-md shadow-md border border-gray-300" />
+                    <div class="summary-container">
+                        <div class="grid">
+                            <!-- Personal Information Section -->
+                            <div class="col-12 md:col-6">
+                                <div class="summary-card personal-info">
+                                    <div class="card-header">
+                                        <i class="pi pi-user text-2xl text-primary"></i>
+                                        <h3>{{ 'personal-information' | transloco }}</h3>
                                     </div>
-
-                                    <div *ngIf="uploadForm?.get('backimage')?.value['objectURL']" class="pt-3 pr-3">
-                                        <p><strong>{{ 'back-image-label' | transloco }}</strong></p>
-                                        <img [src]="uploadForm.get('backimage')?.value['objectURL']"
-                                            [alt]="'back-image-label' | transloco"
-                                            class="image-preview w-32 h-32 object-cover rounded-md shadow-md border border-gray-300" />
-                                    </div>
-
-                                    <div *ngIf="uploadForm?.get('selfie')?.value['objectURL']" class="pt-3">
-                                        <p><strong>{{ 'selfie-image-label' | transloco }}</strong></p>
-                                        <img [src]="uploadForm.get('selfie')?.value['objectURL']"
-                                            [alt]="'selfie-image-label' | transloco"
-                                            class="image-preview w-32 h-32 object-cover rounded-md shadow-md border border-gray-300" />
+                                    <div class="card-content">
+                                        <div class="info-grid">
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'reservation-id-label' | transloco }}</span>
+                                                <span class="info-value">{{ reservationId }}</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'name-label' | transloco }}</span>
+                                                <span class="info-value">{{ clientForm.get('name')?.value }}</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'surname-label' | transloco }}</span>
+                                                <span class="info-value">{{ clientForm.get('surname')?.value }}</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'birthday-label' | transloco }}</span>
+                                                <span class="info-value">{{ clientForm.get('birthday')?.value | date
+                                                    }}</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'gender-label' | transloco }}</span>
+                                                <span class="info-value">{{ (clientForm.get('sesso')?.value == 1 ||
+                                                    clientForm.get('sesso')?.value === '1') ? ('male' | transloco) :
+                                                    (clientForm.get('sesso')?.value == 2 ||
+                                                    clientForm.get('sesso')?.value === '2') ? ('female' | transloco) :
+                                                    ('gender-not-specified' | transloco) }}</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </p-card>
+                            </div>
+
+                            <!-- Contact Information Section -->
+                            <div class="col-12 md:col-6">
+                                <div class="summary-card contact-info">
+                                    <div class="card-header">
+                                        <i class="pi pi-phone text-2xl text-primary"></i>
+                                        <h3>{{ 'contact-information' | transloco }}</h3>
+                                    </div>
+                                    <div class="card-content">
+                                        <div class="info-grid">
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'street-label' | transloco }}</span>
+                                                <span class="info-value">{{ clientForm.get('street')?.value }}</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'city-label' | transloco }}</span>
+                                                <span class="info-value">{{ clientForm.get('city')?.value }}</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'province-label' | transloco }}</span>
+                                                <span class="info-value">{{ clientForm.get('province')?.value }}</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'cap-label' | transloco }}</span>
+                                                <span class="info-value">{{ clientForm.get('cap')?.value }}</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'telephone-label' | transloco }}</span>
+                                                <span class="info-value">{{ clientForm.get('telephone')?.value }}</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'email-label' | transloco }}</span>
+                                                <span class="info-value">{{ clientForm.get('email')?.value }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Document Information Section -->
+                            <div class="col-12 md:col-6">
+                                <div class="summary-card document-info">
+                                    <div class="card-header">
+                                        <i class="pi pi-id-card text-2xl text-primary"></i>
+                                        <h3>{{ 'document-information' | transloco }}</h3>
+                                    </div>
+                                    <div class="card-content">
+                                        <div class="info-grid">
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'document-type-label' | transloco }}</span>
+                                                <span class="info-value">{{ (clientForm.get('document_type')?.value |
+                                                    documentTypeLabel) | transloco }}</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'document-number-label' | transloco
+                                                    }}</span>
+                                                <span class="info-value">{{ clientForm.get('document_number')?.value
+                                                    }}</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'cf-label' | transloco }}</span>
+                                                <span class="info-value">{{ clientForm.get('cf')?.value }}</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'document-issue-place-label' | transloco
+                                                    }}</span>
+                                                <span class="info-value">{{ clientForm.get('luogo_emissione')?.value
+                                                    }}</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'document-issue-date-label' | transloco
+                                                    }}</span>
+                                                <span class="info-value">{{ clientForm.get('data_emissione')?.value |
+                                                    date }}</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'document-expiry-date-label' | transloco
+                                                    }}</span>
+                                                <span class="info-value">{{ clientForm.get('data_scadenza')?.value |
+                                                    date }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Uploaded Images Section -->
+                            <div class="col-12 md:col-6">
+                                <div class="summary-card images-info">
+                                    <div class="card-header">
+                                        <i class="pi pi-images text-2xl text-primary"></i>
+                                        <h3>{{ 'uploaded-images' | transloco }}</h3>
+                                    </div>
+                                    <div class="card-content">
+                                        <div class="images-grid">
+                                            <div class="image-item" *ngIf="uploadForm.get('frontimage')?.value">
+                                                <div class="image-preview">
+                                                    <img [src]="getImagePreview('frontimage')"
+                                                        [alt]="'front-image-label' | transloco" />
+                                                </div>
+                                                <span class="image-label">{{ 'front-image-label' | transloco }}</span>
+                                            </div>
+                                            <div class="image-item" *ngIf="uploadForm.get('backimage')?.value">
+                                                <div class="image-preview">
+                                                    <img [src]="getImagePreview('backimage')"
+                                                        [alt]="'back-image-label' | transloco" />
+                                                </div>
+                                                <span class="image-label">{{ 'back-image-label' | transloco }}</span>
+                                            </div>
+                                            <div class="image-item" *ngIf="uploadForm.get('selfie')?.value">
+                                                <div class="image-preview">
+                                                    <img [src]="getImagePreview('selfie')"
+                                                        [alt]="'selfie-image-label' | transloco" />
+                                                </div>
+                                                <span class="image-label">{{ 'selfie-image-label' | transloco }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Portale Alloggi Information Section -->
+                            <div class="col-12">
+                                <div class="summary-card portale-info">
+                                    <div class="card-header">
+                                        <i class="pi pi-globe text-2xl text-primary"></i>
+                                        <h3>{{ 'portale-alloggi-fields' | transloco }}</h3>
+                                    </div>
+                                    <div class="card-content">
+                                        <div class="info-grid three-columns">
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'nationality-label' | transloco }}</span>
+                                                <span class="info-value">{{ clientForm.get('nazionalita')?.value
+                                                    }}</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'birth-municipality-label' | transloco
+                                                    }}</span>
+                                                <span class="info-value">{{ clientForm.get('comune_nascita')?.value
+                                                    }}</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'birth-province-label' | transloco }}</span>
+                                                <span class="info-value">{{ clientForm.get('provincia_nascita')?.value
+                                                    }}</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'birth-country-label' | transloco }}</span>
+                                                <span class="info-value">{{ clientForm.get('stato_nascita')?.value
+                                                    }}</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'citizenship-label' | transloco }}</span>
+                                                <span class="info-value">{{ clientForm.get('cittadinanza')?.value
+                                                    }}</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'issuing-authority-label' | transloco
+                                                    }}</span>
+                                                <span class="info-value">{{ clientForm.get('autorita_rilascio')?.value
+                                                    }}</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'residence-municipality-label' | transloco
+                                                    }}</span>
+                                                <span class="info-value">{{ clientForm.get('comune_residenza')?.value
+                                                    }}</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'residence-province-label' | transloco
+                                                    }}</span>
+                                                <span class="info-value">{{ clientForm.get('provincia_residenza')?.value
+                                                    }}</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'residence-country-label' | transloco
+                                                    }}</span>
+                                                <span class="info-value">{{ clientForm.get('stato_residenza')?.value
+                                                    }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 

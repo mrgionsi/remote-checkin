@@ -75,3 +75,203 @@ p-card header {
 .justify-center {
     justify-content: center;
 }
+
+// Summary Step Styles
+.summary-header {
+    .summary-icon {
+        animation: pulse 2s ease-in-out infinite;
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.summary-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.summary-card {
+    background: #fafbfc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        background: #f8fafc;
+    }
+
+    .card-header {
+        background: #f1f5f9;
+        padding: 1.5rem;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+
+        i {
+            color: var(--primary-color);
+        }
+
+        h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+    }
+
+    .card-content {
+        padding: 1.5rem;
+    }
+}
+
+.info-grid {
+    display: grid;
+    gap: 1rem;
+
+    &.three-columns {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.75rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border-left: 3px solid var(--primary-color);
+    transition: all 0.2s ease;
+
+    &:hover {
+        background: #f1f5f9;
+        transform: translateX(2px);
+    }
+
+    .info-label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--text-color-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+    }
+
+    .info-value {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-color);
+        word-break: break-word;
+    }
+}
+
+.images-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+}
+
+.image-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+
+    &:hover {
+        background: #f1f5f9;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .image-preview {
+        width: 80px;
+        height: 80px;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 2px solid #e2e8f0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+
+            &:hover {
+                transform: scale(1.05);
+            }
+        }
+    }
+
+    .image-label {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: var(--text-color-secondary);
+        text-align: center;
+        line-height: 1.2;
+    }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+    .summary-container {
+        padding: 0 0.5rem;
+    }
+
+    .summary-card {
+        margin-bottom: 1rem;
+
+        .card-header {
+            padding: 1rem;
+            flex-direction: column;
+            text-align: center;
+            gap: 0.5rem;
+
+            h3 {
+                font-size: 1.125rem;
+            }
+        }
+
+        .card-content {
+            padding: 1rem;
+        }
+    }
+
+    .info-grid.three-columns {
+        grid-template-columns: 1fr;
+    }
+
+    .images-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .image-item {
+        .image-preview {
+            width: 60px;
+            height: 60px;
+        }
+    }
+}
+
+// PrimeNG theme variables automatically handle light/dark mode switching

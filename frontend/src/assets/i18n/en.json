@@ -324,6 +324,10 @@
         "back-image-required": "Back image is required",
         "selfie-required": "Selfie is required",
         "upload-progress": "Upload Progress",
-        "images-uploaded": "images uploaded"
+        "images-uploaded": "images uploaded",
+        "review-summary-description": "Please review all your information before submitting",
+        "personal-information": "Personal Information",
+        "contact-information": "Contact Information",
+        "document-information": "Document Information"
     
 }
