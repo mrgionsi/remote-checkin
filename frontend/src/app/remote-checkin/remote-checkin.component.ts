@@ -176,6 +176,12 @@ export class RemoteCheckinComponent implements OnInit {
     // Load reference data from JSON files
     this.loadReferenceData();
 
+    // Subscribe to language changes to reload country options
+    this.translocoService.langChanges$.subscribe(lang => {
+      this.languageCode = lang;
+      this.loadCountryOptions();
+    });
+
     this.languageCode = this.route.snapshot.paramMap.get('code');
     this.route.params.subscribe(params => {
       if (!params['id']) {
@@ -253,14 +259,13 @@ export class RemoteCheckinComponent implements OnInit {
     this.uploadForm.enable();
   }
 
-  // Load reference data from JSON files
-  private loadReferenceData() {
-    // Load countries
+  // Load country options with current language
+  private loadCountryOptions() {
     this.http.get<any[]>('/assets/data/countries.json').subscribe({
       next: (countries) => {
-        // Transform the data to match the expected format
+        // Transform the data to match the expected format with translated names
         this.countryOptions = countries.map(country => ({
-          label: country.name,
+          label: this.getCountryName(country),
           value: country.code
         }));
       },
@@ -275,6 +280,12 @@ export class RemoteCheckinComponent implements OnInit {
         ];
       }
     });
+  }
+
+  // Load reference data from JSON files
+  private loadReferenceData() {
+    // Load countries
+    this.loadCountryOptions();
 
     // Load Italian provinces
     this.http.get<any[]>('/assets/data/italian-provinces.json').subscribe({
@@ -347,14 +358,13 @@ export class RemoteCheckinComponent implements OnInit {
 
     // Fetch additional data from clientForm
     const formFields = [
-      'name', 'surname', 'birthday', 'street', 'number_city',
+      'name', 'surname', 'birthday', 'street',
       'city', 'province', 'cap', 'telephone', 'document_type',
       'document_number', 'cf',
       // Portale Alloggi required fields
-      'sesso', 'nazionalita', 'email', 'comune_nascita_code', // Use code instead of name
-      'stato_nascita', 'cittadinanza',
+      'sesso', 'nazionalita', 'email', 'stato_nascita', 'cittadinanza',
       'luogo_emissione', 'data_emissione', 'data_scadenza',
-      'autorita_rilascio', 'comune_residenza_code', 'stato_residenza' // Use code instead of name
+      'autorita_rilascio', 'stato_residenza'
     ];
 
     formFields.forEach(field => {
@@ -371,32 +381,30 @@ export class RemoteCheckinComponent implements OnInit {
       if (value) formData.append(field, value);
     });
 
-    // Map municipality codes to the expected backend field names
-    const birthMunicipalityCode = this.clientForm.get('comune_nascita_code')?.value;
-    const residenceMunicipalityCode = this.clientForm.get('comune_residenza_code')?.value;
-
-    if (birthMunicipalityCode) {
-      formData.append('comune_nascita', birthMunicipalityCode);
-    }
-    if (residenceMunicipalityCode) {
-      formData.append('comune_residenza', residenceMunicipalityCode);
-    }
-
-    // Map province codes to province names for backend submission
+    // Map municipality names to the expected backend field names
     const birthProvinceCode = this.clientForm.get('provincia_nascita')?.value;
     const residenceProvinceCode = this.clientForm.get('provincia_residenza')?.value;
 
+    // Use province names as municipality names (simplified approach)
     if (birthProvinceCode) {
       const birthProvinceName = this.getProvinceNameByCode(birthProvinceCode);
       if (birthProvinceName) {
-        formData.append('provincia_nascita', birthProvinceName);
+        formData.append('comune_nascita', birthProvinceName);
       }
     }
     if (residenceProvinceCode) {
       const residenceProvinceName = this.getProvinceNameByCode(residenceProvinceCode);
       if (residenceProvinceName) {
-        formData.append('provincia_residenza', residenceProvinceName);
+        formData.append('comune_residenza', residenceProvinceName);
       }
+    }
+
+    // Map province codes to backend (backend expects 2-character codes)
+    if (birthProvinceCode) {
+      formData.append('provincia_nascita', birthProvinceCode);
+    }
+    if (residenceProvinceCode) {
+      formData.append('provincia_residenza', residenceProvinceCode);
     }
 
     // Append reservationId separately
@@ -453,10 +461,66 @@ export class RemoteCheckinComponent implements OnInit {
   }
 
 
+  // Helper method to get country name based on current language
+  getCountryName(country: any): string {
+    const currentLang = this.translocoService.getActiveLang();
+
+    switch (currentLang) {
+      case 'it':
+        return country.name_it || country.name;
+      case 'es':
+        return country.name_es || country.name;
+      case 'fr':
+        return country.name_fr || country.name;
+      case 'de':
+        return country.name_de || country.name;
+      default:
+        return country.name; // Default to English
+    }
+  }
+
   // Helper method to get province name by code
   getProvinceNameByCode(code: string): string | null {
     const province = this.provinceOptions.find(p => p.value === code);
     return province ? province.label : null;
+  }
+
+  // Helper method to get birth province name for display
+  getBirthProvinceName(): string {
+    const code = this.clientForm.get('provincia_nascita')?.value;
+    return code ? this.getProvinceNameByCode(code) || code : '';
+  }
+
+  // Helper method to get residence province name for display
+  getResidenceProvinceName(): string {
+    const code = this.clientForm.get('provincia_residenza')?.value;
+    return code ? this.getProvinceNameByCode(code) || code : '';
+  }
+
+  // Calculate municipality code based on province code
+  private calculateMunicipalityCode(provinceCode: string): string {
+    // This is a simplified calculation - in production, you might want to:
+    // 1. Use the first municipality in the province
+    // 2. Use a default municipality for the province
+    // 3. Or implement more sophisticated logic
+
+    // For now, return a placeholder code based on province
+    // The actual implementation should map to real municipality codes
+    const provinceMapping: { [key: string]: string } = {
+      'RM': '058091', // Rome
+      'MI': '015146', // Milan
+      'NA': '063049', // Naples
+      'TO': '001272', // Turin
+      'FI': '048017', // Florence
+      'BO': '037006', // Bologna
+      'GE': '010025', // Genoa
+      'BA': '072006', // Bari
+      'CA': '092009', // Cagliari
+      'VE': '027042', // Venice
+      // Add more mappings as needed
+    };
+
+    return provinceMapping[provinceCode] || '000000'; // Default fallback
   }
 
   // Helper method to get municipality display name for summary

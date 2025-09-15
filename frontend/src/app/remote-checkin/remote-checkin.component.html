@@ -584,8 +584,7 @@
                                             </div>
                                             <div class="info-item">
                                                 <span class="info-label">{{ 'birth-province-label' | transloco }}</span>
-                                                <span class="info-value">{{ clientForm.get('provincia_nascita')?.value
-                                                    }}</span>
+                                                <span class="info-value">{{ getBirthProvinceName() }}</span>
                                             </div>
                                             <div class="info-item">
                                                 <span class="info-label">{{ 'birth-country-label' | transloco }}</span>
@@ -606,8 +605,7 @@
                                             <div class="info-item">
                                                 <span class="info-label">{{ 'residence-province-label' | transloco
                                                     }}</span>
-                                                <span class="info-value">{{ clientForm.get('provincia_residenza')?.value
-                                                    }}</span>
+                                                <span class="info-value">{{ getResidenceProvinceName() }}</span>
                                             </div>
                                             <div class="info-item">
                                                 <span class="info-label">{{ 'residence-country-label' | transloco
