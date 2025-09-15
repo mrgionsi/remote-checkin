@@ -150,6 +150,24 @@ Follow these steps to install and set up Remote Check-in:
     - **Backend API**: http://localhost:5000 (Flask API)
     - **Admin Panel**: http://localhost:4200/admin (Login required)
 
+### Common Issues
+
+1. **JWT Secret Key Error**: Ensure your JWT_SECRET_KEY is at least 16 characters long and contains both letters and numbers/symbols.
+
+2. **Database Connection Issues**: Verify your database credentials and ensure PostgreSQL is running.
+
+3. **Email Configuration**: For Gmail, ensure 2FA is enabled and you're using an App Password.
+
+4. **CORS Errors**: Check your ALLOWED_CORS environment variable includes your frontend URL.
+
+5. **File Upload Issues**: Ensure the uploads directory exists and has proper write permissions.
+
+If you encounter a new issues or need help:
+
+1. Check the [Issues](https://github.com/mrgionsi/remote-checkin/issues) page for existing solutions
+2. Create a new issue with detailed information about your problem
+3. Include your environment details and error logs
+
 ## 📄 API Documentation
 
 The Remote Check-in system provides a comprehensive REST API built with Flask. All endpoints are prefixed with `/api/v1/` and require JWT authentication for admin operations.
@@ -312,33 +330,17 @@ The Remote Check-in system features a modern, responsive web interface built wit
 - **Toast Notifications**: User-friendly feedback messages
 - **Form Validation**: Real-time form validation with error messages
 
-## 📁 Project Structure
-
-```
-remote-checkin/
-├── backend/                 # Flask backend application
-│   ├── routes/             # API route definitions
-│   ├── models.py           # Database models
-│   ├── config.py           # Configuration settings
-│   ├── email_handler.py    # Email service
-│   └── utils/              # Utility functions
-├── frontend/               # Angular frontend application
-│   ├── src/app/           # Angular components and services
-│   ├── src/assets/        # Static assets and translations
-│   └── src/environments/  # Environment configurations
-├── database/              # Database initialization scripts
-└── docker-compose-dev.yaml # Development Docker configuration
-```
-
 ## 👥 Contributing Guidelines
 
-We welcome contributions to the Remote Check-in project! To contribute, please follow these guidelines:
+Please read [CONTRIBUTING.md](./CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
 
-1. Fork the repository.
-2. Create a new branch for your feature or bug fix.
-3. Implement your changes, adhering to coding standards.
-4. Write clear and concise commit messages.
-5. Submit a pull request with a detailed description of your changes.
+## Contributors
+
+<a href="https://github.com/mrgionsi/remote-checkin/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=mrgionsi/remote-checkin" />
+</a>
+
+See the full list of [contributors](https://github.com/mrgionsi/remote-checkin/contributors) who participated in this project.
 
 ## 📜 License Information
 
@@ -350,48 +352,6 @@ This project is licensed under the [GNU Affero General Public License v3.0](http
 - **[Google OAuth Setup](GOOGLE_OAUTH_README.md)**: Instructions for Google authentication integration
 - **[Portal Integration](PORTALE_ALLOGGI_INTEGRATION.md)**: Integration with external booking portals
 - **[SOAP API Documentation](SOAP_API_DOCUMENTATION.md)**: SOAP API integration documentation
-
-## 🛠️ Development
-
-### Running Tests
-
-```bash
-# Backend tests
-cd backend && python -m pytest tests/
-
-# Frontend tests
-cd frontend && npm test
-```
-
-### Code Quality
-
-The project uses several tools to maintain code quality:
-
-- **Backend**: pylint, black, isort for Python code formatting
-- **Frontend**: ESLint, Prettier for TypeScript code formatting
-- **Pre-commit hooks**: Automated code quality checks
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-1. **JWT Secret Key Error**: Ensure your JWT_SECRET_KEY is at least 16 characters long and contains both letters and numbers/symbols.
-
-2. **Database Connection Issues**: Verify your database credentials and ensure PostgreSQL is running.
-
-3. **Email Configuration**: For Gmail, ensure 2FA is enabled and you're using an App Password.
-
-4. **CORS Errors**: Check your ALLOWED_CORS environment variable includes your frontend URL.
-
-5. **File Upload Issues**: Ensure the uploads directory exists and has proper write permissions.
-
-## 📞 Support
-
-If you encounter issues or need help:
-
-1. Check the [Issues](https://github.com/mrgionsi/remote-checkin/issues) page for existing solutions
-2. Create a new issue with detailed information about your problem
-3. Include your environment details and error logs
 
 ## Acknowledgments
 
