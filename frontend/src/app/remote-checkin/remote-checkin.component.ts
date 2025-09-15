@@ -45,7 +45,8 @@ export class RemoteCheckinComponent implements OnInit {
   // Reference data loaded from JSON files
   countryOptions: any[] = [];
   provinceOptions: any[] = [];
-  municipalityOptions: any[] = [];
+
+  // Municipality options for autocomplete
 
   languageCode: string | null = '';
   reservationId: string | null = '';
@@ -82,7 +83,7 @@ export class RemoteCheckinComponent implements OnInit {
       sesso: ['', Validators.required],
       nazionalita: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      comune_nascita: ['', Validators.required],
+      comune_nascita_code: [''], // Hidden field for the municipality code
       provincia_nascita: ['', Validators.required],
       stato_nascita: ['', Validators.required],
       cittadinanza: ['', Validators.required],
@@ -90,7 +91,7 @@ export class RemoteCheckinComponent implements OnInit {
       data_emissione: ['', Validators.required],
       data_scadenza: ['', Validators.required],
       autorita_rilascio: ['', Validators.required],
-      comune_residenza: ['', Validators.required],
+      comune_residenza_code: [''], // Hidden field for the municipality code
       provincia_residenza: ['', Validators.required],
       stato_residenza: ['', Validators.required],
     }, { validators: this.documentDateValidator });
@@ -296,26 +297,6 @@ export class RemoteCheckinComponent implements OnInit {
       }
     });
 
-    // Load Italian municipalities
-    this.http.get<any[]>('/assets/data/italian-municipalities.json').subscribe({
-      next: (municipalities) => {
-        // Transform the data to match the expected format
-        this.municipalityOptions = municipalities.map(municipality => ({
-          label: municipality.name,
-          value: municipality.code
-        }));
-      },
-      error: (error) => {
-        console.error('Error loading municipalities:', error);
-        // Fallback to basic municipalities
-        this.municipalityOptions = [
-          { label: 'Roma', value: 'H501' },
-          { label: 'Milano', value: 'F205' },
-          { label: 'Napoli', value: 'F839' },
-          { label: 'Torino', value: 'L219' }
-        ];
-      }
-    });
   }
 
   // Method to handle FormData received from the child
@@ -370,10 +351,10 @@ export class RemoteCheckinComponent implements OnInit {
       'city', 'province', 'cap', 'telephone', 'document_type',
       'document_number', 'cf',
       // Portale Alloggi required fields
-      'sesso', 'nazionalita', 'email', 'comune_nascita',
-      'provincia_nascita', 'stato_nascita', 'cittadinanza',
+      'sesso', 'nazionalita', 'email', 'comune_nascita_code', // Use code instead of name
+      'stato_nascita', 'cittadinanza',
       'luogo_emissione', 'data_emissione', 'data_scadenza',
-      'autorita_rilascio', 'comune_residenza', 'provincia_residenza', 'stato_residenza'
+      'autorita_rilascio', 'comune_residenza_code', 'stato_residenza' // Use code instead of name
     ];
 
     formFields.forEach(field => {
@@ -389,6 +370,34 @@ export class RemoteCheckinComponent implements OnInit {
 
       if (value) formData.append(field, value);
     });
+
+    // Map municipality codes to the expected backend field names
+    const birthMunicipalityCode = this.clientForm.get('comune_nascita_code')?.value;
+    const residenceMunicipalityCode = this.clientForm.get('comune_residenza_code')?.value;
+
+    if (birthMunicipalityCode) {
+      formData.append('comune_nascita', birthMunicipalityCode);
+    }
+    if (residenceMunicipalityCode) {
+      formData.append('comune_residenza', residenceMunicipalityCode);
+    }
+
+    // Map province codes to province names for backend submission
+    const birthProvinceCode = this.clientForm.get('provincia_nascita')?.value;
+    const residenceProvinceCode = this.clientForm.get('provincia_residenza')?.value;
+
+    if (birthProvinceCode) {
+      const birthProvinceName = this.getProvinceNameByCode(birthProvinceCode);
+      if (birthProvinceName) {
+        formData.append('provincia_nascita', birthProvinceName);
+      }
+    }
+    if (residenceProvinceCode) {
+      const residenceProvinceName = this.getProvinceNameByCode(residenceProvinceCode);
+      if (residenceProvinceName) {
+        formData.append('provincia_residenza', residenceProvinceName);
+      }
+    }
 
     // Append reservationId separately
     if (this.reservationId) {
@@ -441,6 +450,20 @@ export class RemoteCheckinComponent implements OnInit {
       return file.objectURL;
     }
     return null;
+  }
+
+
+  // Helper method to get province name by code
+  getProvinceNameByCode(code: string): string | null {
+    const province = this.provinceOptions.find(p => p.value === code);
+    return province ? province.label : null;
+  }
+
+  // Helper method to get municipality display name for summary
+  getMunicipalityDisplayName(code: string): string {
+    // This would need to be implemented to convert code back to name for display
+    // For now, return the code
+    return code;
   }
 
 }
