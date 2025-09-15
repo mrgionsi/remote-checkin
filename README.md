@@ -38,6 +38,15 @@ Remote Check-in is a comprehensive self-hosted solution designed to handle the c
 - **Mobile-Friendly**: Responsive design works on all devices
 - **Reservation Lookup**: Easy reservation verification with unique codes
 
+### User Interface
+
+- **PrimeNG Components**: Professional UI components with consistent styling
+- **Internationalization**: Full multi-language support with Transloco
+- **Responsive Design**: Works seamlessly on desktop, tablet, and mobile
+- **Dark/Light Themes**: Configurable theme support
+- **Toast Notifications**: User-friendly feedback messages
+- **Form Validation**: Real-time form validation with error messages
+
 ### Security & Compliance
 
 - **Data Encryption**: Secure file storage with encryption
@@ -167,15 +176,6 @@ If you encounter a new issues or need help:
 1. Check the [Issues](https://github.com/mrgionsi/remote-checkin/issues) page for existing solutions
 2. Create a new issue with detailed information about your problem
 3. Include your environment details and error logs
-
-### Key UI Features
-
-- **PrimeNG Components**: Professional UI components with consistent styling
-- **Internationalization**: Full multi-language support with Transloco
-- **Responsive Design**: Works seamlessly on desktop, tablet, and mobile
-- **Dark/Light Themes**: Configurable theme support
-- **Toast Notifications**: User-friendly feedback messages
-- **Form Validation**: Real-time form validation with error messages
 
 ## 👥 Contributing Guidelines
 
