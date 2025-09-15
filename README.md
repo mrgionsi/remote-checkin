@@ -214,13 +214,6 @@ See the full list of [contributors](https://github.com/mrgionsi/remote-checkin/c
 
 This project is licensed under the [GNU Affero General Public License v3.0](https://www.gnu.org/licenses/agpl-3.0.en.html). See the `LICENSE` file for more information.
 
-## 📚 Additional Documentation
-
-- **[Email Configuration Guide](backend/EMAIL_CONFIG.md)**: Detailed instructions for setting up email functionality
-- **[Google OAuth Setup](GOOGLE_OAUTH_README.md)**: Instructions for Google authentication integration
-- **[Portal Integration](PORTALE_ALLOGGI_INTEGRATION.md)**: Integration with external booking portals
-- **[SOAP API Documentation](SOAP_API_DOCUMENTATION.md)**: SOAP API integration documentation
-
 ## Acknowledgments
 
 - This project utilizes various open-source libraries and frameworks, including Flask, Angular, PrimeNG, PostgreSQL, and many others.
