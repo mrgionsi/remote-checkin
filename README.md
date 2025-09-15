@@ -168,27 +168,6 @@ If you encounter a new issues or need help:
 2. Create a new issue with detailed information about your problem
 3. Include your environment details and error logs
 
-## 🖥️ User Interface
-
-The Remote Check-in system features a modern, responsive web interface built with Angular and PrimeNG components:
-
-### Guest Interface
-
-- **Language Selection**: Choose from 5 supported languages (EN, ES, IT, FR, DE)
-- **Reservation Lookup**: Enter reservation code to access check-in process
-- **Remote Check-in Form**: Multi-step form for guest information and document upload
-- **Document Upload**: Secure upload of identity documents (front, back, selfie)
-- **Mobile-Responsive**: Optimized for mobile devices and tablets
-
-### Admin Interface
-
-- **Dashboard**: Overview with reservation statistics and charts
-- **Room Management**: Add, edit, and manage rooms and structures
-- **Reservation Management**: Create and manage reservations with client details
-- **Settings**: Configure email providers and system settings
-- **User Management**: Manage admin users and permissions
-- **Reservation Details**: View detailed reservation information and client documents
-
 ### Key UI Features
 
 - **PrimeNG Components**: Professional UI components with consistent styling
