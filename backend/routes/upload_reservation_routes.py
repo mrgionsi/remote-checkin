@@ -14,6 +14,7 @@ import traceback
 
 from flask import Blueprint, request, jsonify
 from werkzeug.exceptions import BadRequest
+from datetime import datetime
 
 from utils.file_utils import allowed_file, sanitize_filename, save_file
 from utils.ocr_utils import validate_document
@@ -48,9 +49,9 @@ def upload_file():
         required_files = ['frontimage', 'backimage', 'selfie']
         required_fields = ['reservationId', 'name', 'surname', 'birthday', 'street',
                            'city', 'province', 'cap', 'telephone', 'document_type', 'document_number', 'cf']
-        
+
         # Portale Alloggi required fields
-        portale_required_fields = ['sesso', 'nazionalita', 'email', 'comune_nascita', 
+        portale_required_fields = ['sesso', 'nazionalita', 'email', 'comune_nascita',
                                   'provincia_nascita', 'stato_nascita', 'cittadinanza',
                                   'luogo_emissione', 'data_emissione', 'data_scadenza',
                                   'autorita_rilascio', 'comune_residenza', 'provincia_residenza', 'stato_residenza']
@@ -64,28 +65,27 @@ def upload_file():
         form_data = {field: request.form.get(field) for field in all_required_fields}
         if any(value is None for value in form_data.values()):
             raise BadRequest("Missing one or more required fields")
-        
+
         # Validate Portale Alloggi specific fields
         try:
             # Validate gender (sesso)
             if form_data['sesso'] not in ['1', '2']:
                 raise BadRequest("Invalid gender value. Must be 1 (Male) or 2 (Female)")
-            
+
             # Validate email format
             if form_data['email'] and '@' not in form_data['email']:
                 raise BadRequest("Invalid email format")
-                
+
             # Validate date formats
-            from datetime import datetime
             if form_data['data_emissione']:
                 datetime.strptime(form_data['data_emissione'], '%Y-%m-%d')
             if form_data['data_scadenza']:
                 datetime.strptime(form_data['data_scadenza'], '%Y-%m-%d')
-                
+
         except ValueError as e:
-            raise BadRequest(f"Invalid date format: {str(e)}")
+            raise BadRequest(f"Invalid date format: {str(e)}") from e
         except Exception as e:
-            raise BadRequest(f"Validation error: {str(e)}")
+            raise BadRequest(f"Validation error: {str(e)}") from e
 
         reservation_id = form_data['reservationId']
         cf = form_data['cf']
