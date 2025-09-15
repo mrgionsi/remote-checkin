@@ -328,6 +328,12 @@
         "review-summary-description": "Please review all your information before submitting",
         "personal-information": "Personal Information",
         "contact-information": "Contact Information",
-        "document-information": "Document Information"
+        "document-information": "Document Information",
+        "birth-information": "Birth Information",
+        "residence-information": "Residence Information",
+        "additional-information": "Additional Information",
+        "search-document-types": "Search document types...",
+        "search-provinces": "Search provinces...",
+        "search-countries": "Search countries..."
     
 }

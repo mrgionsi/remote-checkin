@@ -329,5 +329,11 @@
         "review-summary-description": "Rivedi tutte le tue informazioni prima di inviare",
         "personal-information": "Informazioni Personali",
         "contact-information": "Informazioni di Contatto",
-        "document-information": "Informazioni Documento"
+        "document-information": "Informazioni Documento",
+        "birth-information": "Informazioni di Nascita",
+        "residence-information": "Informazioni di Residenza",
+        "additional-information": "Informazioni Aggiuntive",
+        "search-document-types": "Cerca tipi di documento...",
+        "search-provinces": "Cerca province...",
+        "search-countries": "Cerca paesi..."
 }

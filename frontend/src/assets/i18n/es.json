@@ -162,5 +162,14 @@
     "rooms-label": "Gestión de habitaciones",
     "settings-label": "Configuraciones",
     "user-info-label": "Información del usuario",
-    "change-password-label": "Cambiar contraseña"
+    "change-password-label": "Cambiar contraseña",
+    "personal-information": "Información Personal",
+    "contact-information": "Información de Contacto",
+    "document-information": "Información del Documento",
+    "birth-information": "Información de Nacimiento",
+    "residence-information": "Información de Residencia",
+    "additional-information": "Información Adicional",
+    "search-document-types": "Buscar tipos de documento...",
+    "search-provinces": "Buscar provincias...",
+    "search-countries": "Buscar países..."
 }
