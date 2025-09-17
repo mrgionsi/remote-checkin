@@ -335,5 +335,7 @@
         "additional-information": "Informazioni Aggiuntive",
         "search-document-types": "Cerca tipi di documento...",
         "search-provinces": "Cerca province...",
-        "search-countries": "Cerca paesi..."
+        "search-countries": "Cerca paesi...",
+        "updated": "Aggiornato",
+        "reservation-updated-success": "La prenotazione è stata aggiornata con successo."
 }

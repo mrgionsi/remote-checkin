@@ -442,8 +442,8 @@ export class DetailReservationComponent implements OnInit {
 
         this.messageService.add({
           severity: 'success',
-          summary: 'Updated',
-          detail: 'Reservation has been successfully updated.'
+          summary: this.translocoService.translate('updated'),
+          detail: this.translocoService.translate('reservation-updated-success')
         });
       },
       error: (error) => {

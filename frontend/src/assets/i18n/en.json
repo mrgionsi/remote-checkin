@@ -334,6 +334,8 @@
         "additional-information": "Additional Information",
         "search-document-types": "Search document types...",
         "search-provinces": "Search provinces...",
-        "search-countries": "Search countries..."
+        "search-countries": "Search countries...",
+        "updated": "Updated",
+        "reservation-updated-success": "Reservation has been successfully updated."
     
 }

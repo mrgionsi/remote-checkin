@@ -171,5 +171,7 @@
     "additional-information": "Informations Supplémentaires",
     "search-document-types": "Rechercher types de document...",
     "search-provinces": "Rechercher provinces...",
-    "search-countries": "Rechercher pays..."
+    "search-countries": "Rechercher pays...",
+    "updated": "Mis à jour",
+    "reservation-updated-success": "La réservation a été mise à jour avec succès."
 }
