@@ -11,7 +11,7 @@ All routes are registered under the '/api/v1/admin' URL prefix and require appro
 (e.g., admin, superadmin) for access.
 """
 
-from datetime import timedelta
+from datetime import timedelta,datetime
 import logging
 from flask import Blueprint, request, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -27,6 +27,9 @@ admin_bp = Blueprint("admin", __name__, url_prefix="/api/v1")
 
 # Error messages
 USER_NOT_FOUND = "User not found"
+INTERNAL_SERVER_ERROR = "Internal server error"
+PORTALE_CREDENTIALS_NOT_CONFIGURED = "Portale Alloggi credentials not configured"
+RESERVATION_NOT_FOUND = "Reservation not found"
 
 def verify_admin_access():
     """
@@ -286,7 +289,7 @@ def get_portale_alloggi_config():
 
     except Exception as e:
         logging.error("Error retrieving Portale Alloggi config: %s", str(e))
-        return jsonify({"error": "Internal server error"}), 500
+        return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
     finally:
         db_session.close()
 
@@ -344,7 +347,7 @@ def update_portale_alloggi_config():
     except Exception as e:
         logging.error("Error updating Portale Alloggi config: %s", str(e))
         db_session.rollback()
-        return jsonify({"error": "Internal server error"}), 500
+        return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
     finally:
         db_session.close()
 
@@ -373,7 +376,7 @@ def test_portale_alloggi_connection():
         # Check if credentials are configured
         if not user.portale_username or not user.portale_password or not user.portale_wskey:
             return jsonify({
-                "error": "Portale Alloggi credentials not configured",
+                "error": PORTALE_CREDENTIALS_NOT_CONFIGURED,
                 "details": "Please configure username, password, and wskey first"
             }), 400
 
@@ -420,7 +423,7 @@ def test_portale_alloggi_connection():
 
     except Exception as e:
         logging.error("Error testing Portale Alloggi connection: %s", str(e))
-        return jsonify({"error": "Internal server error"}), 500
+        return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
     finally:
         db_session.close()
 
@@ -474,14 +477,14 @@ def send_reservation_to_portale_alloggi(reservation_id):
         # Check if Portale Alloggi is configured
         if not user.portale_username or not user.portale_password or not user.portale_wskey:
             return jsonify({
-                "error": "Portale Alloggi credentials not configured",
+                "error": PORTALE_CREDENTIALS_NOT_CONFIGURED,
                 "details": "Please configure Portale Alloggi credentials in Settings first"
             }), 400
 
         # Get reservation with clients
         reservation = db_session.query(Reservation).filter(Reservation.id == reservation_id).first()
         if not reservation:
-            return jsonify({"error": "Reservation not found"}), 404
+            return jsonify({"error": RESERVATION_NOT_FOUND}), 404
 
         # Check if reservation is approved
         if reservation.status != 'Approved':
@@ -536,7 +539,7 @@ def send_reservation_to_portale_alloggi(reservation_id):
 
     except Exception as e:
         logging.error("Error sending reservation to Portale Alloggi: %s", str(e))
-        return jsonify({"error": "Internal server error"}), 500
+        return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
     finally:
         db_session.close()
 
@@ -569,14 +572,14 @@ def send_reservation_to_portale_alloggi_real(reservation_id):
         # Check if Portale Alloggi is configured
         if not user.portale_username or not user.portale_password or not user.portale_wskey:
             return jsonify({
-                "error": "Portale Alloggi credentials not configured",
+                "error": PORTALE_CREDENTIALS_NOT_CONFIGURED,
                 "details": "Please configure Portale Alloggi credentials in Settings first"
             }), 400
 
         # Get reservation with clients
         reservation = db_session.query(Reservation).filter(Reservation.id == reservation_id).first()
         if not reservation:
-            return jsonify({"error": "Reservation not found"}), 404
+            return jsonify({"error": RESERVATION_NOT_FOUND}), 404
 
         # Check if reservation is approved
         if reservation.status != 'Approved':
@@ -616,9 +619,9 @@ def send_reservation_to_portale_alloggi_real(reservation_id):
 
         if result.get('success', False):
             # Update reservation with submission status
-            from datetime import datetime
+            from datetime import timezone
             reservation.portale_alloggi_sent = True
-            reservation.portale_alloggi_sent_at = datetime.utcnow()
+            reservation.portale_alloggi_sent_at = datetime.now(timezone.utc)
             reservation.portale_alloggi_response = str(result.get('result', ''))
             
             db_session.commit()
@@ -636,7 +639,7 @@ def send_reservation_to_portale_alloggi_real(reservation_id):
 
     except Exception as e:
         logging.error("Error sending reservation to Portale Alloggi: %s", str(e))
-        return jsonify({"error": "Internal server error"}), 500
+        return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
     finally:
         db_session.close()
 
@@ -658,13 +661,12 @@ def get_portale_alloggi_status(reservation_id):
         return error_response, error_code
 
     try:
-        user_id = get_jwt_identity()
         db_session = SessionLocal()
 
         # Get reservation
         reservation = db_session.query(Reservation).filter(Reservation.id == reservation_id).first()
         if not reservation:
-            return jsonify({"error": "Reservation not found"}), 404
+            return jsonify({"error": RESERVATION_NOT_FOUND}), 404
 
         return jsonify({
             "portale_alloggi_sent": reservation.portale_alloggi_sent,
@@ -674,6 +676,6 @@ def get_portale_alloggi_status(reservation_id):
 
     except Exception as e:
         logging.error("Error getting Portale Alloggi status: %s", str(e))
-        return jsonify({"error": "Internal server error"}), 500
+        return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
     finally:
         db_session.close()
