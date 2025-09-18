@@ -131,20 +131,20 @@ class Client(Base):
         document_type (str): Type of document.
         
         # Portale Alloggi required fields
-        sesso (int): Gender (1=Male, 2=Female).
-        nazionalita (str): Nationality/country code.
-        email (str): Email address.
-        comune_nascita (str): Birth municipality code.
-        provincia_nascita (str): Birth province code.
-        stato_nascita (str): Birth country code.
-        cittadinanza (str): Citizenship code.
+        sesso (str): Gender (1=Male, 2=Female).
+        nazionalita (str): Nationality as Alloggiati Web country code (9 chars, e.g., 100000100 for ITALIA).
+        email (str): Email address for guest communication.
+        comune_nascita (str): Birth municipality name.
+        provincia_nascita (str): Birth province code (Italian provinces).
+        stato_nascita (str): Birth country as Alloggiati Web country code (9 chars).
+        cittadinanza (str): Citizenship as Alloggiati Web country code (9 chars).
         luogo_emissione (str): Document issue place.
         data_emissione (Date): Document issue date.
         data_scadenza (Date): Document expiry date.
-        autorita_rilascio (str): Issuing authority.
-        comune_residenza (str): Residence municipality code.
-        provincia_residenza (str): Residence province code.
-        stato_residenza (str): Residence country code.
+        autorita_rilascio (str): Document issuing authority.
+        comune_residenza (str): Residence municipality name.
+        provincia_residenza (str): Residence province code (Italian provinces).
+        stato_residenza (str): Residence country as Alloggiati Web country code (9 chars).
     """
     __tablename__ = "client"
 
@@ -154,8 +154,6 @@ class Client(Base):
     birthday = Column(Date)
     street = Column(String)
     number_city = Column(String)
-    city = Column(String)
-    province = Column(String)
     cap = Column(String)
     telephone = Column(String)
     document_number = Column(String)
@@ -163,20 +161,20 @@ class Client(Base):
     document_type = Column(String)
     
     # Portale Alloggi required fields
-    sesso = Column(Integer, nullable=True)  # 1=Male, 2=Female
-    nazionalita = Column(String(9), nullable=True)  # Country code
-    email = Column(String(50), nullable=True)  # Email address
-    comune_nascita = Column(String(9), nullable=True)  # Birth municipality code
-    provincia_nascita = Column(String(2), nullable=True)  # Birth province code
-    stato_nascita = Column(String(9), nullable=True)  # Birth country code
-    cittadinanza = Column(String(9), nullable=True)  # Citizenship code
-    luogo_emissione = Column(String(9), nullable=True)  # Document issue place
+    sesso = Column(String(1), nullable=True)  # 1=Male, 2=Female
+    nazionalita = Column(String(9), nullable=True)  # Alloggiati Web country code (e.g., 100000100 for ITALIA)
+    email = Column(String(255), nullable=True)  # Email address
+    comune_nascita = Column(String(100), nullable=True)  # Birth municipality name
+    provincia_nascita = Column(String(2), nullable=True)  # Birth province acronym (e.g., "NA", "MI")
+    stato_nascita = Column(String(9), nullable=True)  # Alloggiati Web birth country code
+    cittadinanza = Column(String(9), nullable=True)  # Alloggiati Web citizenship code
+    luogo_emissione = Column(String(100), nullable=True)  # Document issue place
     data_emissione = Column(Date, nullable=True)  # Document issue date
     data_scadenza = Column(Date, nullable=True)  # Document expiry date
-    autorita_rilascio = Column(String(40), nullable=True)  # Issuing authority
-    comune_residenza = Column(String(9), nullable=True)  # Residence municipality
-    provincia_residenza = Column(String(2), nullable=True)  # Residence province
-    stato_residenza = Column(String(9), nullable=True)  # Residence country
+    autorita_rilascio = Column(String(100), nullable=True)  # Issuing authority
+    comune_residenza = Column(String(100), nullable=True)  # Residence municipality name
+    provincia_residenza = Column(String(2), nullable=True)  # Residence province acronym (e.g., "NA", "MI")
+    stato_residenza = Column(String(9), nullable=True)  # Alloggiati Web residence country code
 
     reservations = relationship(
         "Reservation", secondary="client_reservations", back_populates="clients"
@@ -191,8 +189,6 @@ class Client(Base):
             "birthday": self.birthday,
             "street": self.street,
             "number_city": self.number_city,
-            "city": self.city,
-            "province": self.province,
             "cap": self.cap,
             "telephone": self.telephone,
             "document_number": self.document_number,
@@ -242,6 +238,11 @@ class Reservation(Base):
     email = Column(String, nullable=False)
     telephone = Column(String, default='')
     number_of_people = Column(Integer, default=1, nullable=False,server_default='1')
+    
+    # Portale Alloggi submission tracking
+    portale_alloggi_sent = Column(Boolean, default=False, nullable=False)
+    portale_alloggi_sent_at = Column(DateTime, nullable=True)
+    portale_alloggi_response = Column(String, nullable=True)
 
 
     room = relationship("Room", lazy="joined")
