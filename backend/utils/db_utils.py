@@ -1,4 +1,4 @@
-#pylint: disable=E0611,E0401,W0719,C0301
+#pylint: disable=E0611,E0401,W0719,C0301,C0303
 """
 db_utils.py
 

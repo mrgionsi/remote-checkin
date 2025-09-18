@@ -1,4 +1,4 @@
-#pylint: disable=W0718,R0902,R0914,C0301
+#pylint: disable=W0718,R0902,R0914,C0301,C0303
 """
 Portale Alloggi Service for Italian accommodation registry integration.
 
