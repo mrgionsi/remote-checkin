@@ -4,7 +4,7 @@ This guide provides comprehensive testing procedures for the Portale Alloggi API
 
 ## 📁 Test Files
 
-- `test_portale_alloggi_enhanced.py` - Enhanced test script with configuration file support
+- `test_portale_alloggi.py` - Test script with configuration file support
 - `test_config.json` - Configuration file for credentials and test data
 - `test_requirements.txt` - Python dependencies for testing
 - `TEST_PORTALE_ALLOGGI_README.md` - This testing guide
@@ -36,7 +36,7 @@ Edit `test_config.json` and replace the placeholder values with your actual Port
 ### 3. Run the Test
 
 ```bash
-python test_portale_alloggi_enhanced.py
+python test_portale_alloggi.py
 ```
 
 ## 🔧 Test Configuration
