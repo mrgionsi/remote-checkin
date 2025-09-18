@@ -18,6 +18,10 @@ import { AbstractControl, FormBuilder, FormGroup, FormsModule, ReactiveFormsModu
 import { DocumentTypeLabelPipe } from "../pipes/document-type-label.pipe";
 import { DatePickerModule } from 'primeng/datepicker';
 import { RoomService } from '../services/room.service';
+import {
+  FALLBACK_MUNICIPALITY_MAPPINGS,
+  FALLBACK_DOCUMENT_TYPE_MAPPINGS
+} from '../shared/constants/fallback-data';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DialogModule } from 'primeng/dialog';
 import { HttpClient } from '@angular/common/http';
@@ -26,7 +30,7 @@ import { PortaleAlloggiService } from '../services/portale-alloggi.service';
 
 @Component({
   selector: 'app-detail-reservation',
-  imports: [ToastModule, TranslocoPipe, CommonModule, TableModule, ConfirmDialogModule, CardModule, ButtonModule, FormsModule, SelectModule, DatePickerModule, ReactiveFormsModule, DocumentTypeLabelPipe, DialogModule],
+  imports: [ToastModule, TranslocoPipe, CommonModule, TableModule, ConfirmDialogModule, CardModule, ButtonModule, FormsModule, SelectModule, DatePickerModule, ReactiveFormsModule, DialogModule],
   templateUrl: './detail-reservation.component.html',
   styleUrl: './detail-reservation.component.scss',
   providers: [MessageService, DialogService, ConfirmationService]
@@ -54,6 +58,19 @@ export class DetailReservationComponent implements OnInit {
   // Portale Alloggi modal
   showPortaleAlloggiModal = false;
   sendingToPortaleAlloggi = false;
+
+  // Portale Alloggi submission status
+  portaleAlloggiSent = false;
+  portaleAlloggiSentAt: string | null = null;
+  portaleAlloggiResponse: string | null = null;
+
+  // Development mode
+  isDevelopment = environment.development;
+
+  // Mapping data for display
+  countryMappings: { [key: string]: string } = {};
+  municipalityMappings: { [key: string]: string } = {};
+  documentTypeMappings: { [key: string]: string } = {};
 
 
   constructor(
@@ -98,6 +115,9 @@ export class DetailReservationComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Load reference data for display mappings
+    this.loadReferenceData();
+
     var reservationId: number;
     this.route.params.subscribe(params => {
       reservationId = params['id_reservation'];
@@ -109,6 +129,9 @@ export class DetailReservationComponent implements OnInit {
           console.log("Resp", resp);
           this.reservation_status = this.statusOptions.find(option => option.value === resp.status);
           this.loading = false;
+
+          // Load Portale Alloggi submission status
+          this.loadPortaleAlloggiStatus();
 
           this.client_reservationService.getClientByReservationId(this.reservation_details.id).subscribe({
             next: (r) => {
@@ -530,6 +553,11 @@ export class DetailReservationComponent implements OnInit {
         });
         this.sendingToPortaleAlloggi = false;
         this.closePortaleAlloggiModal();
+
+        // Update local status after successful submission
+        this.portaleAlloggiSent = true;
+        this.portaleAlloggiSentAt = new Date().toISOString();
+        this.portaleAlloggiResponse = response.result || '';
       },
       error: (error) => {
         console.error('Error sending to Portale Alloggi:', error);
@@ -541,5 +569,208 @@ export class DetailReservationComponent implements OnInit {
         this.sendingToPortaleAlloggi = false;
       }
     });
+  }
+
+  // Send to Portale Alloggi (TEST MODE)
+  sendToPortaleAlloggiTest(): void {
+    this.sendingToPortaleAlloggi = true;
+
+    this.portaleAlloggiService.sendReservationData(this.reservationId).subscribe({
+      next: (response) => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: this.translocoService.translate('data-sent-success-test')
+        });
+        this.sendingToPortaleAlloggi = false;
+        this.closePortaleAlloggiModal();
+
+        // DO NOT update submission status for test mode
+        // Test submissions should not disable buttons
+      },
+      error: (error) => {
+        console.error('Error sending to Portale Alloggi (TEST):', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: error.error?.error || this.translocoService.translate('data-send-failed')
+        });
+        this.sendingToPortaleAlloggi = false;
+      }
+    });
+  }
+
+  // Send to Portale Alloggi (REAL PRODUCTION)
+  sendToPortaleAlloggiReal(): void {
+    this.sendingToPortaleAlloggi = true;
+
+    this.http.post<any>(`/api/admin/reservations/${this.reservationId}/send-to-portale-alloggi-real`, {}).subscribe({
+      next: (response) => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: this.translocoService.translate('data-sent-success-real')
+        });
+        this.sendingToPortaleAlloggi = false;
+        this.closePortaleAlloggiModal();
+
+        // Update local status after successful submission
+        this.portaleAlloggiSent = true;
+        this.portaleAlloggiSentAt = new Date().toISOString();
+        this.portaleAlloggiResponse = response.result || '';
+      },
+      error: (error) => {
+        console.error('Error sending to Portale Alloggi (REAL):', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: error.error?.error || this.translocoService.translate('data-send-failed')
+        });
+        this.sendingToPortaleAlloggi = false;
+      }
+    });
+  }
+
+  // Load Portale Alloggi submission status
+  loadPortaleAlloggiStatus(): void {
+    if (!this.reservationId) return;
+
+    this.http.get<any>(`/api/admin/reservations/${this.reservationId}/portale-alloggi-status`).subscribe({
+      next: (response) => {
+        this.portaleAlloggiSent = response.portale_alloggi_sent;
+        this.portaleAlloggiSentAt = response.portale_alloggi_sent_at;
+        this.portaleAlloggiResponse = response.portale_alloggi_response;
+      },
+      error: (error) => {
+        console.error('Error loading Portale Alloggi status:', error);
+      }
+    });
+  }
+
+  // Load reference data from JSON files
+  private loadReferenceData() {
+    Promise.all([
+      this.loadCountries(),
+      this.loadMunicipalities(),
+      this.loadDocumentTypes()
+    ]).catch(error => {
+      console.error('Error loading reference data:', error);
+      this.initializeFallbackData();
+    });
+  }
+
+  private async loadCountries(): Promise<void> {
+    try {
+      const countries = await this.http.get<{ [key: string]: string }>('/assets/data/countries.json').toPromise();
+      if (countries) {
+        this.countryMappings = countries;
+      }
+    } catch (error) {
+      console.error('Error loading countries:', error);
+      this.initializeFallbackCountries();
+    }
+  }
+
+  private async loadMunicipalities(): Promise<void> {
+    try {
+      const municipalities = await this.http.get<{ [key: string]: string }>('/assets/data/municipalities.json').toPromise();
+      if (municipalities) {
+        this.municipalityMappings = municipalities;
+      }
+    } catch (error) {
+      console.error('Error loading municipalities:', error);
+      this.initializeFallbackMunicipalities();
+    }
+  }
+
+  private async loadDocumentTypes(): Promise<void> {
+    try {
+      const documentTypes = await this.http.get<{ [key: string]: string }>('/assets/data/document_types.json').toPromise();
+      if (documentTypes) {
+        this.documentTypeMappings = documentTypes;
+      }
+    } catch (error) {
+      console.error('Error loading document types:', error);
+      this.initializeFallbackDocumentTypes();
+    }
+  }
+
+  private initializeFallbackData() {
+    this.initializeFallbackCountries();
+    this.initializeFallbackMunicipalities();
+    this.initializeFallbackDocumentTypes();
+  }
+
+  private initializeFallbackCountries() {
+    this.countryMappings = {
+      '100000100': 'ITALIA',
+      '100000536': 'STATI UNITI D\'AMERICA',
+      '100000219': 'REGNO UNITO',
+      '100000215': 'FRANCIA'
+    };
+  }
+
+  private initializeFallbackMunicipalities() {
+    this.municipalityMappings = {
+      '058091': 'ROMA',
+      '015146': 'MILANO',
+      '063049': 'NAPOLI',
+      '001272': 'TORINO'
+    };
+  }
+
+  private initializeFallbackDocumentTypes() {
+    this.documentTypeMappings = {
+      'IDENT': 'CARTA DI IDENTITA\'',
+      'PASOR': 'PASSAPORTO ORDINARIO',
+      'PATEN': 'PATENTE DI GUIDA',
+      'IDELE': 'CARTA IDENTITA\' ELETTRONICA'
+    };
+  }
+
+  // Helper method to get country display name by code
+  getCountryDisplayName(code: string): string {
+    return this.countryMappings[code] || code || '-';
+  }
+
+  // Helper method to get municipality display name by code
+  getMunicipalityDisplayName(code: string): string {
+    return this.municipalityMappings[code] || code || '-';
+  }
+
+  // Helper method to get document type display name by code
+  getDocumentTypeDisplayName(code: string): string {
+    return this.documentTypeMappings[code] || code || '-';
+  }
+
+  // Helper method to determine guest type for a specific person
+  getGuestTypeForPerson(person: any, personIndex: number): string {
+    const totalGuests = this.people.length;
+
+    if (totalGuests === 1) {
+      return this.translocoService.translate('ospite-singolo');
+    } else if (totalGuests > 1) {
+      // Check if this is a family reservation (same surnames)
+      const surnames = this.people.map(p => p.surname?.toUpperCase().trim()).filter(s => s);
+      const uniqueSurnames = [...new Set(surnames)];
+
+      const isFamily = uniqueSurnames.length === 1 || uniqueSurnames.length <= totalGuests / 2;
+
+      if (isFamily) {
+        if (personIndex === 0) {
+          return this.translocoService.translate('capo-famiglia');
+        } else {
+          return this.translocoService.translate('familiare');
+        }
+      } else {
+        if (personIndex === 0) {
+          return this.translocoService.translate('capo-gruppo');
+        } else {
+          return this.translocoService.translate('membro-gruppo');
+        }
+      }
+    }
+
+    return this.translocoService.translate('ospite-singolo');
   }
 }

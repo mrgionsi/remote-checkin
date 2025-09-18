@@ -152,10 +152,32 @@
                 (keydown.enter)="confirmDeleteReservation()" (keydown.space)="confirmDeleteReservation()">
             </p-button>
 
-            <p-button *ngIf="!editMode && reservation_status?.value === 'Approved'"
+            <!-- Development Mode: Show two buttons -->
+            <div *ngIf="isDevelopment && !editMode && reservation_status?.value === 'Approved' && !portaleAlloggiSent"
+                class="flex gap-2">
+                <p-button [label]="'send-to-portale-alloggi-test-btn' | transloco" icon="pi pi-flask"
+                    class="p-button-sm text-white" severity="warn" (click)="sendToPortaleAlloggiTest()"
+                    (keydown.enter)="sendToPortaleAlloggiTest()" (keydown.space)="sendToPortaleAlloggiTest()">
+                </p-button>
+
+                <p-button [label]="'send-to-portale-alloggi-real-btn' | transloco" icon="pi pi-send"
+                    class="p-button-sm text-white" severity="info" (click)="sendToPortaleAlloggiReal()"
+                    (keydown.enter)="sendToPortaleAlloggiReal()" (keydown.space)="sendToPortaleAlloggiReal()">
+                </p-button>
+            </div>
+
+            <!-- Production Mode: Show single button -->
+            <p-button
+                *ngIf="!isDevelopment && !editMode && reservation_status?.value === 'Approved' && !portaleAlloggiSent"
                 [label]="'send-to-portale-alloggi-btn' | transloco" icon="pi pi-send" class="p-button-sm text-white"
                 severity="info" (click)="openPortaleAlloggiModal()" (keydown.enter)="openPortaleAlloggiModal()"
                 (keydown.space)="openPortaleAlloggiModal()">
+            </p-button>
+
+            <!-- Status button when data has been sent -->
+            <p-button *ngIf="!editMode && reservation_status?.value === 'Approved' && portaleAlloggiSent"
+                [label]="'data-sent-to-portale-alloggi' | transloco" icon="pi pi-check" class="p-button-sm text-white"
+                severity="success" [disabled]="true">
             </p-button>
         </div>
 
@@ -174,8 +196,7 @@
             <th scope="col">{{ 'surname-header' | transloco }}</th>
             <th scope="col">{{ 'birthday-header' | transloco }}</th>
             <th scope="col">{{ 'street-header' | transloco }}</th>
-            <th scope="col">{{ 'city-header' | transloco }}</th>
-            <th scope="col">{{ 'province-header' | transloco }}</th>
+            <th scope="col">{{ 'number-city-label' | transloco }}</th>
             <th scope="col">{{ 'cap-header' | transloco }}</th>
             <th scope="col">{{ 'telephone-header' | transloco }}</th>
             <th scope="col">{{ 'document-number-header' | transloco }}</th>
@@ -225,13 +246,12 @@
             <td>{{ person.surname }}</td>
             <td>{{ person.birthday | date:'dd-MM-yyyy' }}</td>
             <td>{{ person.street }}</td>
-            <td>{{ person.city }}</td>
-            <td>{{ person.province }}</td>
+            <td>{{ person.number_city }}</td>
             <td>{{ person.cap }}</td>
             <td>{{ person.telephone }}</td>
             <td>{{ person.document_number }}</td>
             <td>{{ person.cf }}</td>
-            <td>{{ person.document_type | documentTypeLabel | transloco }}</td>
+            <td>{{ getDocumentTypeDisplayName(person.document_type) }}</td>
             <!-- Portale Alloggi fields -->
             <td>
                 <!-- Debug: {{ person.sesso }} ({{ typeof person.sesso }}) -->
@@ -241,19 +261,19 @@
                     *ngIf="person.sesso == null || person.sesso === undefined || person.sesso === '' || (person.sesso != 1 && person.sesso !== '1' && person.sesso != 2 && person.sesso !== '2')">{{
                     'gender-not-specified' | transloco }}</span>
             </td>
-            <td>{{ person.nazionalita || '-' }}</td>
+            <td>{{ getCountryDisplayName(person.nazionalita) }}</td>
             <td>{{ person.email || '-' }}</td>
-            <td>{{ person.comune_nascita || '-' }}</td>
+            <td>{{ getMunicipalityDisplayName(person.comune_nascita) }}</td>
             <td>{{ person.provincia_nascita || '-' }}</td>
-            <td>{{ person.stato_nascita || '-' }}</td>
-            <td>{{ person.cittadinanza || '-' }}</td>
+            <td>{{ getCountryDisplayName(person.stato_nascita) }}</td>
+            <td>{{ getCountryDisplayName(person.cittadinanza) }}</td>
             <td>{{ person.luogo_emissione || '-' }}</td>
             <td>{{ person.data_emissione ? (person.data_emissione | date:'dd-MM-yyyy') : '-' }}</td>
             <td>{{ person.data_scadenza ? (person.data_scadenza | date:'dd-MM-yyyy') : '-' }}</td>
             <td>{{ person.autorita_rilascio || '-' }}</td>
-            <td>{{ person.comune_residenza || '-' }}</td>
+            <td>{{ getMunicipalityDisplayName(person.comune_residenza) }}</td>
             <td>{{ person.provincia_residenza || '-' }}</td>
-            <td>{{ person.stato_residenza || '-' }}</td>
+            <td>{{ getCountryDisplayName(person.stato_residenza) }}</td>
         </tr>
     </ng-template>
 </p-table>
@@ -288,15 +308,15 @@
         <div class="mb-4">
             <h4 class="mb-2">{{ 'guests-to-send' | transloco }} ({{ people.length }})</h4>
             <div class="grid">
-                <div *ngFor="let person of people" class="col-12 md:col-6 lg:col-4">
+                <div *ngFor="let person of people; let i = index" class="col-12 md:col-6 lg:col-4">
                     <p-card class="mb-2">
                         <ng-template pTemplate="content">
                             <div class="text-sm">
                                 <p><strong>{{ 'name-label' | transloco }}:</strong> {{ person.name }} {{ person.surname
                                     }}</p>
                                 <p><strong>{{ 'birthday-label' | transloco }}:</strong> {{ person.birthday | date }}</p>
-                                <p><strong>{{ 'document-type-label' | transloco }}:</strong> {{ (person.document_type |
-                                    documentTypeLabel) | transloco }}</p>
+                                <p><strong>{{ 'document-type-label' | transloco }}:</strong> {{
+                                    getDocumentTypeDisplayName(person.document_type) }}</p>
                                 <p><strong>{{ 'document-number-label' | transloco }}:</strong> {{ person.document_number
                                     }}</p>
                                 <p><strong>{{ 'cf-label' | transloco }}:</strong> {{ person.cf }}</p>
@@ -310,7 +330,14 @@
                                         *ngIf="person.sesso == null || person.sesso === undefined || person.sesso === '' || (person.sesso != 1 && person.sesso !== '1' && person.sesso != 2 && person.sesso !== '2')">{{
                                         'gender-not-specified' | transloco }}</span>
                                 </p>
-                                <p><strong>{{ 'nationality-label' | transloco }}:</strong> {{ person.nazionalita }}</p>
+                                <p><strong>{{ 'nationality-label' | transloco }}:</strong> {{
+                                    getCountryDisplayName(person.nazionalita) }}</p>
+                                <p><strong>{{ 'luogo-di-rilascio-documento' | transloco }}:</strong> {{
+                                    getMunicipalityDisplayName(person.luogo_emissione) }}</p>
+                                <p><strong>{{ 'comune-di-residenza' | transloco }}:</strong> {{
+                                    getMunicipalityDisplayName(person.comune_residenza) }}</p>
+                                <p><strong>{{ 'tipo-ospite' | transloco }}:</strong> {{ getGuestTypeForPerson(person, i)
+                                    }}</p>
                             </div>
                         </ng-template>
                     </p-card>
