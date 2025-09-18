@@ -26,6 +26,18 @@ export interface PortaleAlloggiTestResponse {
     details?: string;
 }
 
+export interface PortaleAlloggiStatus {
+    portale_alloggi_sent: boolean;
+    portale_alloggi_sent_at: string | null;
+    portale_alloggi_response: string | null;
+}
+
+export interface PortaleAlloggiSubmissionResponse {
+    message: string;
+    result?: any;
+    submission_tracked?: boolean;
+}
+
 @Injectable({
     providedIn: 'root'
 })
@@ -71,14 +83,39 @@ export class PortaleAlloggiService {
     }
 
     /**
-     * Send guest data from a reservation to Portale Alloggi
+     * Send guest data from a reservation to Portale Alloggi (TEST MODE)
      * @param reservationId The ID of the reservation to send
      * @returns Observable with the submission results
      */
-    sendReservationData(reservationId: number): Observable<any> {
-        return this.http.post<any>(
+    sendReservationDataTest(reservationId: number): Observable<PortaleAlloggiSubmissionResponse> {
+        return this.http.post<PortaleAlloggiSubmissionResponse>(
             `${environment.apiBaseUrl}/api/v1/admin/reservations/${reservationId}/send-to-portale-alloggi`,
             {},
+            { headers: this.authService.getAuthHeaders() }
+        );
+    }
+
+    /**
+     * Send guest data from a reservation to Portale Alloggi (REAL PRODUCTION)
+     * @param reservationId The ID of the reservation to send
+     * @returns Observable with the submission results
+     */
+    sendReservationDataReal(reservationId: number): Observable<PortaleAlloggiSubmissionResponse> {
+        return this.http.post<PortaleAlloggiSubmissionResponse>(
+            `${environment.apiBaseUrl}/api/v1/admin/reservations/${reservationId}/send-to-portale-alloggi-real`,
+            {},
+            { headers: this.authService.getAuthHeaders() }
+        );
+    }
+
+    /**
+     * Get the Portale Alloggi submission status for a reservation
+     * @param reservationId The ID of the reservation
+     * @returns Observable with the status information
+     */
+    getSubmissionStatus(reservationId: number): Observable<PortaleAlloggiStatus> {
+        return this.http.get<PortaleAlloggiStatus>(
+            `${environment.apiBaseUrl}/api/v1/admin/reservations/${reservationId}/portale-alloggi-status`,
             { headers: this.authService.getAuthHeaders() }
         );
     }

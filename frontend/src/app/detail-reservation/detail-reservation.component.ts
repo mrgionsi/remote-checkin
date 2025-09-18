@@ -544,7 +544,7 @@ export class DetailReservationComponent implements OnInit {
   sendToPortaleAlloggi(): void {
     this.sendingToPortaleAlloggi = true;
 
-    this.portaleAlloggiService.sendReservationData(this.reservationId).subscribe({
+    this.portaleAlloggiService.sendReservationDataTest(this.reservationId).subscribe({
       next: (response) => {
         this.messageService.add({
           severity: 'success',
@@ -575,7 +575,7 @@ export class DetailReservationComponent implements OnInit {
   sendToPortaleAlloggiTest(): void {
     this.sendingToPortaleAlloggi = true;
 
-    this.portaleAlloggiService.sendReservationData(this.reservationId).subscribe({
+    this.portaleAlloggiService.sendReservationDataTest(this.reservationId).subscribe({
       next: (response) => {
         this.messageService.add({
           severity: 'success',
@@ -604,7 +604,7 @@ export class DetailReservationComponent implements OnInit {
   sendToPortaleAlloggiReal(): void {
     this.sendingToPortaleAlloggi = true;
 
-    this.http.post<any>(`/api/admin/reservations/${this.reservationId}/send-to-portale-alloggi-real`, {}).subscribe({
+    this.portaleAlloggiService.sendReservationDataReal(this.reservationId).subscribe({
       next: (response) => {
         this.messageService.add({
           severity: 'success',
@@ -635,7 +635,7 @@ export class DetailReservationComponent implements OnInit {
   loadPortaleAlloggiStatus(): void {
     if (!this.reservationId) return;
 
-    this.http.get<any>(`/api/admin/reservations/${this.reservationId}/portale-alloggi-status`).subscribe({
+    this.portaleAlloggiService.getSubmissionStatus(this.reservationId).subscribe({
       next: (response) => {
         this.portaleAlloggiSent = response.portale_alloggi_sent;
         this.portaleAlloggiSentAt = response.portale_alloggi_sent_at;
