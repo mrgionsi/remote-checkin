@@ -343,32 +343,23 @@ class PortaleAlloggiService:
             logger.error("No result element found in authentication response")
             return None
 
-        return self._handle_auth_result(result_element)
-
-    def _handle_auth_result(self, result_element) -> Optional[str]:
-        """Handle authentication result element."""
+        # Check if authentication was successful
         esito = result_element.find(ESITO_XPATH)
-
         if esito is not None and esito.text == 'true':
-            return self._extract_token(result_element)
-
-        if esito is not None and esito.text == 'false':
+            # Look for token at root level (as per test script)
+            token_element = root.find('.//{AlloggiatiService}token')
+            if token_element is not None and token_element.text:
+                self.token = token_element.text.strip()
+                logger.info("Successfully authenticated with Portale Alloggi")
+                return self.token
+            else:
+                logger.error("Success response but no token found")
+                return None
+        else:
+            # Handle authentication failure
             self._log_auth_error(result_element)
             return None
 
-        logger.error("No esito element found in authentication response")
-        return None
-
-    def _extract_token(self, result_element) -> Optional[str]:
-        """Extract token from successful authentication response."""
-        token_element = result_element.find('.//{AlloggiatiService}token')
-        if token_element is not None and token_element.text:
-            self.token = token_element.text.strip()
-            logger.info("Successfully authenticated with Portale Alloggi")
-            return self.token
-
-        logger.error("Success response but no token found")
-        return None
 
     def _log_auth_error(self, result_element):
         """Log authentication error details."""
