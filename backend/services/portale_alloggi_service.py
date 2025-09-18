@@ -189,9 +189,7 @@ class PortaleAlloggiService:
         unique_surnames = set(surnames)
         
         # If more than 50% share the same surname, consider it a family
-        if len(unique_surnames) == 1:
-            return True
-        elif len(unique_surnames) <= len(clients_data) // 2:
+        if len(unique_surnames) <= len(clients_data) // 2:
             return True
             
         # Additional family indicators could be added here:
@@ -670,48 +668,58 @@ class PortaleAlloggiService:
             Dict[str, Any]: Parsed test results
         """
         try:
-            # Check if test was successful
             esito_element = test_result_element.find(ESITO_XPATH)
-            if esito_element is not None:
-                if esito_element.text == 'true':
-                    # Check for valid schedine count in result element
-                    schedine_valide = result_element.find('.//{AlloggiatiService}SchedineValide')
-                    valid_count = schedine_valide.text if schedine_valide is not None else '0'
-                    
-                    # Check service operation result
-                    dettaglio = result_element.find('.//{AlloggiatiService}Dettaglio')
-                    service_success = True
-                    if dettaglio is not None:
-                        esito_servizio = dettaglio.find('.//{AlloggiatiService}EsitoOperazioneServizio')
-                        if esito_servizio is not None:
-                            esito_serv = esito_servizio.find(ESITO_XPATH)
-                            if esito_serv is not None and esito_serv.text == 'false':
-                                service_success = False
-                    
-                    return {
-                        'success': True, 
-                        'message': 'Test passed',
-                        'valid_schedine': int(valid_count),
-                        'service_success': service_success
-                    }
-                else:
-                    # Get error details
-                    errore_cod = test_result_element.find('.//{AlloggiatiService}ErroreCod')
-                    errore_des = test_result_element.find('.//{AlloggiatiService}ErroreDes')
-                    errore_dettaglio = test_result_element.find('.//{AlloggiatiService}ErroreDettaglio')
-                    
-                    return {
-                        'success': False,
-                        'error': 'Test failed',
-                        'error_code': errore_cod.text if errore_cod is not None else 'Unknown',
-                        'error_description': errore_des.text if errore_des is not None else 'Unknown',
-                        'error_detail': errore_dettaglio.text if errore_dettaglio is not None else 'Unknown'
-                    }
-            
-            return {'success': False, 'error': 'No test result found'}
+            if esito_element is None:
+                return {'success': False, 'error': 'No test result found'}
+                
+            if esito_element.text == 'true':
+                return self._handle_successful_test(result_element)
+            else:
+                return self._handle_failed_test(test_result_element)
+                
         except Exception as e:
             logger.error("Error parsing test response: %s", str(e))
             return {'success': False, 'error': f'Parse error: {str(e)}'}
+
+    def _handle_successful_test(self, result_element) -> Dict[str, Any]:
+        """Handle successful test response."""
+        schedine_valide = result_element.find('.//{AlloggiatiService}SchedineValide')
+        valid_count = schedine_valide.text if schedine_valide is not None else '0'
+        service_success = self._check_service_success(result_element)
+        
+        return {
+            'success': True, 
+            'message': 'Test passed',
+            'valid_schedine': int(valid_count),
+            'service_success': service_success
+        }
+
+    def _check_service_success(self, result_element) -> bool:
+        """Check if service operation was successful."""
+        dettaglio = result_element.find('.//{AlloggiatiService}Dettaglio')
+        if dettaglio is None:
+            return True
+            
+        esito_servizio = dettaglio.find('.//{AlloggiatiService}EsitoOperazioneServizio')
+        if esito_servizio is None:
+            return True
+            
+        esito_serv = esito_servizio.find(ESITO_XPATH)
+        return esito_serv is None or esito_serv.text != 'false'
+
+    def _handle_failed_test(self, test_result_element) -> Dict[str, Any]:
+        """Handle failed test response."""
+        errore_cod = test_result_element.find(ERROR_CODE_XPATH)
+        errore_des = test_result_element.find(ERROR_DESC_XPATH)
+        errore_dettaglio = test_result_element.find(ERROR_DETAIL_XPATH)
+        
+        return {
+            'success': False,
+            'error': 'Test failed',
+            'error_code': errore_cod.text if errore_cod is not None else 'Unknown',
+            'error_description': errore_des.text if errore_des is not None else 'Unknown',
+            'error_detail': errore_dettaglio.text if errore_dettaglio is not None else 'Unknown'
+        }
     
     def _parse_send_response(self, result_element) -> Dict[str, Any]:
         """
