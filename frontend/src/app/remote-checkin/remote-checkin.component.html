@@ -593,21 +593,21 @@
                                             <div class="image-item" *ngIf="uploadForm.get('frontimage')?.value">
                                                 <div class="image-preview">
                                                     <img [src]="getImagePreview('frontimage')"
-                                                        [alt]="'front-image-label' | transloco" />
+                                                        [alt]="'front-label' | transloco" />
                                                 </div>
                                                 <span class="image-label">{{ 'front-image-label' | transloco }}</span>
                                             </div>
                                             <div class="image-item" *ngIf="uploadForm.get('backimage')?.value">
                                                 <div class="image-preview">
                                                     <img [src]="getImagePreview('backimage')"
-                                                        [alt]="'back-image-label' | transloco" />
+                                                        [alt]="'back-label' | transloco" />
                                                 </div>
                                                 <span class="image-label">{{ 'back-image-label' | transloco }}</span>
                                             </div>
                                             <div class="image-item" *ngIf="uploadForm.get('selfie')?.value">
                                                 <div class="image-preview">
                                                     <img [src]="getImagePreview('selfie')"
-                                                        [alt]="'selfie-image-label' | transloco" />
+                                                        [alt]="'selfie-label' | transloco" />
                                                 </div>
                                                 <span class="image-label">{{ 'selfie-image-label' | transloco }}</span>
                                             </div>
