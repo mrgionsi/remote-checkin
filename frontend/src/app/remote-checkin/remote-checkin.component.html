@@ -88,14 +88,16 @@
                                         </div>
                                     </div>
 
-                                    <!-- Contact Information Section -->
+                                    <!-- Contact and Residence Information Section -->
                                     <div class="form-section">
                                         <div class="section-header">
-                                            <i class="pi pi-phone section-icon"></i>
-                                            <h3 class="section-title">{{ 'contact-information' | transloco }}</h3>
+                                            <i class="pi pi-home section-icon"></i>
+                                            <h3 class="section-title">{{ 'contact-residence-information' | transloco }}
+                                            </h3>
                                         </div>
                                         <div class="section-content">
                                             <div class="grid">
+                                                <!-- Contact Information -->
                                                 <div class="col-12 md:col-6">
                                                     <div class="field">
                                                         <label for="telephone">{{ 'telephone-label' | transloco
@@ -117,6 +119,8 @@
                                                         </small>
                                                     </div>
                                                 </div>
+
+                                                <!-- Address Information -->
                                                 <div class="col-12 md:col-6">
                                                     <div class="field">
                                                         <label for="street">{{ 'street-label' | transloco }}</label>
@@ -134,20 +138,6 @@
                                                 </div>
                                                 <div class="col-12 md:col-6">
                                                     <div class="field">
-                                                        <label for="city">{{ 'city-label' | transloco }}</label>
-                                                        <input pInputText id="city" formControlName="city"
-                                                            [placeholder]="'cityPlaceholder' | transloco" />
-                                                    </div>
-                                                </div>
-                                                <div class="col-12 md:col-6">
-                                                    <div class="field">
-                                                        <label for="province">{{ 'province-label' | transloco }}</label>
-                                                        <input pInputText id="province" formControlName="province"
-                                                            [placeholder]="'provincePlaceholder' | transloco" />
-                                                    </div>
-                                                </div>
-                                                <div class="col-12 md:col-6">
-                                                    <div class="field">
                                                         <label for="cap">{{ 'cap-label' | transloco }}</label>
                                                         <input pInputText id="cap" formControlName="cap"
                                                             [placeholder]="'capPlaceholder' | transloco" />
@@ -156,6 +146,56 @@
                                                             class="p-error">
                                                             {{ 'cap-error' | transloco }}
                                                         </small>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Residence Information -->
+                                                <div class="col-12 md:col-6">
+                                                    <div class="field">
+                                                        <label for="comune_residenza_code">{{
+                                                            'residence-municipality-label' |
+                                                            transloco }}</label>
+                                                        <p-select id="comune_residenza_code"
+                                                            formControlName="comune_residenza_code"
+                                                            [options]="municipalityOptions" optionLabel="label"
+                                                            optionValue="value"
+                                                            [placeholder]="'residenceMunicipalityPlaceholder' | transloco"
+                                                            [filter]="true" filterBy="label"
+                                                            filterPlaceholder="{{ 'search-municipalities' | transloco }}"
+                                                            [showClear]="true" [virtualScroll]="true"
+                                                            [virtualScrollItemSize]="40"
+                                                            [virtualScrollOptions]="{lazy: false}"
+                                                            styleClass="w-full"></p-select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 md:col-6">
+                                                    <div class="field">
+                                                        <label for="provincia_residenza">{{ 'residence-province-label' |
+                                                            transloco }}</label>
+                                                        <p-select id="provincia_residenza"
+                                                            formControlName="provincia_residenza"
+                                                            [options]="provinceOptions" optionLabel="label"
+                                                            optionValue="value"
+                                                            [placeholder]="'residenceProvincePlaceholder' | transloco"
+                                                            [filter]="true" filterBy="label"
+                                                            filterPlaceholder="{{ 'search-provinces' | transloco }}"
+                                                            [showClear]="true" [virtualScroll]="true"
+                                                            [virtualScrollItemSize]="40"
+                                                            [virtualScrollOptions]="{lazy: false}"
+                                                            styleClass="w-full"></p-select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 md:col-6">
+                                                    <div class="field">
+                                                        <label for="stato_residenza">{{ 'residence-country-label' |
+                                                            transloco }}</label>
+                                                        <p-select id="stato_residenza" formControlName="stato_residenza"
+                                                            [options]="countryOptions" optionLabel="label"
+                                                            optionValue="value"
+                                                            [placeholder]="'residenceCountryPlaceholder' | transloco"
+                                                            [filter]="true" filterBy="label"
+                                                            filterPlaceholder="{{ 'search-countries' | transloco }}"
+                                                            [showClear]="true" styleClass="w-full"></p-select>
                                                     </div>
                                                 </div>
                                             </div>
@@ -175,7 +215,7 @@
                                                         <label for="document_type">{{ 'document-type-label' | transloco
                                                             }}</label>
                                                         <p-select id="document_type" formControlName="document_type"
-                                                            [options]="documentTypes" optionLabel="label"
+                                                            [options]="documentTypeOptions" optionLabel="label"
                                                             optionValue="value"
                                                             [placeholder]="'documentTypePlaceholder' | transloco"
                                                             [filter]="true" filterBy="label"
@@ -196,9 +236,14 @@
                                                     <div class="field">
                                                         <label for="luogo_emissione">{{ 'document-issue-place-label' |
                                                             transloco }}</label>
-                                                        <input pInputText id="luogo_emissione"
-                                                            formControlName="luogo_emissione"
-                                                            [placeholder]="'documentIssuePlacePlaceholder' | transloco" />
+                                                        <p-select id="luogo_emissione" formControlName="luogo_emissione"
+                                                            [options]="luogoEmissioneOptions"
+                                                            [placeholder]="'documentIssuePlacePlaceholder' | transloco"
+                                                            [virtualScroll]="true" [virtualScrollItemSize]="40"
+                                                            [virtualScrollOptions]="{lazy: false}" [showClear]="true"
+                                                            [filter]="true" filterBy="label"
+                                                            [loading]="loadingLuogoEmissioneOptions">
+                                                        </p-select>
                                                     </div>
                                                 </div>
                                                 <div class="col-12 md:col-6">
@@ -259,6 +304,23 @@
                                                 </div>
                                                 <div class="col-12 md:col-6">
                                                     <div class="field">
+                                                        <label for="comune_nascita_code">{{ 'birth-municipality-label' |
+                                                            transloco }}</label>
+                                                        <p-select id="comune_nascita_code"
+                                                            formControlName="comune_nascita_code"
+                                                            [options]="municipalityOptions" optionLabel="label"
+                                                            optionValue="value"
+                                                            [placeholder]="'birthMunicipalityPlaceholder' | transloco"
+                                                            [filter]="true" filterBy="label"
+                                                            filterPlaceholder="{{ 'search-municipalities' | transloco }}"
+                                                            [showClear]="true" [virtualScroll]="true"
+                                                            [virtualScrollItemSize]="40"
+                                                            [virtualScrollOptions]="{lazy: false}"
+                                                            styleClass="w-full"></p-select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 md:col-6">
+                                                    <div class="field">
                                                         <label for="provincia_nascita">{{ 'birth-province-label' |
                                                             transloco }}</label>
                                                         <p-select id="provincia_nascita"
@@ -268,7 +330,10 @@
                                                             [placeholder]="'birthProvincePlaceholder' | transloco"
                                                             [filter]="true" filterBy="label"
                                                             filterPlaceholder="{{ 'search-provinces' | transloco }}"
-                                                            [showClear]="true" styleClass="w-full"></p-select>
+                                                            [showClear]="true" [virtualScroll]="true"
+                                                            [virtualScrollItemSize]="40"
+                                                            [virtualScrollOptions]="{lazy: false}"
+                                                            styleClass="w-full"></p-select>
                                                     </div>
                                                 </div>
                                                 <div class="col-12 md:col-6">
@@ -288,44 +353,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- Residence Information Section -->
-                                    <div class="form-section">
-                                        <div class="section-header">
-                                            <i class="pi pi-home section-icon"></i>
-                                            <h3 class="section-title">{{ 'residence-information' | transloco }}</h3>
-                                        </div>
-                                        <div class="section-content">
-                                            <div class="grid">
-                                                <div class="col-12 md:col-6">
-                                                    <div class="field">
-                                                        <label for="provincia_residenza">{{ 'residence-province-label' |
-                                                            transloco }}</label>
-                                                        <p-select id="provincia_residenza"
-                                                            formControlName="provincia_residenza"
-                                                            [options]="provinceOptions" optionLabel="label"
-                                                            optionValue="value"
-                                                            [placeholder]="'residenceProvincePlaceholder' | transloco"
-                                                            [filter]="true" filterBy="label"
-                                                            filterPlaceholder="{{ 'search-provinces' | transloco }}"
-                                                            [showClear]="true" styleClass="w-full"></p-select>
-                                                    </div>
-                                                </div>
-                                                <div class="col-12 md:col-6">
-                                                    <div class="field">
-                                                        <label for="stato_residenza">{{ 'residence-country-label' |
-                                                            transloco }}</label>
-                                                        <p-select id="stato_residenza" formControlName="stato_residenza"
-                                                            [options]="countryOptions" optionLabel="label"
-                                                            optionValue="value"
-                                                            [placeholder]="'residenceCountryPlaceholder' | transloco"
-                                                            [filter]="true" filterBy="label"
-                                                            filterPlaceholder="{{ 'search-countries' | transloco }}"
-                                                            [showClear]="true" styleClass="w-full"></p-select>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
 
                                     <!-- Additional Information Section -->
                                     <div class="form-section">
@@ -452,31 +479,16 @@
                                 </div>
                             </div>
 
-                            <!-- Contact Information Section -->
+                            <!-- Contact and Residence Information Section -->
                             <div class="col-12 md:col-6">
                                 <div class="summary-card contact-info">
                                     <div class="card-header">
-                                        <i class="pi pi-phone text-2xl text-primary"></i>
-                                        <h3>{{ 'contact-information' | transloco }}</h3>
+                                        <i class="pi pi-home text-2xl text-primary"></i>
+                                        <h3>{{ 'contact-residence-information' | transloco }}</h3>
                                     </div>
                                     <div class="card-content">
                                         <div class="info-grid">
-                                            <div class="info-item">
-                                                <span class="info-label">{{ 'street-label' | transloco }}</span>
-                                                <span class="info-value">{{ clientForm.get('street')?.value }}</span>
-                                            </div>
-                                            <div class="info-item">
-                                                <span class="info-label">{{ 'city-label' | transloco }}</span>
-                                                <span class="info-value">{{ clientForm.get('city')?.value }}</span>
-                                            </div>
-                                            <div class="info-item">
-                                                <span class="info-label">{{ 'province-label' | transloco }}</span>
-                                                <span class="info-value">{{ clientForm.get('province')?.value }}</span>
-                                            </div>
-                                            <div class="info-item">
-                                                <span class="info-label">{{ 'cap-label' | transloco }}</span>
-                                                <span class="info-value">{{ clientForm.get('cap')?.value }}</span>
-                                            </div>
+                                            <!-- Contact Information -->
                                             <div class="info-item">
                                                 <span class="info-label">{{ 'telephone-label' | transloco }}</span>
                                                 <span class="info-value">{{ clientForm.get('telephone')?.value }}</span>
@@ -484,6 +496,42 @@
                                             <div class="info-item">
                                                 <span class="info-label">{{ 'email-label' | transloco }}</span>
                                                 <span class="info-value">{{ clientForm.get('email')?.value }}</span>
+                                            </div>
+
+                                            <!-- Address Information -->
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'street-label' | transloco }}</span>
+                                                <span class="info-value">{{ clientForm.get('street')?.value }}</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'number-city-label' | transloco }}</span>
+                                                <span class="info-value">{{ clientForm.get('number_city')?.value
+                                                    }}</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'cap-label' | transloco }}</span>
+                                                <span class="info-value">{{ clientForm.get('cap')?.value }}</span>
+                                            </div>
+
+                                            <!-- Residence Information -->
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'residence-municipality-label' | transloco
+                                                    }}</span>
+                                                <span class="info-value">{{
+                                                    getMunicipalityDisplayName(clientForm.get('comune_residenza_code')?.value)
+                                                    }}</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'residence-province-label' | transloco
+                                                    }}</span>
+                                                <span class="info-value">{{ getResidenceProvinceName() }}</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'residence-country-label' | transloco
+                                                    }}</span>
+                                                <span class="info-value">{{
+                                                    getCountryDisplayName(clientForm.get('stato_residenza')?.value)
+                                                    }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -501,8 +549,9 @@
                                         <div class="info-grid">
                                             <div class="info-item">
                                                 <span class="info-label">{{ 'document-type-label' | transloco }}</span>
-                                                <span class="info-value">{{ (clientForm.get('document_type')?.value |
-                                                    documentTypeLabel) | transloco }}</span>
+                                                <span class="info-value">{{
+                                                    getDocumentTypeDisplayName(clientForm.get('document_type')?.value)
+                                                    }}</span>
                                             </div>
                                             <div class="info-item">
                                                 <span class="info-label">{{ 'document-number-label' | transloco
@@ -513,8 +562,7 @@
                                             <div class="info-item">
                                                 <span class="info-label">{{ 'document-issue-place-label' | transloco
                                                     }}</span>
-                                                <span class="info-value">{{ clientForm.get('luogo_emissione')?.value
-                                                    }}</span>
+                                                <span class="info-value">{{ getLuogoEmissioneName() }}</span>
                                             </div>
                                             <div class="info-item">
                                                 <span class="info-label">{{ 'document-issue-date-label' | transloco
@@ -579,7 +627,15 @@
                                         <div class="info-grid three-columns">
                                             <div class="info-item">
                                                 <span class="info-label">{{ 'nationality-label' | transloco }}</span>
-                                                <span class="info-value">{{ clientForm.get('nazionalita')?.value
+                                                <span class="info-value">{{
+                                                    getCountryDisplayName(clientForm.get('nazionalita')?.value)
+                                                    }}</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'birth-municipality-label' | transloco
+                                                    }}</span>
+                                                <span class="info-value">{{
+                                                    getMunicipalityDisplayName(clientForm.get('comune_nascita_code')?.value)
                                                     }}</span>
                                             </div>
                                             <div class="info-item">
@@ -588,18 +644,21 @@
                                             </div>
                                             <div class="info-item">
                                                 <span class="info-label">{{ 'birth-country-label' | transloco }}</span>
-                                                <span class="info-value">{{ clientForm.get('stato_nascita')?.value
+                                                <span class="info-value">{{
+                                                    getCountryDisplayName(clientForm.get('stato_nascita')?.value)
                                                     }}</span>
                                             </div>
                                             <div class="info-item">
                                                 <span class="info-label">{{ 'citizenship-label' | transloco }}</span>
-                                                <span class="info-value">{{ clientForm.get('cittadinanza')?.value
+                                                <span class="info-value">{{
+                                                    getCountryDisplayName(clientForm.get('cittadinanza')?.value)
                                                     }}</span>
                                             </div>
                                             <div class="info-item">
-                                                <span class="info-label">{{ 'issuing-authority-label' | transloco
+                                                <span class="info-label">{{ 'residence-municipality-label' | transloco
                                                     }}</span>
-                                                <span class="info-value">{{ clientForm.get('autorita_rilascio')?.value
+                                                <span class="info-value">{{
+                                                    getMunicipalityDisplayName(clientForm.get('comune_residenza_code')?.value)
                                                     }}</span>
                                             </div>
                                             <div class="info-item">
@@ -610,7 +669,19 @@
                                             <div class="info-item">
                                                 <span class="info-label">{{ 'residence-country-label' | transloco
                                                     }}</span>
-                                                <span class="info-value">{{ clientForm.get('stato_residenza')?.value
+                                                <span class="info-value">{{
+                                                    getCountryDisplayName(clientForm.get('stato_residenza')?.value)
+                                                    }}</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'luogo-di-rilascio-documento' | transloco
+                                                    }}</span>
+                                                <span class="info-value">{{ getLuogoEmissioneName() }}</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">{{ 'issuing-authority-label' | transloco
+                                                    }}</span>
+                                                <span class="info-value">{{ clientForm.get('autorita_rilascio')?.value
                                                     }}</span>
                                             </div>
                                         </div>
@@ -623,8 +694,8 @@
                     <!-- Submit Button Section - Centered -->
                     <div class="flex justify-center pt-4 w-full">
                         <p-button [label]="'submit' | transloco" icon="pi pi-check" class="p-button-lg"
-                            [disabled]="clientForm.invalid || uploadForm.invalid || !canRegister"
-                            (onClick)="uploadReservationData()"></p-button>
+                            [disabled]="clientForm.invalid || uploadForm.invalid || !canRegister || isSubmitting"
+                            [loading]="isSubmitting" (onClick)="uploadReservationData()"></p-button>
                     </div>
 
                     <div class="flex pt-6 justify-start">

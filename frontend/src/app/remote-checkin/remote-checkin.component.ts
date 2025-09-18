@@ -15,10 +15,17 @@ import { UploadIdentityComponent } from '../upload-identity/upload-identity.comp
 import { UploadService } from '../services/upload.service';
 import { ToastModule } from 'primeng/toast';
 import { DialogModule } from 'primeng/dialog';
-import { DocumentTypeLabelPipe } from '../pipes/document-type-label.pipe';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { ReservationService } from '../services/reservation.service';
 import { HttpClient } from '@angular/common/http';
+import {
+  FALLBACK_MUNICIPALITY_OPTIONS,
+  FALLBACK_MUNICIPALITY_MAPPINGS,
+  FALLBACK_DOCUMENT_TYPE_OPTIONS,
+  FALLBACK_DOCUMENT_TYPE_MAPPINGS,
+  FALLBACK_COUNTRY_OPTIONS,
+  FALLBACK_COUNTRY_MAPPINGS
+} from '../shared/constants/fallback-data';
 
 
 @Component({
@@ -27,7 +34,7 @@ import { HttpClient } from '@angular/common/http';
   imports: [StepperModule, UploadIdentityComponent, ToastModule, DialogModule,
     DatePickerModule, InputGroupAddonModule, InputTextModule, CardModule,
     FormsModule, ReactiveFormsModule, InputGroupModule, ButtonModule,
-    CommonModule, SelectModule, DocumentTypeLabelPipe, TranslocoPipe
+    CommonModule, SelectModule, TranslocoPipe
   ],
   templateUrl: './remote-checkin.component.html',
   styleUrl: './remote-checkin.component.scss',
@@ -45,8 +52,24 @@ export class RemoteCheckinComponent implements OnInit {
   // Reference data loaded from JSON files
   countryOptions: any[] = [];
   provinceOptions: any[] = [];
+  municipalityOptions: any[] = [];
+  documentTypeOptions: any[] = [];
+  luogoEmissioneOptions: any[] = [];
 
-  // Municipality options for autocomplete
+  // Mapping data for display
+  countryMappings: { [key: string]: string } = {};
+  municipalityMappings: { [key: string]: string } = {};
+  documentTypeMappings: { [key: string]: string } = {};
+  luogoEmissioneMappings: { [key: string]: string } = {};
+  provinceMappings: { [key: string]: string } = {};
+
+  // Performance optimization flags
+  private dataLoaded = false;
+  private loadingPromise: Promise<void> | null = null;
+  public isLoadingData = true;
+  public loadingLuogoEmissioneOptions = false;
+  public isSubmitting = false;
+
 
   languageCode: string | null = '';
   reservationId: string | null = '';
@@ -71,8 +94,6 @@ export class RemoteCheckinComponent implements OnInit {
       birthday: ['', Validators.required],
       street: ['', Validators.required],
       number_city: ['', Validators.required],
-      city: ['', Validators.required],
-      province: ['', Validators.required],
       cap: ['', [Validators.required, Validators.pattern('^[0-9]{5}$')]],
       telephone: ['', [Validators.required, Validators.pattern('^[0-9]+$')]],
       document_type: ['', Validators.required],
@@ -161,12 +182,6 @@ export class RemoteCheckinComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.documentTypes = [
-      { label: this.translocoService.translate('identity-card-label'), value: 'identity_card' },
-      { label: this.translocoService.translate('driver-license-label'), value: 'driver_license' },
-      { label: this.translocoService.translate('passport-label'), value: 'passport' }
-    ];
-
     // Initialize gender options with translations
     this.genderOptions = [
       { label: this.translocoService.translate('gender-male'), value: '1' },
@@ -174,12 +189,12 @@ export class RemoteCheckinComponent implements OnInit {
     ];
 
     // Load reference data from JSON files
-    this.loadReferenceData();
+    this.loadAllReferenceDataAsync();
 
     // Subscribe to language changes to reload country options
     this.translocoService.langChanges$.subscribe(lang => {
       this.languageCode = lang;
-      this.loadCountryOptions();
+      this.loadCountryOptionsAsync();
     });
 
     this.languageCode = this.route.snapshot.paramMap.get('code');
@@ -259,56 +274,159 @@ export class RemoteCheckinComponent implements OnInit {
     this.uploadForm.enable();
   }
 
-  // Load country options with current language
-  private loadCountryOptions() {
-    this.http.get<any[]>('/assets/data/countries.json').subscribe({
-      next: (countries) => {
-        // Transform the data to match the expected format with translated names
-        this.countryOptions = countries.map(country => ({
-          label: this.getCountryName(country),
-          value: country.code
-        }));
-      },
-      error: (error) => {
-        console.error('Error loading countries:', error);
-        // Fallback to basic countries
-        this.countryOptions = [
-          { label: 'Italy', value: 'IT' },
-          { label: 'United States', value: 'US' },
-          { label: 'United Kingdom', value: 'GB' },
-          { label: 'Other', value: 'XX' }
-        ];
+  // Load country options with current language (async version)
+  private async loadCountryOptionsAsync(): Promise<void> {
+    try {
+      const countries = await this.http.get<{ [key: string]: string }>('/assets/data/countries.json').toPromise();
+      if (countries) {
+        this.countryMappings = countries;
+        // Use requestAnimationFrame to avoid blocking UI (if available)
+        if (typeof requestAnimationFrame !== 'undefined') {
+          requestAnimationFrame(() => {
+            this.countryOptions = Object.entries(countries).map(([code, description]) => ({
+              label: description,
+              value: code
+            }));
+          });
+        } else {
+          // Fallback for server-side rendering
+          this.countryOptions = Object.entries(countries).map(([code, description]) => ({
+            label: description,
+            value: code
+          }));
+        }
       }
-    });
+    } catch (error) {
+      console.error('Error loading countries:', error);
+      // Use centralized fallback data
+      this.countryOptions = [...FALLBACK_COUNTRY_OPTIONS];
+      this.countryMappings = { ...FALLBACK_COUNTRY_MAPPINGS };
+    }
   }
 
-  // Load reference data from JSON files
-  private loadReferenceData() {
-    // Load countries
-    this.loadCountryOptions();
 
-    // Load Italian provinces
-    this.http.get<any[]>('/assets/data/italian-provinces.json').subscribe({
-      next: (provinces) => {
-        // Transform the data to match the expected format
-        this.provinceOptions = provinces.map(province => ({
-          label: province.name,
-          value: province.code
-        }));
-      },
-      error: (error) => {
-        console.error('Error loading provinces:', error);
-        // Fallback to basic provinces
-        this.provinceOptions = [
-          { label: 'Roma (RM)', value: 'RM' },
-          { label: 'Milano (MI)', value: 'MI' },
-          { label: 'Napoli (NA)', value: 'NA' },
-          { label: 'Torino (TO)', value: 'TO' }
-        ];
-      }
-    });
 
+  private async loadAllReferenceDataAsync(): Promise<void> {
+    try {
+      // Load smaller datasets first (countries, document types, province acronyms)
+      await Promise.all([
+        this.loadCountryOptionsAsync(),
+        this.loadDocumentTypesAsync(),
+        this.loadProvinceAcronymsAsync()
+      ]);
+
+      // Load municipalities data once (this will populate municipalityOptions and luogoEmissioneOptions)
+      setTimeout(() => {
+        this.loadMunicipalitiesDataAsync();
+      }, 100);
+
+      this.dataLoaded = true;
+      this.isLoadingData = false;
+    } catch (error) {
+      console.error('Error loading reference data:', error);
+      this.isLoadingData = false;
+    }
   }
+
+  // Load document types from JSON mapping (async version)
+  private async loadDocumentTypesAsync(): Promise<void> {
+    try {
+      const documentTypes = await this.http.get<{ [key: string]: string }>('/assets/data/document_types.json').toPromise();
+      if (documentTypes) {
+        this.documentTypeMappings = documentTypes;
+        // Use requestAnimationFrame to avoid blocking UI (if available)
+        if (typeof requestAnimationFrame !== 'undefined') {
+          requestAnimationFrame(() => {
+            this.documentTypeOptions = Object.entries(documentTypes).map(([code, description]) => ({
+              label: description,
+              value: code
+            }));
+          });
+        } else {
+          // Fallback for server-side rendering
+          this.documentTypeOptions = Object.entries(documentTypes).map(([code, description]) => ({
+            label: description,
+            value: code
+          }));
+        }
+      }
+    } catch (error) {
+      console.error('Error loading document types:', error);
+      // Use centralized fallback data
+      this.documentTypeOptions = [...FALLBACK_DOCUMENT_TYPE_OPTIONS];
+      this.documentTypeMappings = { ...FALLBACK_DOCUMENT_TYPE_MAPPINGS };
+    }
+  }
+
+
+  // Load province acronyms from JSON
+  private async loadProvinceAcronymsAsync(): Promise<void> {
+    try {
+      const provinceAcronyms = await this.http.get<{ [key: string]: string }>('/assets/data/province_acronyms.json').toPromise();
+      if (provinceAcronyms) {
+        // Convert to options format for the select
+        this.provinceOptions = Object.entries(provinceAcronyms).map(([acronym, name]) => ({
+          label: name,
+          value: acronym
+        }));
+        this.provinceMappings = provinceAcronyms;
+      }
+    } catch (error) {
+      console.error('Error loading province acronyms:', error);
+    }
+  }
+
+  // Centralized method to load municipalities data and populate both options
+  private async loadMunicipalitiesDataAsync(): Promise<void> {
+    try {
+      const municipalities = await this.http.get<{ [key: string]: string }>('/assets/data/municipalities.json').toPromise();
+      if (municipalities) {
+        this.municipalityMappings = municipalities;
+
+        // Process municipalities in chunks to avoid blocking UI
+        const entries = Object.entries(municipalities);
+        const chunkSize = 1000; // Process 1000 entries at a time
+        const options: { label: string; value: string }[] = [];
+
+        for (let i = 0; i < entries.length; i += chunkSize) {
+          const chunk = entries.slice(i, i + chunkSize);
+          const chunkOptions = chunk.map(([code, description]) => ({
+            label: description,
+            value: code
+          }));
+
+          // Add chunk to options array
+          options.push(...chunkOptions);
+
+          // Yield control back to the browser to prevent blocking
+          if (i + chunkSize < entries.length) {
+            await new Promise(resolve => setTimeout(resolve, 0));
+          }
+        }
+
+        // Sort the options array
+        options.sort((a, b) => a.label.localeCompare(b.label));
+
+        // Populate municipality and luogo emissione options (provinces are loaded separately)
+        this.municipalityOptions = [...options];
+        this.luogoEmissioneOptions = [...options];
+
+        // Set loading states to false
+        this.loadingLuogoEmissioneOptions = false;
+      }
+    } catch (error) {
+      console.error('Error loading municipalities data:', error);
+      // Use centralized fallback data
+      this.municipalityOptions = [...FALLBACK_MUNICIPALITY_OPTIONS];
+      this.luogoEmissioneOptions = [...FALLBACK_MUNICIPALITY_OPTIONS];
+      this.municipalityMappings = { ...FALLBACK_MUNICIPALITY_MAPPINGS };
+      this.luogoEmissioneMappings = { ...FALLBACK_MUNICIPALITY_MAPPINGS };
+
+      // Set loading states to false
+      this.loadingLuogoEmissioneOptions = false;
+    }
+  }
+
 
   // Method to handle FormData received from the child
   handleFormData(formData: FormGroup) {
@@ -335,6 +453,9 @@ export class RemoteCheckinComponent implements OnInit {
       return;
     }
 
+    // Set loading state
+    this.isSubmitting = true;
+
     if (this.uploadForm.invalid || this.clientForm.invalid) {
       // Check for specific validation errors
       if (this.clientForm.hasError('documentDateInvalid')) {
@@ -346,6 +467,7 @@ export class RemoteCheckinComponent implements OnInit {
       } else {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: this.translocoService.translate('all-fields-required-error') });
       }
+      this.isSubmitting = false;
       return;
     }
 
@@ -358,8 +480,8 @@ export class RemoteCheckinComponent implements OnInit {
 
     // Fetch additional data from clientForm
     const formFields = [
-      'name', 'surname', 'birthday', 'street',
-      'city', 'province', 'cap', 'telephone', 'document_type',
+      'name', 'surname', 'birthday', 'street', 'number_city',
+      'cap', 'telephone', 'document_type',
       'document_number', 'cf',
       // Portale Alloggi required fields
       'sesso', 'nazionalita', 'email', 'stato_nascita', 'cittadinanza',
@@ -381,25 +503,36 @@ export class RemoteCheckinComponent implements OnInit {
       if (value) formData.append(field, value);
     });
 
+    // Add municipality codes for birth and residence
+    const birthMunicipalityCode = this.clientForm.get('comune_nascita_code')?.value;
+    const residenceMunicipalityCode = this.clientForm.get('comune_residenza_code')?.value;
+
+    if (birthMunicipalityCode) {
+      formData.append('comune_nascita', birthMunicipalityCode);
+    }
+    if (residenceMunicipalityCode) {
+      formData.append('comune_residenza', residenceMunicipalityCode);
+    }
+
     // Map municipality names to the expected backend field names
     const birthProvinceCode = this.clientForm.get('provincia_nascita')?.value;
     const residenceProvinceCode = this.clientForm.get('provincia_residenza')?.value;
 
     // Use province names as municipality names (simplified approach)
     if (birthProvinceCode) {
-      const birthProvinceName = this.getProvinceNameByCode(birthProvinceCode);
+      const birthProvinceName = this.provinceMappings[birthProvinceCode];
       if (birthProvinceName) {
         formData.append('comune_nascita', birthProvinceName);
       }
     }
     if (residenceProvinceCode) {
-      const residenceProvinceName = this.getProvinceNameByCode(residenceProvinceCode);
+      const residenceProvinceName = this.provinceMappings[residenceProvinceCode];
       if (residenceProvinceName) {
         formData.append('comune_residenza', residenceProvinceName);
       }
     }
 
-    // Map province codes to backend (backend expects 2-character codes)
+    // Send province acronyms directly (no conversion needed)
     if (birthProvinceCode) {
       formData.append('provincia_nascita', birthProvinceCode);
     }
@@ -422,6 +555,7 @@ export class RemoteCheckinComponent implements OnInit {
           detail: response.message || 'Images uploaded successfully'
         });
         this.showConfirmationDialog = true;
+        this.isSubmitting = false;
       },
       error: (error) => {
         // Handle error response
@@ -433,6 +567,7 @@ export class RemoteCheckinComponent implements OnInit {
           summary: 'Error',
           detail: errorMessage
         });
+        this.isSubmitting = false;
       }
     });
 
@@ -461,73 +596,48 @@ export class RemoteCheckinComponent implements OnInit {
   }
 
 
-  // Helper method to get country name based on current language
-  getCountryName(country: any): string {
-    const currentLang = this.translocoService.getActiveLang();
-
-    switch (currentLang) {
-      case 'it':
-        return country.name_it || country.name;
-      case 'es':
-        return country.name_es || country.name;
-      case 'fr':
-        return country.name_fr || country.name;
-      case 'de':
-        return country.name_de || country.name;
-      default:
-        return country.name; // Default to English
-    }
+  // Helper method to get country display name by code
+  getCountryDisplayName(code: string): string {
+    return this.countryMappings[code] || code;
   }
 
-  // Helper method to get province name by code
-  getProvinceNameByCode(code: string): string | null {
-    const province = this.provinceOptions.find(p => p.value === code);
-    return province ? province.label : null;
+  // Helper method to get municipality display name by code
+  getMunicipalityDisplayName(code: string): string {
+    return this.municipalityMappings[code] || code;
   }
+
+  // Helper method to get document type display name by code
+  getDocumentTypeDisplayName(code: string): string {
+    return this.documentTypeMappings[code] || code;
+  }
+
 
   // Helper method to get birth province name for display
   getBirthProvinceName(): string {
     const code = this.clientForm.get('provincia_nascita')?.value;
-    return code ? this.getProvinceNameByCode(code) || code : '';
+    if (!code) return '';
+    // Get province name from acronym
+    return this.provinceMappings[code] || code;
   }
 
   // Helper method to get residence province name for display
   getResidenceProvinceName(): string {
     const code = this.clientForm.get('provincia_residenza')?.value;
-    return code ? this.getProvinceNameByCode(code) || code : '';
+    if (!code) return '';
+    // Get province name from acronym
+    return this.provinceMappings[code] || code;
   }
 
-  // Calculate municipality code based on province code
-  private calculateMunicipalityCode(provinceCode: string): string {
-    // This is a simplified calculation - in production, you might want to:
-    // 1. Use the first municipality in the province
-    // 2. Use a default municipality for the province
-    // 3. Or implement more sophisticated logic
 
-    // For now, return a placeholder code based on province
-    // The actual implementation should map to real municipality codes
-    const provinceMapping: { [key: string]: string } = {
-      'RM': '058091', // Rome
-      'MI': '015146', // Milan
-      'NA': '063049', // Naples
-      'TO': '001272', // Turin
-      'FI': '048017', // Florence
-      'BO': '037006', // Bologna
-      'GE': '010025', // Genoa
-      'BA': '072006', // Bari
-      'CA': '092009', // Cagliari
-      'VE': '027042', // Venice
-      // Add more mappings as needed
-    };
-
-    return provinceMapping[provinceCode] || '000000'; // Default fallback
+  // Helper method to get luogo emissione name for display
+  getLuogoEmissioneName(): string {
+    const code = this.clientForm.get('luogo_emissione')?.value;
+    return code ? this.getMunicipalityDisplayName(code) || code : '';
   }
 
-  // Helper method to get municipality display name for summary
-  getMunicipalityDisplayName(code: string): string {
-    // This would need to be implemented to convert code back to name for display
-    // For now, return the code
-    return code;
-  }
+
+
+
+
 
 }
