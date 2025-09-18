@@ -57,7 +57,7 @@ mail = Mail(app)
 # Ensure mail is properly registered with app extensions
 app.extensions['mail'] = mail
 
-allowed_origins = os.getenv("ALLOWED_CORS", "http://localhost:4200").split(",")
+allowed_origins = os.getenv("ALLOWED_CORS", "http://localhost:4200,http://127.0.0.1:4200").split(",")
 
 CORS(
     app,
@@ -139,4 +139,4 @@ def test_email_config():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5001)
