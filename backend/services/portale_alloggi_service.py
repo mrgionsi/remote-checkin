@@ -29,6 +29,16 @@ DEFAULT_DOCUMENT_TYPE = "IDENT"  # CARTA DI IDENTITA'
 DEFAULT_COUNTRY_CODE = "100000100"  # ITALIA
 DEFAULT_MUNICIPALITY_CODE = "100000100"  # Default municipality
 
+# SOAP constants
+SOAP_CONTENT_TYPE = "text/xml; charset=utf-8"
+ESITO_XPATH = ".//{AlloggiatiService}esito"
+ERROR_CODE_XPATH = ".//{AlloggiatiService}ErroreCod"
+ERROR_DESC_XPATH = ".//{AlloggiatiService}ErroreDes"
+ERROR_DETAIL_XPATH = ".//{AlloggiatiService}ErroreDettaglio"
+
+# Date constants
+DEFAULT_DATE = "01/01/1990"
+
 
 class PortaleAlloggiService:
     """
@@ -295,57 +305,13 @@ class PortaleAlloggiService:
             Optional[str]: Authentication token if successful, None otherwise
         """
         try:
-            # SOAP envelope for GenerateToken
-            soap_envelope = f"""<?xml version="1.0" encoding="utf-8"?>
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-  <soap:Body>
-    <GenerateToken xmlns="AlloggiatiService">
-      <Utente>{self.username}</Utente>
-      <Password>{self.password}</Password>
-      <WsKey>{self.ws_key}</WsKey>
-    </GenerateToken>
-  </soap:Body>
-</soap:Envelope>"""
-            
-            headers = {
-                'Content-Type': 'text/xml; charset=utf-8',
-                'SOAPAction': 'AlloggiatiService/GenerateToken'
-            }
+            soap_envelope = self._create_auth_soap_envelope()
+            headers = self._create_auth_headers()
             
             response = requests.post(self.wsdl_url, data=soap_envelope, headers=headers, timeout=30)
             response.raise_for_status()
             
-            # Parse the SOAP response
-            root = ET.fromstring(response.text)
-            
-            # Check for success response first
-            result_element = root.find('.//{AlloggiatiService}result')
-            if result_element is not None:
-                esito = result_element.find('.//{AlloggiatiService}esito')
-                if esito is not None and esito.text == 'true':
-                    # Success case - extract token directly
-                    token_element = root.find('.//{AlloggiatiService}token')
-                    if token_element is not None and token_element.text:
-                        self.token = token_element.text.strip()
-                        logger.info("Successfully authenticated with Portale Alloggi")
-                        return self.token
-                    else:
-                        logger.error("Success response but no token found")
-                        return None
-                elif esito is not None and esito.text == 'false':
-                    # Error case
-                    error_code = result_element.find('.//{AlloggiatiService}ErroreCod')
-                    error_desc = result_element.find('.//{AlloggiatiService}ErroreDes')
-                    error_detail = result_element.find('.//{AlloggiatiService}ErroreDettaglio')
-                    
-                    logger.error("Authentication failed - Code: %s, Description: %s, Detail: %s", 
-                               error_code.text if error_code is not None and error_code.text else 'Unknown',
-                               error_desc.text if error_desc is not None and error_desc.text else 'Unknown',
-                               error_detail.text if error_detail is not None and error_detail.text else 'Unknown')
-                    return None
-            
-            logger.error("No result element found in authentication response")
-            return None
+            return self._parse_auth_response(response.text)
                 
         except requests.exceptions.RequestException as e:
             logger.error("Network error during authentication: %s", str(e))
@@ -356,6 +322,72 @@ class PortaleAlloggiService:
         except Exception as e:
             logger.error("Unexpected error during authentication: %s", str(e))
             return None
+
+    def _create_auth_soap_envelope(self) -> str:
+        """Create SOAP envelope for authentication."""
+        return f"""<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+  <soap:Body>
+    <GenerateToken xmlns="AlloggiatiService">
+      <Utente>{self.username}</Utente>
+      <Password>{self.password}</Password>
+      <WsKey>{self.ws_key}</WsKey>
+    </GenerateToken>
+  </soap:Body>
+</soap:Envelope>"""
+
+    def _create_auth_headers(self) -> Dict[str, str]:
+        """Create headers for authentication request."""
+        return {
+            'Content-Type': SOAP_CONTENT_TYPE,
+            'SOAPAction': 'AlloggiatiService/GenerateToken'
+        }
+
+    def _parse_auth_response(self, response_text: str) -> Optional[str]:
+        """Parse authentication response and extract token."""
+        root = ET.fromstring(response_text)
+        result_element = root.find('.//{AlloggiatiService}result')
+        
+        if result_element is None:
+            logger.error("No result element found in authentication response")
+            return None
+            
+        return self._handle_auth_result(result_element)
+
+    def _handle_auth_result(self, result_element) -> Optional[str]:
+        """Handle authentication result element."""
+        esito = result_element.find(ESITO_XPATH)
+        
+        if esito is not None and esito.text == 'true':
+            return self._extract_token(result_element)
+        elif esito is not None and esito.text == 'false':
+            self._log_auth_error(result_element)
+            return None
+        
+        logger.error("No esito element found in authentication response")
+        return None
+
+    def _extract_token(self, result_element) -> Optional[str]:
+        """Extract token from successful authentication response."""
+        token_element = result_element.find('.//{AlloggiatiService}token')
+        if token_element is not None and token_element.text:
+            self.token = token_element.text.strip()
+            logger.info("Successfully authenticated with Portale Alloggi")
+            return self.token
+        else:
+            logger.error("Success response but no token found")
+            return None
+
+    def _log_auth_error(self, result_element):
+        """Log authentication error details."""
+        error_code = result_element.find(ERROR_CODE_XPATH)
+        error_desc = result_element.find(ERROR_DESC_XPATH)
+        error_detail = result_element.find(ERROR_DETAIL_XPATH)
+        
+        logger.error("Authentication failed - Code: %s, Description: %s, Detail: %s", 
+                   error_code.text if error_code is not None and error_code.text else 'Unknown',
+                   error_desc.text if error_desc is not None and error_desc.text else 'Unknown',
+                   error_detail.text if error_detail is not None and error_detail.text else 'Unknown')
     
     def format_schedina(self, client_data: Dict[str, Any], reservation_data: Dict[str, Any], 
                        clients_data: List[Dict[str, Any]] = None, client_index: int = 0) -> str:
@@ -383,13 +415,13 @@ class PortaleAlloggiService:
                             dt = datetime.strptime(date_input, '%Y-%m-%d')
                             return dt.strftime('%d/%m/%Y')
                         except ValueError:
-                            return '01/01/1990'
+                            return DEFAULT_DATE
                     elif '/' in date_input:
                         return date_input
                 elif hasattr(date_input, 'strftime'):
                     # Handle Python date/datetime objects
                     return date_input.strftime('%d/%m/%Y')
-                return '01/01/1990'
+                return DEFAULT_DATE
             
             # Determine guest type automatically if not provided
             if clients_data is not None:
@@ -430,7 +462,7 @@ class PortaleAlloggiService:
             schedina += pad_string(client_data.get('surname', ''), 50)  # 14-63: Cognome
             schedina += pad_string(client_data.get('name', ''), 30)  # 64-93: Nome
             schedina += str(client_data.get('sesso', 1))  # 94: Sesso (1=M, 2=F)
-            birthday = client_data.get('birthday', '01/01/1990')
+            birthday = client_data.get('birthday', DEFAULT_DATE)
             birthday_formatted = format_date(birthday)
             print(f"Birthday: {birthday} (type: {type(birthday)}) -> Formatted: {birthday_formatted}")
             schedina += birthday_formatted  # 95-104: Data Nascita
@@ -639,7 +671,7 @@ class PortaleAlloggiService:
         """
         try:
             # Check if test was successful
-            esito_element = test_result_element.find('.//{AlloggiatiService}esito')
+            esito_element = test_result_element.find(ESITO_XPATH)
             if esito_element is not None:
                 if esito_element.text == 'true':
                     # Check for valid schedine count in result element
@@ -652,7 +684,7 @@ class PortaleAlloggiService:
                     if dettaglio is not None:
                         esito_servizio = dettaglio.find('.//{AlloggiatiService}EsitoOperazioneServizio')
                         if esito_servizio is not None:
-                            esito_serv = esito_servizio.find('.//{AlloggiatiService}esito')
+                            esito_serv = esito_servizio.find(ESITO_XPATH)
                             if esito_serv is not None and esito_serv.text == 'false':
                                 service_success = False
                     
@@ -693,7 +725,7 @@ class PortaleAlloggiService:
         """
         try:
             # Check if submission was successful
-            esito_element = result_element.find('.//{AlloggiatiService}esito')
+            esito_element = result_element.find(ESITO_XPATH)
             if esito_element is not None:
                 if esito_element.text == 'true':
                     return {
