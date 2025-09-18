@@ -228,18 +228,18 @@
                     [title]="'complete-title' | transloco"></i>
             </td>
             <td>
-                <img *ngIf="person.images?.front" [src]="person.images.front" [alt]="'front-photo-header' | transloco"
+                <img *ngIf="person.images?.front" [src]="person.images.front" [alt]="'front-header' | transloco"
                     width="50" height="50" />
                 <span *ngIf="!person.images?.front">{{ 'not-found-label' | transloco }}</span>
             </td>
             <td>
-                <img *ngIf="person.images?.back" [src]="person.images.back" [alt]="'back-photo-header' | transloco"
-                    width="50" height="50" />
+                <img *ngIf="person.images?.back" [src]="person.images.back" [alt]="'back-header' | transloco" width="50"
+                    height="50" />
                 <span *ngIf="!person.images?.back">{{ 'not-found-label' | transloco }}</span>
             </td>
             <td>
-                <img *ngIf="person.images?.selfie" [src]="person.images.selfie"
-                    [alt]="'selfie-photo-header' | transloco" width="50" height="50" />
+                <img *ngIf="person.images?.selfie" [src]="person.images.selfie" [alt]="'selfie-header' | transloco"
+                    width="50" height="50" />
                 <span *ngIf="!person.images?.selfie">{{ 'not-found-label' | transloco }}</span>
             </td>
             <td>{{ person.name }}</td>
@@ -354,10 +354,12 @@
     <ng-template pTemplate="footer">
         <div class="flex justify-content-end gap-2">
             <p-button [label]="'cancel-send' | transloco" icon="pi pi-times" severity="secondary"
-                (click)="closePortaleAlloggiModal()">
+                (click)="closePortaleAlloggiModal()" (keydown.enter)="closePortaleAlloggiModal()"
+                (keydown.space)="closePortaleAlloggiModal()">
             </p-button>
             <p-button [label]="'confirm-send-data' | transloco" icon="pi pi-check" severity="success"
-                (click)="sendToPortaleAlloggi()" [disabled]="people.length === 0" [loading]="sendingToPortaleAlloggi">
+                (click)="sendToPortaleAlloggi()" [disabled]="people.length === 0" [loading]="sendingToPortaleAlloggi"
+                (keydown.enter)="sendToPortaleAlloggi()" (keydown.space)="sendToPortaleAlloggi()">
             </p-button>
         </div>
     </ng-template>
