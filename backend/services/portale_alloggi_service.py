@@ -6,12 +6,12 @@ for submitting guest data to the Italian national accommodation registry.
 """
 
 import logging
+from datetime import datetime
+from typing import Dict, List, Optional, Any, Tuple
 import requests
 import xml.etree.ElementTree as ET
 import json
 import os
-from typing import Dict, List, Optional, Any, Tuple
-from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +67,6 @@ class PortaleAlloggiService:
         
         # Load reference data from JSON files
         self.json_data_path = json_data_path or os.path.join(os.path.dirname(__file__), 'mappings')
-        self.guest_types = {}
         self.document_types = {}
         self.municipalities = {}
         self.countries = {}
@@ -76,9 +75,6 @@ class PortaleAlloggiService:
     def _load_reference_data(self):
         """Load reference data from JSON files."""
         try:
-            # Load guest types
-            self._load_json_data('guest_types.json', self.guest_types)
-            
             # Load document types
             self._load_json_data('document_types.json', self.document_types)
             
@@ -88,7 +84,7 @@ class PortaleAlloggiService:
             # Load countries
             self._load_json_data('countries.json', self.countries)
             
-            logger.info(f"Loaded reference data: {len(self.guest_types)} guest types, "
+            logger.info(f"Loaded reference data: "
                        f"{len(self.document_types)} document types, "
                        f"{len(self.municipalities)} municipalities, "
                        f"{len(self.countries)} countries")
@@ -118,14 +114,6 @@ class PortaleAlloggiService:
 
     def _initialize_default_data(self):
         """Initialize with default reference data if JSON files are not available."""
-        self.guest_types = {
-            GUEST_TYPE_SINGLE: "OSPITE SINGOLO",
-            GUEST_TYPE_FAMILY_HEAD: "CAPO FAMIGLIA",
-            GUEST_TYPE_GROUP_LEADER: "CAPO GRUPPO",
-            GUEST_TYPE_FAMILY_MEMBER: "FAMILIARE",
-            GUEST_TYPE_GROUP_MEMBER: "MEMBRO GRUPPO"
-        }
-        
         self.document_types = {
             DEFAULT_DOCUMENT_TYPE: "CARTA DI IDENTITA'",
             "PASOR": "PASSAPORTO ORDINARIO",
@@ -268,10 +256,17 @@ class PortaleAlloggiService:
         
         mappings = {}
         
-        # Create guest types mapping
+        # Create guest types mapping (using constants)
+        guest_types_data = {
+            GUEST_TYPE_SINGLE: "OSPITE SINGOLO",
+            GUEST_TYPE_FAMILY_HEAD: "CAPO FAMIGLIA",
+            GUEST_TYPE_GROUP_LEADER: "CAPO GRUPPO",
+            GUEST_TYPE_FAMILY_MEMBER: "FAMILIARE",
+            GUEST_TYPE_GROUP_MEMBER: "MEMBRO GRUPPO"
+        }
         guest_types_file = os.path.join(output_dir, 'guest_types.json')
         with open(guest_types_file, 'w', encoding='utf-8') as f:
-            json.dump(self.guest_types, f, ensure_ascii=False, indent=2)
+            json.dump(guest_types_data, f, ensure_ascii=False, indent=2)
         mappings['guest_types'] = guest_types_file
         
         # Create document types mapping
