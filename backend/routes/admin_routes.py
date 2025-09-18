@@ -25,6 +25,9 @@ from utils.encryption_utils import encrypt_password, decrypt_password
 # Blueprint setup
 admin_bp = Blueprint("admin", __name__, url_prefix="/api/v1")
 
+# Error messages
+USER_NOT_FOUND = "User not found"
+
 def verify_admin_access():
     """
     Verify JWT authentication and admin role access.
@@ -231,7 +234,7 @@ def get_admin_info():
         user_id = get_jwt_identity()
         user = db_session.query(User).filter_by(id=int(user_id)).first()
         if not user:
-            return jsonify({"error": "User not found"}), 404
+            return jsonify({"error": USER_NOT_FOUND}), 404
 
         structures = (
             db_session.query(AdminStructure.id_structure, Structure.name)
@@ -274,7 +277,7 @@ def get_portale_alloggi_config():
 
         user = db_session.query(User).filter(User.id == user_id).first()
         if not user:
-            return jsonify({"error": "User not found"}), 404
+            return jsonify({"error": USER_NOT_FOUND}), 404
 
         return jsonify({
             "message": "Portale Alloggi configuration retrieved successfully",
@@ -318,7 +321,7 @@ def update_portale_alloggi_config():
 
         user = db_session.query(User).filter(User.id == user_id).first()
         if not user:
-            return jsonify({"error": "User not found"}), 404
+            return jsonify({"error": USER_NOT_FOUND}), 404
 
         # Update Portale Alloggi credentials
         if "portale_username" in data:
@@ -365,7 +368,7 @@ def test_portale_alloggi_connection():
 
         user = db_session.query(User).filter(User.id == user_id).first()
         if not user:
-            return jsonify({"error": "User not found"}), 404
+            return jsonify({"error": USER_NOT_FOUND}), 404
 
         # Check if credentials are configured
         if not user.portale_username or not user.portale_password or not user.portale_wskey:
@@ -466,7 +469,7 @@ def send_reservation_to_portale_alloggi(reservation_id):
         # Get user with Portale Alloggi credentials
         user = db_session.query(User).filter(User.id == user_id).first()
         if not user:
-            return jsonify({"error": "User not found"}), 404
+            return jsonify({"error": USER_NOT_FOUND}), 404
 
         # Check if Portale Alloggi is configured
         if not user.portale_username or not user.portale_password or not user.portale_wskey:
@@ -561,7 +564,7 @@ def send_reservation_to_portale_alloggi_real(reservation_id):
         # Get user with Portale Alloggi credentials
         user = db_session.query(User).filter(User.id == user_id).first()
         if not user:
-            return jsonify({"error": "User not found"}), 404
+            return jsonify({"error": USER_NOT_FOUND}), 404
 
         # Check if Portale Alloggi is configured
         if not user.portale_username or not user.portale_password or not user.portale_wskey:
