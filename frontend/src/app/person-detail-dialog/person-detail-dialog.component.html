@@ -57,12 +57,8 @@
                     <strong>{{ 'street-label' | transloco }}</strong> {{ person.street }}
                 </div>
                 <div class="detail-item">
-                    <i class="pi pi-map"></i>
-                    <strong>{{ 'city-label' | transloco }}</strong> {{ person.city }}
-                </div>
-                <div class="detail-item">
-                    <i class="pi pi-globe"></i>
-                    <strong>{{ 'province-label' | transloco }}</strong> {{ person.province }}
+                    <i class="pi pi-hashtag"></i>
+                    <strong>{{ 'number-city-label' | transloco }}</strong> {{ person.number_city }}
                 </div>
                 <div class="detail-item">
                     <i class="pi pi-envelope"></i>
@@ -82,8 +78,8 @@
                 </div>
                 <div class="detail-item">
                     <i class="pi pi-file"></i>
-                    <strong>{{ 'document-type-label' | transloco }}</strong> {{ person.document_type | documentTypeLabel
-                    | transloco }}
+                    <strong>{{ 'document-type-label' | transloco }}</strong> {{
+                    getDocumentTypeDisplayName(person.document_type) }}
                 </div>
 
                 <!-- Portale Alloggi Fields Section -->
@@ -103,7 +99,8 @@
                 </div>
                 <div class="detail-item">
                     <i class="pi pi-flag"></i>
-                    <strong>{{ 'nationality-label' | transloco }}</strong> {{ person.nazionalita || '-' }}
+                    <strong>{{ 'nationality-label' | transloco }}</strong> {{ getCountryDisplayName(person.nazionalita)
+                    }}
                 </div>
                 <div class="detail-item">
                     <i class="pi pi-envelope"></i>
@@ -111,7 +108,8 @@
                 </div>
                 <div class="detail-item">
                     <i class="pi pi-map-marker"></i>
-                    <strong>{{ 'birth-municipality-label' | transloco }}</strong> {{ person.comune_nascita || '-' }}
+                    <strong>{{ 'birth-municipality-label' | transloco }}</strong> {{
+                    getMunicipalityDisplayName(person.comune_nascita) }}
                 </div>
                 <div class="detail-item">
                     <i class="pi pi-globe"></i>
@@ -119,11 +117,13 @@
                 </div>
                 <div class="detail-item">
                     <i class="pi pi-flag"></i>
-                    <strong>{{ 'birth-country-label' | transloco }}</strong> {{ person.stato_nascita || '-' }}
+                    <strong>{{ 'birth-country-label' | transloco }}</strong> {{
+                    getCountryDisplayName(person.stato_nascita) }}
                 </div>
                 <div class="detail-item">
                     <i class="pi pi-id-card"></i>
-                    <strong>{{ 'citizenship-label' | transloco }}</strong> {{ person.cittadinanza || '-' }}
+                    <strong>{{ 'citizenship-label' | transloco }}</strong> {{ getCountryDisplayName(person.cittadinanza)
+                    }}
                 </div>
                 <div class="detail-item">
                     <i class="pi pi-map-marker"></i>
@@ -145,8 +145,8 @@
                 </div>
                 <div class="detail-item">
                     <i class="pi pi-home"></i>
-                    <strong>{{ 'residence-municipality-label' | transloco }}</strong> {{ person.comune_residenza || '-'
-                    }}
+                    <strong>{{ 'residence-municipality-label' | transloco }}</strong> {{
+                    getMunicipalityDisplayName(person.comune_residenza) }}
                 </div>
                 <div class="detail-item">
                     <i class="pi pi-globe"></i>
@@ -155,7 +155,8 @@
                 </div>
                 <div class="detail-item">
                     <i class="pi pi-flag"></i>
-                    <strong>{{ 'residence-country-label' | transloco }}</strong> {{ person.stato_residenza || '-' }}
+                    <strong>{{ 'residence-country-label' | transloco }}</strong> {{
+                    getCountryDisplayName(person.stato_residenza) }}
                 </div>
             </div>
         </ng-template>
