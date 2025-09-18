@@ -11,10 +11,9 @@ Functions:
 #pylint: disable=C0301,E0401,R0914,W0718,W0612,E0611,R0912,R0915,R1702
 import os
 import traceback
-
+from datetime import datetime
 from flask import Blueprint, request, jsonify
 from werkzeug.exceptions import BadRequest
-from datetime import datetime
 
 from utils.file_utils import allowed_file, sanitize_filename, save_file
 from utils.ocr_utils import validate_document

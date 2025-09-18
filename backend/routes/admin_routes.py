@@ -11,7 +11,7 @@ All routes are registered under the '/api/v1/admin' URL prefix and require appro
 (e.g., admin, superadmin) for access.
 """
 
-from datetime import timedelta,datetime
+from datetime import timedelta,datetime,timezone
 import logging
 from flask import Blueprint, request, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -436,7 +436,7 @@ def _prepare_reservation_data(reservation):
         duration = (reservation.end_date - reservation.start_date).days
         # Ensure minimum of 1 day
         duration = max(1, duration)
-    
+
     return {
         'id': reservation.id,
         'id_reference': reservation.id_reference,
@@ -525,7 +525,7 @@ def send_reservation_to_portale_alloggi(reservation_id):
         if result.get('success', False):
             # DO NOT update submission status for test mode
             # Test submissions should not disable buttons or track as sent
-            
+
             return jsonify({
                 "message": "Guest data successfully tested with Portale Alloggi (TEST MODE)",
                 "result": result,
@@ -619,13 +619,12 @@ def send_reservation_to_portale_alloggi_real(reservation_id):
 
         if result.get('success', False):
             # Update reservation with submission status
-            from datetime import timezone
             reservation.portale_alloggi_sent = True
             reservation.portale_alloggi_sent_at = datetime.now(timezone.utc)
             reservation.portale_alloggi_response = str(result.get('result', ''))
-            
+
             db_session.commit()
-            
+
             return jsonify({
                 "message": "Guest data successfully sent to Portale Alloggi (PRODUCTION)",
                 "result": result,
