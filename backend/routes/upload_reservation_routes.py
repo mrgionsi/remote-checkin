@@ -47,8 +47,8 @@ def upload_file():
     try:
         # Required files and form fields
         required_files = ['frontimage', 'backimage', 'selfie']
-        required_fields = ['reservationId', 'name', 'surname', 'birthday', 'street',
-                           'city', 'province', 'cap', 'telephone', 'document_type', 'document_number', 'cf']
+        required_fields = ['reservationId', 'name', 'surname', 'birthday', 'street', 'number_city',
+                           'cap', 'telephone', 'document_type', 'document_number', 'cf']
 
         # Portale Alloggi required fields
         portale_required_fields = ['sesso', 'nazionalita', 'email', 'comune_nascita',
