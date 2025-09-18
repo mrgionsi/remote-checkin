@@ -340,6 +340,7 @@
         "residence-information": "Informazioni di Residenza",
         "additional-information": "Informazioni Aggiuntive",
         "search-document-types": "Cerca tipi di documento...",
+        "search-municipalities": "Cerca comuni...",
         "search-provinces": "Cerca province...",
         "search-countries": "Cerca paesi...",
         "updated": "Aggiornato",
@@ -353,5 +354,8 @@
         "capo-famiglia": "Capo Famiglia",
         "capo-gruppo": "Capo Gruppo",
         "familiare": "Familiare",
-        "membro-gruppo": "Membro Gruppo"
+        "membro-gruppo": "Membro Gruppo",
+        "front-header": "Immagine Fronte",
+        "back-header": "Immagine Retro",
+        "selfie-header": "Selfie"
 }
