@@ -1,4 +1,4 @@
-#pylint: disable=W0718,R0902,R0914
+#pylint: disable=W0718,R0902,R0914,C0301
 """
 Portale Alloggi Service for Italian accommodation registry integration.
 
@@ -352,13 +352,13 @@ class PortaleAlloggiService:
                 self.token = token_element.text.strip()
                 logger.info("Successfully authenticated with Portale Alloggi")
                 return self.token
-            else:
-                logger.error("Success response but no token found")
-                return None
-        else:
-            # Handle authentication failure
-            self._log_auth_error(result_element)
+            
+            logger.error("Success response but no token found")
             return None
+        
+        # Handle authentication failure
+        self._log_auth_error(result_element)
+        return None
 
 
     def _log_auth_error(self, result_element):
