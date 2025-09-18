@@ -424,11 +424,19 @@ def test_portale_alloggi_connection():
 
 def _prepare_reservation_data(reservation):
     """Helper function to prepare reservation data for Portale Alloggi submission."""
+    # Calculate duration in days
+    duration = 3  # Default fallback
+    if reservation.start_date and reservation.end_date:
+        duration = (reservation.end_date - reservation.start_date).days
+        # Ensure minimum of 1 day
+        duration = max(1, duration)
+    
     return {
         'id': reservation.id,
         'id_reference': reservation.id_reference,
         'start_date': reservation.start_date,
         'end_date': reservation.end_date,
+        'duration': duration,
         'name_reference': reservation.name_reference,
         'email': reservation.email,
         'telephone': reservation.telephone
@@ -505,13 +513,117 @@ def send_reservation_to_portale_alloggi(reservation_id):
         clients_data = [client.to_dict() for client in clients]
         reservation_data = _prepare_reservation_data(reservation)
 
-        # Submit to Portale Alloggi
+        # Test submission to Portale Alloggi (using test endpoint)
+        result = portale_service.test_guest_registration(clients_data, reservation_data)
+
+        if result.get('success', False):
+            # DO NOT update submission status for test mode
+            # Test submissions should not disable buttons or track as sent
+            
+            return jsonify({
+                "message": "Guest data successfully tested with Portale Alloggi (TEST MODE)",
+                "result": result,
+                "submission_tracked": False
+            }), 200
+        return jsonify({
+            "error": "Failed to test data with Portale Alloggi",
+            "details": result.get('error', 'Unknown error'),
+            "result": result
+        }), 400
+
+    except Exception as e:
+        logging.error("Error sending reservation to Portale Alloggi: %s", str(e))
+        return jsonify({"error": "Internal server error"}), 500
+    finally:
+        db_session.close()
+
+
+@admin_bp.route("/admin/reservations/<int:reservation_id>/send-to-portale-alloggi-real", methods=["POST"])
+@jwt_required()
+def send_reservation_to_portale_alloggi_real(reservation_id):
+    """
+    Send guest data from a reservation to Portale Alloggi (REAL PRODUCTION).
+    
+    Args:
+        reservation_id (int): ID of the reservation to send
+        
+    Returns:
+        JSON response with submission results
+    """
+    error_response, error_code = verify_admin_access()
+    if error_response:
+        return error_response, error_code
+
+    try:
+        user_id = get_jwt_identity()
+        db_session = SessionLocal()
+
+        # Get user with Portale Alloggi credentials
+        user = db_session.query(User).filter(User.id == user_id).first()
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+
+        # Check if Portale Alloggi is configured
+        if not user.portale_username or not user.portale_password or not user.portale_wskey:
+            return jsonify({
+                "error": "Portale Alloggi credentials not configured",
+                "details": "Please configure Portale Alloggi credentials in Settings first"
+            }), 400
+
+        # Get reservation with clients
+        reservation = db_session.query(Reservation).filter(Reservation.id == reservation_id).first()
+        if not reservation:
+            return jsonify({"error": "Reservation not found"}), 404
+
+        # Check if reservation is approved
+        if reservation.status != 'Approved':
+            return jsonify({
+                "error": "Reservation not approved",
+                "details": "Only approved reservations can be sent to Portale Alloggi"
+            }), 400
+
+        # Get all clients for this reservation
+        clients = (
+            db_session.query(Client)
+            .join(ClientReservations, Client.id == ClientReservations.id_client)
+            .filter(ClientReservations.id_reservation == reservation_id)
+            .all()
+        )
+
+        if not clients:
+            return jsonify({
+                "error": "No guests found",
+                "details": "No guest data available for this reservation"
+            }), 400
+
+        # Initialize Portale Alloggi service
+        decrypted_password = decrypt_password(user.portale_password)
+        portale_service = PortaleAlloggiService(
+            username=user.portale_username,
+            password=decrypted_password,
+            ws_key=user.portale_wskey
+        )
+
+        # Prepare data for submission
+        clients_data = [client.to_dict() for client in clients]
+        reservation_data = _prepare_reservation_data(reservation)
+
+        # REAL submission to Portale Alloggi (production endpoint)
         result = portale_service.submit_guest_registration(clients_data, reservation_data)
 
         if result.get('success', False):
+            # Update reservation with submission status
+            from datetime import datetime
+            reservation.portale_alloggi_sent = True
+            reservation.portale_alloggi_sent_at = datetime.utcnow()
+            reservation.portale_alloggi_response = str(result.get('result', ''))
+            
+            db_session.commit()
+            
             return jsonify({
-                "message": "Guest data successfully sent to Portale Alloggi",
-                "result": result
+                "message": "Guest data successfully sent to Portale Alloggi (PRODUCTION)",
+                "result": result,
+                "submission_tracked": True
             }), 200
         return jsonify({
             "error": "Failed to send data to Portale Alloggi",
@@ -521,6 +633,44 @@ def send_reservation_to_portale_alloggi(reservation_id):
 
     except Exception as e:
         logging.error("Error sending reservation to Portale Alloggi: %s", str(e))
+        return jsonify({"error": "Internal server error"}), 500
+    finally:
+        db_session.close()
+
+
+@admin_bp.route("/admin/reservations/<int:reservation_id>/portale-alloggi-status", methods=["GET"])
+@jwt_required()
+def get_portale_alloggi_status(reservation_id):
+    """
+    Get Portale Alloggi submission status for a reservation.
+    
+    Args:
+        reservation_id (int): ID of the reservation to check
+        
+    Returns:
+        JSON response with submission status
+    """
+    error_response, error_code = verify_admin_access()
+    if error_response:
+        return error_response, error_code
+
+    try:
+        user_id = get_jwt_identity()
+        db_session = SessionLocal()
+
+        # Get reservation
+        reservation = db_session.query(Reservation).filter(Reservation.id == reservation_id).first()
+        if not reservation:
+            return jsonify({"error": "Reservation not found"}), 404
+
+        return jsonify({
+            "portale_alloggi_sent": reservation.portale_alloggi_sent,
+            "portale_alloggi_sent_at": reservation.portale_alloggi_sent_at.isoformat() if reservation.portale_alloggi_sent_at else None,
+            "portale_alloggi_response": reservation.portale_alloggi_response
+        }), 200
+
+    except Exception as e:
+        logging.error("Error getting Portale Alloggi status: %s", str(e))
         return jsonify({"error": "Internal server error"}), 500
     finally:
         db_session.close()
