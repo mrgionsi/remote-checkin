@@ -6,7 +6,7 @@
                 [preview]="true" styleClass="zoomable-image shadow-2 rounded-image" />
             <div class="button-group">
                 <p-button pButton type="button" icon="pi pi-download" class="p-button-rounded p-button-info"
-                    (click)="forceDownload(person.images?.front)"
+                    (click)="forceDownload(person.images?.front)" (keydown.enter)="forceDownload(person.images?.front)"
                     [pTooltip]="'download-image-tooltip' | transloco"></p-button>
             </div>
         </div>
@@ -16,7 +16,7 @@
                 [preview]="true" styleClass="zoomable-image shadow-2 rounded-image" />
             <div class="button-group">
                 <p-button pButton type="button" icon="pi pi-download" class="p-button-rounded p-button-info"
-                    (click)="forceDownload(person.images?.back)"
+                    (click)="forceDownload(person.images?.back)" (keydown.enter)="forceDownload(person.images?.back)"
                     [pTooltip]="'download-image-tooltip' | transloco"></p-button>
             </div>
         </div>
@@ -27,6 +27,7 @@
             <div class="button-group">
                 <p-button pButton type="button" icon="pi pi-download" class="p-button-rounded p-button-info"
                     (click)="forceDownload(person.images?.selfie)"
+                    (keydown.enter)="forceDownload(person.images?.selfie)"
                     [pTooltip]="'download-image-tooltip' | transloco"></p-button>
             </div>
         </div>
