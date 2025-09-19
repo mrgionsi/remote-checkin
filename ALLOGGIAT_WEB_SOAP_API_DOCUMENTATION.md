@@ -114,17 +114,6 @@ The service uses a token-based authentication system where:
         <string>schedina_line_1</string>
         <string>schedina_line_2</string>
       </ElencoSchedine>
-      <result>
-        <SchedineValide>100</SchedineValide>
-        <Dettaglio>
-          <EsitoOperazioneServizio>
-            <esito>true</esito>
-            <ErroreCod>string</ErroreCod>
-            <ErroreDes>string</ErroreDes>
-            <ErroreDettaglio>string</ErroreDettaglio>
-          </EsitoOperazioneServizio>
-        </Dettaglio>
-      </result>
     </Send>
   </soap:Body>
 </soap:Envelope>
