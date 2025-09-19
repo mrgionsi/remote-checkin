@@ -353,7 +353,7 @@ class User(Base):
             result.update({
                 "portale_username": self.portale_username,
                 "portale_password": "***" if self.portale_password else None,  # Mask password
-                "portale_wskey": self.portale_wskey,
+                "portale_wskey": "***" if self.portale_wskey else None,  # Mask WS key
             })
         
         return result
