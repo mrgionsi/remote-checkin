@@ -152,27 +152,27 @@
                 (keydown.enter)="confirmDeleteReservation()" (keydown.space)="confirmDeleteReservation()">
             </p-button>
 
-            <!-- Development Mode: Show two buttons -->
+            <!-- Development Mode: Show test button -->
             <div *ngIf="isDevelopment && !editMode && reservation_status?.value === 'Approved' && !portaleAlloggiSent"
                 class="flex gap-2">
                 <p-button [label]="'send-to-portale-alloggi-test-btn' | transloco" icon="pi pi-flask"
                     class="p-button-sm text-white" severity="warn" (click)="sendToPortaleAlloggiTest()"
                     (keydown.enter)="sendToPortaleAlloggiTest()" (keydown.space)="sendToPortaleAlloggiTest()">
                 </p-button>
-
-                <!-- Production Mode: Show single button -->
-                <p-button *ngIf="!editMode && reservation_status?.value === 'Approved' && !portaleAlloggiSent"
-                    [label]="'send-to-portale-alloggi-btn' | transloco" icon="pi pi-send" class="p-button-sm text-white"
-                    severity="info" (click)="openPortaleAlloggiModal()" (keydown.enter)="openPortaleAlloggiModal()"
-                    (keydown.space)="openPortaleAlloggiModal()">
-                </p-button>
-
-                <!-- Status button when data has been sent -->
-                <p-button *ngIf="!editMode && reservation_status?.value === 'Approved' && portaleAlloggiSent"
-                    [label]="'data-sent-to-portale-alloggi' | transloco" icon="pi pi-check"
-                    class="p-button-sm text-white" severity="success" [disabled]="true">
-                </p-button>
             </div>
+
+            <!-- Production Mode: Show send button -->
+            <p-button *ngIf="!editMode && reservation_status?.value === 'Approved' && !portaleAlloggiSent"
+                [label]="'send-to-portale-alloggi-btn' | transloco" icon="pi pi-send" class="p-button-sm text-white"
+                severity="info" (click)="openPortaleAlloggiModal()" (keydown.enter)="openPortaleAlloggiModal()"
+                (keydown.space)="openPortaleAlloggiModal()">
+            </p-button>
+
+            <!-- Status button when data has been sent -->
+            <p-button *ngIf="!editMode && reservation_status?.value === 'Approved' && portaleAlloggiSent"
+                [label]="'data-sent-to-portale-alloggi' | transloco" icon="pi pi-check"
+                class="p-button-sm text-white" severity="success" [disabled]="true">
+            </p-button>
 
 
         </div>
