@@ -29,7 +29,6 @@ export class PersonDetailDialogComponent {
   documentTypeMappings: { [key: string]: string } = {};
 
   constructor(public ref: DynamicDialogRef, @Inject(DynamicDialogConfig) public data: any, @Optional() private http: HttpClient) {
-    console.log(data.data.person)
     this.person = data.data.person;
     this.loadReferenceData();
   }
