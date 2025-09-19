@@ -162,5 +162,16 @@
     "rooms-label": "Zimmerverwaltung",
     "settings-label": "Einstellungen",
     "user-info-label": "Benutzerinformationen",
-    "change-password-label": "Passwort ändern"
+    "change-password-label": "Passwort ändern",
+    "personal-information": "Persönliche Informationen",
+    "contact-information": "Kontaktinformationen",
+    "document-information": "Dokumentinformationen",
+    "birth-information": "Geburtsinformationen",
+    "residence-information": "Wohninformationen",
+    "additional-information": "Zusätzliche Informationen",
+    "search-document-types": "Dokumenttypen suchen...",
+    "search-provinces": "Provinzen suchen...",
+    "search-countries": "Länder suchen...",
+    "updated": "Aktualisiert",
+    "reservation-updated-success": "Die Reservierung wurde erfolgreich aktualisiert."
 }
