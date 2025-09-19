@@ -514,23 +514,9 @@ export class RemoteCheckinComponent implements OnInit {
       formData.append('comune_residenza', residenceMunicipalityCode);
     }
 
-    // Map municipality names to the expected backend field names
+    // Add province codes for birth and residence
     const birthProvinceCode = this.clientForm.get('provincia_nascita')?.value;
     const residenceProvinceCode = this.clientForm.get('provincia_residenza')?.value;
-
-    // Use province names as municipality names (simplified approach)
-    if (birthProvinceCode) {
-      const birthProvinceName = this.provinceMappings[birthProvinceCode];
-      if (birthProvinceName) {
-        formData.append('comune_nascita', birthProvinceName);
-      }
-    }
-    if (residenceProvinceCode) {
-      const residenceProvinceName = this.provinceMappings[residenceProvinceCode];
-      if (residenceProvinceName) {
-        formData.append('comune_residenza', residenceProvinceName);
-      }
-    }
 
     // Send province acronyms directly (no conversion needed)
     if (birthProvinceCode) {
