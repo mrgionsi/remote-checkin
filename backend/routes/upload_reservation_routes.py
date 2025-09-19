@@ -152,7 +152,7 @@ def upload_file():
                     'has_back_image': 'backimage' in files,
                     'has_selfie': 'selfie' in files,
                     # Portale Alloggi fields for admin notification
-                    'client_gender': 'Male' if client.sesso == 1 else 'Female' if client.sesso == 2 else 'N/A',
+                    'client_gender': 'Male' if client.sesso == '1' else 'Female' if client.sesso == '2' else 'N/A',
                     'client_nationality': client.nazionalita or 'N/A',
                     'client_birth_municipality': client.comune_nascita or 'N/A',
                     'client_birth_province': client.provincia_nascita or 'N/A',
