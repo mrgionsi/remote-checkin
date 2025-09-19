@@ -109,22 +109,6 @@ def home():
     """
     return "Hello, Flask!"
 
-@app.before_request
-def handle_preflight():
-    """
-    Return an empty permissive CORS preflight response when the incoming request is an OPTIONS preflight.
-    
-    This function is intended to be used as a Flask `before_request` handler. If the request method is OPTIONS it returns an empty response with
-    Access-Control-Allow-Origin, Access-Control-Allow-Headers, and Access-Control-Allow-Methods set to "*" to satisfy CORS preflight checks. 
-    For non-OPTIONS requests it does nothing (continues normal request handling).
-    """
-    if request.method == "OPTIONS":
-        response = make_response()
-        response.headers.add("Access-Control-Allow-Origin", "*")
-        response.headers.add('Access-Control-Allow-Headers', "*")
-        response.headers.add('Access-Control-Allow-Methods', "*")
-        return response
-    return None
 
 @app.route("/test-email-config")
 def test_email_config():
