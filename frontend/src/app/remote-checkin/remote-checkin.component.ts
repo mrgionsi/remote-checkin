@@ -442,9 +442,17 @@ export class RemoteCheckinComponent implements OnInit {
 
   uploadReservationData() {
     console.log("uploadReservationData called");  // For debugging
+    
+    // Prevent duplicate submissions immediately
+    if (this.isSubmitting) {
+      console.log("Submission already in progress");
+      return;
+    }
+    this.isSubmitting = true;
 
     // Check if registration is still available
     if (!this.canRegister) {
+      this.isSubmitting = false;
       this.messageService.add({
         severity: 'warn',
         summary: this.translocoService.translate('registration-full'),
@@ -452,9 +460,6 @@ export class RemoteCheckinComponent implements OnInit {
       });
       return;
     }
-
-    // Set loading state
-    this.isSubmitting = true;
 
     if (this.uploadForm.invalid || this.clientForm.invalid) {
       // Check for specific validation errors
