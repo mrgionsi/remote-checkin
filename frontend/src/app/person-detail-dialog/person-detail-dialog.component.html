@@ -128,7 +128,7 @@
                 </div>
                 <div class="detail-item">
                     <i class="pi pi-map-marker"></i>
-                    <strong>{{ 'document-issue-place-label' | transloco }}</strong> {{ person.luogo_emissione || '-' }}
+                    <strong>{{ 'document-issue-place-label' | transloco }}</strong> {{ getMunicipalityDisplayName(person.luogo_emissione) }}
                 </div>
                 <div class="detail-item">
                     <i class="pi pi-calendar"></i>
