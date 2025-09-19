@@ -541,6 +541,7 @@ class PortaleAlloggiService:
 
             # Create SOAP envelope for Test with proper namespaces
             schedine_xml = '\n'.join([f'<string>{line}</string>' for line in schedine_lines])
+            logger.debug("Schedine XML: %s", schedine_xml)
             soap_envelope = f"""<?xml version="1.0" encoding="utf-8"?>
 <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                xmlns:xsd="http://www.w3.org/2001/XMLSchema"

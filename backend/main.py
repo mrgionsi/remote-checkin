@@ -7,6 +7,7 @@ and registers blueprints for routing.
 # pylint: disable=C0303,E0401,W0718,C0301
 import os
 import re
+import logging
 
 from flask import Flask, make_response, request
 from flask_cors import CORS
@@ -22,6 +23,25 @@ from routes.upload_reservation_routes import upload_bp
 from routes.client_reservation_routes import client_reservation_bp
 
 app = Flask(__name__)
+
+# Configure logging for development
+if os.getenv('FLASK_ENV') == 'development' or os.getenv('DEBUG') == 'True':
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.StreamHandler(),  # Console output
+        ]
+    )
+    # Enable debug logging for our specific service
+    logging.getLogger('backend.services.portale_alloggi_service').setLevel(logging.DEBUG)
+    logging.getLogger('backend.routes').setLevel(logging.DEBUG)
+else:
+    # Production logging - only WARNING and above
+    logging.basicConfig(
+        level=logging.WARNING,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
 
 # Load configuration
 app.config.from_object(Config())
