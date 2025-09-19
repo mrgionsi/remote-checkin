@@ -281,9 +281,13 @@ export class SettingsComponent implements OnInit {
       // Only include password if it's not empty (to avoid overwriting existing password)
       const config: PortaleAlloggiConfig = {
         portale_username: formValue.portale_username,
-        portale_wskey: formValue.portale_wskey,
-        portale_password: formValue.portale_password || '' // Include empty string if no password provided
+        portale_wskey: formValue.portale_wskey
       };
+
+      // Only include password if it has a non-empty value
+      if (formValue.portale_password && formValue.portale_password.trim() !== '') {
+        config.portale_password = formValue.portale_password;
+      }
 
       this.portaleAlloggiService.saveConfig(config).subscribe({
         next: (response) => {

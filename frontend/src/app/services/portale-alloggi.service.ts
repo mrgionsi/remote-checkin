@@ -6,7 +6,7 @@ import { AuthService } from './auth.service';
 
 export interface PortaleAlloggiConfig {
     portale_username: string;
-    portale_password: string;
+    portale_password?: string;
     portale_wskey: string;
 }
 
