@@ -50,6 +50,11 @@
                     class="p-error mt-2">
                     {{ 'end-date-required' | transloco }}
                 </p>
+                <div *ngIf="reservationForm.errors?.['dateRangeInvalid']">
+                    <p style="color: red;">
+                        {{ 'date-range-invalid' | transloco }}
+                    </p>
+                </div>
             </div>
         </div>
 
@@ -124,11 +129,7 @@
                     {{ 'room-name-required' | transloco }}
                 </p>
                 <!-- Error Message -->
-                <div *ngIf="reservationForm.errors?.['dateRangeInvalid']">
-                    <p style="color: red;">
-                        {{ 'date-range-invalid' | transloco }}
-                    </p>
-                </div>
+
             </div>
         </div>
         <!-- Number of People Field -->
