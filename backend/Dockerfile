@@ -1,5 +1,5 @@
 # Use an official lightweight Python image
-FROM python:3.13-slim
+FROM python:3.11-slim
 
 LABEL org.opencontainers.image.source="https://github.com/mrgionsi/remote-checkin"
 
@@ -11,12 +11,15 @@ COPY requirements.txt .
 
 # Install system dependencies (only if needed)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgl1 libglib2.0-0 tesseract-ocr && \
-    rm -rf /var/lib/apt/lists/*
+    libgl1 libglib2.0-0 tesseract-ocr \
+    build-essential \
+    gcc \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
 
-
-# Install Python dependencies
-RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
+# Install Python dependencies with build optimizations
+RUN pip install --upgrade pip setuptools wheel && \
+    pip install --no-cache-dir -r requirements.txt
 
 # Create a non-root user
 RUN groupadd -r appuser && useradd -r -g appuser appuser
