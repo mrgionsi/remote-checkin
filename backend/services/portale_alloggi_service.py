@@ -10,8 +10,9 @@ import os
 import json
 import xml.etree.ElementTree as ET
 import logging
+import time
 from datetime import datetime
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Callable
 import requests
 
 logger = logging.getLogger(__name__)
@@ -41,6 +42,36 @@ ERROR_DETAIL_XPATH = ".//{AlloggiatiService}ErroreDettaglio"
 DEFAULT_DATE = "01/01/1990"
 DATE_FORMAT_ISO = "%Y-%m-%d"
 DATE_FORMAT_ITALIAN = "%d/%m/%Y"
+
+
+def retry_with_backoff(func: Callable, max_retries: int = 3, backoff_factor: float = 2.0):
+    """
+    Execute function with retry logic and exponential backoff.
+    
+    Args:
+        func: Function to execute
+        max_retries: Maximum number of retry attempts (default: 3)
+        backoff_factor: Multiplier for exponential backoff (default: 2.0)
+        
+    Returns:
+        Function result if successful
+        
+    Raises:
+        Last exception if all retries fail
+    """
+    last_exception = None
+    for attempt in range(max_retries):
+        try:
+            return func()
+        except (requests.exceptions.RequestException, requests.exceptions.Timeout) as e:
+            last_exception = e
+            if attempt < max_retries - 1:
+                wait_time = backoff_factor ** attempt
+                logger.warning(f"Request failed (attempt {attempt + 1}/{max_retries}), retrying in {wait_time}s: {e}")
+                time.sleep(wait_time)
+            else:
+                logger.error(f"Request failed after {max_retries} attempts: {e}")
+    raise last_exception
 
 
 class PortaleAlloggiService:
@@ -359,10 +390,13 @@ class PortaleAlloggiService:
         try:
             soap_envelope = self._create_auth_soap_envelope()
             headers = self._create_auth_headers()
-
-            response = requests.post(self.wsdl_url, data=soap_envelope, headers=headers, timeout=30)
+            
+            def make_request():
+                return requests.post(self.wsdl_url, data=soap_envelope, headers=headers, timeout=30)
+            
+            response = retry_with_backoff(make_request)
             response.raise_for_status()
-
+            
             return self._parse_auth_response(response.text)
 
         except requests.exceptions.RequestException as e:
@@ -564,7 +598,10 @@ class PortaleAlloggiService:
                 'SOAPAction': 'AlloggiatiService/Test'
             }
 
-            response = requests.post(self.wsdl_url, data=soap_envelope, headers=headers, timeout=30)
+            def make_request():
+                return requests.post(self.wsdl_url, data=soap_envelope, headers=headers, timeout=30)
+            
+            response = retry_with_backoff(make_request)
             response.raise_for_status()
 
             # Parse response
@@ -621,7 +658,10 @@ class PortaleAlloggiService:
                 'SOAPAction': 'AlloggiatiService/Send'
             }
 
-            response = requests.post(self.wsdl_url, data=soap_envelope, headers=headers, timeout=30)
+            def make_request():
+                return requests.post(self.wsdl_url, data=soap_envelope, headers=headers, timeout=30)
+            
+            response = retry_with_backoff(make_request)
             response.raise_for_status()
 
             # Parse response
