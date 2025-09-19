@@ -16,33 +16,33 @@ def get_encryption_key():
     """
     Return a Fernet-compatible encryption key from app config or environment, creating and caching one if needed.
     
-    Checks current_app.config['EMAIL_ENCRYPTION_KEY'] first. If missing, attempts to read the string value from the EMAIL_ENCRYPTION_KEY environment variable (interpreted as a base64-encoded key and encoded to bytes). If neither is present, generates a new key with Fernet.generate_key() and stores it in current_app.config['EMAIL_ENCRYPTION_KEY'].
+    Checks current_app.config['ENCRYPTION_KEY'] first. If missing, attempts to read the string value from the ENCRYPTION_KEY environment variable (interpreted as a base64-encoded key and encoded to bytes). If neither is present, generates a new key with Fernet.generate_key() and stores it in current_app.config['ENCRYPTION_KEY'].
     
     Returns:
         bytes: A base64-url-safe 32-byte key suitable for cryptography.fernet.Fernet.
     
     Notes:
         - The key is cached in the Flask app config for the process lifetime.
-        - Generating a new key will make previously encrypted passwords unreadable unless the original key is preserved and reused (e.g., via the EMAIL_ENCRYPTION_KEY environment variable).
+        - Generating a new key will make previously encrypted passwords unreadable unless the original key is preserved and reused (e.g., via the ENCRYPTION_KEY environment variable).
+        - This key is used for encrypting sensitive data like email passwords and Portale Alloggi credentials.
     """
     # First try to get from Flask app config (in-memory)
-    key = current_app.config.get('EMAIL_ENCRYPTION_KEY')
+    key = current_app.config.get('ENCRYPTION_KEY')
 
     if not key:
-        # Try to get from environment variable
-        key_string = os.getenv('EMAIL_ENCRYPTION_KEY')
-        print(key_string)
+        # Try to get from environment variable (support both old and new names for backward compatibility)
+        key_string = os.getenv('ENCRYPTION_KEY') or os.getenv('EMAIL_ENCRYPTION_KEY')
         if key_string:
             # Use the key string directly (Fernet expects base64-encoded string)
             key = key_string.encode('utf-8')
-            current_app.config['EMAIL_ENCRYPTION_KEY'] = key
-            logger.info("Using EMAIL_ENCRYPTION_KEY from environment variable")
+            current_app.config['ENCRYPTION_KEY'] = key
+            logger.info("Using ENCRYPTION_KEY from environment variable")
         else:
             # Generate a new key if none exists
             key = Fernet.generate_key()
-            current_app.config['EMAIL_ENCRYPTION_KEY'] = key
-            logger.warning("Generated new EMAIL_ENCRYPTION_KEY - existing encrypted passwords may not be readable")
-            logger.warning("Set EMAIL_ENCRYPTION_KEY environment variable to maintain consistency across restarts")
+            current_app.config['ENCRYPTION_KEY'] = key
+            logger.warning("Generated new ENCRYPTION_KEY - existing encrypted passwords may not be readable")
+            logger.warning("Set ENCRYPTION_KEY environment variable to maintain consistency across restarts")
 
     return key
 
