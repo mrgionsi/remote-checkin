@@ -39,6 +39,8 @@ ERROR_DETAIL_XPATH = ".//{AlloggiatiService}ErroreDettaglio"
 
 # Date constants
 DEFAULT_DATE = "01/01/1990"
+DATE_FORMAT_ISO = "%Y-%m-%d"
+DATE_FORMAT_ITALIAN = "%d/%m/%Y"
 
 
 class PortaleAlloggiService:
@@ -125,6 +127,63 @@ class PortaleAlloggiService:
         self.countries = {
             DEFAULT_COUNTRY_CODE: "ITALIA"
         }
+
+    def _calculate_duration(self, reservation_data: Dict[str, Any]) -> int:
+        """
+        Calculate duration in days from start_date and end_date.
+        
+        Args:
+            reservation_data (Dict[str, Any]): Reservation data containing dates
+            
+        Returns:
+            int: Duration in days
+        """
+        try:
+            start_date = reservation_data.get('start_date')
+            end_date = reservation_data.get('end_date')
+            
+            # If both dates are provided, calculate the difference
+            if start_date and end_date:
+                start_dt = self._parse_date(start_date)
+                end_dt = self._parse_date(end_date)
+                
+                if start_dt and end_dt:
+                    duration = (end_dt - start_dt).days
+                    return max(1, duration)  # Ensure at least 1 day
+            
+            # Fallback to provided duration or default
+            return reservation_data.get('duration', 1)
+            
+        except (ValueError, TypeError) as e:
+            logger.warning("Error calculating duration from dates: %s. Using fallback duration.", str(e))
+            return reservation_data.get('duration', 1)
+
+    def _parse_date(self, date_input) -> Optional[datetime]:
+        """
+        Parse date input into datetime object.
+        
+        Args:
+            date_input: Date input (string or datetime object)
+            
+        Returns:
+            Optional[datetime]: Parsed datetime object or None if parsing fails
+        """
+        if not date_input:
+            return None
+            
+        if isinstance(date_input, str):
+            if '-' in date_input:
+                return datetime.strptime(date_input, DATE_FORMAT_ISO)
+            elif '/' in date_input:
+                return datetime.strptime(date_input, DATE_FORMAT_ITALIAN)
+            return None
+        elif hasattr(date_input, 'date'):
+            # Handle date objects
+            return datetime.combine(date_input, datetime.min.time())
+        elif isinstance(date_input, datetime):
+            return date_input
+            
+        return None
 
     def determine_guest_type(self, clients_data: List[Dict[str, Any]], client_index: int = 0) -> str:
         """
@@ -395,15 +454,15 @@ class PortaleAlloggiService:
                 if isinstance(date_input, str):
                     if '-' in date_input:
                         try:
-                            dt = datetime.strptime(date_input, '%Y-%m-%d')
-                            return dt.strftime('%d/%m/%Y')
+                            dt = datetime.strptime(date_input, DATE_FORMAT_ISO)
+                            return dt.strftime(DATE_FORMAT_ITALIAN)
                         except ValueError:
                             return DEFAULT_DATE
                     elif '/' in date_input:
                         return date_input
                 elif hasattr(date_input, 'strftime'):
                     # Handle Python date/datetime objects
-                    return date_input.strftime('%d/%m/%Y')
+                    return date_input.strftime(DATE_FORMAT_ITALIAN)
                 return DEFAULT_DATE
 
             # Determine guest type automatically if not provided
@@ -436,18 +495,18 @@ class PortaleAlloggiService:
             schedina += pad_string(guest_type, 2)  # 0-1: Tipo Alloggiato
             start_date = reservation_data.get('start_date', '15/09/2025')
             start_date_formatted = format_date(start_date)
-            print(f"Start date: {start_date} (type: {type(start_date)}) -> Formatted: {start_date_formatted}")
             schedina += start_date_formatted  # 2-11: Data Arrivo
-            duration = reservation_data.get('duration', 3)
+            
+            # Calculate duration from start_date and end_date
+            duration = self._calculate_duration(reservation_data)
             duration_formatted = str(duration).zfill(2)
-            print(f"Duration: {duration} days -> Formatted: {duration_formatted}")
+            logger.debug("Calculated duration: %s days (formatted: %s)", duration, duration_formatted)
             schedina += duration_formatted  # 12-13: Giorni Permanenza (zero-padded to 2 digits)
             schedina += pad_string(client_data.get('surname', ''), 50)  # 14-63: Cognome
             schedina += pad_string(client_data.get('name', ''), 30)  # 64-93: Nome
             schedina += str(client_data.get('sesso', 1))  # 94: Sesso (1=M, 2=F)
             birthday = client_data.get('birthday', DEFAULT_DATE)
             birthday_formatted = format_date(birthday)
-            print(f"Birthday: {birthday} (type: {type(birthday)}) -> Formatted: {birthday_formatted}")
             schedina += birthday_formatted  # 95-104: Data Nascita
             schedina += pad_string(comune_nascita, 9)  # 105-113: Comune Nascita
             schedina += pad_string(client_data.get('provincia_nascita', ''), 2)  # 114-115: Provincia Nascita (acronym)
@@ -482,7 +541,6 @@ class PortaleAlloggiService:
 
             # Create SOAP envelope for Test with proper namespaces
             schedine_xml = '\n'.join([f'<string>{line}</string>' for line in schedine_lines])
-            print(f"Schedine XML:\n{schedine_xml}")
             soap_envelope = f"""<?xml version="1.0" encoding="utf-8"?>
 <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                xmlns:xsd="http://www.w3.org/2001/XMLSchema"
@@ -502,10 +560,6 @@ class PortaleAlloggiService:
                 'Content-Type': 'text/xml; charset=utf-8',
                 'SOAPAction': 'AlloggiatiService/Test'
             }
-
-            print(f"SOAP Request:\n{soap_envelope}")
-            print(f"Headers: {headers}")
-            print(f"URL: {self.wsdl_url}")
 
             response = requests.post(self.wsdl_url, data=soap_envelope, headers=headers, timeout=30)
             response.raise_for_status()
@@ -563,10 +617,6 @@ class PortaleAlloggiService:
                 'Content-Type': 'text/xml; charset=utf-8',
                 'SOAPAction': 'AlloggiatiService/Send'
             }
-
-            print(f"Production SOAP Request:\n{soap_envelope}")
-            print(f"Production Headers: {headers}")
-            print(f"Production URL: {self.wsdl_url}")
 
             response = requests.post(self.wsdl_url, data=soap_envelope, headers=headers, timeout=30)
             response.raise_for_status()
