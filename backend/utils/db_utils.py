@@ -22,7 +22,7 @@ Note:
     - Make sure the `Client`, `Reservation`, and `ClientReservations` models are properly defined in the application.
 """
 
-from datetime import datetime
+from datetime import datetime, date
 from models import Client, ClientReservations, Reservation
 from database import get_db
 
@@ -57,7 +57,7 @@ def _parse_date_field(value):
     if not value:
         return None
     try:
-        return datetime.strptime(value, "%Y-%m-%d")
+        return datetime.strptime(value, "%Y-%m-%d").date()
     except ValueError:
         raise ValueError(f"Invalid date format: {value}") from None
 
