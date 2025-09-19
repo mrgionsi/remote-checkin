@@ -8,12 +8,13 @@ for submitting guest data to the Italian national accommodation registry.
 
 import os
 import json
-import defusedxml.ElementTree as ET
 import logging
 import time
 from datetime import datetime
 from typing import Dict, List, Optional, Any, Callable
 from xml.sax.saxutils import escape
+
+import defusedxml.ElementTree as ET
 import requests
 
 logger = logging.getLogger(__name__)
@@ -68,10 +69,10 @@ def retry_with_backoff(func: Callable, max_retries: int = 3, backoff_factor: flo
             last_exception = e
             if attempt < max_retries - 1:
                 wait_time = backoff_factor ** attempt
-                logger.warning(f"Request failed (attempt {attempt + 1}/{max_retries}), retrying in {wait_time}s: {e}")
+                logger.warning("Request failed (attempt %d/%d), retrying in %ds: %s", attempt + 1, max_retries, wait_time, e)
                 time.sleep(wait_time)
             else:
-                logger.error(f"Request failed after {max_retries} attempts: {e}")
+                logger.error("Request failed after %d attempts: %s", max_retries, e)
     raise last_exception
 
 

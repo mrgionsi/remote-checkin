@@ -38,10 +38,9 @@ def get_encryption_key():
         # Check environment to determine if we should generate a key
         env = current_app.config.get('ENV') or os.getenv('FLASK_ENV', 'production')
         is_development = env.lower() in ['development', 'testing']
-        
+
         # Try to get from environment variable (support both old and new names for backward compatibility)
         key_string = os.getenv('ENCRYPTION_KEY') or os.getenv('EMAIL_ENCRYPTION_KEY')
-        
         if key_string:
             # Use the key string directly (Fernet expects base64-encoded string)
             key = key_string.encode('utf-8')

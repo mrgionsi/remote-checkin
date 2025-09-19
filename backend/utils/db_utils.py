@@ -22,7 +22,7 @@ Note:
     - Make sure the `Client`, `Reservation`, and `ClientReservations` models are properly defined in the application.
 """
 
-from datetime import datetime, date
+from datetime import datetime
 from models import Client, ClientReservations, Reservation
 from database import get_db
 
