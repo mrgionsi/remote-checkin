@@ -234,7 +234,7 @@ def get_admin_info():
 
     db_session = SessionLocal()
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = db_session.query(User).filter_by(id=int(user_id)).first()
         if not user:
             return jsonify({"error": USER_NOT_FOUND}), 404
@@ -275,7 +275,7 @@ def get_portale_alloggi_config():
         return error_response, error_code
 
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         db_session = SessionLocal()
 
         user = db_session.query(User).filter(User.id == user_id).first()
@@ -319,7 +319,7 @@ def update_portale_alloggi_config():
         if not data:
             return jsonify({"error": "No data provided"}), 400
 
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         db_session = SessionLocal()
 
         user = db_session.query(User).filter(User.id == user_id).first()
@@ -366,7 +366,7 @@ def test_portale_alloggi_connection():
         return error_response, error_code
 
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         db_session = SessionLocal()
 
         user = db_session.query(User).filter(User.id == user_id).first()
@@ -466,7 +466,7 @@ def send_reservation_to_portale_alloggi(reservation_id):
         return error_response, error_code
 
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         db_session = SessionLocal()
 
         # Get user with Portale Alloggi credentials
@@ -561,7 +561,7 @@ def send_reservation_to_portale_alloggi_real(reservation_id):
         return error_response, error_code
 
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         db_session = SessionLocal()
 
         # Get user with Portale Alloggi credentials
