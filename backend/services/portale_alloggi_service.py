@@ -8,7 +8,7 @@ for submitting guest data to the Italian national accommodation registry.
 
 import os
 import json
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET
 import logging
 import time
 from datetime import datetime
