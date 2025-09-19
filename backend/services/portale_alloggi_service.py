@@ -13,6 +13,7 @@ import logging
 import time
 from datetime import datetime
 from typing import Dict, List, Optional, Any, Callable
+from xml.sax.saxutils import escape
 import requests
 
 logger = logging.getLogger(__name__)
@@ -415,9 +416,9 @@ class PortaleAlloggiService:
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
   <soap:Body>
     <GenerateToken xmlns="AlloggiatiService">
-      <Utente>{self.username}</Utente>
-      <Password>{self.password}</Password>
-      <WsKey>{self.ws_key}</WsKey>
+      <Utente>{escape(self.username)}</Utente>
+      <Password>{escape(self.password)}</Password>
+      <WsKey>{escape(self.ws_key)}</WsKey>
     </GenerateToken>
   </soap:Body>
 </soap:Envelope>"""
