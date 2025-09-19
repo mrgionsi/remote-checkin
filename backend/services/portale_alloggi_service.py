@@ -1,4 +1,4 @@
-#pylint: disable=W0718,R0902,R0914,C0301,C0303
+#pylint: disable=W0718,R0902,R0914,C0301,C0303,R0911
 """
 Portale Alloggi Service for Italian accommodation registry integration.
 
@@ -174,13 +174,15 @@ class PortaleAlloggiService:
         if isinstance(date_input, str):
             if '-' in date_input:
                 return datetime.strptime(date_input, DATE_FORMAT_ISO)
-            elif '/' in date_input:
+            if '/' in date_input:
                 return datetime.strptime(date_input, DATE_FORMAT_ITALIAN)
             return None
-        elif hasattr(date_input, 'date'):
+        
+        if hasattr(date_input, 'date'):
             # Handle date objects
             return datetime.combine(date_input, datetime.min.time())
-        elif isinstance(date_input, datetime):
+        
+        if isinstance(date_input, datetime):
             return date_input
             
         return None
