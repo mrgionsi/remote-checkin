@@ -1,4 +1,4 @@
-#pylint: disable=E0611,E0401,W0719,C0301
+#pylint: disable=E0611,E0401,W0719,C0301,C0303
 """
 db_utils.py
 
@@ -52,6 +52,50 @@ def get_client_by_cf(cf):
     with get_db() as db:
         return db.query(Client).filter(Client.cf == cf).first()
 
+def _parse_date_field(value):
+    """Parse a date field value."""
+    if not value:
+        return None
+    try:
+        return datetime.strptime(value, "%Y-%m-%d").date()
+    except ValueError:
+        raise ValueError(f"Invalid date format: {value}") from None
+
+
+def _update_existing_client(db, client, form_data):
+    """Update an existing client with form data."""
+    client = db.merge(client)
+    print("Updating client:", client.id)
+    
+    for key, value in form_data.items():
+        if not hasattr(client, key) or key == 'reservationId':
+            continue
+            
+        if key in ['birthday', 'data_emissione', 'data_scadenza']:
+            value = _parse_date_field(value)
+        
+        setattr(client, key, value)
+    
+    db.commit()
+    db.refresh(client)
+    return client
+
+
+def _create_new_client(db, form_data):
+    """Create a new client from form data."""
+    date_fields = ['birthday', 'data_emissione', 'data_scadenza']
+    for date_field in date_fields:
+        if date_field in form_data and form_data[date_field]:
+            form_data[date_field] = _parse_date_field(form_data[date_field])
+    
+    form_data.pop('reservationId', None)
+    print(form_data)
+    client = Client(**form_data)
+    db.add(client)
+    db.commit()
+    return client
+
+
 def add_or_update_client(form_data, client=None):
     """
     Adds a new client to the database or updates an existing client based on the provided form data.
@@ -69,41 +113,14 @@ def add_or_update_client(form_data, client=None):
     try:
         with get_db() as db:
             if client:
-                # Ensure the client is part of the session
-                client = db.merge(client)  # This will either return the existing object or attach it to the session
-
-                print("Updating client:", client.id)
-
-                # Update existing client
-                for key, value in form_data.items():
-                    if hasattr(client, key) and key != 'reservationId':
-                        if key == 'birthday':
-                            try:
-                                value = datetime.strptime(value, "%Y-%m-%d")
-                            except ValueError:
-                                raise ValueError(f"Invalid date format for birthday: {value}") from None
-                        setattr(client, key, value)
-                db.commit()  # Commit the updates
-                db.refresh(client)  # Refresh to get the latest values
-
+                client = _update_existing_client(db, client, form_data)
             else:
-                # Create new client
-                try:
-                    form_data['birthday'] = datetime.strptime(form_data['birthday'], "%Y-%m-%d")
-                except ValueError as e:
-                    raise ValueError(f"Invalid date format for birthday: {form_data.get('birthday')}") from e
-                form_data.pop('reservationId', None)  # Remove if present
-                print(form_data)
-                client = Client(**form_data)
-                db.add(client)  # Add new client to the session
-                db.commit()  # Commit to save the new client
-
-            # Ensure the object is properly persisted
+                client = _create_new_client(db, form_data)
+            
             db.refresh(client)
             return client
 
     except Exception as e:
-        # Rollback in case of error
         db.rollback()
         print(f"Error during client add or update: {str(e)}")
         raise Exception(f"Error during client add or update: {str(e)}") from e

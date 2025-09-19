@@ -11,17 +11,25 @@ All routes are registered under the '/api/v1/admin' URL prefix and require appro
 (e.g., admin, superadmin) for access.
 """
 
-from datetime import timedelta
+from datetime import timedelta,datetime,timezone
 import logging
 from flask import Blueprint, request, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request, get_jwt
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
-from models import User, AdminStructure, Structure
+from models import User, AdminStructure, Structure,Reservation, Client, ClientReservations
+from services.portale_alloggi_service import PortaleAlloggiService
+from utils.encryption_utils import encrypt_password, decrypt_password
 from database import SessionLocal
 
 # Blueprint setup
 admin_bp = Blueprint("admin", __name__, url_prefix="/api/v1")
+
+# Error messages
+USER_NOT_FOUND = "User not found"
+INTERNAL_SERVER_ERROR = "Internal server error"
+PORTALE_CREDENTIALS_NOT_CONFIGURED = "Portale Alloggi credentials not configured"
+RESERVATION_NOT_FOUND = "Reservation not found"
 
 def verify_admin_access():
     """
@@ -226,10 +234,10 @@ def get_admin_info():
 
     db_session = SessionLocal()
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = db_session.query(User).filter_by(id=int(user_id)).first()
         if not user:
-            return jsonify({"error": "User not found"}), 404
+            return jsonify({"error": USER_NOT_FOUND}), 404
 
         structures = (
             db_session.query(AdminStructure.id_structure, Structure.name)
@@ -249,5 +257,424 @@ def get_admin_info():
             "role": user.role.name,
             "structures": structures_list
         }), 200
+    finally:
+        db_session.close()
+
+
+@admin_bp.route("/admin/portale-alloggi", methods=["GET"])
+@jwt_required()
+def get_portale_alloggi_config():
+    """
+    Get Portale Alloggi configuration for the current user.
+    
+    Returns:
+        JSON response with Portale Alloggi credentials (password masked)
+    """
+    error_response, error_code = verify_admin_access()
+    if error_response:
+        return error_response, error_code
+
+    try:
+        user_id = int(get_jwt_identity())
+        db_session = SessionLocal()
+
+        user = db_session.query(User).filter(User.id == user_id).first()
+        if not user:
+            return jsonify({"error": USER_NOT_FOUND}), 404
+
+        return jsonify({
+            "message": "Portale Alloggi configuration retrieved successfully",
+            "config": user.to_dict(include_portale_credentials=True)
+        }), 200
+
+    except Exception as e:
+        logging.error("Error retrieving Portale Alloggi config: %s", str(e))
+        return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
+    finally:
+        db_session.close()
+
+
+@admin_bp.route("/admin/portale-alloggi", methods=["POST"])
+@jwt_required()
+def update_portale_alloggi_config():
+    """
+    Update Portale Alloggi configuration for the current user.
+    
+    Expected JSON payload:
+    {
+        "portale_username": "string",
+        "portale_password": "string",  # Will be encrypted
+        "portale_wskey": "string"
+    }
+    
+    Returns:
+        JSON response with success message
+    """
+    error_response, error_code = verify_admin_access()
+    if error_response:
+        return error_response, error_code
+
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+
+        user_id = int(get_jwt_identity())
+        db_session = SessionLocal()
+
+        user = db_session.query(User).filter(User.id == user_id).first()
+        if not user:
+            return jsonify({"error": USER_NOT_FOUND}), 404
+
+        # Update Portale Alloggi credentials
+        if "portale_username" in data:
+            user.portale_username = data["portale_username"]
+
+        if "portale_password" in data and data["portale_password"]:
+            # Encrypt the password before storing
+            user.portale_password = encrypt_password(data["portale_password"])
+
+        if "portale_wskey" in data:
+            user.portale_wskey = data["portale_wskey"]
+
+        db_session.commit()
+
+        return jsonify({
+            "message": "Portale Alloggi configuration updated successfully",
+            "config": user.to_dict(include_portale_credentials=True)
+        }), 200
+
+    except Exception as e:
+        logging.error("Error updating Portale Alloggi config: %s", str(e))
+        db_session.rollback()
+        return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
+    finally:
+        db_session.close()
+
+
+@admin_bp.route("/admin/portale-alloggi/test", methods=["POST"])
+@jwt_required()
+def test_portale_alloggi_connection():
+    """
+    Test Portale Alloggi connection with current credentials.
+    
+    Returns:
+        JSON response with test results
+    """
+    error_response, error_code = verify_admin_access()
+    if error_response:
+        return error_response, error_code
+
+    try:
+        user_id = int(get_jwt_identity())
+        db_session = SessionLocal()
+
+        user = db_session.query(User).filter(User.id == user_id).first()
+        if not user:
+            return jsonify({"error": USER_NOT_FOUND}), 404
+
+        # Check if credentials are configured
+        if not user.portale_username or not user.portale_password or not user.portale_wskey:
+            return jsonify({
+                "error": PORTALE_CREDENTIALS_NOT_CONFIGURED,
+                "details": "Please configure username, password, and wskey first"
+            }), 400
+
+        # Decrypt password for testing
+        decrypted_password = decrypt_password(user.portale_password)
+
+        # Import and test Portale Alloggi service
+        try:
+
+            # Initialize service with credentials
+            portale_service = PortaleAlloggiService(
+                username=user.portale_username,
+                password=decrypted_password,
+                ws_key=user.portale_wskey
+            )
+
+            # Test authentication
+            token = portale_service.authenticate()
+
+            if token:
+                return jsonify({
+                    "message": "Portale Alloggi connection successful",
+                    "status": "success",
+                    "token_received": True
+                }), 200
+            return jsonify({
+                "error": "Portale Alloggi authentication failed",
+                "status": "error",
+                "details": "Unable to obtain authentication token"
+            }), 400
+
+        except ImportError:
+            return jsonify({
+                "error": "Portale Alloggi service not available",
+                "status": "error",
+                "details": "Service module not found"
+            }), 500
+        except Exception as service_error:
+            return jsonify({
+                "error": "Portale Alloggi connection failed",
+                "status": "error",
+                "details": str(service_error)
+            }), 400
+
+    except Exception as e:
+        logging.error("Error testing Portale Alloggi connection: %s", str(e))
+        return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
+    finally:
+        db_session.close()
+
+
+def _prepare_reservation_data(reservation):
+    """Helper function to prepare reservation data for Portale Alloggi submission."""
+    # Calculate duration in days
+    duration = 3  # Default fallback
+    if reservation.start_date and reservation.end_date:
+        duration = (reservation.end_date - reservation.start_date).days
+        # Ensure minimum of 1 day
+        duration = max(1, duration)
+
+    return {
+        'id': reservation.id,
+        'id_reference': reservation.id_reference,
+        'start_date': reservation.start_date,
+        'end_date': reservation.end_date,
+        'duration': duration,
+        'name_reference': reservation.name_reference,
+        'email': reservation.email,
+        'telephone': reservation.telephone
+    }
+
+
+@admin_bp.route("/admin/reservations/<int:reservation_id>/send-to-portale-alloggi", methods=["POST"])
+@jwt_required()
+def send_reservation_to_portale_alloggi(reservation_id):
+    """
+    Send guest data from a reservation to Portale Alloggi.
+    
+    Args:
+        reservation_id (int): ID of the reservation to send
+        
+    Returns:
+        JSON response with submission results
+    """
+    error_response, error_code = verify_admin_access()
+    if error_response:
+        return error_response, error_code
+
+    try:
+        user_id = int(get_jwt_identity())
+        db_session = SessionLocal()
+
+        # Get user with Portale Alloggi credentials
+        user = db_session.query(User).filter(User.id == user_id).first()
+        if not user:
+            return jsonify({"error": USER_NOT_FOUND}), 404
+
+        # Check if Portale Alloggi is configured
+        if not user.portale_username or not user.portale_password or not user.portale_wskey:
+            return jsonify({
+                "error": PORTALE_CREDENTIALS_NOT_CONFIGURED,
+                "details": "Please configure Portale Alloggi credentials in Settings first"
+            }), 400
+
+        # Get reservation with clients
+        reservation = db_session.query(Reservation).filter(Reservation.id == reservation_id).first()
+        if not reservation:
+            return jsonify({"error": RESERVATION_NOT_FOUND}), 404
+
+        # Check if reservation is approved
+        if reservation.status != 'Approved':
+            return jsonify({
+                "error": "Reservation not approved",
+                "details": "Only approved reservations can be sent to Portale Alloggi"
+            }), 400
+
+        # Get all clients for this reservation
+        clients = (
+            db_session.query(Client)
+            .join(ClientReservations, Client.id == ClientReservations.id_client)
+            .filter(ClientReservations.id_reservation == reservation_id)
+            .all()
+        )
+
+        if not clients:
+            return jsonify({
+                "error": "No guests found",
+                "details": "No guest data available for this reservation"
+            }), 400
+
+        # Initialize Portale Alloggi service
+        decrypted_password = decrypt_password(user.portale_password)
+        portale_service = PortaleAlloggiService(
+            username=user.portale_username,
+            password=decrypted_password,
+            ws_key=user.portale_wskey
+        )
+
+        # Prepare data for submission
+        clients_data = [client.to_dict() for client in clients]
+        reservation_data = _prepare_reservation_data(reservation)
+
+        # Test submission to Portale Alloggi (using test endpoint)
+        result = portale_service.test_guest_registration(clients_data, reservation_data)
+
+        if result.get('success', False):
+            # DO NOT update submission status for test mode
+            # Test submissions should not disable buttons or track as sent
+
+            return jsonify({
+                "message": "Guest data successfully tested with Portale Alloggi (TEST MODE)",
+                "result": result,
+                "submission_tracked": False
+            }), 200
+        return jsonify({
+            "error": "Failed to test data with Portale Alloggi",
+            "details": result.get('error', 'Unknown error'),
+            "result": result
+        }), 400
+
+    except Exception as e:
+        logging.error("Error sending reservation to Portale Alloggi: %s", str(e))
+        return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
+    finally:
+        db_session.close()
+
+
+@admin_bp.route("/admin/reservations/<int:reservation_id>/send-to-portale-alloggi-real", methods=["POST"])
+@jwt_required()
+def send_reservation_to_portale_alloggi_real(reservation_id):
+    """
+    Send guest data from a reservation to Portale Alloggi (REAL PRODUCTION).
+    
+    Args:
+        reservation_id (int): ID of the reservation to send
+        
+    Returns:
+        JSON response with submission results
+    """
+    error_response, error_code = verify_admin_access()
+    if error_response:
+        return error_response, error_code
+
+    try:
+        user_id = int(get_jwt_identity())
+        db_session = SessionLocal()
+
+        # Get user with Portale Alloggi credentials
+        user = db_session.query(User).filter(User.id == user_id).first()
+        if not user:
+            return jsonify({"error": USER_NOT_FOUND}), 404
+
+        # Check if Portale Alloggi is configured
+        if not user.portale_username or not user.portale_password or not user.portale_wskey:
+            return jsonify({
+                "error": PORTALE_CREDENTIALS_NOT_CONFIGURED,
+                "details": "Please configure Portale Alloggi credentials in Settings first"
+            }), 400
+
+        # Get reservation with clients
+        reservation = db_session.query(Reservation).filter(Reservation.id == reservation_id).first()
+        if not reservation:
+            return jsonify({"error": RESERVATION_NOT_FOUND}), 404
+
+        # Check if reservation is approved
+        if reservation.status != 'Approved':
+            return jsonify({
+                "error": "Reservation not approved",
+                "details": "Only approved reservations can be sent to Portale Alloggi"
+            }), 400
+
+        # Get all clients for this reservation
+        clients = (
+            db_session.query(Client)
+            .join(ClientReservations, Client.id == ClientReservations.id_client)
+            .filter(ClientReservations.id_reservation == reservation_id)
+            .all()
+        )
+
+        if not clients:
+            return jsonify({
+                "error": "No guests found",
+                "details": "No guest data available for this reservation"
+            }), 400
+
+        # Initialize Portale Alloggi service
+        decrypted_password = decrypt_password(user.portale_password)
+        portale_service = PortaleAlloggiService(
+            username=user.portale_username,
+            password=decrypted_password,
+            ws_key=user.portale_wskey
+        )
+
+        # Prepare data for submission
+        clients_data = [client.to_dict() for client in clients]
+        reservation_data = _prepare_reservation_data(reservation)
+
+        # REAL submission to Portale Alloggi (production endpoint)
+        result = portale_service.submit_guest_registration(clients_data, reservation_data)
+
+        if result.get('success', False):
+            # Update reservation with submission status
+            reservation.portale_alloggi_sent = True
+            reservation.portale_alloggi_sent_at = datetime.now(timezone.utc)
+            reservation.portale_alloggi_response = str(result.get('result', ''))
+
+            db_session.commit()
+
+            return jsonify({
+                "message": "Guest data successfully sent to Portale Alloggi (PRODUCTION)",
+                "result": result,
+                "submission_tracked": True
+            }), 200
+        return jsonify({
+            "error": "Failed to send data to Portale Alloggi",
+            "details": result.get('error', 'Unknown error'),
+            "result": result
+        }), 400
+
+    except Exception as e:
+        logging.error("Error sending reservation to Portale Alloggi: %s", str(e))
+        return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
+    finally:
+        db_session.close()
+
+
+@admin_bp.route("/admin/reservations/<int:reservation_id>/portale-alloggi-status", methods=["GET"])
+@jwt_required()
+def get_portale_alloggi_status(reservation_id):
+    """
+    Get Portale Alloggi submission status for a reservation.
+    
+    Args:
+        reservation_id (int): ID of the reservation to check
+        
+    Returns:
+        JSON response with submission status
+    """
+    error_response, error_code = verify_admin_access()
+    if error_response:
+        return error_response, error_code
+
+    try:
+        db_session = SessionLocal()
+
+        # Get reservation
+        reservation = db_session.query(Reservation).filter(Reservation.id == reservation_id).first()
+        if not reservation:
+            return jsonify({"error": RESERVATION_NOT_FOUND}), 404
+
+        return jsonify({
+            "portale_alloggi_sent": reservation.portale_alloggi_sent,
+            "portale_alloggi_sent_at": reservation.portale_alloggi_sent_at.isoformat() if reservation.portale_alloggi_sent_at else None,
+            "portale_alloggi_response": reservation.portale_alloggi_response
+        }), 200
+
+    except Exception as e:
+        logging.error("Error getting Portale Alloggi status: %s", str(e))
+        return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
     finally:
         db_session.close()

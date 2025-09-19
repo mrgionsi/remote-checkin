@@ -162,5 +162,16 @@
     "surname-header": "Nom de famille",
     "telephone-header": "Telephone",
     "user-info-label": "Informations sur l'utilisateur",
-    "zoomable-image-alt": "Image zoomable"
+    "zoomable-image-alt": "Image zoomable",
+    "personal-information": "informations personnelles",
+    "contact-information": "informations de contact",
+    "document-information": "informations du document",
+    "birth-information": "informations de naissance",
+    "residence-information": "informations de résidence",
+    "additional-information": "informations supplémentaires",
+    "search-document-types": "Rechercher des types de document...",
+    "search-provinces": "Rechercher des provinces...",
+    "search-countries": "Rechercher des pays...",
+    "updated": "mis à jour",
+    "reservation-updated-success": "Réservation mise à jour avec succès."
 }

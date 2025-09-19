@@ -1,200 +1,123 @@
-# 📲 Remote Check-in
 
-Remote Check-in is a comprehensive self-hosted solution designed to handle the check-in process for Bed and Breakfasts (B&Bs) and hotels remotely. This system allows property owners to manage their properties and rooms, create reservations, and securely collect necessary guest information, documents, and photos before arrival.
+# Remote Check-in
 
-## 🏗️ Technology Stack
+Remote check-in is a self-hosted to handle the check-in for a B&B remotely. 
 
-- **Backend**: Flask (Python) with SQLAlchemy ORM
-- **Frontend**: Angular 19 with PrimeNG UI components
-- **Database**: PostgreSQL
-- **Authentication**: JWT-based authentication
-- **Email**: Flask-Mail with SMTP support
-- **File Storage**: Local file system with encrypted uploads
-- **Internationalization**: Multi-language support (EN, ES, IT, FR, DE)
-- **Deployment**: Docker & Docker Compose ready
+Setting up your structures (B&Bs) and relative rooms, you can add a reservation and ask clients to fill in mandatory informations and upload documents and selfie. 
 
-<p>
- <a href="https://github.com/mrgionsi/remote-checkin/releases"><img alt="GitHub Release" src="https://img.shields.io/github/v/release/mrgionsi/remote-checkin" hspace="6px" vspace="2px"></a>
- <a href="https://github.com/mrgionsi/remote-checkin/releases"><img alt="Project Build Workflow" src="https://img.shields.io/github/actions/workflow/status/mrgionsi/remote-checkin/build.yml" vspace="2px"></a>
- <a href="https://github.com/mrgionsi/remote-checkin/issues"><img alt="GitHub Issues" src="https://img.shields.io/github/issues/mrgionsi/remote-checkin" hspace="6px" vspace="2px"></a>
-</p>
 
-## ⚡️ Key Features & Benefits
 
-### For Property Owners
 
-- **Admin Dashboard**: Comprehensive dashboard with reservation analytics and charts
-- **Structure & Room Management**: Easily manage multiple B&B locations and rooms
-- **Reservation Management**: Create, update, and track reservations with detailed client information
-- **Multi-User Support**: Role-based access control with admin and superadmin roles
-- **Email Integration**: Automated email notifications and confirmations
-- **Settings Management**: Configure email providers and system settings
+## Documentation
 
-### For Guests
+[Documentation](https://tbd)
 
-- **Remote Check-in Process**: Complete check-in remotely before arrival
-- **Multi-language Support**: Available in English, Spanish, Italian, French, and German
-- **Document Upload**: Secure upload of identity documents (front, back, selfie)
-- **Mobile-Friendly**: Responsive design works on all devices
-- **Reservation Lookup**: Easy reservation verification with unique codes
 
-### User Interface
+## Environment Variables
 
-- **PrimeNG Components**: Professional UI components with consistent styling
-- **Internationalization**: Full multi-language support with Transloco
-- **Responsive Design**: Works seamlessly on desktop, tablet, and mobile
-- **Dark/Light Themes**: Configurable theme support
-- **Toast Notifications**: User-friendly feedback messages
-- **Form Validation**: Real-time form validation with error messages
+To run this project, you will need to add the following environment variables to your .env file
 
-### Security & Compliance
+`DATABASE_IP`
 
-- **Data Encryption**: Secure file storage with encryption
-- **JWT Authentication**: Industry-standard authentication
-- **Document Validation**: OCR processing for document verification
-- **Self-Hosted**: Complete control over your data and privacy
+`DATABASE_PORT`
 
-## 🚀 Deployment
+`DATABASE_USERNAME`
 
-Follow this chapter to get the Remote Check-In app up and running in your environment.
+`DATABASE_PASSWORD`
+## Contributing
 
-### Prerequisites & Dependencies
+Contributions are always welcome!
 
-Before installing and setting up Remote Check-in, ensure you have the following tools and dependencies:
+See `contributing.md` for ways to get started.
 
-- **Python:** Version 3.7 or higher
-- **Node.js:** Version 18+ (Latest LTS version recommended)
-- **Docker:** Docker Engine installed and running
-- **Docker Compose:** Version 3.8+ (recommended for development)
-- **PostgreSQL:** Version 12+ (can be run via Docker)
-- **SMTP Server:** For email functionality (Gmail, Sendgrid, or any SMTP provider)
+Please adhere to this project's `code of conduct`.
 
-### Installation & Setup Instructions
 
-Follow these steps to install and set up Remote Check-in:
+## Run Locally
 
-1.  **Clone the Repository:**
+Clone the project
 
-    ```bash
-    git clone https://github.com/mrgionsi/remote-checkin.git
-    cd remote-checkin
-    ```
+```bash
+  git clone https://github.com/mrgionsi/remote-checkin.git
+```
 
-2.  **Configure Environment Variables:**
+Go to the project directory
 
-    Create a `.env` file in the root directory and populate it with the necessary environment variables:
+```bash
+  cd remote-checkin/frontend
+  npm install remote-checkin
+  npm start
+```
+```bash
+  cd remote-checkin/backend
+  pip install -r requirements.txt
+  python main.py
+```
 
-    ```env
-    # Database Configuration
-    DB_HOST=localhost
-    DB_PORT=5432
-    DB_USER=your_db_user
-    DB_PASSWORD=your_db_password
-    DB_NAME=remotecheckin
-    DATABASE_TYPE=postgresql
 
-    # JWT Configuration (REQUIRED - Generate a strong secret key)
-    JWT_SECRET_KEY=your_very_strong_jwt_secret_key_here_minimum_16_chars
+## Running Tests
 
-    # Email Configuration
-    MAIL_SERVER=smtp.gmail.com
-    MAIL_PORT=587
-    MAIL_USE_TLS=True
-    MAIL_USERNAME=your_email@gmail.com
-    MAIL_PASSWORD=your_app_password
-    MAIL_DEFAULT_SENDER_EMAIL=your_email@gmail.com
-    MAIL_DEFAULT_SENDER_NAME=Remote Check-in System
-    EMAIL_ENCRYPTION_KEY=your_generated_email_encryption_key_here
+To run tests, run the following command
 
-    # CORS Configuration
-    ALLOWED_CORS=http://localhost:4200
+```bash
+  npm run test
+```
 
-    # File Upload Configuration
-    UPLOAD_FOLDER=uploads
-    MAX_CONTENT_LENGTH=16777216  # 16MB max file size
-    ```
 
-    **Important**:
+## Usage/Examples
 
-    - Generate a strong JWT secret key (minimum 16 characters with letters and numbers/symbols)
-    - For Gmail, enable 2FA and use an App Password (see `backend/EMAIL_CONFIG.md`)
-    - Generate an encryption key for email passwords: `python backend/generate_encryption_key.py`
-    - Refer to `backend/EMAIL_CONFIG.md` for detailed email configuration instructions
+```javascript
+import Component from 'my-project'
 
-3.  **Start Database with Docker Compose (Recommended):**
+function App() {
+  return <Component />
+}
+```
 
-    ```bash
-    # Start PostgreSQL database
-    docker-compose -f docker-compose-dev.yaml up -d postgres
-    ```
 
-4.  **Build and Run the Application:**
+## Add Pre-commit hooks
+1. Install Pre-Commit
+```bash
+pip install pre-commit
+```
 
-    **Option A: Full Docker Setup (Recommended for Production)**
+2. Create the Validation Script
+Save the following as .git/hooks/commit-msg-check.py and make it executable:
+```python
+#!/usr/bin/env python3
+import sys
+import re
 
-    ```bash
-    # Build and run both frontend and backend
-    docker-compose up --build
-    ```
+# Allowed commit types
+ALLOWED_TYPES = {"feat", "fix", "perf", "refactor", "style", "test", "build", "ops", "docs", "merge"}
 
-    **Option B: Development Setup (Backend with Docker, Frontend locally)**
+# Commit message pattern
+COMMIT_REGEX = re.compile(rf"^({'|'.join(ALLOWED_TYPES)})(\(.+\))?: .+")
 
-    ```bash
-    # Start database
-    docker-compose -f docker-compose-dev.yaml up -d postgres
+# Read the commit message
+commit_msg_file = sys.argv[1]
+with open(commit_msg_file, "r") as file:
+    commit_msg = file.readline().strip()
 
-    # Install backend dependencies
-    pip install -r backend/requirements.txt
+if not COMMIT_REGEX.match(commit_msg):
+    print(f"❌ ERROR: Invalid commit message format.\n")
+    print("✅ Allowed format: `<type>(<scope>): <description>`")
+    print(f"✅ Allowed types: {', '.join(ALLOWED_TYPES)}")
+    print("💡 Example: `feat(ui): add dark mode toggle`")
+    sys.exit(1)
 
-    # Run backend (will be available at http://localhost:8000)
-    cd backend && python main.py
+sys.exit(0)
 
-    # In another terminal, install and run frontend
-    cd frontend && npm install && npm start
-    # Frontend will be available at http://localhost:4200
-    ```
+```
 
-5.  **Access the Application:**
-    - **Frontend**: http://localhost:4200 (Angular app)
-    - **Backend API**: http://localhost:5000 (Flask API)
-    - **Admin Panel**: http://localhost:4200/admin (Login required)
+4. Make the Script Executable
+Run:
+```bash
+chmod +x .git/hooks/commit-msg-check.py
+```
 
-### Common Issues
-
-1. **JWT Secret Key Error**: Ensure your JWT_SECRET_KEY is at least 16 characters long and contains both letters and numbers/symbols.
-
-2. **Database Connection Issues**: Verify your database credentials and ensure PostgreSQL is running.
-
-3. **Email Configuration**: For Gmail, ensure 2FA is enabled and you're using an App Password.
-
-4. **CORS Errors**: Check your ALLOWED_CORS environment variable includes your frontend URL.
-
-5. **File Upload Issues**: Ensure the uploads directory exists and has proper write permissions.
-
-If you encounter a new issues or need help:
-
-1. Check the [Issues](https://github.com/mrgionsi/remote-checkin/issues) page for existing solutions
-2. Create a new issue with detailed information about your problem
-3. Include your environment details and error logs
-
-## 👥 Contributing Guidelines
-
-Please read [CONTRIBUTING.md](./CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
-
-## Contributors
-
-<a href="https://github.com/mrgionsi/remote-checkin/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=mrgionsi/remote-checkin" />
-</a>
-
-See the full list of [contributors](https://github.com/mrgionsi/remote-checkin/contributors) who participated in this project.
-
-## 📜 License Information
-
-This project is licensed under the [GNU Affero General Public License v3.0](https://www.gnu.org/licenses/agpl-3.0.en.html). See the `LICENSE` file for more information.
-
-## Acknowledgments
-
-- This project utilizes various open-source libraries and frameworks, including Flask, Angular, PrimeNG, PostgreSQL, and many others.
-- We thank the open-source community for their contributions to these essential tools and frameworks.
-- Special thanks to the PrimeNG team for the excellent UI component library.
+5. Install the Hook
+Run:
+```bash
+pre-commit install --hook-type commit-msg
+```

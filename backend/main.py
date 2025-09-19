@@ -7,8 +7,9 @@ and registers blueprints for routing.
 # pylint: disable=C0303,E0401,W0718,C0301
 import os
 import re
+import logging
 
-from flask import Flask, make_response, request
+from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_mail import Mail
@@ -22,6 +23,25 @@ from routes.upload_reservation_routes import upload_bp
 from routes.client_reservation_routes import client_reservation_bp
 
 app = Flask(__name__)
+
+# Configure logging for development
+if os.getenv('FLASK_ENV') == 'development' or os.getenv('DEBUG') == 'True':
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.StreamHandler(),  # Console output
+        ]
+    )
+    # Enable debug logging for our specific service
+    logging.getLogger('backend.services.portale_alloggi_service').setLevel(logging.DEBUG)
+    logging.getLogger('backend.routes').setLevel(logging.DEBUG)
+else:
+    # Production logging - only WARNING and above
+    logging.basicConfig(
+        level=logging.WARNING,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
 
 # Load configuration
 app.config.from_object(Config())
@@ -57,7 +77,7 @@ mail = Mail(app)
 # Ensure mail is properly registered with app extensions
 app.extensions['mail'] = mail
 
-allowed_origins = os.getenv("ALLOWED_CORS", "http://localhost:4200").split(",")
+allowed_origins = os.getenv("ALLOWED_CORS", "http://localhost:4200,http://127.0.0.1:4200").split(",")
 
 CORS(
     app,
@@ -89,22 +109,6 @@ def home():
     """
     return "Hello, Flask!"
 
-@app.before_request
-def handle_preflight():
-    """
-    Return an empty permissive CORS preflight response when the incoming request is an OPTIONS preflight.
-    
-    This function is intended to be used as a Flask `before_request` handler. If the request method is OPTIONS it returns an empty response with
-    Access-Control-Allow-Origin, Access-Control-Allow-Headers, and Access-Control-Allow-Methods set to "*" to satisfy CORS preflight checks. 
-    For non-OPTIONS requests it does nothing (continues normal request handling).
-    """
-    if request.method == "OPTIONS":
-        response = make_response()
-        response.headers.add("Access-Control-Allow-Origin", "*")
-        response.headers.add('Access-Control-Allow-Headers', "*")
-        response.headers.add('Access-Control-Allow-Methods', "*")
-        return response
-    return None
 
 @app.route("/test-email-config")
 def test_email_config():
@@ -139,4 +143,4 @@ def test_email_config():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5001)

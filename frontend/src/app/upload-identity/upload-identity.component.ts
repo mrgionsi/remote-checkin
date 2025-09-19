@@ -7,12 +7,13 @@ import { FileUploadModule } from 'primeng/fileupload';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { ToastModule } from 'primeng/toast';
+import { ProgressBarModule } from 'primeng/progressbar';
 import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-upload-identity',
   standalone: true,
-  imports: [CommonModule, TranslocoPipe, FormsModule, ReactiveFormsModule, FileUploadModule, ButtonModule, CardModule, ToastModule],
+  imports: [CommonModule, TranslocoPipe, FormsModule, ReactiveFormsModule, FileUploadModule, ButtonModule, CardModule, ToastModule, ProgressBarModule],
   templateUrl: './upload-identity.component.html',
   styleUrl: './upload-identity.component.scss',
   providers: [MessageService]
@@ -24,7 +25,7 @@ export class UploadIdentityComponent {
   selfiePreview: string | ArrayBuffer | null = null;
   @Output() formDataEmitter = new EventEmitter<FormGroup>();
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private messageService: MessageService) {
     this.uploadForm = this.fb.group({
       frontimage: [null, Validators.required],
       backimage: [null, Validators.required],
@@ -32,13 +33,31 @@ export class UploadIdentityComponent {
     });
   }
 
-
   onFileSelect(event: any, type: 'frontimage' | 'backimage' | 'selfie') {
-    console.log(event)
-
     const file = event.currentFiles[0];
-    console.log(event)
+
     if (file) {
+      // Validate file size (5MB max)
+      if (file.size > 5000000) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'File Too Large',
+          detail: 'File size must be less than 5MB'
+        });
+        return;
+      }
+
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+      if (!allowedTypes.includes(file.type)) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Invalid File Type',
+          detail: 'Only JPEG, PNG, and GIF images are allowed'
+        });
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = () => {
         if (type === 'frontimage') this.frontPreview = reader.result;
@@ -46,13 +65,55 @@ export class UploadIdentityComponent {
         if (type === 'selfie') this.selfiePreview = reader.result;
       };
       reader.readAsDataURL(file);
-      this.uploadForm.patchValue({ [type]: file });
 
+      this.uploadForm.patchValue({ [type]: file });
       this.formDataEmitter.emit(this.uploadForm);
 
+      // Show success message
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Image Uploaded',
+        detail: `${type} image uploaded successfully`
+      });
     }
-
   }
 
+  removeImage(type: 'frontimage' | 'backimage' | 'selfie') {
+    this.uploadForm.patchValue({ [type]: null });
 
+    // Clear preview
+    if (type === 'frontimage') this.frontPreview = null;
+    if (type === 'backimage') this.backPreview = null;
+    if (type === 'selfie') this.selfiePreview = null;
+
+    this.formDataEmitter.emit(this.uploadForm);
+
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Image Removed',
+      detail: `${type} image removed`
+    });
+  }
+
+  getImagePreview(type: 'frontimage' | 'backimage' | 'selfie'): string | ArrayBuffer | null {
+    const file = this.uploadForm.get(type)?.value;
+    if (file && file.objectURL) {
+      return file.objectURL;
+    }
+
+    // Fallback to stored preview
+    if (type === 'frontimage') return this.frontPreview;
+    if (type === 'backimage') return this.backPreview;
+    if (type === 'selfie') return this.selfiePreview;
+
+    return null;
+  }
+
+  getUploadProgress(): number {
+    let count = 0;
+    if (this.uploadForm.get('frontimage')?.value) count++;
+    if (this.uploadForm.get('backimage')?.value) count++;
+    if (this.uploadForm.get('selfie')?.value) count++;
+    return count;
+  }
 }

@@ -119,6 +119,32 @@ class Client(Base):
         id (int): Unique identifier for the client.
         name (str): Client's name.
         surname (str): Client's surname.
+        birthday (Date): Client's birth date.
+        street (str): Client's street address.
+        number_city (str): Client's street number.
+        city (str): Client's city.
+        province (str): Client's province.
+        cap (str): Client's postal code.
+        telephone (str): Client's phone number.
+        document_number (str): Client's document number.
+        cf (str): Client's tax code (codice fiscale).
+        document_type (str): Type of document.
+        
+        # Portale Alloggi required fields
+        sesso (str): Gender (1=Male, 2=Female).
+        nazionalita (str): Nationality as Alloggiati Web country code (9 chars, e.g., 100000100 for ITALIA).
+        email (str): Email address for guest communication.
+        comune_nascita (str): Birth municipality name.
+        provincia_nascita (str): Birth province code (Italian provinces).
+        stato_nascita (str): Birth country as Alloggiati Web country code (9 chars).
+        cittadinanza (str): Citizenship as Alloggiati Web country code (9 chars).
+        luogo_emissione (str): Document issue place.
+        data_emissione (Date): Document issue date.
+        data_scadenza (Date): Document expiry date.
+        autorita_rilascio (str): Document issuing authority.
+        comune_residenza (str): Residence municipality name.
+        provincia_residenza (str): Residence province code (Italian provinces).
+        stato_residenza (str): Residence country as Alloggiati Web country code (9 chars).
     """
     __tablename__ = "client"
 
@@ -128,13 +154,27 @@ class Client(Base):
     birthday = Column(Date)
     street = Column(String)
     number_city = Column(String)
-    city = Column(String)
-    province = Column(String)
     cap = Column(String)
     telephone = Column(String)
     document_number = Column(String)
     cf = Column(String)
     document_type = Column(String)
+    
+    # Portale Alloggi required fields
+    sesso = Column(String(1), nullable=True)  # 1=Male, 2=Female
+    nazionalita = Column(String(9), nullable=True)  # Alloggiati Web country code (e.g., 100000100 for ITALIA)
+    email = Column(String(255), nullable=True)  # Email address
+    comune_nascita = Column(String(100), nullable=True)  # Birth municipality name
+    provincia_nascita = Column(String(2), nullable=True)  # Birth province acronym (e.g., "NA", "MI")
+    stato_nascita = Column(String(9), nullable=True)  # Alloggiati Web birth country code
+    cittadinanza = Column(String(9), nullable=True)  # Alloggiati Web citizenship code
+    luogo_emissione = Column(String(100), nullable=True)  # Document issue place
+    data_emissione = Column(Date, nullable=True)  # Document issue date
+    data_scadenza = Column(Date, nullable=True)  # Document expiry date
+    autorita_rilascio = Column(String(100), nullable=True)  # Issuing authority
+    comune_residenza = Column(String(100), nullable=True)  # Residence municipality name
+    provincia_residenza = Column(String(2), nullable=True)  # Residence province acronym (e.g., "NA", "MI")
+    stato_residenza = Column(String(9), nullable=True)  # Alloggiati Web residence country code
 
     reservations = relationship(
         "Reservation", secondary="client_reservations", back_populates="clients"
@@ -149,13 +189,26 @@ class Client(Base):
             "birthday": self.birthday,
             "street": self.street,
             "number_city": self.number_city,
-            "city": self.city,
-            "province": self.province,
             "cap": self.cap,
             "telephone": self.telephone,
             "document_number": self.document_number,
             "document_type": self.document_type,
             "cf": self.cf,
+            # Portale Alloggi fields
+            "sesso": self.sesso,
+            "nazionalita": self.nazionalita,
+            "email": self.email,
+            "comune_nascita": self.comune_nascita,
+            "provincia_nascita": self.provincia_nascita,
+            "stato_nascita": self.stato_nascita,
+            "cittadinanza": self.cittadinanza,
+            "luogo_emissione": self.luogo_emissione,
+            "data_emissione": self.data_emissione,
+            "data_scadenza": self.data_scadenza,
+            "autorita_rilascio": self.autorita_rilascio,
+            "comune_residenza": self.comune_residenza,
+            "provincia_residenza": self.provincia_residenza,
+            "stato_residenza": self.stato_residenza,
         }
 
     def __repr__(self):
@@ -185,6 +238,11 @@ class Reservation(Base):
     email = Column(String, nullable=False)
     telephone = Column(String, default='')
     number_of_people = Column(Integer, default=1, nullable=False,server_default='1')
+    
+    # Portale Alloggi submission tracking
+    portale_alloggi_sent = Column(Boolean, default=False, nullable=False)
+    portale_alloggi_sent_at = Column(DateTime, nullable=True)
+    portale_alloggi_response = Column(String, nullable=True)
 
 
     room = relationship("Room", lazy="joined")
@@ -259,21 +317,29 @@ class User(Base):
     password = Column(String)
     username = Column(String)
     id_role = Column(Integer, ForeignKey("role.id"))
+    # Portale Alloggi credentials
+    portale_username = Column(String)  # Username for Portale Alloggi
+    portale_password = Column(String)  # Encrypted password for Portale Alloggi
+    portale_wskey = Column(String)     # Web Service Key for Portale Alloggi
 
     role = relationship("Role")
     email_config = relationship("EmailConfig", back_populates="user", uselist=False)
 
-    def to_dict(self):
+    def to_dict(self, include_portale_credentials=False):
         """
         Return a serializable dictionary of the User suitable for API responses.
         
         The dictionary includes the user's primary fields:
         - id, name, surname, email, telephone, username, id_role
+        - portale_username, portale_password (masked), portale_wskey (if include_portale_credentials=True)
+        
+        Parameters:
+            include_portale_credentials (bool): If True, include Portale Alloggi credentials (password masked)
         
         Returns:
             dict: Mapping of the above field names to their values.
         """
-        return {
+        result = {
             "id": self.id,
             "name": self.name,
             "surname": self.surname,
@@ -282,6 +348,15 @@ class User(Base):
             "username": self.username,
             "id_role": self.id_role,
         }
+        
+        if include_portale_credentials:
+            result.update({
+                "portale_username": self.portale_username,
+                "portale_password": "***" if self.portale_password else None,  # Mask password
+                "portale_wskey": "***" if self.portale_wskey else None,  # Mask WS key
+            })
+        
+        return result
 
     def __repr__(self):
         return f"<User(id={self.id}, username={self.username})>"
