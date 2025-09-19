@@ -50,12 +50,14 @@
 
 /* PrimeNG Card Component Styling */
 p-card {
-    margin-bottom: 20px;
+    margin-bottom: 12px;
+    overflow: visible !important;
 }
 
 /* Small spacing between each section */
 p-card .p-card-body {
-    padding: 20px;
+    padding: 12px;
+    overflow: visible !important;
 }
 
 /* Styling for the title of each section */
@@ -75,3 +77,426 @@ p-card header {
 .justify-center {
     justify-content: center;
 }
+
+// Summary Step Styles
+.summary-header {
+    .summary-icon {
+        animation: pulse 2s ease-in-out infinite;
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.summary-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.summary-card {
+    background: #fafbfc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        background: #f8fafc;
+    }
+
+    .card-header {
+        background: #f1f5f9;
+        padding: 1.5rem;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+
+        i {
+            color: var(--primary-color);
+        }
+
+        h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+    }
+
+    .card-content {
+        padding: 1.5rem;
+    }
+}
+
+.info-grid {
+    display: grid;
+    gap: 1rem;
+
+    &.three-columns {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.75rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border-left: 3px solid var(--primary-color);
+    transition: all 0.2s ease;
+
+    &:hover {
+        background: #f1f5f9;
+        transform: translateX(2px);
+    }
+
+    .info-label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--text-color-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+    }
+
+    .info-value {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-color);
+        word-break: break-word;
+    }
+}
+
+.images-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+}
+
+.image-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+
+    &:hover {
+        background: #f1f5f9;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .image-preview {
+        width: 80px;
+        height: 80px;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 2px solid #e2e8f0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+
+            &:hover {
+                transform: scale(1.05);
+            }
+        }
+    }
+
+    .image-label {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: var(--text-color-secondary);
+        text-align: center;
+        line-height: 1.2;
+    }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+    .summary-container {
+        padding: 0 0.5rem;
+    }
+
+    .summary-card {
+        margin-bottom: 1rem;
+
+        .card-header {
+            padding: 1rem;
+            flex-direction: column;
+            text-align: center;
+            gap: 0.5rem;
+
+            h3 {
+                font-size: 1.125rem;
+            }
+        }
+
+        .card-content {
+            padding: 1rem;
+        }
+    }
+
+    .info-grid.three-columns {
+        grid-template-columns: 1fr;
+    }
+
+    .images-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .image-item {
+        .image-preview {
+            width: 60px;
+            height: 60px;
+        }
+    }
+}
+
+// Form Section Styles
+.form-section {
+    margin-bottom: 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: visible;
+    background: #ffffff;
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+    &:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border-color: #cbd5e1;
+    }
+
+    &:last-child {
+        margin-bottom: 0.5rem;
+    }
+}
+
+.section-header {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+
+    .section-icon {
+        font-size: 1.25rem;
+        color: var(--primary-color);
+        transition: all 0.3s ease;
+    }
+
+    .section-title {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-color);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    &:hover {
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+
+        .section-icon {
+            transform: scale(1.1);
+        }
+    }
+}
+
+.section-content {
+    padding: 1rem;
+    background: #ffffff;
+
+    .grid {
+        margin: 0;
+    }
+
+    .field {
+        margin-bottom: 0.75rem;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            font-weight: 500;
+            color: var(--text-color);
+            margin-bottom: 0.25rem;
+            display: block;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+
+        input,
+        p-select,
+        p-datePicker {
+            transition: all 0.3s ease;
+            border-radius: 6px;
+
+            &:focus {
+                box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.1);
+                border-color: var(--primary-color);
+            }
+        }
+
+        // Ensure select dropdowns are visible
+        p-select {
+            ::ng-deep .p-select-overlay {
+                z-index: 1000 !important;
+            }
+        }
+
+        // Ensure date picker dropdowns are visible
+        p-datePicker {
+            ::ng-deep .p-datepicker {
+                z-index: 1000 !important;
+            }
+        }
+
+        .p-error {
+            margin-top: 0.25rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+    }
+}
+
+// Enhanced field spacing for better visual hierarchy
+.p-fluid {
+    .form-section {
+        .field {
+            padding: 0.5rem 0;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+
+            &:hover {
+                background: rgba(var(--primary-color-rgb), 0.02);
+                padding-left: 0.25rem;
+            }
+
+            label {
+                transition: all 0.2s ease;
+            }
+
+            &:focus-within {
+                label {
+                    color: var(--primary-color);
+                    font-weight: 600;
+                }
+            }
+        }
+    }
+}
+
+// Responsive adjustments for form sections
+@media (max-width: 768px) {
+    .form-section {
+        margin-bottom: 0.75rem;
+        border-radius: 6px;
+
+        .section-header {
+            padding: 0.5rem 0.75rem;
+            flex-direction: column;
+            text-align: center;
+            gap: 0.25rem;
+
+            .section-icon {
+                font-size: 1rem;
+            }
+
+            .section-title {
+                font-size: 0.875rem;
+            }
+        }
+
+        .section-content {
+            padding: 0.75rem;
+
+            .field {
+                margin-bottom: 0.5rem;
+
+                label {
+                    font-size: 0.75rem;
+                }
+            }
+        }
+    }
+
+    .p-fluid {
+        .form-section {
+            .field {
+                padding: 0.25rem 0;
+
+                &:hover {
+                    padding-left: 0.125rem;
+                }
+            }
+        }
+    }
+}
+
+// Animation for section headers
+@keyframes sectionSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.form-section {
+    animation: sectionSlideIn 0.5s ease-out;
+
+    &:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    &:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    &:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+
+    &:nth-child(4) {
+        animation-delay: 0.4s;
+    }
+
+    &:nth-child(5) {
+        animation-delay: 0.5s;
+    }
+}
+
+// PrimeNG theme variables automatically handle light/dark mode switching
