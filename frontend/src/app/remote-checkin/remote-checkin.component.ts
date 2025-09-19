@@ -508,27 +508,52 @@ export class RemoteCheckinComponent implements OnInit {
       if (value) formData.append(field, value);
     });
 
-    // Add municipality codes for birth and residence
+    // Handle municipality fields (birth and residence)
     const birthMunicipalityCode = this.clientForm.get('comune_nascita_code')?.value;
     const residenceMunicipalityCode = this.clientForm.get('comune_residenza_code')?.value;
-
+    
+    // Birth municipality: try code first, then fallback to name
     if (birthMunicipalityCode) {
       formData.append('comune_nascita', birthMunicipalityCode);
+    } else {
+      // Fallback: try to get municipality name from the selected municipality
+      const selectedBirthMunicipality = this.clientForm.get('comune_nascita')?.value;
+      if (selectedBirthMunicipality) {
+        const municipalityName = this.getMunicipalityDisplayName(selectedBirthMunicipality);
+        if (municipalityName) {
+          formData.append('comune_nascita', municipalityName);
+        }
+      }
     }
+    
+    // Residence municipality: try code first, then fallback to name
     if (residenceMunicipalityCode) {
       formData.append('comune_residenza', residenceMunicipalityCode);
+    } else {
+      // Fallback: try to get municipality name from the selected municipality
+      const selectedResidenceMunicipality = this.clientForm.get('comune_residenza')?.value;
+      if (selectedResidenceMunicipality) {
+        const municipalityName = this.getMunicipalityDisplayName(selectedResidenceMunicipality);
+        if (municipalityName) {
+          formData.append('comune_residenza', municipalityName);
+        }
+      }
     }
 
-    // Add province codes for birth and residence
+    // Handle province fields (birth and residence) - separate from municipality fields
     const birthProvinceCode = this.clientForm.get('provincia_nascita')?.value;
     const residenceProvinceCode = this.clientForm.get('provincia_residenza')?.value;
 
-    // Send province acronyms directly (no conversion needed)
+    // Birth province: use code or mapped name
     if (birthProvinceCode) {
-      formData.append('provincia_nascita', birthProvinceCode);
+      const provinceName = this.provinceMappings[birthProvinceCode] || birthProvinceCode;
+      formData.append('provincia_nascita', provinceName);
     }
+    
+    // Residence province: use code or mapped name
     if (residenceProvinceCode) {
-      formData.append('provincia_residenza', residenceProvinceCode);
+      const provinceName = this.provinceMappings[residenceProvinceCode] || residenceProvinceCode;
+      formData.append('provincia_residenza', provinceName);
     }
 
     // Append reservationId separately
