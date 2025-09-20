@@ -159,7 +159,7 @@ def safe_file_exists(file_path: Path) -> bool:
 
 @client_reservation_bp.route("/reservations/<string:reservation_id>/client-images", methods=["POST"])
 @jwt_required()
-@log_route(include_request_data=True, include_response_data=True)
+@log_route(include_request_data=False, include_response_data=False)
 def check_images(reservation_id):
     """
     Check whether identity images (back, front, selfie) exist for a given reservation and client.
