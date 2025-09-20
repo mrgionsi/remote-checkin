@@ -531,7 +531,7 @@ class PortaleAlloggiService:
             # Build schedina according to official format (168 characters)
             schedina = ""
             schedina += pad_string(guest_type, 2)  # 0-1: Tipo Alloggiato
-            start_date = reservation_data.get('start_date', '15/09/2025')
+            start_date = reservation_data.get('start_date') or datetime.now()
             start_date_formatted = format_date(start_date)
             schedina += start_date_formatted  # 2-11: Data Arrivo
             
