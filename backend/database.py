@@ -4,6 +4,7 @@ This module provides configuration for SQLAlchemy, including session management,
 engine creation, and a context manager for database operations.
 """
 
+import os
 from contextlib import contextmanager  # Standard library import
 from sqlalchemy import create_engine  # Third-party imports
 from sqlalchemy.orm import sessionmaker, declarative_base  # Third-party imports
@@ -11,10 +12,10 @@ from sqlalchemy.orm import sessionmaker, declarative_base  # Third-party imports
 from config import Config  # Adjust the path based on your project structure
 #pylint: disable=C0301
 
-# Create the database engine
+# Create the database engine with environment-based echo
 engine = create_engine(
     Config.DATABASE_URL,
-    echo=True
+    echo=os.getenv('DATABASE_ECHO', 'false').lower() == 'true'
 )
 
 # Session factory

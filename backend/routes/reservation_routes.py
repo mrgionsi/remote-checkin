@@ -21,6 +21,9 @@ from email_handler import EmailService
 from routes.email_config_routes import get_encryption_key
 from utils.email_utils import get_admin_email_config
 from database import SessionLocal
+from app_logging.config import get_logger
+from app_logging.decorators import log_route, log_database_operation, log_function, log_performance
+from app_logging.utils import safe_extra_fields
 
 
 class EmailConfigurationError(Exception):
@@ -30,9 +33,14 @@ class EmailConfigurationError(Exception):
 # Create a blueprint for reservations
 reservation_bp = Blueprint("reservations", __name__, url_prefix="/api/v1")
 
+# Configure logging
+logger = get_logger(__name__)
+
 
 @reservation_bp.route("/reservations", methods=["POST"])
 @jwt_required()
+@log_route(include_request_data=True, include_response_data=True)
+@log_database_operation("CREATE")
 def create_reservation():
     """
     Create a new reservation from JSON payload, persist it to the database, and (optionally) send a confirmation email.
@@ -223,6 +231,8 @@ def create_reservation():
 
 @reservation_bp.route("/reservations/<int:reservation_id>", methods=["PATCH"])
 @jwt_required()
+@log_route(include_request_data=True, include_response_data=True)
+@log_database_operation("UPDATE")
 def update_reservation(reservation_id):
     """
     Update an existing reservation's fields by its database ID.
@@ -342,6 +352,8 @@ def update_reservation(reservation_id):
         db.close()
 @reservation_bp.route("/reservations/<int:reservation_id>", methods=["DELETE"])
 @jwt_required()
+@log_route(include_request_data=True)
+@log_database_operation("DELETE")
 def delete_reservation(reservation_id):
     """
     Delete a reservation by its database ID.
@@ -376,6 +388,8 @@ def delete_reservation(reservation_id):
 
 @reservation_bp.route("/reservations", methods=["GET"])
 @jwt_required()
+@log_route(include_request_data=True)
+@log_database_operation("READ")
 def get_reservations():
     """
     Return a JSON response containing a list of reservations.
@@ -390,6 +404,8 @@ def get_reservations():
 
 @reservation_bp.route("/reservations/structure/<structure_id>", methods=["GET"])
 @jwt_required()
+@log_route(include_request_data=True)
+@log_database_operation("READ")
 def get_reservations_by_structure(structure_id):
     """
     Return all reservations for the specified structure as a JSON array.
@@ -424,6 +440,8 @@ def get_reservations_by_structure(structure_id):
 
 @reservation_bp.route("/reservations/admin/<int:reservation_id>", methods=["GET"])
 @jwt_required()
+@log_route(include_request_data=True)
+@log_database_operation("READ")
 def get_admin_reservations_by_id(reservation_id):
     """
     Retrieve a reservation by its ID for administrative use.
@@ -456,6 +474,8 @@ def get_admin_reservations_by_id(reservation_id):
 
 @reservation_bp.route("/reservations/check/<string:reservation_id>", methods=["GET"])
 #@jwt_required() Not needed as this endpoint is for public access
+@log_route(include_request_data=True)
+@log_database_operation("READ")
 def check_get_reservations_by_id(reservation_id):
     """
     Check whether a reservation exists by its reference ID and return the reference when found.
@@ -501,6 +521,9 @@ def check_get_reservations_by_id(reservation_id):
 
 @reservation_bp.route("/reservations/monthly/<int:structure_id>", methods=["GET"])
 @jwt_required()
+@log_route(include_request_data=True)
+@log_database_operation("READ")
+@log_performance(threshold_ms=2000)
 def get_reservations_per_month(structure_id):
     """
     Return the number of reservations per calendar month for a given structure.
@@ -554,6 +577,8 @@ def get_reservations_per_month(structure_id):
 
 @reservation_bp.route("/reservations/<int:reservation_id>/status", methods=["PUT"])
 @jwt_required()
+@log_route(include_request_data=True, include_response_data=True)
+@log_database_operation("UPDATE")
 def update_reservation_status(reservation_id):
     """
     Update a reservation's status and notify the structure admin's configured email when appropriate.

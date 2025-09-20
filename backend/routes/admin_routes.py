@@ -21,9 +21,15 @@ from models import User, AdminStructure, Structure,Reservation, Client, ClientRe
 from services.portale_alloggi_service import PortaleAlloggiService
 from utils.encryption_utils import encrypt_password, decrypt_password
 from database import SessionLocal
+from app_logging.config import get_logger
+from app_logging.decorators import log_route, log_database_operation, log_function, log_performance
+from app_logging.utils import safe_extra_fields
 
 # Blueprint setup
 admin_bp = Blueprint("admin", __name__, url_prefix="/api/v1")
+
+# Configure logging
+logger = get_logger(__name__)
 
 # Error messages
 USER_NOT_FOUND = "User not found"
@@ -54,6 +60,7 @@ def verify_admin_access():
     return None, None
 
 @admin_bp.route("/admin/login", methods=["POST"])
+@log_route(include_request_data=True, include_response_data=True)
 def admin_login():
     """
     Authenticate an admin user and return a JWT access token with the user's profile and associated structures.
@@ -129,6 +136,9 @@ def admin_login():
 
 #pylint: disable=W0703,R0911
 @admin_bp.route("/admin/create", methods=["POST"])
+@jwt_required()
+@log_route(include_request_data=True)
+@log_database_operation("CREATE")
 def create_admin_user():
     """
     Create a new admin user from a JSON request.
@@ -201,6 +211,8 @@ def create_admin_user():
 
 @admin_bp.route("/admin/me", methods=["GET"])
 @jwt_required()
+@log_route(include_request_data=True)
+@log_database_operation("READ")
 def get_admin_info():
     """
     Return the authenticated admin user's profile and associated structures.
@@ -263,6 +275,8 @@ def get_admin_info():
 
 @admin_bp.route("/admin/portale-alloggi", methods=["GET"])
 @jwt_required()
+@log_route(include_request_data=True)
+@log_database_operation("READ")
 def get_portale_alloggi_config():
     """
     Get Portale Alloggi configuration for the current user.
@@ -296,6 +310,8 @@ def get_portale_alloggi_config():
 
 @admin_bp.route("/admin/portale-alloggi", methods=["POST"])
 @jwt_required()
+@log_route(include_request_data=True)
+@log_database_operation("UPDATE")
 def update_portale_alloggi_config():
     """
     Update Portale Alloggi configuration for the current user.
@@ -354,6 +370,8 @@ def update_portale_alloggi_config():
 
 @admin_bp.route("/admin/portale-alloggi/test", methods=["POST"])
 @jwt_required()
+@log_route(include_request_data=True)
+@log_performance(threshold_ms=5000)
 def test_portale_alloggi_connection():
     """
     Test Portale Alloggi connection with current credentials.

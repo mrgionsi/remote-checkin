@@ -46,12 +46,20 @@ from flask_jwt_extended import jwt_required, verify_jwt_in_request
 
 from models import Client, ClientReservations, Reservation
 from database import SessionLocal
+from app_logging.config import get_logger
+from app_logging.decorators import log_route, log_database_operation
+from app_logging.utils import safe_extra_fields
 
 # Blueprint setup
 client_reservation_bp = Blueprint("client_reservations", __name__, url_prefix="/api/v1")
 
+# Configure logging
+logger = get_logger(__name__)
+
 @client_reservation_bp.route("/reservations/<int:reservation_id>/clients", methods=["GET"])
 @jwt_required()
+@log_route(include_request_data=True)
+@log_database_operation("READ")
 def get_clients_by_reservation(reservation_id):
     """
     Get all clients associated with a given reservation ID.
