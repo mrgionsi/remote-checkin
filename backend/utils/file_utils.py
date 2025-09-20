@@ -73,7 +73,7 @@ def save_file(file, folder, filename):
     except (OSError, IOError) as e:
         logger.error("Error saving file", extra=safe_extra_fields({
             'filename': filename,
-            'upload_folder': upload_folder,
+            'upload_folder': folder,
             'error_type': type(e).__name__,
             'error_details': str(e),
             'operation_result': 'failed'
