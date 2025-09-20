@@ -78,18 +78,29 @@ def create_reservation():
     session = SessionLocal()
 
     try:
-        # Debug: Log the received data
-        current_app.logger.info(f"Received reservation data: {data}")
-        current_app.logger.info(f"startDate type: {type(data['startDate'])}, value: {data['startDate']}")
-        current_app.logger.info(f"endDate type: {type(data['endDate'])}, value: {data['endDate']}")
+        # Log the received reservation data
+        logger.info("Processing reservation creation", extra=safe_extra_fields({
+            'reservation_number': data.get('reservationNumber'),
+            'start_date': data.get('startDate'),
+            'end_date': data.get('endDate'),
+            'room_name': data.get('roomName'),
+            'guest_email': data.get('email'),
+            'number_of_people': data.get('numberOfPeople', 1),
+            'operation': 'create_reservation_validation'
+        }))
 
         # Validate and parse date fields
         try:
             start_date = datetime.strptime(data["startDate"], "%Y-%m-%d")
             end_date = datetime.strptime(data["endDate"], "%Y-%m-%d")
         except ValueError as e:
-            current_app.logger.error(f"Date parsing error: {e}")
-            current_app.logger.error(f"startDate: '{data['startDate']}', endDate: '{data['endDate']}'")
+            logger.error("Date parsing error in reservation creation", extra=safe_extra_fields({
+                'start_date_input': data.get('startDate'),
+                'end_date_input': data.get('endDate'),
+                'error_type': 'date_parsing_error',
+                'error_details': str(e),
+                'operation_result': 'validation_failed'
+            }))
             return jsonify({"error": f"Invalid date format. Expected YYYY-MM-DD, got startDate: '{data['startDate']}', endDate: '{data['endDate']}'"}), 400
         # Ensure a valid date range
         if end_date < start_date:
