@@ -162,11 +162,20 @@ def create_reservation():
                 ).first()
 
                 if not email_config:
-                    current_app.logger.error("No email configuration found for user")
+                    logger.error("No email configuration found for user", extra=safe_extra_fields({
+                        'user_id': get_jwt_identity(),
+                        'operation': 'email_config_lookup',
+                        'error_type': 'missing_email_config',
+                        'operation_result': 'failed'
+                    }))
                     raise EmailConfigurationError("Email configuration not found. Please configure email settings first.")
 
                 # Use database configuration
-                current_app.logger.info("Using database email configuration")
+                logger.info("Using database email configuration", extra=safe_extra_fields({
+                    'user_id': get_jwt_identity(),
+                    'email_config_source': 'database',
+                    'operation': 'email_config_setup'
+                }))
                 encryption_key = get_encryption_key()
                 email_service = EmailService(config=email_config, encryption_key=encryption_key)
 
@@ -182,10 +191,14 @@ def create_reservation():
                 'room_name': room_name
             }
 
-            # Log the data being sent
-            current_app.logger.info(f"Preparing to send email to: {data['email']}")
-            current_app.logger.info(f"Reservation data: {reservation_data}")
-            current_app.logger.info(f"Email service type: {type(email_service)}")
+            # Log the email preparation
+            logger.info("Preparing to send reservation confirmation email", extra=safe_extra_fields({
+                'recipient_email': data['email'],
+                'reservation_number': data.get('reservationNumber'),
+                'room_name': data.get('roomName'),
+                'email_service_type': type(email_service).__name__,
+                'operation': 'email_preparation'
+            }))
             # current_app.logger.info(f"Mail instance type: {type(mail)}")  # Removed as mail is not used in new email system
 
             # Send confirmation email
@@ -196,16 +209,29 @@ def create_reservation():
 
             # Log email result
             if email_result['status'] == 'error':
-                current_app.logger.warning(f"Failed to send email: {email_result['message']}")
-                current_app.logger.warning(f"Email error type: {email_result.get('error_type', 'unknown')}")
+                logger.warning("Reservation confirmation email failed", extra=safe_extra_fields({
+                    'recipient_email': data['email'],
+                    'reservation_number': data.get('reservationNumber'),
+                    'error_message': email_result['message'],
+                    'error_type': email_result.get('error_type', 'unknown'),
+                    'email_result': 'failed'
+                }))
             else:
-                current_app.logger.info("Reservation confirmation email sent successfully")
-                current_app.logger.info(f"Email sent to: {email_result.get('to', 'unknown')}")
+                logger.info("Reservation confirmation email sent successfully", extra=safe_extra_fields({
+                    'recipient_email': email_result.get('to', data['email']),
+                    'reservation_number': data.get('reservationNumber'),
+                    'email_result': 'success'
+                }))
 
         except Exception as e:
             # Log email error but don't fail the reservation creation
-            current_app.logger.error(f"Error sending email: {str(e)}")
-            current_app.logger.error(f"Email error traceback: {traceback.format_exc()}")
+            logger.error("Error sending reservation confirmation email", extra=safe_extra_fields({
+                'recipient_email': data['email'],
+                'reservation_number': data.get('reservationNumber'),
+                'error_type': type(e).__name__,
+                'error_details': str(e),
+                'email_result': 'error'
+            }), exc_info=True)
 
         return (
             jsonify(
@@ -667,15 +693,36 @@ def update_reservation_status(reservation_id):
                         )
 
                     if email_result and email_result.get('status') == 'success':
-                        current_app.logger.info(f"Status change notification sent successfully to {reservation.email}")
+                        logger.info("Status change notification sent successfully", extra=safe_extra_fields({
+                            'reservation_id': reservation_id,
+                            'recipient_email': reservation.email,
+                            'new_status': new_status,
+                            'notification_result': 'success'
+                        }))
                     elif email_result:
-                        current_app.logger.warning(f"Failed to send status change notification: {email_result.get('message', 'Unknown error')}")
+                        logger.warning("Status change notification failed", extra=safe_extra_fields({
+                            'reservation_id': reservation_id,
+                            'recipient_email': reservation.email,
+                            'new_status': new_status,
+                            'error_message': email_result.get('message', 'Unknown error'),
+                            'notification_result': 'failed'
+                        }))
                 else:
-                    current_app.logger.warning(f"No email configuration found for admin or no client email for reservation {reservation.id}")
+                    logger.warning("No email configuration or recipient for status notification", extra=safe_extra_fields({
+                        'reservation_id': reservation_id,
+                        'has_admin_config': admin_email_config is not None,
+                        'has_client_email': bool(reservation.email),
+                        'notification_result': 'skipped'
+                    }))
 
             except Exception as e:
-                current_app.logger.error(f"Error sending status change notification: {str(e)}")
-                current_app.logger.error(f"Traceback: {traceback.format_exc()}")
+                logger.error("Error sending status change notification", extra=safe_extra_fields({
+                    'reservation_id': reservation_id,
+                    'new_status': new_status,
+                    'error_type': type(e).__name__,
+                    'error_details': str(e),
+                    'notification_result': 'error'
+                }), exc_info=True)
 
         return jsonify({
             "message": "Reservation status updated successfully",
