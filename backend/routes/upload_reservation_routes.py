@@ -192,18 +192,38 @@ def upload_file():
                     email_result = email_service.send_admin_checkin_notification(admin_email, checkin_data)
 
                     if email_result.get('status') == 'success':
-                        print(f"Admin notification sent successfully to {admin_email}")
+                        logger.info("Admin notification sent successfully", extra=safe_extra_fields({
+                            'admin_email': admin_email,
+                            'reservation_id': reservation_id,
+                            'client_name': f"{name} {surname}",
+                            'notification_result': 'success'
+                        }))
                     else:
-                        print(f"Failed to send admin notification: {email_result.get('message', 'Unknown error')}")
+                        logger.warning("Admin notification failed", extra=safe_extra_fields({
+                            'admin_email': admin_email,
+                            'error_message': email_result.get('message', 'Unknown error'),
+                            'notification_result': 'failed'
+                        }))
                 else:
-                    print("No valid admin email address found - skipping notification")
+                    logger.warning("No valid admin email address found", extra=safe_extra_fields({
+                        'admin_user_id': admin_user.id if admin_user else None,
+                        'notification_result': 'skipped'
+                    }))
             else:
-                print(f"No email configuration found for admin user {admin_user.id if admin_user else 'None'}")
+                logger.warning("No email configuration found for admin", extra=safe_extra_fields({
+                    'admin_user_id': admin_user.id if admin_user else None,
+                    'notification_result': 'no_config'
+                }))
 
         except Exception as e:
             # Don't fail the upload if email notification fails
-            print(f"Error sending admin notification: {str(e)}")
-            print(f"Traceback: {traceback.format_exc()}")
+            logger.error("Error sending admin notification", extra=safe_extra_fields({
+                'reservation_id': reservation_id,
+                'client_name': f"{name} {surname}",
+                'error_type': type(e).__name__,
+                'error_details': str(e),
+                'notification_result': 'error'
+            }), exc_info=True)
 
         return jsonify({
             "message": "Files uploaded successfully and client linked to reservation",
