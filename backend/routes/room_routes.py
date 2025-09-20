@@ -41,9 +41,13 @@ def _validate_room_update_data(data, db):
         except ValueError:
             return "Invalid capacity value"
     if "id_structure" in data:
-        structure = db.query(Structure).filter(Structure.id == data["id_structure"]).first()
-        if not structure:
-            return "Invalid structure ID"
+        try:
+            structure = db.query(Structure).filter(Structure.id == data["id_structure"]).first()
+            if not structure:
+                return "Invalid structure ID"
+        except SQLAlchemyError as e:
+            logger.error("Database error validating structure ID %s: %s", data["id_structure"], str(e))
+            return "Failed to validate structure ID due to database error"
     return None
 
 
@@ -180,17 +184,18 @@ def update_room(room_id):
         flask.Response: JSON response with the updated room details (HTTP 200), or an error message (HTTP 400 or 404).
     """
     with get_db() as db:
-        room = db.query(Room).filter(Room.id == room_id).first()
-        if not room:
-            return jsonify({"error": "Room not found"}), 404
-
-        data = request.get_json()
-        # Validate input data
-        validation_error = _validate_room_update_data(data, db)
-        if validation_error:
-            return jsonify({"error": validation_error}), 400
-
         try:
+            room = db.query(Room).filter(Room.id == room_id).first()
+            if not room:
+                logger.warning("Room with ID %s not found for update", room_id)
+                return jsonify({"error": "Room not found"}), 404
+
+            data = request.get_json()
+            # Validate input data
+            validation_error = _validate_room_update_data(data, db)
+            if validation_error:
+                return jsonify({"error": validation_error}), 400
+
             if "name" in data:
                 room.name = data["name"]
             if "capacity" in data:
