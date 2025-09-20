@@ -219,7 +219,11 @@ def create_admin_user():
         return jsonify({"error": "An error occurred while creating the user"}), 500
     except Exception:
         db_session.rollback()
-        logging.exception("Unexpected error during user creation")
+        logger.exception("Unexpected error during user creation", extra=safe_extra_fields({
+            'username': data.get('username'),
+            'error_type': 'unexpected_error',
+            'operation_result': 'failed'
+        }))
         return jsonify({"error": "An unexpected error occurred"}), 500
     finally:
         db_session.close()
@@ -317,7 +321,12 @@ def get_portale_alloggi_config():
         }), 200
 
     except Exception as e:
-        logging.error("Error retrieving Portale Alloggi config: %s", str(e))
+        logger.error("Error retrieving Portale Alloggi config", extra=safe_extra_fields({
+            'user_id': get_jwt_identity(),
+            'error_type': type(e).__name__,
+            'error_details': str(e),
+            'operation_result': 'failed'
+        }))
         return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
     finally:
         db_session.close()
@@ -376,7 +385,12 @@ def update_portale_alloggi_config():
         }), 200
 
     except Exception as e:
-        logging.error("Error updating Portale Alloggi config: %s", str(e))
+        logger.error("Error updating Portale Alloggi config", extra=safe_extra_fields({
+            'user_id': get_jwt_identity(),
+            'error_type': type(e).__name__,
+            'error_details': str(e),
+            'operation_result': 'failed'
+        }))
         db_session.rollback()
         return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
     finally:
@@ -455,7 +469,12 @@ def test_portale_alloggi_connection():
             }), 400
 
     except Exception as e:
-        logging.error("Error testing Portale Alloggi connection: %s", str(e))
+        logger.error("Error testing Portale Alloggi connection", extra=safe_extra_fields({
+            'user_id': get_jwt_identity(),
+            'error_type': type(e).__name__,
+            'error_details': str(e),
+            'operation_result': 'failed'
+        }))
         return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
     finally:
         db_session.close()
@@ -573,7 +592,13 @@ def send_reservation_to_portale_alloggi(reservation_id):
         }), 400
 
     except Exception as e:
-        logging.error("Error sending reservation to Portale Alloggi: %s", str(e))
+        logger.error("Error sending reservation to Portale Alloggi", extra=safe_extra_fields({
+            'reservation_id': reservation_id,
+            'user_id': get_jwt_identity(),
+            'error_type': type(e).__name__,
+            'error_details': str(e),
+            'operation_result': 'failed'
+        }))
         return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
     finally:
         db_session.close()
@@ -674,7 +699,13 @@ def send_reservation_to_portale_alloggi_real(reservation_id):
         }), 400
 
     except Exception as e:
-        logging.error("Error sending reservation to Portale Alloggi: %s", str(e))
+        logger.error("Error sending reservation to Portale Alloggi", extra=safe_extra_fields({
+            'reservation_id': reservation_id,
+            'user_id': get_jwt_identity(),
+            'error_type': type(e).__name__,
+            'error_details': str(e),
+            'operation_result': 'failed'
+        }))
         return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
     finally:
         db_session.close()
@@ -713,7 +744,13 @@ def get_portale_alloggi_status(reservation_id):
         }), 200
 
     except Exception as e:
-        logging.error("Error getting Portale Alloggi status: %s", str(e))
+        logger.error("Error getting Portale Alloggi status", extra=safe_extra_fields({
+            'reservation_id': reservation_id,
+            'user_id': get_jwt_identity(),
+            'error_type': type(e).__name__,
+            'error_details': str(e),
+            'operation_result': 'failed'
+        }))
         return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
     finally:
         db_session.close()
