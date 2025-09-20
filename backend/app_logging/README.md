@@ -57,8 +57,8 @@ backend/logging/
 ### 1. Basic Setup
 
 ```python
-from logging.config import setup_logging
-from logging.middleware import setup_request_logging
+from app_logging.config import setup_logging
+from app_logging.middleware import setup_request_logging
 from flask import Flask
 
 app = Flask(__name__)
@@ -95,9 +95,9 @@ def process_user_data(user_data):
 ### 3. Manual Logging
 
 ```python
-from logging.config import get_logger
+import logging
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 def my_function():
     logger.info("Processing started", extra={
@@ -331,9 +331,9 @@ def create_reservation(reservation_data):
 ### With Error Handling
 
 ```python
-from logging.config import get_logger
+import logging
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 def process_payment(payment_data):
     try:
@@ -552,8 +552,8 @@ Replace old logging patterns:
 import logging
 logger = logging.getLogger(__name__)
 
-# New way
-from logging.config import get_logger
+# New way (for app_logging integration)
+from app_logging.config import get_logger
 logger = get_logger(__name__)
 ```
 
