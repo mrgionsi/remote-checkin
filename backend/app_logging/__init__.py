@@ -10,16 +10,17 @@ This package provides comprehensive logging infrastructure including:
 """
 
 from .config import setup_logging, get_logger
-from .middleware import LoggingMiddleware
-from .decorators import log_function, log_route
-from .formatters import JSONFormatter, ColoredFormatter
+from .middleware import setup_request_logging
+from .decorators import log_function, log_route, log_database_operation, log_performance
+from .utils import safe_extra_fields
 
 __all__ = [
     'setup_logging',
     'get_logger',
-    'LoggingMiddleware',
+    'setup_request_logging',
     'log_function',
     'log_route',
-    'JSONFormatter',
-    'ColoredFormatter'
+    'log_database_operation',
+    'log_performance',
+    'safe_extra_fields'
 ]

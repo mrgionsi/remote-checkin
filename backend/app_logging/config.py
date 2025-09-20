@@ -26,9 +26,6 @@ class LoggingConfig:
         'CRITICAL': logging.CRITICAL
     }
     
-    # Default configurations
-    DEFAULT_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    DEFAULT_DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
     
     @classmethod
     def get_environment(cls) -> str:
