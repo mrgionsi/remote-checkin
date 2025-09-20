@@ -129,13 +129,12 @@ def admin_login():
         }), 200
 
     except Exception as e:
-        logger.error("Login error occurred", extra=safe_extra_fields({
+        logger.exception("Login error occurred", extra=safe_extra_fields({
             'username': data.get('username'),
             'error_type': type(e).__name__,
-            'error_details': str(e),
             'operation_result': 'failed'
         }))
-        return jsonify({"error": f"Errore durante il login: {str(e)}"}), 500
+        return jsonify({"error": "Errore durante il login"}), 500
     finally:
         db_session.close()
 
@@ -211,12 +210,11 @@ def create_admin_user():
         return jsonify({"error": "User creation failed due to data constraint violation"}), 400
     except SQLAlchemyError as e:
         db_session.rollback()
-        logger.error("Database error during user creation", extra=safe_extra_fields({
+        logger.exception("Database error during user creation", extra=safe_extra_fields({
             'username': data.get('username'),
             'error_type': 'database_error',
-            'error_details': str(e),
             'operation_result': 'failed'
-        }), exc_info=True)
+        }))
         return jsonify({"error": "An error occurred while creating the user"}), 500
     except Exception:
         db_session.rollback()
