@@ -199,7 +199,6 @@ def create_reservation():
                 'email_service_type': type(email_service).__name__,
                 'operation': 'email_preparation'
             }))
-            # current_app.logger.info(f"Mail instance type: {type(mail)}")  # Removed as mail is not used in new email system
 
             # Send confirmation email
             email_result = email_service.send_reservation_confirmation(
