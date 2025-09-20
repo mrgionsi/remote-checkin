@@ -22,13 +22,21 @@ from email_handler import EmailService
 from routes.email_config_routes import get_encryption_key
 from app_logging.config import get_logger
 from app_logging.decorators import log_route, log_database_operation, log_performance
-from app_logging.utils import safe_extra_fields
+from app_logging.utils import safe_extra_fields, log_notification_error
 
 upload_bp = Blueprint('upload', __name__, url_prefix="/api/v1")
 
 # Configure logging
 logger = get_logger(__name__)
 UPLOAD_FOLDER = 'uploads/'
+
+def _get_gender_display(sesso):
+    """Convert gender code to display string."""
+    if sesso == '1':
+        return 'Male'
+    if sesso == '2':
+        return 'Female'
+    return 'N/A'
 
 @upload_bp.route('/upload', methods=['POST'])
 @log_route(include_request_data=True, include_response_data=True)
@@ -160,7 +168,7 @@ def upload_file():
                     'has_back_image': 'backimage' in files,
                     'has_selfie': 'selfie' in files,
                     # Portale Alloggi fields for admin notification
-                    'client_gender': 'Male' if client.sesso == '1' else 'Female' if client.sesso == '2' else 'N/A',
+                    'client_gender': _get_gender_display(client.sesso),
                     'client_nationality': client.nazionalita or 'N/A',
                     'client_birth_municipality': client.comune_nascita or 'N/A',
                     'client_birth_province': client.provincia_nascita or 'N/A',
@@ -194,7 +202,7 @@ def upload_file():
                         logger.info("Admin notification sent successfully", extra=safe_extra_fields({
                             'admin_email': admin_email,
                             'reservation_id': reservation_id,
-                            'client_name': f"{name} {surname}",
+                            'client_name': f"{form_data['name']} {form_data['surname']}",
                             'notification_result': 'success'
                         }))
                     else:
@@ -216,13 +224,10 @@ def upload_file():
 
         except Exception as e:
             # Don't fail the upload if email notification fails
-            logger.error("Error sending admin notification", extra=safe_extra_fields({
+            log_notification_error(logger, "admin notification", {
                 'reservation_id': reservation_id,
-                'client_name': f"{name} {surname}",
-                'error_type': type(e).__name__,
-                'error_details': str(e),
-                'notification_result': 'error'
-            }), exc_info=True)
+                'client_name': f"{form_data['name']} {form_data['surname']}"
+            }, e)
 
         return jsonify({
             "message": "Files uploaded successfully and client linked to reservation",

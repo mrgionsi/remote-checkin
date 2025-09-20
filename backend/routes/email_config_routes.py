@@ -19,7 +19,6 @@ from models import EmailConfig
 from database import SessionLocal
 from app_logging.config import get_logger
 from app_logging.decorators import log_route, log_database_operation, log_performance
-from app_logging.utils import safe_extra_fields
 
 # Configure logging
 logger = get_logger(__name__)

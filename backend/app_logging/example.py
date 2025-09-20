@@ -1,3 +1,4 @@
+#pylint: disable=C0301,C0413,W0718,C0301,E0401,C0415,R1720,R1705
 """
 Example usage of the logging system for the remote check-in application.
 

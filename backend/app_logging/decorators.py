@@ -9,7 +9,6 @@ import time
 import functools
 import logging
 from typing import Callable, Any, Optional, Dict, List
-from flask import request, g
 
 from .config import get_logger
 from .utils import get_correlation_id, safe_extra_fields
@@ -55,7 +54,7 @@ def log_function(
                 func_info['function_kwargs'] = _format_kwargs(kwargs, max_arg_length)
 
             # Log function entry
-            func_logger.log(level, f"Entering function {func.__qualname__}", extra=safe_extra_fields(func_info))
+            func_logger.log(level, "Entering function %s", func.__qualname__, extra=safe_extra_fields(func_info))
 
             try:
                 # Execute function
@@ -70,7 +69,7 @@ def log_function(
                     func_info['result'] = _format_value(result, max_arg_length)
 
                 # Log successful exit
-                func_logger.log(level, f"Exiting function {func.__qualname__}", extra=func_info)
+                func_logger.log(level, "Exiting function %s", func.__qualname__, extra=func_info)
 
                 return result
 
@@ -82,7 +81,7 @@ def log_function(
                 func_info['error_type'] = type(e).__name__
 
                 # Log exception
-                func_logger.error(f"Exception in function {func.__qualname__}", extra=func_info, exc_info=True)
+                func_logger.error("Exception in function %s", func.__qualname__, extra=func_info, exc_info=True)
 
                 # Re-raise the exception
                 raise
@@ -121,14 +120,15 @@ def log_route(
             route_info = _prepare_route_info(func, correlation_id, include_request_data)
 
             # Log route entry
-            func_logger.log(level, f"Handling route {func.__qualname__}", extra=route_info)
+            func_logger.log(level, "Handling route %s", func.__qualname__, extra=route_info)
 
             try:
                 # Execute route function
                 result = func(*args, **kwargs)
 
                 # Log successful completion
-                _log_route_success(func_logger, level, func, start_time, route_info, result, include_response_data)
+                _log_route_success(func_logger, level, func, start_time, route_info,
+                                 result=result, include_response_data=include_response_data)
 
                 return result
 
@@ -180,12 +180,14 @@ def log_performance(
                 if duration >= threshold_ms:
                     func_logger.log(
                         level,
-                        f"Slow operation detected: {func.__qualname__} took {duration}ms",
+                        "Slow operation detected: %s took %dms",
+                        func.__qualname__, duration,
                         extra=perf_info
                     )
                 else:
                     func_logger.debug(
-                        f"Performance: {func.__qualname__} took {duration}ms",
+                        "Performance: %s took %dms",
+                        func.__qualname__, duration,
                         extra=perf_info
                     )
 
@@ -234,7 +236,7 @@ def log_database_operation(
                 db_info['duration_ms'] = duration
 
                 # Log successful completion
-                func_logger.log(level, f"{operation_type} operation completed successfully", extra=db_info)
+                func_logger.log(level, "%s operation completed successfully", operation_type, extra=db_info)
 
                 return result
 
@@ -246,7 +248,7 @@ def log_database_operation(
                 db_info['error_type'] = type(e).__name__
 
                 # Log database error
-                func_logger.error(f"{operation_type} operation failed", extra=db_info, exc_info=True)
+                func_logger.error("%s operation failed", operation_type, extra=db_info, exc_info=True)
 
                 # Re-raise the exception
                 raise
@@ -267,7 +269,7 @@ def _format_kwargs(kwargs: Dict[str, Any], max_length: int) -> Dict[str, str]:
 
 def _prepare_route_info(func: Callable, correlation_id: Optional[str], include_request_data: bool) -> Dict[str, Any]:
     """Prepare route information for logging."""
-    from flask import request
+    from flask import request  # pylint: disable=import-outside-toplevel
 
     route_info = {
         'route_function': func.__qualname__,
@@ -286,30 +288,31 @@ def _prepare_route_info(func: Callable, correlation_id: Optional[str], include_r
 
         # Add user ID if available
         try:
-            from flask_jwt_extended import get_jwt_identity
+            from flask_jwt_extended import get_jwt_identity  # pylint: disable=import-outside-toplevel
             user_id = get_jwt_identity()
             if user_id:
                 route_info['user_id'] = user_id
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             pass
 
     return route_info
 
 
 def _log_route_success(func_logger: logging.Logger, level: int, func: Callable,
-                      start_time: float, route_info: Dict[str, Any], result: Any,
-                      include_response_data: bool) -> None:
+                      start_time: float, route_info: Dict[str, Any], **kwargs) -> None:
     """Log successful route completion."""
     # Calculate execution time
     duration = int((time.time() - start_time) * 1000)  # milliseconds
     route_info['duration_ms'] = duration
 
     # Add response data if requested
-    if include_response_data and hasattr(result, 'status_code'):
+    result = kwargs.get('result')
+    include_response_data = kwargs.get('include_response_data', False)
+    if include_response_data and result and hasattr(result, 'status_code'):
         route_info['status_code'] = result.status_code
 
     # Log successful completion
-    func_logger.log(level, f"Route {func.__qualname__} completed successfully", extra=route_info)
+    func_logger.log(level, "Route %s completed successfully", func.__qualname__, extra=route_info)
 
 
 def _log_route_error(func_logger: logging.Logger, func: Callable,
@@ -322,7 +325,7 @@ def _log_route_error(func_logger: logging.Logger, func: Callable,
     route_info['error_type'] = type(error).__name__
 
     # Log exception
-    func_logger.error(f"Exception in route {func.__qualname__}", extra=route_info, exc_info=True)
+    func_logger.error("Exception in route %s", func.__qualname__, extra=route_info, exc_info=True)
 
 
 def _format_value(value: Any, max_length: int) -> str:
@@ -332,5 +335,5 @@ def _format_value(value: Any, max_length: int) -> str:
         if len(str_value) > max_length:
             return str_value[:max_length] + "..."
         return str_value
-    except Exception:
+    except Exception:  # pylint: disable=broad-exception-caught
         return f"<{type(value).__name__}>"

@@ -1,3 +1,4 @@
+#pylint: disable=C0301,C0413,W0718,C0301,E0401,R0915
 """
 Centralized logging configuration for the remote check-in system.
 
@@ -10,7 +11,6 @@ This module provides environment-specific logging configurations with support fo
 import os
 import logging
 import logging.handlers
-from typing import Optional
 from .formatters import JSONFormatter, ColoredFormatter
 
 
@@ -37,10 +37,9 @@ class LoggingConfig:
         # If Flask is in debug mode or FLASK_ENV is development, use development
         if flask_env == 'development' or debug_mode:
             return 'development'
-        elif flask_env == 'testing':
+        if flask_env == 'testing':
             return 'testing'
-        else:
-            return 'production'
+        return 'production'
 
     @classmethod
     def get_log_level(cls) -> int:
@@ -173,7 +172,7 @@ def setup_logging(app_name: str = 'remote-checkin') -> None:
 
     # Log the configuration
     logger = logging.getLogger(__name__)
-    logger.info(f"Logging configured for environment: {environment}, level: {logging.getLevelName(log_level)}")
+    logger.info("Logging configured for environment: %s, level: %s", environment, logging.getLevelName(log_level))
 
 
 def _configure_third_party_loggers() -> None:
@@ -203,5 +202,3 @@ def get_logger(name: str) -> logging.Logger:
         Logger instance configured with the current settings
     """
     return logging.getLogger(name)
-
-

@@ -1,4 +1,4 @@
-#pylint: disable=W0718,R0902,R0914,C0301,C0303,R0911
+#pylint: disable=W0718,R0902,R0914,C0301,C0303,R0911,E0401
 """
 Portale Alloggi Service for Italian accommodation registry integration.
 
@@ -8,7 +8,6 @@ for submitting guest data to the Italian national accommodation registry.
 
 import os
 import json
-import logging
 import time
 from datetime import datetime
 from typing import Dict, List, Optional, Any, Callable

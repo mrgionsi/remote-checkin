@@ -22,12 +22,15 @@ from utils.email_utils import get_admin_email_config
 from database import SessionLocal
 from app_logging.config import get_logger
 from app_logging.decorators import log_route, log_database_operation, log_performance
-from app_logging.utils import safe_extra_fields
+from app_logging.utils import safe_extra_fields, log_notification_error
 
 
 class EmailConfigurationError(Exception):
     """Custom exception for email configuration errors."""
     pass
+
+# Constants
+STATUS_SENT_BACK_TO_CUSTOMER = "Sent back to customer"
 
 # Create a blueprint for reservations
 reservation_bp = Blueprint("reservations", __name__, url_prefix="/api/v1")
@@ -618,7 +621,7 @@ def update_reservation_status(reservation_id):
     """
     Update a reservation's status and notify the structure admin's configured email when appropriate.
 
-    Updates the Reservation identified by reservation_id to the provided status (one of "Approved", "Pending", "Declined", "Sent back to customer"). If the status changes to "Approved" or "Sent back to customer", the function attempts to send a notification email to the reservation's email using the structure admin's active EmailConfig; email failures are logged and do not prevent the status update. The function returns a JSON response with the updated reservation data on success or an error message with an appropriate HTTP status code on failure.
+    Updates the Reservation identified by reservation_id to the provided status (one of "Approved", "Pending", "Declined", STATUS_SENT_BACK_TO_CUSTOMER). If the status changes to "Approved" or STATUS_SENT_BACK_TO_CUSTOMER, the function attempts to send a notification email to the reservation's email using the structure admin's active EmailConfig; email failures are logged and do not prevent the status update. The function returns a JSON response with the updated reservation data on success or an error message with an appropriate HTTP status code on failure.
 
     Parameters:
         reservation_id: The reservation identifier (int or str). The value is compared against Reservation.id.
@@ -631,7 +634,7 @@ def update_reservation_status(reservation_id):
           - 500 for server-side errors.
     """
     data = request.get_json()
-    allowed_statuses = {"Approved", "Pending", "Declined", "Sent back to customer"}
+    allowed_statuses = {"Approved", "Pending", "Declined", STATUS_SENT_BACK_TO_CUSTOMER}
 
     if "status" not in data:
         return jsonify({"error": "Missing 'status' field"}), 400
@@ -655,8 +658,8 @@ def update_reservation_status(reservation_id):
         reservation.status = new_status
         db.commit()
 
-        # Send email notification if status changed to "Approved" or "Sent back to customer"
-        if old_status != new_status and new_status in ["Approved", "Sent back to customer"]:
+        # Send email notification if status changed to "Approved" or STATUS_SENT_BACK_TO_CUSTOMER
+        if old_status != new_status and new_status in ["Approved", STATUS_SENT_BACK_TO_CUSTOMER]:
             try:
                 # Get admin email configuration
                 email_config, _ = get_admin_email_config(reservation)
@@ -678,7 +681,7 @@ def update_reservation_status(reservation_id):
                                 'room_name': reservation.room.name if reservation.room else 'N/A'
                             }
                         )
-                    elif new_status == "Sent back to customer":
+                    elif new_status == STATUS_SENT_BACK_TO_CUSTOMER:
                         email_result = email_service.send_reservation_revision_notification(
                             reservation.email,
                             {
@@ -708,19 +711,16 @@ def update_reservation_status(reservation_id):
                 else:
                     logger.warning("No email configuration or recipient for status notification", extra=safe_extra_fields({
                         'reservation_id': reservation_id,
-                        'has_admin_config': admin_email_config is not None,
+                        'has_admin_config': email_config is not None,
                         'has_client_email': bool(reservation.email),
                         'notification_result': 'skipped'
                     }))
 
             except Exception as e:
-                logger.error("Error sending status change notification", extra=safe_extra_fields({
+                log_notification_error(logger, "status change notification", {
                     'reservation_id': reservation_id,
-                    'new_status': new_status,
-                    'error_type': type(e).__name__,
-                    'error_details': str(e),
-                    'notification_result': 'error'
-                }), exc_info=True)
+                    'new_status': new_status
+                }, e)
 
         return jsonify({
             "message": "Reservation status updated successfully",

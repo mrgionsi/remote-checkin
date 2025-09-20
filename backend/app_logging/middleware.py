@@ -1,3 +1,4 @@
+#pylint: disable=C0301,C0413,W0718,C0301,E0401
 """
 Logging middleware for Flask applications.
 
@@ -8,8 +9,8 @@ with correlation ID support and performance monitoring.
 import time
 import uuid
 import logging
-from typing import Optional, Dict, Any, List
-from flask import Flask, request, g, jsonify
+from typing import Optional, Any, List
+from flask import Flask, request, g
 from flask_jwt_extended import get_jwt_identity
 from werkzeug.exceptions import HTTPException
 
@@ -40,24 +41,21 @@ class LoggingMiddleware:
         '/health', '/ping', '/favicon.ico', '/robots.txt'
     }
 
-    def __init__(self, app: Optional[Flask] = None,
-                 exclude_paths: Optional[List[str]] = None,
-                 log_request_body: bool = True,
-                 log_response_body: bool = False,
-                 max_body_size: int = 1024):
+    def __init__(self, app: Optional[Flask] = None, **kwargs):
         """
         Initialize logging middleware.
 
         Args:
             app: Flask application instance
-            exclude_paths: Additional paths to exclude from logging
-            log_request_body: Whether to log request body
-            log_response_body: Whether to log response body
-            max_body_size: Maximum body size to log (in bytes)
+            **kwargs: Configuration options including:
+                exclude_paths: Additional paths to exclude from logging
+                log_request_body: Whether to log request body
+                log_response_body: Whether to log response body
+                max_body_size: Maximum body size to log (in bytes)
         """
-        self.log_request_body = log_request_body
-        self.log_response_body = log_response_body
-        self.max_body_size = max_body_size
+        self.log_request_body = kwargs.get('log_request_body', True)
+        self.log_response_body = kwargs.get('log_response_body', False)
+        self.max_body_size = kwargs.get('max_body_size', 1024)
         self.logger = get_logger(__name__)
 
         # Setup request formatter
@@ -67,6 +65,7 @@ class LoggingMiddleware:
         self.request_logger.propagate = True
 
         # Update excluded paths
+        exclude_paths = kwargs.get('exclude_paths')
         if exclude_paths:
             self.EXCLUDED_PATHS.update(exclude_paths)
 
@@ -126,7 +125,7 @@ class LoggingMiddleware:
                     if len(raw_data) <= self.max_body_size:
                         request_data['body'] = raw_data[:self.max_body_size]
             except Exception as e:
-                self.logger.warning(f"Failed to log request body: {e}")
+                self.logger.warning("Failed to log request body: %s", e)
 
         # Log the request
         self.logger.info("Incoming request", extra={'request_data': request_data})
@@ -166,7 +165,7 @@ class LoggingMiddleware:
                     response_data = response.get_json()
                     request_data['response_body'] = self._filter_sensitive_data(response_data)
             except Exception as e:
-                self.logger.warning(f"Failed to log response body: {e}")
+                self.logger.warning("Failed to log response body: %s", e)
 
         # Log the response
         log_level = self._get_log_level_for_status(response.status_code)
@@ -207,9 +206,9 @@ class LoggingMiddleware:
             # HTTP exceptions (4xx, 5xx)
             error_data['status_code'] = error.code
             if error.code >= 500:
-                self.logger.error(f"HTTP {error.code} error", extra=error_data, exc_info=True)
+                self.logger.error("HTTP %s error", error.code, extra=error_data, exc_info=True)
             else:
-                self.logger.warning(f"HTTP {error.code} error", extra=error_data)
+                self.logger.warning("HTTP %s error", error.code, extra=error_data)
         else:
             # Unexpected exceptions
             error_data['status_code'] = 500
@@ -230,10 +229,9 @@ class LoggingMiddleware:
         # Check for common proxy headers
         if request.headers.get('X-Forwarded-For'):
             return request.headers['X-Forwarded-For'].split(',')[0].strip()
-        elif request.headers.get('X-Real-IP'):
+        if request.headers.get('X-Real-IP'):
             return request.headers['X-Real-IP']
-        else:
-            return request.remote_addr or 'unknown'
+        return request.remote_addr or 'unknown'
 
     def _filter_sensitive_data(self, data: Any) -> Any:
         """
@@ -256,10 +254,9 @@ class LoggingMiddleware:
                 else:
                     filtered[key] = value
             return filtered
-        elif isinstance(data, list):
+        if isinstance(data, list):
             return [self._filter_sensitive_data(item) for item in data]
-        else:
-            return data
+        return data
 
     def _get_log_level_for_status(self, status_code: int) -> int:
         """
@@ -273,10 +270,18 @@ class LoggingMiddleware:
         """
         if status_code >= 500:
             return logging.ERROR
-        elif status_code >= 400:
+        if status_code >= 400:
             return logging.WARNING
-        else:
-            return logging.INFO
+        return logging.INFO
+
+    def configure_excluded_paths(self, paths: List[str]) -> None:
+        """
+        Configure additional paths to exclude from logging.
+        
+        Args:
+            paths: List of paths to exclude
+        """
+        self.EXCLUDED_PATHS.update(paths)
 
 
 def setup_request_logging(app: Flask, **kwargs) -> LoggingMiddleware:

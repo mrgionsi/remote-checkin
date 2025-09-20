@@ -10,7 +10,7 @@ import json
 import logging
 import traceback
 from datetime import datetime
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 from .utils import get_correlation_id
 
 
@@ -176,5 +176,3 @@ class ColoredFormatter(logging.Formatter):
             formatted_message += '\n' + self.formatException(record.exc_info)
 
         return formatted_message
-
-
