@@ -14,14 +14,37 @@ It defines the following endpoints:
 Each route interacts with the database to perform the necessary actions related to rooms.
 """
 
+import logging
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 #pylint: disable=E0611,E0401
 from models import Room, Structure
 from database import get_db  # Use absolute import
 
+# Configure logging
+logger = logging.getLogger(__name__)
+
 room_bp = Blueprint("room", __name__, url_prefix="/api/v1")
+
+
+def _validate_room_update_data(data, db):
+    """Validate room update data and return error message if invalid."""
+    if "name" in data and not data["name"].strip():
+        return "Room name cannot be empty"
+    if "capacity" in data:
+        try:
+            capacity = int(data["capacity"])
+            if capacity <= 0:
+                return "Capacity must be a positive number"
+        except ValueError:
+            return "Invalid capacity value"
+    if "id_structure" in data:
+        structure = db.query(Structure).filter(Structure.id == data["id_structure"]).first()
+        if not structure:
+            return "Invalid structure ID"
+    return None
 
 
 # Add a new room
@@ -59,11 +82,24 @@ def add_room():
         )
 
         # Add to DB and commit
-        db.add(new_room)
-        db.commit()
-        db.refresh(new_room)
-
-        return jsonify(new_room.to_dict()), 201
+        try:
+            db.add(new_room)
+            db.commit()
+            db.refresh(new_room)
+            logger.info(f"Room '{new_room.name}' created successfully with ID {new_room.id}")
+            return jsonify(new_room.to_dict()), 201
+        except IntegrityError as e:
+            db.rollback()
+            logger.error(f"Integrity error creating room '{data.get('name')}': {str(e)}")
+            return jsonify({"error": f"Room creation failed due to constraint violation: {str(e)}"}), 400
+        except SQLAlchemyError as e:
+            db.rollback()
+            logger.error(f"Database error creating room '{data.get('name')}': {str(e)}")
+            return jsonify({"error": "Failed to create room due to database error"}), 500
+        except Exception as e:
+            db.rollback()
+            logger.exception(f"Unexpected error creating room '{data.get('name')}': {str(e)}")
+            return jsonify({"error": "An unexpected error occurred while creating the room"}), 500
 
 
 # Get all rooms by structure
@@ -76,19 +112,27 @@ def get_rooms():
     Queries the database for Room records with id_structure currently hard-coded to 1, serializes each Room using its to_dict() method, and returns the list as a JSON response. The function does not accept parameters; behavior will need updating when structure selection is implemented via request parameters.
     """
     with get_db() as db:  # Using 'with' to properly manage the db session
-        id_structure = (
-            1  # Get structure ID from query params. For now, this value is fixed.
-        )
+        try:
+            id_structure = (
+                1  # Get structure ID from query params. For now, this value is fixed.
+            )
 
-        if id_structure:
-            rooms = db.query(Room).filter(Room.id_structure == id_structure).all()
-        else:
-            rooms = db.query(
-                Room
-            ).all()  # Return all rooms if no structure is specified
+            if id_structure:
+                rooms = db.query(Room).filter(Room.id_structure == id_structure).all()
+            else:
+                rooms = db.query(
+                    Room
+                ).all()  # Return all rooms if no structure is specified
 
-        room_data = [room.to_dict() for room in rooms]
-        return jsonify(room_data)
+            room_data = [room.to_dict() for room in rooms]
+            logger.info(f"Retrieved {len(room_data)} rooms for structure {id_structure}")
+            return jsonify(room_data)
+        except SQLAlchemyError as e:
+            logger.error(f"Database error retrieving rooms: {str(e)}")
+            return jsonify({"error": "Failed to retrieve rooms due to database error"}), 500
+        except Exception as e:
+            logger.exception(f"Unexpected error retrieving rooms: {str(e)}")
+            return jsonify({"error": "An unexpected error occurred while retrieving rooms"}), 500
 
 
 # Get room by ID
@@ -105,10 +149,19 @@ def get_room(room_id):
         Flask response: JSON with room details if found, or an error message with HTTP 404 if not found.
     """
     with get_db() as db:  # Using 'with' statement here as well
-        room = db.query(Room).filter(Room.id == room_id).first()
-        if room:
-            return jsonify(room.to_dict())
-        return jsonify({"error": "Room not found"}), 404
+        try:
+            room = db.query(Room).filter(Room.id == room_id).first()
+            if room:
+                logger.info(f"Retrieved room {room_id}: '{room.name}'")
+                return jsonify(room.to_dict())
+            logger.warning(f"Room with ID {room_id} not found")
+            return jsonify({"error": "Room not found"}), 404
+        except SQLAlchemyError as e:
+            logger.error(f"Database error retrieving room {room_id}: {str(e)}")
+            return jsonify({"error": "Failed to retrieve room due to database error"}), 500
+        except Exception as e:
+            logger.exception(f"Unexpected error retrieving room {room_id}: {str(e)}")
+            return jsonify({"error": "An unexpected error occurred while retrieving the room"}), 500
 
 
 # Update a room
@@ -128,35 +181,38 @@ def update_room(room_id):
     """
     with get_db() as db:
         room = db.query(Room).filter(Room.id == room_id).first()
-
         if not room:
             return jsonify({"error": "Room not found"}), 404
 
         data = request.get_json()
         # Validate input data
-        if "name" in data and not data["name"].strip():
-            return jsonify({"error": "Room name cannot be empty"}), 400
-        if "capacity" in data:
-            try:
-                capacity = int(data["capacity"])
-                if capacity <= 0:
-                    return jsonify({"error": "Capacity must be a positive number"}), 400
-            except ValueError:
-                return jsonify({"error": "Invalid capacity value"}), 400
-        if "id_structure" in data:
-            structure = db.query(Structure).filter(Structure.id == data["id_structure"]).first()
-            if not structure:
-                return jsonify({"error": "Invalid structure ID"}), 400
+        validation_error = _validate_room_update_data(data, db)
+        if validation_error:
+            return jsonify({"error": validation_error}), 400
 
-        if "name" in data:
-            room.name = data["name"]
-        if "capacity" in data:
-            room.capacity = data["capacity"]
-        if "id_structure" in data:
-            room.id_structure = data["id_structure"]
+        try:
+            if "name" in data:
+                room.name = data["name"]
+            if "capacity" in data:
+                room.capacity = data["capacity"]
+            if "id_structure" in data:
+                room.id_structure = data["id_structure"]
 
-        db.commit()
-        return jsonify(room.to_dict()), 200
+            db.commit()
+            logger.info(f"Room {room_id} updated successfully")
+            return jsonify(room.to_dict()), 200
+        except IntegrityError as e:
+            db.rollback()
+            logger.error(f"Integrity error updating room {room_id}: {str(e)}")
+            return jsonify({"error": f"Room update failed due to constraint violation: {str(e)}"}), 400
+        except SQLAlchemyError as e:
+            db.rollback()
+            logger.error(f"Database error updating room {room_id}: {str(e)}")
+            return jsonify({"error": "Failed to update room due to database error"}), 500
+        except Exception as e:
+            db.rollback()
+            logger.exception(f"Unexpected error updating room {room_id}: {str(e)}")
+            return jsonify({"error": "An unexpected error occurred while updating the room"}), 500
 
 
 # Delete a room
@@ -178,8 +234,23 @@ def delete_room(room_id):
         room = db.query(Room).filter(Room.id == room_id).first()
 
         if room:
-            db.delete(room)
-            db.commit()
-            return jsonify({"message": "Room deleted successfully"}), 200
+            try:
+                db.delete(room)
+                db.commit()
+                logger.info(f"Room {room_id} ('{room.name}') deleted successfully")
+                return jsonify({"message": "Room deleted successfully"}), 200
+            except IntegrityError as e:
+                db.rollback()
+                logger.error(f"Integrity error deleting room {room_id}: {str(e)}")
+                return jsonify({"error": f"Failed to delete room due to foreign key constraints: {str(e)}"}), 400
+            except SQLAlchemyError as e:
+                db.rollback()
+                logger.error(f"Database error deleting room {room_id}: {str(e)}")
+                return jsonify({"error": f"Failed to delete room: {str(e)}"}), 500
+            except Exception as e:
+                db.rollback()
+                logger.exception(f"Unexpected error deleting room {room_id}: {str(e)}")
+                return jsonify({"error": "An unexpected error occurred while deleting the room"}), 500
 
+        logger.warning(f"Room with ID {room_id} not found for deletion")
         return jsonify({"error": "Room not found"}), 404
