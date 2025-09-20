@@ -13,7 +13,6 @@ from flask import Flask, request, g, jsonify
 from flask_jwt_extended import get_jwt_identity
 from werkzeug.exceptions import HTTPException
 
-from .formatters import RequestFormatter
 from .config import get_logger
 
 
@@ -63,10 +62,9 @@ class LoggingMiddleware:
         
         # Setup request formatter
         self.request_logger = logging.getLogger(f"{__name__}.requests")
-        handler = logging.StreamHandler()
-        handler.setFormatter(RequestFormatter())
-        self.request_logger.addHandler(handler)
-        self.request_logger.propagate = False
+        # Request logger will use the same formatters as the main logging system
+        # No need for separate handler - let it propagate to root logger
+        self.request_logger.propagate = True
         
         # Update excluded paths
         if exclude_paths:
