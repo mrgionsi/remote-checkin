@@ -9,10 +9,20 @@ with correlation ID support and performance monitoring.
 import time
 import uuid
 import logging
-from typing import Optional, Any, List
-from flask import Flask, request, g
-from flask_jwt_extended import get_jwt_identity
-from werkzeug.exceptions import HTTPException
+import json
+from typing import Optional, Any, List, ClassVar, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from flask import Flask, request, g
+    from flask_jwt_extended import get_jwt_identity
+    from werkzeug.exceptions import HTTPException
+else:
+    try:
+        from flask import Flask, request, g
+        from flask_jwt_extended import get_jwt_identity
+        from werkzeug.exceptions import HTTPException
+    except ImportError:
+        Flask = request = g = get_jwt_identity = HTTPException = None
 
 from .config import get_logger
 
@@ -31,13 +41,13 @@ class LoggingMiddleware:
     """
 
     # Sensitive fields that should be filtered from logs
-    SENSITIVE_FIELDS = {
+    SENSITIVE_FIELDS: ClassVar[set] = {
         'password', 'passwd', 'secret', 'token', 'key', 'authorization',
         'x-api-key', 'x-auth-token', 'cookie', 'session'
     }
-
+    
     # Paths to exclude from detailed logging (health checks, static files, etc.)
-    EXCLUDED_PATHS = {
+    EXCLUDED_PATHS: ClassVar[set] = {
         '/health', '/ping', '/favicon.ico', '/robots.txt'
     }
 
@@ -124,7 +134,7 @@ class LoggingMiddleware:
                     raw_data = request.get_data(as_text=True)
                     if len(raw_data) <= self.max_body_size:
                         request_data['body'] = raw_data[:self.max_body_size]
-            except Exception as e:
+            except (KeyError, ValueError, TypeError, json.JSONDecodeError) as e:
                 self.logger.warning("Failed to log request body: %s", e)
 
         # Log the request
@@ -164,7 +174,7 @@ class LoggingMiddleware:
                 if response.is_json:
                     response_data = response.get_json()
                     request_data['response_body'] = self._filter_sensitive_data(response_data)
-            except Exception as e:
+            except (KeyError, ValueError, TypeError, json.JSONDecodeError) as e:
                 self.logger.warning("Failed to log response body: %s", e)
 
         # Log the response
@@ -221,7 +231,7 @@ class LoggingMiddleware:
         """Get current user ID from JWT token."""
         try:
             return get_jwt_identity()
-        except Exception:
+        except (ImportError, RuntimeError, AttributeError):
             return None
 
     def _get_client_ip(self) -> str:
