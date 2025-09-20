@@ -45,10 +45,11 @@ from flask import Blueprint, jsonify, request, send_from_directory
 from flask_jwt_extended import jwt_required, verify_jwt_in_request
 
 from models import Client, ClientReservations, Reservation
-from database import SessionLocal
 from app_logging.config import get_logger
 from app_logging.decorators import log_route, log_database_operation
 from app_logging.utils import safe_extra_fields
+from database import SessionLocal
+
 
 # Blueprint setup
 client_reservation_bp = Blueprint("client_reservations", __name__, url_prefix="/api/v1")
