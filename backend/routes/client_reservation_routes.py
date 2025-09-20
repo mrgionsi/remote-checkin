@@ -158,6 +158,7 @@ def safe_file_exists(file_path: Path) -> bool:
 
 @client_reservation_bp.route("/reservations/<string:reservation_id>/client-images", methods=["POST"])
 @jwt_required()
+@log_route(include_request_data=True, include_response_data=True)
 def check_images(reservation_id):
     """
     Check whether identity images (back, front, selfie) exist for a given reservation and client.
@@ -226,6 +227,7 @@ def check_images(reservation_id):
 
 
 @client_reservation_bp.route("/images/<string:reservation_id>/<path:filename>", methods=["GET", "OPTIONS"])
+@log_route(include_request_data=True)
 def get_image(reservation_id, filename):
     """
     Serve a client identity image file for a reservation or respond to CORS preflight.
@@ -253,11 +255,20 @@ def get_image(reservation_id, filename):
     try:
         # Use secure path resolution to prevent path traversal
         file_path = get_secure_file_path(reservation_id, filename)
-        print(f"Looking for image: reservation_id={reservation_id}, filename={filename}")
-        print(f"Resolved file path: {file_path}")
+        logger.debug("Looking for client image file", extra=safe_extra_fields({
+            'reservation_id': reservation_id,
+            'filename': filename,
+            'resolved_path': str(file_path),
+            'operation': 'file_lookup'
+        }))
 
         if not safe_file_exists(file_path):
-            print(f"File not found: {file_path}")
+            logger.warning("Client image file not found", extra=safe_extra_fields({
+                'reservation_id': reservation_id,
+                'filename': filename,
+                'file_path': str(file_path),
+                'operation_result': 'not_found'
+            }))
             return jsonify({"error": "Image not found"}), 404
 
         # Get the directory and filename for send_from_directory
@@ -268,10 +279,22 @@ def get_image(reservation_id, filename):
         response = send_from_directory(folder_path, safe_filename)
 
     except ValueError as e:
-        print(f"Path traversal detected: {e}")
+        logger.error("Path traversal attempt detected", extra=safe_extra_fields({
+            'reservation_id': reservation_id,
+            'filename': filename,
+            'error_type': 'security_violation',
+            'error_details': str(e),
+            'operation_result': 'blocked'
+        }))
         return jsonify({"error": "Invalid file path"}), 400
     except Exception as e:
-        print(f"Error accessing file: {e}")
+        logger.error("Error accessing client image file", extra=safe_extra_fields({
+            'reservation_id': reservation_id,
+            'filename': filename,
+            'error_type': 'file_access_error',
+            'error_details': str(e),
+            'operation_result': 'failed'
+        }))
         return jsonify({"error": "Error accessing file"}), 500
     response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'

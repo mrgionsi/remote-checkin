@@ -129,7 +129,12 @@ def admin_login():
         }), 200
 
     except Exception as e:
-        logging.error("Errore durante il login: %s", e)
+        logger.error("Login error occurred", extra=safe_extra_fields({
+            'username': data.get('username'),
+            'error_type': type(e).__name__,
+            'error_details': str(e),
+            'operation_result': 'failed'
+        }))
         return jsonify({"error": f"Errore durante il login: {str(e)}"}), 500
     finally:
         db_session.close()
@@ -196,11 +201,21 @@ def create_admin_user():
 #pylint: disable=W0703,R0911
     except IntegrityError:
         db_session.rollback()
-        logging.exception("Database integrity error during user creation")
+        logger.error("User creation failed due to integrity constraint", extra=safe_extra_fields({
+            'username': data.get('username'),
+            'email': data.get('email'),
+            'error_type': 'integrity_constraint',
+            'error_details': str(e),
+            'operation_result': 'failed'
+        }), exc_info=True)
         return jsonify({"error": "User creation failed due to data constraint violation"}), 400
     except SQLAlchemyError:
         db_session.rollback()
-        logging.exception("Database error during user creation")
+        logger.error("Database error during user creation", extra=safe_extra_fields({
+            'username': data.get('username'),
+            'error_type': 'database_error',
+            'operation_result': 'failed'
+        }), exc_info=True)
         return jsonify({"error": "An error occurred while creating the user"}), 500
     except Exception:
         db_session.rollback()
@@ -469,6 +484,8 @@ def _prepare_reservation_data(reservation):
 
 @admin_bp.route("/admin/reservations/<int:reservation_id>/send-to-portale-alloggi", methods=["POST"])
 @jwt_required()
+@log_route(include_request_data=True, include_response_data=True)
+@log_performance(threshold_ms=10000)
 def send_reservation_to_portale_alloggi(reservation_id):
     """
     Send guest data from a reservation to Portale Alloggi.
@@ -564,6 +581,8 @@ def send_reservation_to_portale_alloggi(reservation_id):
 
 @admin_bp.route("/admin/reservations/<int:reservation_id>/send-to-portale-alloggi-real", methods=["POST"])
 @jwt_required()
+@log_route(include_request_data=True, include_response_data=True)
+@log_performance(threshold_ms=10000)
 def send_reservation_to_portale_alloggi_real(reservation_id):
     """
     Send guest data from a reservation to Portale Alloggi (REAL PRODUCTION).
@@ -663,6 +682,8 @@ def send_reservation_to_portale_alloggi_real(reservation_id):
 
 @admin_bp.route("/admin/reservations/<int:reservation_id>/portale-alloggi-status", methods=["GET"])
 @jwt_required()
+@log_route(include_request_data=True)
+@log_database_operation("READ")
 def get_portale_alloggi_status(reservation_id):
     """
     Get Portale Alloggi submission status for a reservation.
