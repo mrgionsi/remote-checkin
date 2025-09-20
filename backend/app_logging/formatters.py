@@ -17,28 +17,28 @@ from .utils import get_correlation_id
 class JSONFormatter(logging.Formatter):
     """
     JSON formatter for structured logging in production environments.
-    
+
     Outputs logs in JSON format with consistent fields for easy parsing
     by log aggregation systems like ELK stack, Splunk, etc.
     """
-    
+
     def __init__(self, app_name: str = 'remote-checkin'):
         """
         Initialize JSON formatter.
-        
+
         Args:
             app_name: Application name to include in logs
         """
         super().__init__()
         self.app_name = app_name
-    
+
     def format(self, record: logging.LogRecord) -> str:
         """
         Format log record as JSON.
-        
+
         Args:
             record: Log record to format
-            
+
         Returns:
             JSON formatted log string
         """
@@ -54,12 +54,12 @@ class JSONFormatter(logging.Formatter):
             'process_id': record.process,
             'thread_id': record.thread,
         }
-        
+
         # Add correlation ID if available
         correlation_id = get_correlation_id()
         if correlation_id:
             log_data['correlation_id'] = correlation_id
-        
+
         # Add exception information if present
         if record.exc_info:
             log_data['exception'] = {
@@ -67,21 +67,21 @@ class JSONFormatter(logging.Formatter):
                 'message': str(record.exc_info[1]),
                 'traceback': traceback.format_exception(*record.exc_info)
             }
-        
+
         # Add extra fields from record
         extra_fields = self._get_extra_fields(record)
         if extra_fields:
             log_data['extra'] = extra_fields
-        
+
         return json.dumps(log_data, ensure_ascii=False, separators=(',', ':'))
-    
+
     def _get_extra_fields(self, record: logging.LogRecord) -> Dict[str, Any]:
         """
         Extract extra fields from log record.
-        
+
         Args:
             record: Log record
-            
+
         Returns:
             Dictionary of extra fields
         """
@@ -92,7 +92,7 @@ class JSONFormatter(logging.Formatter):
             'thread', 'threadName', 'processName', 'process', 'exc_info', 'exc_text',
             'stack_info', 'getMessage', 'taskName', 'asctime', 'message'
         }
-        
+
         extra = {}
         for key, value in record.__dict__.items():
             if key not in standard_fields and not key.startswith('_'):
@@ -102,18 +102,18 @@ class JSONFormatter(logging.Formatter):
                     extra[key] = value
                 except (TypeError, ValueError):
                     extra[key] = str(value)
-        
+
         return extra
 
 
 class ColoredFormatter(logging.Formatter):
     """
     Colored formatter for development environment console output.
-    
+
     Provides colored output based on log levels and includes correlation IDs
     for better debugging experience.
     """
-    
+
     # Color codes for different log levels
     COLORS = {
         logging.DEBUG: '\033[36m',      # Cyan
@@ -122,10 +122,10 @@ class ColoredFormatter(logging.Formatter):
         logging.ERROR: '\033[31m',      # Red
         logging.CRITICAL: '\033[35m',   # Magenta
     }
-    
+
     RESET = '\033[0m'  # Reset color
     BOLD = '\033[1m'   # Bold text
-    
+
     def __init__(self):
         """Initialize colored formatter with custom format."""
         super().__init__()
@@ -136,27 +136,27 @@ class ColoredFormatter(logging.Formatter):
             '{color}{logger}:{function}:{lineno}{reset} - '
             '{message}'
         )
-    
+
     def format(self, record: logging.LogRecord) -> str:
         """
         Format log record with colors.
-        
+
         Args:
             record: Log record to format
-            
+
         Returns:
             Colored formatted log string
         """
         # Get color for log level
         color = self.COLORS.get(record.levelno, '')
-        
+
         # Format timestamp
         timestamp = datetime.fromtimestamp(record.created).strftime('%Y-%m-%d %H:%M:%S')
-        
+
         # Get correlation ID
         correlation_id = get_correlation_id()
         correlation_str = f'[{correlation_id[:8]}] ' if correlation_id else ''
-        
+
         # Format the message
         formatted_message = self.base_format.format(
             color=color,
@@ -170,11 +170,11 @@ class ColoredFormatter(logging.Formatter):
             lineno=record.lineno,
             message=record.getMessage()
         )
-        
+
         # Add exception information if present
         if record.exc_info:
             formatted_message += '\n' + self.formatException(record.exc_info)
-        
+
         return formatted_message
 
 

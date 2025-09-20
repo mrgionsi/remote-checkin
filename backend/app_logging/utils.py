@@ -11,7 +11,7 @@ from typing import Optional, Dict, Any
 def get_correlation_id() -> Optional[str]:
     """
     Get the current correlation ID from Flask's g object.
-    
+
     Returns:
         Correlation ID if available, None otherwise
     """
@@ -26,10 +26,10 @@ def get_correlation_id() -> Optional[str]:
 def safe_extra_fields(extra_data: Dict[str, Any]) -> Dict[str, Any]:
     """
     Filter out reserved field names from extra logging data to prevent KeyError.
-    
+
     Args:
         extra_data: Dictionary of extra fields for logging
-        
+
     Returns:
         Filtered dictionary with reserved fields removed
     """
@@ -40,8 +40,8 @@ def safe_extra_fields(extra_data: Dict[str, Any]) -> Dict[str, Any]:
         'thread', 'threadName', 'processName', 'process', 'exc_info', 'exc_text',
         'stack_info', 'getMessage', 'taskName', 'asctime', 'message'
     }
-    
+
     return {
-        key: value for key, value in extra_data.items() 
+        key: value for key, value in extra_data.items()
         if key not in reserved_fields and not key.startswith('_')
     }

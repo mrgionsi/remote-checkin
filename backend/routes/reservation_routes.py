@@ -8,10 +8,9 @@ It supports operations such as creating new reservations and listing all reserva
 """
 
 import calendar
-import traceback
 from datetime import datetime
 
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, jsonify
 from sqlalchemy import  func
 from sqlalchemy.sql import extract
 from flask_jwt_extended import get_jwt_identity, jwt_required
@@ -22,7 +21,7 @@ from routes.email_config_routes import get_encryption_key
 from utils.email_utils import get_admin_email_config
 from database import SessionLocal
 from app_logging.config import get_logger
-from app_logging.decorators import log_route, log_database_operation, log_function, log_performance
+from app_logging.decorators import log_route, log_database_operation, log_performance
 from app_logging.utils import safe_extra_fields
 
 
@@ -44,7 +43,7 @@ logger = get_logger(__name__)
 def create_reservation():
     """
     Create a new reservation from JSON payload, persist it to the database, and (optionally) send a confirmation email.
-    
+
     Expects a POST JSON body with the required fields:
       - reservationNumber (str): external reservation identifier
       - startDate (str): reservation start in YYYY-MM-DD
@@ -55,13 +54,13 @@ def create_reservation():
       - nameReference (str)
       - telephone (str)
       - numberOfPeople (int): number of people for this reservation (default: 1, max: room capacity)
-    
+
     Behavior:
       - Validates required fields and parses dates (format YYYY-MM-DD).
       - Looks up Room by name and returns 404 if not found.
       - Creates and commits a Reservation record (returns 201 on success).
       - After committing, attempts to send a confirmation email using the caller's active EmailConfig; email failures are logged and do not roll back the reservation.
-    
+
     Responses:
       - 201: JSON payload with created reservation details.
       - 400: missing fields or invalid date formats.
@@ -272,9 +271,9 @@ def create_reservation():
 def update_reservation(reservation_id):
     """
     Update an existing reservation's fields by its database ID.
-    
+
     Accepts a JSON payload with any of the updatable fields listed below and persists changes to the database.
-    
+
     Payload fields (all optional except at least one meaningful field):
     - start_date, end_date: strings parsed with format "%a, %d %b %Y %H:%M:%S GMT".
     - name_reference (str)
@@ -284,12 +283,12 @@ def update_reservation(reservation_id):
     - status (str)
     - number_of_people (int): number of people for this reservation (max: room capacity)
     - room: object containing "id" (int) — if provided, the referenced Room must exist.
-    
+
     Behavior:
     - Commits changes and returns the updated reservation representation on success.
     - Returns 404 if the reservation or referenced room is not found.
     - Returns 500 on unexpected errors.
-    
+
     Returns:
     - Flask JSON response with HTTP 200 and the updated reservation on success; otherwise a JSON error with the appropriate HTTP status code.
     """
@@ -393,10 +392,10 @@ def update_reservation(reservation_id):
 def delete_reservation(reservation_id):
     """
     Delete a reservation by its database ID.
-    
+
     Parameters:
         reservation_id (int): Primary key of the reservation to remove.
-    
+
     Returns:
         A Flask JSON response with:
           - 200 and a success message when the reservation is deleted,
@@ -429,7 +428,7 @@ def delete_reservation(reservation_id):
 def get_reservations():
     """
     Return a JSON response containing a list of reservations.
-    
+
     This endpoint responds with {"reservations": [...]}. Currently the list is a placeholder (empty) and should be replaced with actual reservation objects retrieved from the database. Requires authenticated access (JWT) in the application routes.
     """
     # This would typically query the database to get reservations
@@ -445,12 +444,12 @@ def get_reservations():
 def get_reservations_by_structure(structure_id):
     """
     Return all reservations for the specified structure as a JSON array.
-    
+
     Queries the read-only StructureReservationsView for reservations whose room belongs to the given structure. Each reservation in the response includes structure and room identifiers, reference id, ISO-8601 formatted start and end dates, status, and guest name.
-    
+
     Parameters:
         structure_id (int): ID of the Structure to fetch reservations for.
-    
+
     Returns:
         flask.Response: JSON array of reservation objects. If no reservations exist for the structure, an empty list is returned.
     """
@@ -481,12 +480,12 @@ def get_reservations_by_structure(structure_id):
 def get_admin_reservations_by_id(reservation_id):
     """
     Retrieve a reservation by its ID for administrative use.
-    
+
     Looks up the Reservation by primary key (accepts int or string-like IDs) and returns its serialized representation as JSON.
-    
+
     Parameters:
         reservation_id (int | str): Reservation primary key. The value is compared as a string against the stored Reservation.id.
-    
+
     Returns:
         Flask Response: JSON body with the reservation dictionary and HTTP 200 when found; JSON error with HTTP 404 if not found; JSON error with HTTP 500 on unexpected failures.
     """
@@ -516,10 +515,10 @@ def check_get_reservations_by_id(reservation_id):
     """
     Check whether a reservation exists by its reference ID and return the reference when found.
     Also returns capacity information needed for client registration.
-    
+
     Parameters:
         reservation_id (str): The reservation reference (id_reference) to look up.
-    
+
     Returns:
         Flask Response: JSON with reservation details including capacity info and HTTP 200 if found;
         JSON error and HTTP 404 if not found; JSON error and HTTP 500 on unexpected errors.
@@ -563,12 +562,12 @@ def check_get_reservations_by_id(reservation_id):
 def get_reservations_per_month(structure_id):
     """
     Return the number of reservations per calendar month for a given structure.
-    
+
     Returns a list of 12 entries (January–December) with counts for each month; months with no reservations are returned with a count of 0.
-    
+
     Parameters:
         structure_id (int): ID of the structure to query.
-    
+
     Returns:
         flask.Response: JSON array of objects {"month": "<Month Name>", "total_reservations": <int>} and HTTP status 200.
         If the specified structure does not exist, returns a 404 JSON response {"message": "Structure not found"}.
@@ -618,12 +617,12 @@ def get_reservations_per_month(structure_id):
 def update_reservation_status(reservation_id):
     """
     Update a reservation's status and notify the structure admin's configured email when appropriate.
-    
+
     Updates the Reservation identified by reservation_id to the provided status (one of "Approved", "Pending", "Declined", "Sent back to customer"). If the status changes to "Approved" or "Sent back to customer", the function attempts to send a notification email to the reservation's email using the structure admin's active EmailConfig; email failures are logged and do not prevent the status update. The function returns a JSON response with the updated reservation data on success or an error message with an appropriate HTTP status code on failure.
-    
+
     Parameters:
         reservation_id: The reservation identifier (int or str). The value is compared against Reservation.id.
-    
+
     Returns:
         A Flask JSON response:
           - 200 with the updated reservation object on success.

@@ -12,7 +12,6 @@ All routes are registered under the '/api/v1/admin' URL prefix and require appro
 """
 
 from datetime import timedelta,datetime,timezone
-import logging
 from flask import Blueprint, request, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request, get_jwt
@@ -22,7 +21,7 @@ from services.portale_alloggi_service import PortaleAlloggiService
 from utils.encryption_utils import encrypt_password, decrypt_password
 from database import SessionLocal
 from app_logging.config import get_logger
-from app_logging.decorators import log_route, log_database_operation, log_function, log_performance
+from app_logging.decorators import log_route, log_database_operation, log_performance
 from app_logging.utils import safe_extra_fields
 
 # Blueprint setup
@@ -40,7 +39,7 @@ RESERVATION_NOT_FOUND = "Reservation not found"
 def verify_admin_access():
     """
     Verify JWT authentication and admin role access.
-    
+
     Returns:
         tuple: (error_response, error_code) if verification fails, (None, None) if successful
     """
@@ -64,11 +63,11 @@ def verify_admin_access():
 def admin_login():
     """
     Authenticate an admin user and return a JWT access token with the user's profile and associated structures.
-    
+
     Expects a JSON body with `username` and `password`. On success returns HTTP 200 with a JSON object containing:
     - `access_token`: JWT (expires in 2 hours) whose identity is the user ID and includes `username` and `role` claims.
     - `user`: object with `id`, `username`, `name`, `surname`, `email`, `telephone`, `structures` (list of {id, name}), and `role`.
-    
+
     Possible responses:
     - 200: Authentication successful.
     - 400: Missing `username` or `password`.
@@ -147,7 +146,7 @@ def admin_login():
 def create_admin_user():
     """
     Create a new admin user from a JSON request.
-    
+
     Requires JWT authentication and admin role. Expects a JSON body with required fields: `username`, `password`, and `id_role`; optional fields: `name`, `surname`, `email`, and `telephone`. On success inserts a new User record (password is stored hashed) and returns HTTP 201 with the created user's data (id, username, name, surname, email, telephone, id_role). Returns HTTP 400 when required fields are missing or the username already exists, HTTP 401 for missing/invalid JWT, HTTP 403 for insufficient permissions, and HTTP 500 for unexpected server errors.
     """
     # Verify JWT authentication and admin role
@@ -199,7 +198,7 @@ def create_admin_user():
             }
         }), 201
 #pylint: disable=W0703,R0911
-    except IntegrityError:
+    except IntegrityError as e:
         db_session.rollback()
         logger.error("User creation failed due to integrity constraint", extra=safe_extra_fields({
             'username': data.get('username'),
@@ -209,11 +208,12 @@ def create_admin_user():
             'operation_result': 'failed'
         }), exc_info=True)
         return jsonify({"error": "User creation failed due to data constraint violation"}), 400
-    except SQLAlchemyError:
+    except SQLAlchemyError as e:
         db_session.rollback()
         logger.error("Database error during user creation", extra=safe_extra_fields({
             'username': data.get('username'),
             'error_type': 'database_error',
+            'error_details': str(e),
             'operation_result': 'failed'
         }), exc_info=True)
         return jsonify({"error": "An error occurred while creating the user"}), 500
@@ -235,9 +235,9 @@ def create_admin_user():
 def get_admin_info():
     """
     Return the authenticated admin user's profile and associated structures.
-    
+
     Admin-only access (requires role: admin). Requires a valid JWT (identity is the user id). Queries the database for the user and their AdminStructure->Structure associations and returns a JSON response with the user's fields and a list of structures.
-    
+
     Returns:
         tuple: (Flask Response, int) JSON payload and HTTP status code.
             Success (200) JSON structure:
@@ -299,7 +299,7 @@ def get_admin_info():
 def get_portale_alloggi_config():
     """
     Get Portale Alloggi configuration for the current user.
-    
+
     Returns:
         JSON response with Portale Alloggi credentials (password masked)
     """
@@ -339,14 +339,14 @@ def get_portale_alloggi_config():
 def update_portale_alloggi_config():
     """
     Update Portale Alloggi configuration for the current user.
-    
+
     Expected JSON payload:
     {
         "portale_username": "string",
         "portale_password": "string",  # Will be encrypted
         "portale_wskey": "string"
     }
-    
+
     Returns:
         JSON response with success message
     """
@@ -404,7 +404,7 @@ def update_portale_alloggi_config():
 def test_portale_alloggi_connection():
     """
     Test Portale Alloggi connection with current credentials.
-    
+
     Returns:
         JSON response with test results
     """
@@ -508,10 +508,10 @@ def _prepare_reservation_data(reservation):
 def send_reservation_to_portale_alloggi(reservation_id):
     """
     Send guest data from a reservation to Portale Alloggi.
-    
+
     Args:
         reservation_id (int): ID of the reservation to send
-        
+
     Returns:
         JSON response with submission results
     """
@@ -611,10 +611,10 @@ def send_reservation_to_portale_alloggi(reservation_id):
 def send_reservation_to_portale_alloggi_real(reservation_id):
     """
     Send guest data from a reservation to Portale Alloggi (REAL PRODUCTION).
-    
+
     Args:
         reservation_id (int): ID of the reservation to send
-        
+
     Returns:
         JSON response with submission results
     """
@@ -718,10 +718,10 @@ def send_reservation_to_portale_alloggi_real(reservation_id):
 def get_portale_alloggi_status(reservation_id):
     """
     Get Portale Alloggi submission status for a reservation.
-    
+
     Args:
         reservation_id (int): ID of the reservation to check
-        
+
     Returns:
         JSON response with submission status
     """

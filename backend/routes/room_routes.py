@@ -14,7 +14,6 @@ It defines the following endpoints:
 Each route interacts with the database to perform the necessary actions related to rooms.
 """
 
-import logging
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
@@ -147,7 +146,7 @@ def add_room():
 def get_rooms():
     """
     Return a JSON array of rooms for a fixed structure.
-    
+
     Queries the database for Room records with id_structure currently hard-coded to 1, serializes each Room using its to_dict() method, and returns the list as a JSON response. The function does not accept parameters; behavior will need updating when structure selection is implemented via request parameters.
     """
     with get_db() as db:  # Using 'with' to properly manage the db session
@@ -267,7 +266,7 @@ def update_room(room_id):
                 return jsonify({"error": "Room not found"}), 404
 
             data = request.get_json()
-            
+
             # Log update attempt with details
             logger.info("Attempting room update", extra=safe_extra_fields({
                 'room_id': room_id,
@@ -276,7 +275,7 @@ def update_room(room_id):
                 'update_fields': list(data.keys()) if data else [],
                 'operation': 'update_validation'
             }))
-            
+
             # Validate input data
             validation_error = _validate_room_update_data(data, db)
             if validation_error:
@@ -366,7 +365,7 @@ def delete_room(room_id):
                 'operation': 'delete_attempt'
             }
             logger.info("Attempting room deletion", extra=room_details)
-            
+
             try:
                 db.delete(room)
                 db.commit()

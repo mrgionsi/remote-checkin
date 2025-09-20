@@ -10,7 +10,6 @@ Functions:
 
 #pylint: disable=C0301,E0401,R0914,W0718,W0612,E0611,R0912,R0915,R1702
 import os
-import traceback
 from datetime import datetime
 from flask import Blueprint, request, jsonify
 from werkzeug.exceptions import BadRequest
@@ -38,14 +37,14 @@ UPLOAD_FOLDER = 'uploads/'
 def upload_file():
     """
     Handle POST uploads of identity documents for a reservation.
-    
+
     Accepts three image files in the request.files ('frontimage', 'backimage', 'selfie') and form fields including reservationId, name, surname, birthday, street, city, province, cap, telephone, document_type, document_number, and cf. Saves files under uploads/<reservationId>, runs OCR validation on front/back images, creates or updates the client record, links the client to the reservation, and returns a JSON response with saved filenames, per-file OCR validation results, client summary, and reservation summary.
-    
+
     Side effects:
     - Persists uploaded files to disk.
     - Creates/updates client and links it to the reservation in the database.
     - Attempts to send an admin notification email (best-effort; failures do not affect the main operation).
-    
+
     Responses:
     - 200: JSON with message, files, validation, client, and reservation data on success.
     - 400: Missing/invalid files or required form fields (BadRequest).

@@ -54,20 +54,20 @@ def basic_demo():
 def database_demo():
     """Demonstrate database operation logging."""
     data = request.get_json()
-    
+
     logger.info("Creating new record", extra={
         'record_type': data.get('type', 'unknown'),
         'user_input': data.get('name', 'unnamed')
     })
-    
+
     # Simulate database operation
     record_id = simulate_database_create(data)
-    
+
     logger.info("Record created successfully", extra={
         'record_id': record_id,
         'operation_result': 'success'
     })
-    
+
     return jsonify({
         "message": "Record created",
         "id": record_id,
@@ -81,18 +81,18 @@ def simulate_database_create(data):
     """Simulate a database create operation."""
     import time
     import random
-    
+
     # Simulate processing time
     time.sleep(0.1)
-    
+
     # Generate mock ID
     record_id = random.randint(1000, 9999)
-    
+
     logger.debug("Database simulation completed", extra={
         'generated_id': record_id,
         'input_data_keys': list(data.keys()) if data else []
     })
-    
+
     return record_id
 
 
@@ -103,14 +103,14 @@ def simulate_database_create(data):
 def slow_operation_demo():
     """Demonstrate performance logging for slow operations."""
     import time
-    
+
     logger.info("Starting slow operation")
-    
+
     # Simulate slow operation
     time.sleep(0.8)  # This will trigger the performance warning
-    
+
     logger.info("Slow operation completed")
-    
+
     return jsonify({"message": "Slow operation completed", "duration": "800ms"})
 
 
@@ -120,11 +120,11 @@ def slow_operation_demo():
 def error_demo():
     """Demonstrate error logging."""
     error_type = request.args.get('type', 'generic')
-    
+
     logger.info("Processing error demo", extra={
         'requested_error_type': error_type
     })
-    
+
     try:
         if error_type == 'validation':
             raise ValueError("Invalid input data provided")
@@ -134,7 +134,7 @@ def error_demo():
             raise PermissionError("Insufficient permissions")
         else:
             raise RuntimeError("Generic error occurred")
-            
+
     except ValueError as e:
         logger.warning("Validation error occurred", extra={
             'error_type': 'validation',
@@ -142,7 +142,7 @@ def error_demo():
             'user_input': error_type
         })
         return jsonify({"error": "Validation failed", "message": str(e)}), 400
-        
+
     except (ConnectionError, PermissionError) as e:
         logger.error("System error occurred", extra={
             'error_type': type(e).__name__,
@@ -150,7 +150,7 @@ def error_demo():
             'requires_attention': True
         }, exc_info=True)
         return jsonify({"error": "System error", "message": "Please try again later"}), 500
-        
+
     except Exception as e:
         logger.critical("Unexpected error occurred", extra={
             'error_type': 'unexpected',
@@ -167,24 +167,24 @@ def login_demo():
     """Demonstrate authentication logging."""
     data = request.get_json()
     username = data.get('username')
-    
+
     logger.info("Login attempt", extra={
         'username': username,
         'ip_address': request.remote_addr,
         'user_agent': request.headers.get('User-Agent', '')
     })
-    
+
     # Simulate authentication
     if username and len(username) > 3:
         # Successful login
         access_token = create_access_token(identity=username)
-        
+
         logger.info("Login successful", extra={
             'username': username,
             'login_result': 'success',
             'token_created': True
         })
-        
+
         return jsonify({
             'access_token': access_token,
             'message': 'Login successful'
@@ -196,7 +196,7 @@ def login_demo():
             'login_result': 'failed',
             'failure_reason': 'invalid_credentials'
         })
-        
+
         return jsonify({'error': 'Invalid credentials'}), 401
 
 
@@ -213,7 +213,7 @@ def health_check():
 def context_demo():
     """Demonstrate manual logging with rich context."""
     data = request.get_json()
-    
+
     # Create rich context for logging
     context = {
         'operation': 'context_demo',
@@ -225,28 +225,28 @@ def context_demo():
             'content_type': request.content_type
         }
     }
-    
+
     logger.info("Processing context demo with rich information", extra=context)
-    
+
     # Simulate some processing
     result = {
         'processed_keys': list(data.keys()) if isinstance(data, dict) else [],
         'processing_result': 'success',
         'timestamp': '2024-01-15T10:30:00Z'
     }
-    
+
     logger.info("Context demo completed", extra={
         **context,
         'result_keys': list(result.keys()),
         'processing_duration': '50ms'
     })
-    
+
     return jsonify(result)
 
 
 if __name__ == '__main__':
     logger.info("Starting logging demo application")
-    
+
     print("\n" + "="*60)
     print("LOGGING SYSTEM DEMO")
     print("="*60)
@@ -263,5 +263,5 @@ if __name__ == '__main__':
     print("  curl -X POST http://localhost:5000/api/demo/login -H 'Content-Type: application/json' -d '{\"username\":\"demo\"}'")
     print("  curl http://localhost:5000/api/demo/error?type=validation")
     print("="*60)
-    
+
     app.run(debug=True, port=5000)

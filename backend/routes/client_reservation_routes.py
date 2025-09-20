@@ -120,7 +120,7 @@ def get_secure_file_path(reservation_id: str, filename: str) -> Path:
     """
     Get a secure file path by resolving the base directory and filename.
     Ensures the resulting path is within the base upload directory.
-    
+
     Args:
         reservation_id: The reservation ID (will be sanitized)
         filename: The filename (will be sanitized)
@@ -162,9 +162,9 @@ def safe_file_exists(file_path: Path) -> bool:
 def check_images(reservation_id):
     """
     Check whether identity images (back, front, selfie) exist for a given reservation and client.
-    
+
     Validates required JSON fields ("name", "surname", "cf"), confirms the reservation (matched against Reservation.id_reference) and that the client is associated with that reservation, then inspects the reservation's upload folder (UPLOAD_FOLDER/<reservation_id>) for three expected files named `<name>-<surname>-<cf>-backimage.jpg`, `-frontimage.jpg`, and `-selfie.jpg` (name/surname/cf are sanitized). Returns a JSON object with keys "back_image", "front_image", and "selfie" mapped to the API URL for the file if present ("/api/v1/images/<reservation_id>/<filename>") or null if missing.
-    
+
     Responses:
     - 200: JSON object with the three keys and URL or null values.
     - 400: Missing required fields in the request JSON.
@@ -231,13 +231,13 @@ def check_images(reservation_id):
 def get_image(reservation_id, filename):
     """
     Serve a client identity image file for a reservation or respond to CORS preflight.
-    
+
     For GET requests this endpoint requires a valid JWT. If the reservation folder or requested file does not exist, returns a JSON 404 error. For OPTIONS requests it returns an empty JSON body with permissive CORS headers.
-    
+
     Parameters:
         reservation_id (str): Reservation reference used to locate the uploads subfolder.
         filename (str): File name (including extension) inside the reservation folder.
-    
+
     Returns:
         A Flask response containing the requested file on success, or a JSON error response with HTTP 404 when the folder or file is missing. OPTIONS requests return a 200 response with CORS headers.
     """

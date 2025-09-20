@@ -7,7 +7,6 @@ and registers blueprints for routing.
 # pylint: disable=C0303,E0401,W0718,C0301
 import os
 import re
-import logging
 
 from flask import Flask
 from flask_cors import CORS
