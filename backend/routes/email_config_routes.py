@@ -18,9 +18,12 @@ from email_handler import EmailService
 from utils.encryption_utils import get_encryption_key, encrypt_password, decrypt_password
 from models import EmailConfig
 from database import SessionLocal
+from app_logging.config import get_logger
+from app_logging.decorators import log_route, log_database_operation, log_performance
+from app_logging.utils import safe_extra_fields
 
 # Configure logging
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Create a blueprint for email configuration
 email_config_bp = Blueprint("email_config", __name__, url_prefix="/api/v1")
@@ -88,6 +91,8 @@ EMAIL_PROVIDER_PRESETS = {
 
 @email_config_bp.route("/email-config", methods=["GET"])
 @jwt_required()
+@log_route(include_request_data=True)
+@log_database_operation("READ")
 def get_email_config():
     """
     Return the current user's active EmailConfig as JSON.
@@ -146,6 +151,8 @@ def get_email_config():
 
 @email_config_bp.route("/email-config", methods=["POST"])
 @jwt_required()
+@log_route(include_request_data=True, include_response_data=True)
+@log_database_operation("CREATE")
 def create_or_update_email_config():
     """
     Create or update the current user's email configuration.
@@ -218,6 +225,8 @@ def create_or_update_email_config():
 
 @email_config_bp.route("/email-config/test", methods=["POST"])
 @jwt_required()
+@log_route(include_request_data=True)
+@log_performance(threshold_ms=5000)
 def test_email_config():
     """
     Send a test reservation confirmation email using the current user's active email configuration.
@@ -280,6 +289,7 @@ def test_email_config():
 
 @email_config_bp.route("/email-config/presets", methods=["GET"])
 @jwt_required()
+@log_route(include_request_data=True)
 def get_email_presets():
     """
     Get available email provider presets.
@@ -292,6 +302,7 @@ def get_email_presets():
 
 @email_config_bp.route("/email-config/preset/<preset_name>", methods=["GET"])
 @jwt_required()
+@log_route(include_request_data=True)
 def get_email_preset(preset_name):
     """
     Return the email provider preset configuration for a given preset name.
@@ -310,6 +321,8 @@ def get_email_preset(preset_name):
 
 @email_config_bp.route("/email-config", methods=["DELETE"])
 @jwt_required()
+@log_route(include_request_data=True)
+@log_database_operation("DELETE")
 def delete_email_config():
     """
     Delete the current user's email configuration.
@@ -348,6 +361,8 @@ def delete_email_config():
 
 @email_config_bp.route("/email-config/migrate", methods=["POST"])
 @jwt_required()
+@log_route(include_request_data=True)
+@log_database_operation("UPDATE")
 def migrate_to_external_provider():
     """
     Migrate the current user's SMTP configuration to an external email provider (e.g., Mailgun or SendGrid).

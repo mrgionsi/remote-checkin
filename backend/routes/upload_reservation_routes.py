@@ -21,11 +21,20 @@ from utils.db_utils import get_reservation_by_id, get_client_by_cf, add_or_updat
 from utils.email_utils import get_admin_email_config
 from email_handler import EmailService
 from routes.email_config_routes import get_encryption_key
+from app_logging.config import get_logger
+from app_logging.decorators import log_route, log_database_operation, log_performance
+from app_logging.utils import safe_extra_fields
 
 upload_bp = Blueprint('upload', __name__, url_prefix="/api/v1")
+
+# Configure logging
+logger = get_logger(__name__)
 UPLOAD_FOLDER = 'uploads/'
 
 @upload_bp.route('/upload', methods=['POST'])
+@log_route(include_request_data=True, include_response_data=True)
+@log_database_operation("CREATE")
+@log_performance(threshold_ms=3000)
 def upload_file():
     """
     Handle POST uploads of identity documents for a reservation.
