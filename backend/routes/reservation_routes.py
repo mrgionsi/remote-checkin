@@ -19,10 +19,11 @@ from models import Reservation, Room, Structure, StructureReservationsView, Emai
 from email_handler import EmailService
 from routes.email_config_routes import get_encryption_key
 from utils.email_utils import get_admin_email_config
-from database import SessionLocal
 from app_logging.config import get_logger
 from app_logging.decorators import log_route, log_database_operation, log_performance
 from app_logging.utils import safe_extra_fields, log_notification_error
+from database import SessionLocal
+
 
 
 class EmailConfigurationError(Exception):

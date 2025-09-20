@@ -19,10 +19,11 @@ from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from models import User, AdminStructure, Structure,Reservation, Client, ClientReservations
 from services.portale_alloggi_service import PortaleAlloggiService
 from utils.encryption_utils import encrypt_password, decrypt_password
-from database import SessionLocal
 from app_logging.config import get_logger
 from app_logging.decorators import log_route, log_database_operation, log_performance
 from app_logging.utils import safe_extra_fields
+from database import SessionLocal
+
 
 # Blueprint setup
 admin_bp = Blueprint("admin", __name__, url_prefix="/api/v1")

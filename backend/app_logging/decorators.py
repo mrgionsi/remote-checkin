@@ -1,3 +1,4 @@
+#pylint: disable=C0301,E0401,R0914,W0718,W0612,E0611,R0912,R0915,R1702
 """
 Logging decorators for function and route-level logging.
 

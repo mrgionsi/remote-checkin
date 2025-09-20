@@ -24,9 +24,10 @@ Note:
 
 from datetime import datetime
 from models import Client, ClientReservations, Reservation
-from database import get_db
 from app_logging.config import get_logger
 from app_logging.utils import safe_extra_fields
+from database import get_db
+
 
 # Configure logging
 logger = get_logger(__name__)

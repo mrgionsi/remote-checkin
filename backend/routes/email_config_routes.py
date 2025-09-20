@@ -16,9 +16,10 @@ from sqlalchemy.exc import IntegrityError
 from email_handler import EmailService
 from utils.encryption_utils import get_encryption_key, encrypt_password, decrypt_password
 from models import EmailConfig
-from database import SessionLocal
 from app_logging.config import get_logger
 from app_logging.decorators import log_route, log_database_operation, log_performance
+from database import SessionLocal
+
 
 # Configure logging
 logger = get_logger(__name__)

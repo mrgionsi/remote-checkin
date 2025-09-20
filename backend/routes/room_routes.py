@@ -20,10 +20,10 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 #pylint: disable=E0611,E0401
 from models import Room, Structure
-from database import get_db  # Use absolute import
 from app_logging.config import get_logger
 from app_logging.decorators import log_route, log_database_operation, log_function
 from app_logging.utils import safe_extra_fields
+from database import get_db  # Use absolute import
 
 # Configure logging
 logger = get_logger(__name__)
