@@ -177,3 +177,4 @@ report.xml
 .DS_Store
 frontend/package-lock.json
 /backend/uploads
+.env.backup
