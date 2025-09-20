@@ -16,8 +16,9 @@ from xml.sax.saxutils import escape
 
 import defusedxml.ElementTree as ET
 import requests
+from app_logging.config import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Guest type constants based on guest_types.json
 GUEST_TYPE_SINGLE = "16"  # OSPITE SINGOLO

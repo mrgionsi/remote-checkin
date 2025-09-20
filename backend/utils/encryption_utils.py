@@ -8,8 +8,9 @@ import os
 import logging
 from flask import current_app
 from cryptography.fernet import Fernet
+from app_logging.config import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def get_encryption_key():
