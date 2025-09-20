@@ -137,6 +137,6 @@ def test_email_config():
 
 
 if __name__ == "__main__":
-    # Set DEBUG environment variable for logging system
-    os.environ['DEBUG'] = 'true'
-    app.run(debug=True, port=5001)
+    # Read debug flag from environment
+    debug_flag = os.getenv('DEBUG', 'false').lower() in ('true', '1', 'yes')
+    app.run(debug=debug_flag, port=5001)
