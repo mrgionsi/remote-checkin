@@ -39,7 +39,7 @@ def _get_gender_display(sesso):
     return 'N/A'
 
 @upload_bp.route('/upload', methods=['POST'])
-@log_route(include_request_data=True, include_response_data=True)
+@log_route(include_request_data=False, include_response_data=False)
 @log_database_operation("CREATE")
 @log_performance(threshold_ms=3000)
 def upload_file():
@@ -207,8 +207,8 @@ def upload_file():
                         }))
                     else:
                         logger.warning("Admin notification failed", extra=safe_extra_fields({
-                            'admin_email': admin_email,
-                            'error_message': email_result.get('message', 'Unknown error'),
+                            'admin_email': admin_email if 'admin_email' in locals() else 'unknown',
+                            'error_message': email_result.get('message', 'Unknown error') if email_result else 'Unknown error',
                             'notification_result': 'failed'
                         }))
                 else:
