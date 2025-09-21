@@ -12,6 +12,7 @@ import os
 import logging
 import logging.handlers
 from .formatters import JSONFormatter, ColoredFormatter
+from .pii_filter import PIIRedactionFilter
 
 
 class LoggingConfig:
@@ -170,6 +171,9 @@ def setup_logging(app_name: str = 'remote-checkin') -> None:
     # Configure specific loggers
     _configure_third_party_loggers()
 
+    # Setup PII redaction filter
+    _setup_pii_filtering(root_logger, environment)
+
     # Log the configuration
     logger = logging.getLogger(__name__)
     logger.info("Logging configured for environment: %s, level: %s", environment, logging.getLevelName(log_level))
@@ -189,6 +193,31 @@ def _configure_third_party_loggers() -> None:
 
     # Configure other third-party loggers as needed
     logging.getLogger('urllib3').setLevel(logging.WARNING)
+
+
+def _setup_pii_filtering(root_logger: logging.Logger, environment: str) -> None:
+    """
+    Setup PII redaction filtering on the root logger and all handlers.
+    
+    Args:
+        root_logger: Root logger to add PII filter to
+        environment: Current environment (development/production/testing)
+    """
+    # Create PII filter with environment-specific settings
+    use_hash_anonymization = environment in ['development', 'production']
+    hash_salt = os.getenv('PII_HASH_SALT', f"pii_salt_{environment}_2024")
+    
+    pii_filter = PIIRedactionFilter(
+        use_hash_anonymization=use_hash_anonymization,
+        hash_salt=hash_salt
+    )
+    
+    # Add filter to root logger (affects all child loggers)
+    root_logger.addFilter(pii_filter)
+    
+    # Also add filter to all handlers to ensure comprehensive coverage
+    for handler in root_logger.handlers:
+        handler.addFilter(pii_filter)
 
 
 def get_logger(name: str) -> logging.Logger:

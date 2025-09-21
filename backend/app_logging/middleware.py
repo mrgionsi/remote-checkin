@@ -10,7 +10,7 @@ import time
 import uuid
 import logging
 import json
-from typing import Optional, Any, List, ClassVar, TYPE_CHECKING
+from typing import Optional, Any, List, ClassVar, Set, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from flask import Flask, request, g
@@ -41,13 +41,13 @@ class LoggingMiddleware:
     """
 
     # Sensitive fields that should be filtered from logs
-    SENSITIVE_FIELDS: ClassVar[set] = {
+    SENSITIVE_FIELDS: ClassVar[Set[str]] = {
         'password', 'passwd', 'secret', 'token', 'key', 'authorization',
         'x-api-key', 'x-auth-token', 'cookie', 'session'
     }
     
     # Paths to exclude from detailed logging (health checks, static files, etc.)
-    EXCLUDED_PATHS: ClassVar[set] = {
+    EXCLUDED_PATHS: ClassVar[Set[str]] = {
         '/health', '/ping', '/favicon.ico', '/robots.txt'
     }
 

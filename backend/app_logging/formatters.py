@@ -9,7 +9,7 @@ This module provides specialized formatters for different environments:
 import json
 import logging
 import traceback
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any
 from .utils import get_correlation_id
 
@@ -43,7 +43,7 @@ class JSONFormatter(logging.Formatter):
             JSON formatted log string
         """
         log_data = {
-            'timestamp': datetime.now().isoformat() + 'Z',
+            'timestamp': datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z'),
             'level': record.levelname,
             'logger': record.name,
             'message': record.getMessage(),

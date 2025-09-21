@@ -87,7 +87,7 @@ def create_reservation():
             'start_date': data.get('startDate'),
             'end_date': data.get('endDate'),
             'room_name': data.get('roomName'),
-            'guest_email': data.get('email'),
+            'guest_email_present': bool(data.get('email')),
             'number_of_people': data.get('numberOfPeople', 1),
             'operation': 'create_reservation_validation'
         }))
@@ -196,7 +196,7 @@ def create_reservation():
 
             # Log the email preparation
             logger.info("Preparing to send reservation confirmation email", extra=safe_extra_fields({
-                'recipient_email': data['email'],
+                'recipient_email_present': bool(data.get('email')),
                 'reservation_number': data.get('reservationNumber'),
                 'room_name': data.get('roomName'),
                 'email_service_type': type(email_service).__name__,
@@ -212,7 +212,7 @@ def create_reservation():
             # Log email result
             if email_result['status'] == 'error':
                 logger.warning("Reservation confirmation email failed", extra=safe_extra_fields({
-                    'recipient_email': data['email'],
+                    'recipient_email_present': bool(data.get('email')),
                     'reservation_number': data.get('reservationNumber'),
                     'error_message': email_result['message'],
                     'error_type': email_result.get('error_type', 'unknown'),
@@ -220,7 +220,7 @@ def create_reservation():
                 }))
             else:
                 logger.info("Reservation confirmation email sent successfully", extra=safe_extra_fields({
-                    'recipient_email': email_result.get('to', data['email']),
+                    'recipient_email_present': bool(email_result.get('to') or data.get('email')),
                     'reservation_number': data.get('reservationNumber'),
                     'email_result': 'success'
                 }))
@@ -228,7 +228,7 @@ def create_reservation():
         except Exception as e:
             # Log email error but don't fail the reservation creation
             logger.error("Error sending reservation confirmation email", extra=safe_extra_fields({
-                'recipient_email': data['email'],
+                'recipient_email_present': bool(data.get('email')),
                 'reservation_number': data.get('reservationNumber'),
                 'error_type': type(e).__name__,
                 'error_details': str(e),
@@ -616,7 +616,7 @@ def get_reservations_per_month(structure_id):
 
 @reservation_bp.route("/reservations/<int:reservation_id>/status", methods=["PUT"])
 @jwt_required()
-@log_route(include_request_data=True, include_response_data=True)
+@log_route(include_request_data=False, include_response_data=False)
 @log_database_operation("UPDATE")
 def update_reservation_status(reservation_id):
     """
@@ -697,14 +697,14 @@ def update_reservation_status(reservation_id):
                     if email_result and email_result.get('status') == 'success':
                         logger.info("Status change notification sent successfully", extra=safe_extra_fields({
                             'reservation_id': reservation_id,
-                            'recipient_email': reservation.email,
+                            'recipient_email_present': bool(reservation.email),
                             'new_status': new_status,
                             'notification_result': 'success'
                         }))
                     elif email_result:
                         logger.warning("Status change notification failed", extra=safe_extra_fields({
                             'reservation_id': reservation_id,
-                            'recipient_email': reservation.email,
+                            'recipient_email_present': bool(reservation.email),
                             'new_status': new_status,
                             'error_message': email_result.get('message', 'Unknown error'),
                             'notification_result': 'failed'
