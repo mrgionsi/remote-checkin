@@ -10,7 +10,7 @@ import time
 import uuid
 import logging
 import json
-from typing import Optional, Any, List, ClassVar, Set, TYPE_CHECKING
+from typing import Optional, Any, List, ClassVar, Set, Dict, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from flask import Flask, request, g
@@ -50,6 +50,14 @@ class LoggingMiddleware:
     EXCLUDED_PATHS: ClassVar[Set[str]] = {
         '/health', '/ping', '/favicon.ico', '/robots.txt'
     }
+    
+    # Path patterns to exclude from detailed logging (static resources, images, etc.)
+    EXCLUDED_PATH_PATTERNS: ClassVar[List[str]] = [
+        '/api/v1/images/',  # Image requests
+        '/static/',         # Static files
+        '/assets/',         # Frontend assets
+        '/uploads/',        # File uploads
+    ]
 
     def __init__(self, app: Optional[Flask] = None, **kwargs):
         """
@@ -100,8 +108,9 @@ class LoggingMiddleware:
         g.correlation_id = correlation_id
         g.request_start_time = time.time()
 
-        # Skip logging for excluded paths
-        if request.path in self.EXCLUDED_PATHS:
+        # Skip logging for excluded paths and patterns
+        if (request.path in self.EXCLUDED_PATHS or 
+            any(request.path.startswith(pattern) for pattern in self.EXCLUDED_PATH_PATTERNS)):
             return None
 
         # Get user information
@@ -118,8 +127,8 @@ class LoggingMiddleware:
             'query_params': dict(request.args),
         }
 
-        # Add request headers (filtered)
-        request_data['headers'] = self._filter_sensitive_data(dict(request.headers))
+        # Add essential request headers only (reduced verbosity)
+        request_data['headers'] = self._get_essential_headers(dict(request.headers))
 
         # Add request body if enabled
         if self.log_request_body and request.content_length and request.content_length < self.max_body_size:
@@ -147,8 +156,9 @@ class LoggingMiddleware:
 
     def _after_request(self, response) -> Any:
         """Process response after handling."""
-        # Skip logging for excluded paths
-        if request.path in self.EXCLUDED_PATHS:
+        # Skip logging for excluded paths and patterns
+        if (request.path in self.EXCLUDED_PATHS or 
+            any(request.path.startswith(pattern) for pattern in self.EXCLUDED_PATH_PATTERNS)):
             return response
 
         # Calculate response time
@@ -162,8 +172,8 @@ class LoggingMiddleware:
             'response_size': response.content_length or 0,
         })
 
-        # Add response headers (filtered)
-        request_data['response_headers'] = self._filter_sensitive_data(dict(response.headers))
+        # Add essential response headers only (reduced verbosity)
+        request_data['response_headers'] = self._get_essential_response_headers(dict(response.headers))
 
         # Add response body if enabled and successful
         if (self.log_response_body and
@@ -242,6 +252,77 @@ class LoggingMiddleware:
         if request.headers.get('X-Real-IP'):
             return request.headers['X-Real-IP']
         return request.remote_addr or 'unknown'
+
+    def _get_essential_headers(self, headers: Dict[str, str]) -> Dict[str, str]:
+        """
+        Extract only essential headers for logging to reduce verbosity.
+        
+        Args:
+            headers: All request headers
+            
+        Returns:
+            Dictionary with only essential headers
+        """
+        essential_headers = {}
+        
+        # Always include these essential headers
+        essential_keys = {
+            'content-type', 'content-length', 'authorization', 'user-agent',
+            'accept', 'accept-encoding', 'accept-language', 'origin', 'referer'
+        }
+        
+        for key, value in headers.items():
+            key_lower = key.lower()
+            
+            # Filter sensitive headers
+            if any(sensitive in key_lower for sensitive in self.SENSITIVE_FIELDS):
+                essential_headers[key] = '***FILTERED***'
+            elif key_lower in essential_keys:
+                # Truncate long headers to keep logs readable
+                if key_lower == 'user-agent' and len(value) > 100:
+                    essential_headers[key] = value[:100] + '...'
+                else:
+                    essential_headers[key] = value
+        
+        return essential_headers
+    
+    def _get_essential_response_headers(self, headers: Dict[str, str]) -> Dict[str, str]:
+        """
+        Extract only essential response headers for logging.
+        
+        Args:
+            headers: All response headers
+            
+        Returns:
+            Dictionary with only essential response headers
+        """
+        essential_headers = {}
+        
+        # Only log essential response headers
+        essential_keys = {
+            'content-type', 'content-length', 'content-disposition',
+            'cache-control', 'etag', 'last-modified', 'status'
+        }
+        
+        for key, value in headers.items():
+            key_lower = key.lower()
+            if key_lower in essential_keys:
+                essential_headers[key] = value
+        
+        return essential_headers
+    
+    def _should_exclude_path(self, path: str) -> bool:
+        """
+        Check if a path should be excluded from detailed logging.
+        
+        Args:
+            path: Request path to check
+            
+        Returns:
+            True if path should be excluded from logging
+        """
+        return (path in self.EXCLUDED_PATHS or 
+                any(path.startswith(pattern) for pattern in self.EXCLUDED_PATH_PATTERNS))
 
     def _filter_sensitive_data(self, data: Any) -> Any:
         """

@@ -117,24 +117,30 @@ def log_route(
             start_time = time.time()
             correlation_id = get_correlation_id()
 
+            # Check if route should be excluded from detailed logging
+            from flask import request  # pylint: disable=import-outside-toplevel
+            should_exclude = _should_exclude_route_logging(request.path)
+
             # Prepare route info
             route_info = _prepare_route_info(func, correlation_id, include_request_data)
 
-            # Log route entry
-            func_logger.log(level, "Handling route %s", func.__qualname__, extra=route_info)
+            # Only log route entry for non-excluded paths
+            if not should_exclude:
+                func_logger.log(level, "Handling route %s", func.__qualname__, extra=route_info)
 
             try:
                 # Execute route function
                 result = func(*args, **kwargs)
 
-                # Log successful completion
-                _log_route_success(func_logger, level, func, start_time, route_info,
-                                 result=result, include_response_data=include_response_data)
+                # Log successful completion only for non-excluded paths
+                if not should_exclude:
+                    _log_route_success(func_logger, level, func, start_time, route_info,
+                                     result=result, include_response_data=include_response_data)
 
                 return result
 
             except Exception as e:
-                # Log exception
+                # Always log exceptions regardless of path exclusion
                 _log_route_error(func_logger, func, start_time, route_info, e)
                 raise
 
@@ -268,6 +274,33 @@ def _format_kwargs(kwargs: Dict[str, Any], max_length: int) -> Dict[str, str]:
     return {key: _format_value(value, max_length) for key, value in kwargs.items()}
 
 
+def _should_exclude_route_logging(path: str) -> bool:
+    """
+    Check if a route should be excluded from detailed logging.
+    
+    Args:
+        path: Request path to check
+        
+    Returns:
+        True if route should be excluded from logging
+    """
+    # Paths to exclude from route logging
+    excluded_paths = {
+        '/health', '/ping', '/favicon.ico', '/robots.txt'
+    }
+    
+    # Path patterns to exclude
+    excluded_patterns = [
+        '/api/v1/images/',  # Image requests
+        '/static/',         # Static files
+        '/assets/',         # Frontend assets
+        '/uploads/',        # File uploads
+    ]
+    
+    return (path in excluded_paths or 
+            any(path.startswith(pattern) for pattern in excluded_patterns))
+
+
 def _prepare_route_info(func: Callable, correlation_id: Optional[str], include_request_data: bool) -> Dict[str, Any]:
     """Prepare route information for logging."""
     from flask import request  # pylint: disable=import-outside-toplevel
@@ -281,9 +314,9 @@ def _prepare_route_info(func: Callable, correlation_id: Optional[str], include_r
     }
 
     if include_request_data:
+        # Only include essential request data to reduce verbosity
         route_info.update({
             'remote_addr': request.remote_addr,
-            'user_agent': request.headers.get('User-Agent', ''),
             'query_params': dict(request.args),
         })
 
@@ -295,6 +328,13 @@ def _prepare_route_info(func: Callable, correlation_id: Optional[str], include_r
                 route_info['user_id'] = user_id
         except Exception:  # pylint: disable=broad-exception-caught
             pass
+
+        # Only include user-agent if it's not too long
+        user_agent = request.headers.get('User-Agent', '')
+        if user_agent and len(user_agent) <= 100:
+            route_info['user_agent'] = user_agent
+        elif user_agent:
+            route_info['user_agent'] = user_agent[:100] + '...'
 
     return route_info
 

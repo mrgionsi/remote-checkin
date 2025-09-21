@@ -35,7 +35,10 @@ setup_logging('remote-checkin')
 # Setup request/response logging middleware
 setup_request_logging(
     app,
-    exclude_paths=['/health', '/ping', '/favicon.ico'],
+    exclude_paths=[
+        '/health', '/ping', '/favicon.ico', '/robots.txt',
+        '/api/v1/images/', '/static/', '/assets/', '/uploads/'
+    ],
     log_request_body=True,
     log_response_body=False,
     max_body_size=1024
