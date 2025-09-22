@@ -9,8 +9,12 @@ import { ReservationCheckComponent } from './reservation-check/reservation-check
 import { DetailReservationComponent } from './detail-reservation/detail-reservation.component';
 import { LoginComponent } from './admin/login/login.component';
 import { authGuard } from './guards/auth.guard';
+import { superadminGuard } from './guards/superadmin.guard';
 import { AdminInfoComponent } from './admin/admin-info/admin-info.component';
 import { SettingsComponent } from './admin/settings/settings.component';
+import { SuperadminComponent } from './admin/superadmin/superadmin.component';
+import { SuperadminDashboardComponent } from './admin/superadmin/dashboard/superadmin-dashboard.component';
+import { SuperadminStructuresComponent } from './admin/superadmin/structures/structures.component';
 
 export const routes: Routes = [
     { path: '', component: LanguageComponent },
@@ -33,6 +37,16 @@ export const routes: Routes = [
             { path: 'settings', component: SettingsComponent, canActivate: [authGuard] },
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 
+        ]
+    },
+    {
+        path: 'admin/superadmin',
+        component: SuperadminComponent,
+        canActivate: [superadminGuard],
+        children: [
+            { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+            { path: 'dashboard', component: SuperadminDashboardComponent },
+            { path: 'structures', component: SuperadminStructuresComponent },
         ]
     },
 ];
