@@ -18,12 +18,23 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Install Python dependencies
 RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
+# Create necessary directories with proper permissions
+RUN mkdir -p /usr/src/app/logs /usr/src/app/uploads
+
 # Create a non-root user
 RUN groupadd -r appuser && useradd -r -g appuser appuser
 
 # Copy application code while ignoring unnecessary files
 COPY . .
-RUN chown -R appuser:appuser /usr/src/app
+
+# Copy and set up entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Set proper ownership and permissions
+RUN chown -R appuser:appuser /usr/src/app && \
+    chmod -R 755 /usr/src/app/logs && \
+    chmod -R 755 /usr/src/app/uploads
 
 # Switch to non-root user
 USER appuser
@@ -33,6 +44,9 @@ ENV GUNICORN_CMD_ARGS="--bind=0.0.0.0:8000 --chdir=/usr/src/app"
 
 # Expose the Flask port
 EXPOSE 8000
+
+# Set entrypoint
+ENTRYPOINT ["/entrypoint.sh"]
 
 # Run the application using Gunicorn
 CMD ["gunicorn", "wsgi:app"]
