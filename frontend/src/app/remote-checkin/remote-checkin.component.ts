@@ -442,7 +442,7 @@ export class RemoteCheckinComponent implements OnInit {
 
   uploadReservationData() {
     console.log("uploadReservationData called");  // For debugging
-    
+
     // Prevent duplicate submissions immediately
     if (this.isSubmitting) {
       console.log("Submission already in progress");
@@ -511,7 +511,7 @@ export class RemoteCheckinComponent implements OnInit {
     // Handle municipality fields (birth and residence)
     const birthMunicipalityCode = this.clientForm.get('comune_nascita_code')?.value;
     const residenceMunicipalityCode = this.clientForm.get('comune_residenza_code')?.value;
-    
+
     // Birth municipality: try code first, then fallback to name
     if (birthMunicipalityCode) {
       formData.append('comune_nascita', birthMunicipalityCode);
@@ -525,7 +525,7 @@ export class RemoteCheckinComponent implements OnInit {
         }
       }
     }
-    
+
     // Residence municipality: try code first, then fallback to name
     if (residenceMunicipalityCode) {
       formData.append('comune_residenza', residenceMunicipalityCode);
@@ -548,7 +548,7 @@ export class RemoteCheckinComponent implements OnInit {
     if (birthProvinceCode) {
       formData.append('provincia_nascita', birthProvinceCode);
     }
-    
+
     // Residence province: send the acronym (2-character code)
     if (residenceProvinceCode) {
       formData.append('provincia_residenza', residenceProvinceCode);
