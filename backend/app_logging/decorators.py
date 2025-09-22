@@ -60,20 +60,6 @@ def log_function(
             try:
                 # Execute function
                 result = func(*args, **kwargs)
-
-                # Calculate execution time
-                duration = int((time.time() - start_time) * 1000)  # milliseconds
-                func_info['duration_ms'] = duration
-
-                # Add result if requested
-                if include_result:
-                    func_info['result'] = _format_value(result, max_arg_length)
-
-                # Log successful exit
-                func_logger.log(level, "Exiting function %s", func.__qualname__, extra=func_info)
-
-                return result
-
             except Exception as e:
                 # Calculate execution time
                 duration = int((time.time() - start_time) * 1000)  # milliseconds
@@ -86,6 +72,19 @@ def log_function(
 
                 # Re-raise the exception
                 raise
+
+            # Calculate execution time
+            duration = int((time.time() - start_time) * 1000)  # milliseconds
+            func_info['duration_ms'] = duration
+
+            # Add result if requested
+            if include_result:
+                func_info['result'] = _format_value(result, max_arg_length)
+
+            # Log successful exit
+            func_logger.log(level, "Exiting function %s", func.__qualname__, extra=func_info)
+
+            return result
 
         return wrapper
     return decorator
@@ -131,18 +130,17 @@ def log_route(
             try:
                 # Execute route function
                 result = func(*args, **kwargs)
-
-                # Log successful completion only for non-excluded paths
-                if not should_exclude:
-                    _log_route_success(func_logger, level, func, start_time, route_info,
-                                     result=result, include_response_data=include_response_data)
-
-                return result
-
             except Exception as e:
                 # Always log exceptions regardless of path exclusion
                 _log_route_error(func_logger, func, start_time, route_info, e)
                 raise
+
+            # Log successful completion only for non-excluded paths
+            if not should_exclude:
+                _log_route_success(func_logger, level, func, start_time, route_info,
+                                 result=result, include_response_data=include_response_data)
+
+            return result
 
         return wrapper
     return decorator
@@ -237,16 +235,6 @@ def log_database_operation(
 
             try:
                 result = func(*args, **kwargs)
-
-                # Calculate execution time
-                duration = int((time.time() - start_time) * 1000)  # milliseconds
-                db_info['duration_ms'] = duration
-
-                # Log successful completion
-                func_logger.log(level, "%s operation completed successfully", operation_type, extra=db_info)
-
-                return result
-
             except Exception as e:
                 # Calculate execution time
                 duration = int((time.time() - start_time) * 1000)  # milliseconds
@@ -259,6 +247,15 @@ def log_database_operation(
 
                 # Re-raise the exception
                 raise
+
+            # Calculate execution time
+            duration = int((time.time() - start_time) * 1000)  # milliseconds
+            db_info['duration_ms'] = duration
+
+            # Log successful completion
+            func_logger.log(level, "%s operation completed successfully", operation_type, extra=db_info)
+
+            return result
 
         return wrapper
     return decorator
@@ -326,8 +323,14 @@ def _prepare_route_info(func: Callable, correlation_id: Optional[str], include_r
             user_id = get_jwt_identity()
             if user_id:
                 route_info['user_id'] = user_id
-        except Exception:  # pylint: disable=broad-exception-caught
-            pass
+        except (ImportError, RuntimeError) as exc:
+            # Log expected exceptions (JWT not available, not in request context, etc.)
+            logger = get_logger(__name__)
+            logger.debug("Could not retrieve user ID from JWT: %s", exc)
+        except Exception as exc:
+            # Log unexpected exceptions
+            logger = get_logger(__name__)
+            logger.error("Unexpected error retrieving user ID: %s", exc, exc_info=True)
 
         # Only include user-agent if it's not too long
         user_agent = request.headers.get('User-Agent', '')
@@ -376,5 +379,13 @@ def _format_value(value: Any, max_length: int) -> str:
         if len(str_value) > max_length:
             return str_value[:max_length] + "..."
         return str_value
-    except Exception:  # pylint: disable=broad-exception-caught
+    except (TypeError, ValueError) as exc:
+        # Log specific serialization errors for debugging
+        logger = get_logger(__name__)
+        logger.debug("Failed to format value for logging: %s", exc)
+        return f"<{type(value).__name__}>"
+    except Exception as exc:
+        # Log unexpected exceptions and provide safe fallback
+        logger = get_logger(__name__)
+        logger.error("Unexpected error formatting value for logging: %s", exc, exc_info=True)
         return f"<{type(value).__name__}>"
