@@ -208,7 +208,7 @@ def create_admin_user():
             'operation_result': 'failed'
         }), exc_info=True)
         return jsonify({"error": "User creation failed due to data constraint violation"}), 400
-    except SQLAlchemyError as e:
+    except SQLAlchemyError:
         db_session.rollback()
         logger.exception("Database error during user creation", extra=safe_extra_fields({
             'username': data.get('username'),

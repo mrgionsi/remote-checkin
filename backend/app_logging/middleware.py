@@ -9,7 +9,6 @@ with correlation ID support and performance monitoring.
 import time
 import uuid
 import logging
-import json
 from typing import Optional, Any, List, ClassVar, Set, Dict, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -45,12 +44,12 @@ class LoggingMiddleware:
         'password', 'passwd', 'secret', 'token', 'key', 'authorization',
         'x-api-key', 'x-auth-token', 'cookie', 'session'
     }
-    
+
     # Paths to exclude from detailed logging (health checks, static files, etc.)
     EXCLUDED_PATHS: ClassVar[Set[str]] = {
         '/health', '/ping', '/favicon.ico', '/robots.txt'
     }
-    
+
     # Path patterns to exclude from detailed logging (static resources, images, etc.)
     EXCLUDED_PATH_PATTERNS: ClassVar[List[str]] = [
         '/api/v1/images/',  # Image requests
@@ -109,7 +108,7 @@ class LoggingMiddleware:
         g.request_start_time = time.time()
 
         # Skip logging for excluded paths and patterns
-        if (request.path in self.EXCLUDED_PATHS or 
+        if (request.path in self.EXCLUDED_PATHS or
             any(request.path.startswith(pattern) for pattern in self.EXCLUDED_PATH_PATTERNS)):
             return None
 
@@ -157,7 +156,7 @@ class LoggingMiddleware:
     def _after_request(self, response) -> Any:
         """Process response after handling."""
         # Skip logging for excluded paths and patterns
-        if (request.path in self.EXCLUDED_PATHS or 
+        if (request.path in self.EXCLUDED_PATHS or
             any(request.path.startswith(pattern) for pattern in self.EXCLUDED_PATH_PATTERNS)):
             return response
 
@@ -256,24 +255,24 @@ class LoggingMiddleware:
     def _get_essential_headers(self, headers: Dict[str, str]) -> Dict[str, str]:
         """
         Extract only essential headers for logging to reduce verbosity.
-        
+
         Args:
             headers: All request headers
-            
+
         Returns:
             Dictionary with only essential headers
         """
         essential_headers = {}
-        
+
         # Always include these essential headers
         essential_keys = {
             'content-type', 'content-length', 'authorization', 'user-agent',
             'accept', 'accept-encoding', 'accept-language', 'origin', 'referer'
         }
-        
+
         for key, value in headers.items():
             key_lower = key.lower()
-            
+
             # Filter sensitive headers
             if any(sensitive in key_lower for sensitive in self.SENSITIVE_FIELDS):
                 essential_headers[key] = '***FILTERED***'
@@ -283,41 +282,41 @@ class LoggingMiddleware:
                     essential_headers[key] = value[:100] + '...'
                 else:
                     essential_headers[key] = value
-        
+
         return essential_headers
-    
+
     def _get_essential_response_headers(self, headers: Dict[str, str]) -> Dict[str, str]:
         """
         Extract only essential response headers for logging.
-        
+
         Args:
             headers: All response headers
-            
+
         Returns:
             Dictionary with only essential response headers
         """
         essential_headers = {}
-        
+
         # Only log essential response headers
         essential_keys = {
             'content-type', 'content-length', 'content-disposition',
             'cache-control', 'etag', 'last-modified', 'status'
         }
-        
+
         for key, value in headers.items():
             key_lower = key.lower()
             if key_lower in essential_keys:
                 essential_headers[key] = value
-        
+
         return essential_headers
-    
+
     def _should_exclude_path(self, path: str) -> bool:
         """
         Check if a path should be excluded from detailed logging.
-        
+
         Args:
             path: Request path to check
-            
+
         Returns:
             True if path should be excluded from logging
         """
@@ -368,7 +367,7 @@ class LoggingMiddleware:
     def configure_excluded_paths(self, paths: List[str]) -> None:
         """
         Configure additional paths to exclude from logging.
-        
+
         Args:
             paths: List of paths to exclude
         """

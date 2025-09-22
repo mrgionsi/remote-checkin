@@ -277,10 +277,10 @@ def _format_kwargs(kwargs: Dict[str, Any], max_length: int) -> Dict[str, str]:
 def _should_exclude_route_logging(path: str) -> bool:
     """
     Check if a route should be excluded from detailed logging.
-    
+
     Args:
         path: Request path to check
-        
+
     Returns:
         True if route should be excluded from logging
     """
@@ -288,7 +288,7 @@ def _should_exclude_route_logging(path: str) -> bool:
     excluded_paths = {
         '/health', '/ping', '/favicon.ico', '/robots.txt'
     }
-    
+
     # Path patterns to exclude
     excluded_patterns = [
         '/api/v1/images/',  # Image requests
@@ -296,8 +296,8 @@ def _should_exclude_route_logging(path: str) -> bool:
         '/assets/',         # Frontend assets
         '/uploads/',        # File uploads
     ]
-    
-    return (path in excluded_paths or 
+
+    return (path in excluded_paths or
             any(path.startswith(pattern) for pattern in excluded_patterns))
 
 
