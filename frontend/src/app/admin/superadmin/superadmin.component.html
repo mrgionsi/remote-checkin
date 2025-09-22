@@ -3,6 +3,26 @@
     <h1>Superadmin Panel</h1>
     <p>Manage structures, users, and associations</p>
   </div>
+  
+  <nav class="superadmin-nav">
+    <a routerLink="/admin/superadmin/dashboard" routerLinkActive="active" class="nav-link">
+      <i class="pi pi-chart-bar"></i>
+      Dashboard
+    </a>
+    <a routerLink="/admin/superadmin/structures" routerLinkActive="active" class="nav-link">
+      <i class="pi pi-building"></i>
+      Structures
+    </a>
+    <a routerLink="/admin/superadmin/users" routerLinkActive="active" class="nav-link">
+      <i class="pi pi-users"></i>
+      Users
+    </a>
+    <a routerLink="/admin/superadmin/associations" routerLinkActive="active" class="nav-link">
+      <i class="pi pi-link"></i>
+      Associations
+    </a>
+  </nav>
+  
   <div class="superadmin-content">
     <router-outlet></router-outlet>
   </div>

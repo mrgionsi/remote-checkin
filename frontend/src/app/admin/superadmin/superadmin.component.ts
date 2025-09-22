@@ -1,13 +1,13 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet } from '@angular/router';
+import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
     selector: 'app-superadmin',
     standalone: true,
-    imports: [CommonModule, RouterOutlet],
+    imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
     templateUrl: './superadmin.component.html',
-    styleUrls: ['./superadmin.component.css']
+    styleUrls: ['./superadmin.component.scss']
 })
 export class SuperadminComponent {
 

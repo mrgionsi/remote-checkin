@@ -8,7 +8,7 @@ import { SuperadminService, Structure } from '../../../services/superadmin.servi
     standalone: true,
     imports: [CommonModule, FormsModule],
     templateUrl: './structures.component.html',
-    styleUrls: ['./structures.component.css']
+    styleUrls: ['./structures.component.scss']
 })
 export class SuperadminStructuresComponent implements OnInit {
     structures: Structure[] = [];

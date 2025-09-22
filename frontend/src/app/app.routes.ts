@@ -15,6 +15,8 @@ import { SettingsComponent } from './admin/settings/settings.component';
 import { SuperadminComponent } from './admin/superadmin/superadmin.component';
 import { SuperadminDashboardComponent } from './admin/superadmin/dashboard/superadmin-dashboard.component';
 import { SuperadminStructuresComponent } from './admin/superadmin/structures/structures.component';
+import { SuperadminUsersComponent } from './admin/superadmin/users/users.component';
+import { SuperadminAssociationsComponent } from './admin/superadmin/associations/associations.component';
 
 export const routes: Routes = [
     { path: '', component: LanguageComponent },
@@ -47,6 +49,8 @@ export const routes: Routes = [
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
             { path: 'dashboard', component: SuperadminDashboardComponent },
             { path: 'structures', component: SuperadminStructuresComponent },
+            { path: 'users', component: SuperadminUsersComponent },
+            { path: 'associations', component: SuperadminAssociationsComponent },
         ]
     },
 ];

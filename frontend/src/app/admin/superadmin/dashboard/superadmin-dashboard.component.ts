@@ -7,7 +7,7 @@ import { SuperadminService, DashboardData } from '../../../services/superadmin.s
   standalone: true,
   imports: [CommonModule],
   templateUrl: './superadmin-dashboard.component.html',
-  styleUrls: ['./superadmin-dashboard.component.css']
+  styleUrls: ['./superadmin-dashboard.component.scss']
 })
 export class SuperadminDashboardComponent implements OnInit {
   dashboardData: DashboardData | null = null;
