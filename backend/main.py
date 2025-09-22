@@ -13,10 +13,6 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_mail import Mail
 from dotenv import load_dotenv
-
-# Load environment variables BEFORE setting up logging
-load_dotenv()
-
 from config import Config
 from app_logging.config import setup_logging
 from app_logging.middleware import setup_request_logging
@@ -26,6 +22,11 @@ from routes.room_routes import room_bp
 from routes.reservation_routes import reservation_bp
 from routes.upload_reservation_routes import upload_bp
 from routes.client_reservation_routes import client_reservation_bp
+
+# Load environment variables BEFORE setting up logging
+load_dotenv()
+
+
 
 app = Flask(__name__)
 

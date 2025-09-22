@@ -206,15 +206,15 @@ def _setup_pii_filtering(root_logger: logging.Logger, environment: str) -> None:
     # Create PII filter with environment-specific settings
     use_hash_anonymization = environment in ['development', 'production']
     hash_salt = os.getenv('PII_HASH_SALT', f"pii_salt_{environment}_2024")
-    
+
     pii_filter = PIIRedactionFilter(
         use_hash_anonymization=use_hash_anonymization,
         hash_salt=hash_salt
     )
-    
+
     # Add filter to root logger (affects all child loggers)
     root_logger.addFilter(pii_filter)
-    
+
     # Also add filter to all handlers to ensure comprehensive coverage
     for handler in root_logger.handlers:
         handler.addFilter(pii_filter)
