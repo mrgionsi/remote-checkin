@@ -59,6 +59,30 @@ def verify_admin_access():
 
     return None, None
 
+
+def verify_superadmin_access():
+    """
+    Verify JWT authentication and superadmin role access.
+
+    Returns:
+        tuple: (error_response, error_code) if verification fails, (None, None) if successful
+    """
+    try:
+        verify_jwt_in_request()
+    except Exception:
+        return jsonify({"error": "Token di autenticazione mancante o non valido"}), 401
+
+    try:
+        claims = get_jwt()
+        user_role = claims.get("role", "").lower()
+        if user_role != "superadmin":
+            return jsonify({"error": "Permessi insufficienti. È richiesto il ruolo superadmin"}), 403
+    except Exception:
+        return jsonify({"error": "Errore durante la verifica dei permessi"}), 403
+
+    return None, None
+
+
 @admin_bp.route("/admin/login", methods=["POST"])
 @log_route(include_request_data=True, include_response_data=True)
 def admin_login():

@@ -233,7 +233,7 @@ class Reservation(Base):
     start_date = Column(Date)
     end_date = Column(Date)
     id_room = Column(BigInteger, ForeignKey("room.id"))
-    status = Column(String, default='Pending') #Approved, Pending, Declined, Sent back to customer
+    status = Column(String, default='Pending')  # Approved, Pending, Declined, Sent back to customer
     name_reference = Column(String, default='Not available')
     email = Column(String, nullable=False)
     telephone = Column(String, default='')
@@ -380,6 +380,7 @@ class Structure(Base):
     street = Column(String)
     city = Column(String)
     cin = Column(String)
+    is_active = Column(Boolean, default=True)
 
     rooms = relationship("Room", back_populates="structure")
 
@@ -397,6 +398,7 @@ class Structure(Base):
             "street": self.street,
             "city": self.city,
             "cin": self.cin,
+            "is_active": self.is_active,
         }
 
     def __repr__(self):
