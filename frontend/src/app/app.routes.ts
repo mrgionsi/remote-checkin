@@ -37,9 +37,9 @@ export const routes: Routes = [
             { path: 'create-reservation', component: CreateReservationComponent, canActivate: [authGuard] },
             { path: 'admin-info', component: AdminInfoComponent, canActivate: [authGuard] },
             { path: 'settings', component: SettingsComponent, canActivate: [authGuard] },
-            { 
-                path: 'superadmin', 
-                component: SuperadminComponent, 
+            {
+                path: 'superadmin',
+                component: SuperadminComponent,
                 canActivate: [superadminGuard],
                 children: [
                     { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
