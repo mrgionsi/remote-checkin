@@ -117,6 +117,8 @@ def upload_file():
             if file and allowed_file(file.filename):
                 filename = sanitize_filename(form_data['name'], form_data['surname'], cf, key)
                 filepath = save_file(file, reservation_folder, filename)
+                if not filepath:
+                    raise BadRequest(f"Failed to save {key}")
                 files[key] = filename
 
                 # Validate document text
@@ -131,7 +133,9 @@ def upload_file():
         selfie = request.files['selfie']
         if selfie and allowed_file(selfie.filename):
             selfie_filename = sanitize_filename(form_data['name'], form_data['surname'], cf, "selfie")
-            save_file(selfie, reservation_folder, selfie_filename)
+            selfie_path = save_file(selfie, reservation_folder, selfie_filename)
+            if not selfie_path:
+                raise BadRequest("Failed to save selfie")
             files['selfie'] = selfie_filename
         else:
             raise BadRequest("Invalid file type for selfie")
