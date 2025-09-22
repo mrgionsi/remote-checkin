@@ -12,7 +12,6 @@ All routes are registered under the '/api/v1/admin' URL prefix and require appro
 """
 
 from datetime import timedelta,datetime,timezone
-import logging
 from flask import Blueprint, request, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request, get_jwt
@@ -20,10 +19,17 @@ from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from models import User, AdminStructure, Structure,Reservation, Client, ClientReservations
 from services.portale_alloggi_service import PortaleAlloggiService
 from utils.encryption_utils import encrypt_password, decrypt_password
+from app_logging.config import get_logger
+from app_logging.decorators import log_route, log_database_operation, log_performance
+from app_logging.utils import safe_extra_fields
 from database import SessionLocal
+
 
 # Blueprint setup
 admin_bp = Blueprint("admin", __name__, url_prefix="/api/v1")
+
+# Configure logging
+logger = get_logger(__name__)
 
 # Error messages
 USER_NOT_FOUND = "User not found"
@@ -34,7 +40,7 @@ RESERVATION_NOT_FOUND = "Reservation not found"
 def verify_admin_access():
     """
     Verify JWT authentication and admin role access.
-    
+
     Returns:
         tuple: (error_response, error_code) if verification fails, (None, None) if successful
     """
@@ -54,14 +60,15 @@ def verify_admin_access():
     return None, None
 
 @admin_bp.route("/admin/login", methods=["POST"])
+@log_route(include_request_data=True, include_response_data=True)
 def admin_login():
     """
     Authenticate an admin user and return a JWT access token with the user's profile and associated structures.
-    
+
     Expects a JSON body with `username` and `password`. On success returns HTTP 200 with a JSON object containing:
     - `access_token`: JWT (expires in 2 hours) whose identity is the user ID and includes `username` and `role` claims.
     - `user`: object with `id`, `username`, `name`, `surname`, `email`, `telephone`, `structures` (list of {id, name}), and `role`.
-    
+
     Possible responses:
     - 200: Authentication successful.
     - 400: Missing `username` or `password`.
@@ -122,17 +129,24 @@ def admin_login():
         }), 200
 
     except Exception as e:
-        logging.error("Errore durante il login: %s", e)
-        return jsonify({"error": f"Errore durante il login: {str(e)}"}), 500
+        logger.exception("Login error occurred", extra=safe_extra_fields({
+            'username': data.get('username'),
+            'error_type': type(e).__name__,
+            'operation_result': 'failed'
+        }))
+        return jsonify({"error": "Errore durante il login"}), 500
     finally:
         db_session.close()
 
 #pylint: disable=W0703,R0911
 @admin_bp.route("/admin/create", methods=["POST"])
+@jwt_required()
+@log_route(include_request_data=True)
+@log_database_operation("CREATE")
 def create_admin_user():
     """
     Create a new admin user from a JSON request.
-    
+
     Requires JWT authentication and admin role. Expects a JSON body with required fields: `username`, `password`, and `id_role`; optional fields: `name`, `surname`, `email`, and `telephone`. On success inserts a new User record (password is stored hashed) and returns HTTP 201 with the created user's data (id, username, name, surname, email, telephone, id_role). Returns HTTP 400 when required fields are missing or the username already exists, HTTP 401 for missing/invalid JWT, HTTP 403 for insufficient permissions, and HTTP 500 for unexpected server errors.
     """
     # Verify JWT authentication and admin role
@@ -184,29 +198,45 @@ def create_admin_user():
             }
         }), 201
 #pylint: disable=W0703,R0911
-    except IntegrityError:
+    except IntegrityError as e:
         db_session.rollback()
-        logging.exception("Database integrity error during user creation")
+        logger.error("User creation failed due to integrity constraint", extra=safe_extra_fields({
+            'username': data.get('username'),
+            'email': data.get('email'),
+            'error_type': 'integrity_constraint',
+            'error_details': str(e),
+            'operation_result': 'failed'
+        }), exc_info=True)
         return jsonify({"error": "User creation failed due to data constraint violation"}), 400
     except SQLAlchemyError:
         db_session.rollback()
-        logging.exception("Database error during user creation")
+        logger.exception("Database error during user creation", extra=safe_extra_fields({
+            'username': data.get('username'),
+            'error_type': 'database_error',
+            'operation_result': 'failed'
+        }))
         return jsonify({"error": "An error occurred while creating the user"}), 500
     except Exception:
         db_session.rollback()
-        logging.exception("Unexpected error during user creation")
+        logger.exception("Unexpected error during user creation", extra=safe_extra_fields({
+            'username': data.get('username'),
+            'error_type': 'unexpected_error',
+            'operation_result': 'failed'
+        }))
         return jsonify({"error": "An unexpected error occurred"}), 500
     finally:
         db_session.close()
 
 @admin_bp.route("/admin/me", methods=["GET"])
 @jwt_required()
+@log_route(include_request_data=True)
+@log_database_operation("READ")
 def get_admin_info():
     """
     Return the authenticated admin user's profile and associated structures.
-    
+
     Admin-only access (requires role: admin). Requires a valid JWT (identity is the user id). Queries the database for the user and their AdminStructure->Structure associations and returns a JSON response with the user's fields and a list of structures.
-    
+
     Returns:
         tuple: (Flask Response, int) JSON payload and HTTP status code.
             Success (200) JSON structure:
@@ -263,10 +293,12 @@ def get_admin_info():
 
 @admin_bp.route("/admin/portale-alloggi", methods=["GET"])
 @jwt_required()
+@log_route(include_request_data=True)
+@log_database_operation("READ")
 def get_portale_alloggi_config():
     """
     Get Portale Alloggi configuration for the current user.
-    
+
     Returns:
         JSON response with Portale Alloggi credentials (password masked)
     """
@@ -288,7 +320,12 @@ def get_portale_alloggi_config():
         }), 200
 
     except Exception as e:
-        logging.error("Error retrieving Portale Alloggi config: %s", str(e))
+        logger.error("Error retrieving Portale Alloggi config", extra=safe_extra_fields({
+            'user_id': get_jwt_identity(),
+            'error_type': type(e).__name__,
+            'error_details': str(e),
+            'operation_result': 'failed'
+        }))
         return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
     finally:
         db_session.close()
@@ -296,17 +333,19 @@ def get_portale_alloggi_config():
 
 @admin_bp.route("/admin/portale-alloggi", methods=["POST"])
 @jwt_required()
+@log_route(include_request_data=True)
+@log_database_operation("UPDATE")
 def update_portale_alloggi_config():
     """
     Update Portale Alloggi configuration for the current user.
-    
+
     Expected JSON payload:
     {
         "portale_username": "string",
         "portale_password": "string",  # Will be encrypted
         "portale_wskey": "string"
     }
-    
+
     Returns:
         JSON response with success message
     """
@@ -345,7 +384,12 @@ def update_portale_alloggi_config():
         }), 200
 
     except Exception as e:
-        logging.error("Error updating Portale Alloggi config: %s", str(e))
+        logger.error("Error updating Portale Alloggi config", extra=safe_extra_fields({
+            'user_id': get_jwt_identity(),
+            'error_type': type(e).__name__,
+            'error_details': str(e),
+            'operation_result': 'failed'
+        }))
         db_session.rollback()
         return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
     finally:
@@ -354,10 +398,12 @@ def update_portale_alloggi_config():
 
 @admin_bp.route("/admin/portale-alloggi/test", methods=["POST"])
 @jwt_required()
+@log_route(include_request_data=True)
+@log_performance(threshold_ms=5000)
 def test_portale_alloggi_connection():
     """
     Test Portale Alloggi connection with current credentials.
-    
+
     Returns:
         JSON response with test results
     """
@@ -422,7 +468,12 @@ def test_portale_alloggi_connection():
             }), 400
 
     except Exception as e:
-        logging.error("Error testing Portale Alloggi connection: %s", str(e))
+        logger.error("Error testing Portale Alloggi connection", extra=safe_extra_fields({
+            'user_id': get_jwt_identity(),
+            'error_type': type(e).__name__,
+            'error_details': str(e),
+            'operation_result': 'failed'
+        }))
         return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
     finally:
         db_session.close()
@@ -451,13 +502,15 @@ def _prepare_reservation_data(reservation):
 
 @admin_bp.route("/admin/reservations/<int:reservation_id>/send-to-portale-alloggi", methods=["POST"])
 @jwt_required()
+@log_route(include_request_data=True, include_response_data=True)
+@log_performance(threshold_ms=10000)
 def send_reservation_to_portale_alloggi(reservation_id):
     """
     Send guest data from a reservation to Portale Alloggi.
-    
+
     Args:
         reservation_id (int): ID of the reservation to send
-        
+
     Returns:
         JSON response with submission results
     """
@@ -538,7 +591,13 @@ def send_reservation_to_portale_alloggi(reservation_id):
         }), 400
 
     except Exception as e:
-        logging.error("Error sending reservation to Portale Alloggi: %s", str(e))
+        logger.error("Error sending reservation to Portale Alloggi", extra=safe_extra_fields({
+            'reservation_id': reservation_id,
+            'user_id': get_jwt_identity(),
+            'error_type': type(e).__name__,
+            'error_details': str(e),
+            'operation_result': 'failed'
+        }))
         return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
     finally:
         db_session.close()
@@ -546,13 +605,15 @@ def send_reservation_to_portale_alloggi(reservation_id):
 
 @admin_bp.route("/admin/reservations/<int:reservation_id>/send-to-portale-alloggi-real", methods=["POST"])
 @jwt_required()
+@log_route(include_request_data=True, include_response_data=True)
+@log_performance(threshold_ms=10000)
 def send_reservation_to_portale_alloggi_real(reservation_id):
     """
     Send guest data from a reservation to Portale Alloggi (REAL PRODUCTION).
-    
+
     Args:
         reservation_id (int): ID of the reservation to send
-        
+
     Returns:
         JSON response with submission results
     """
@@ -637,7 +698,13 @@ def send_reservation_to_portale_alloggi_real(reservation_id):
         }), 400
 
     except Exception as e:
-        logging.error("Error sending reservation to Portale Alloggi: %s", str(e))
+        logger.error("Error sending reservation to Portale Alloggi", extra=safe_extra_fields({
+            'reservation_id': reservation_id,
+            'user_id': get_jwt_identity(),
+            'error_type': type(e).__name__,
+            'error_details': str(e),
+            'operation_result': 'failed'
+        }))
         return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
     finally:
         db_session.close()
@@ -645,13 +712,15 @@ def send_reservation_to_portale_alloggi_real(reservation_id):
 
 @admin_bp.route("/admin/reservations/<int:reservation_id>/portale-alloggi-status", methods=["GET"])
 @jwt_required()
+@log_route(include_request_data=True)
+@log_database_operation("READ")
 def get_portale_alloggi_status(reservation_id):
     """
     Get Portale Alloggi submission status for a reservation.
-    
+
     Args:
         reservation_id (int): ID of the reservation to check
-        
+
     Returns:
         JSON response with submission status
     """
@@ -674,7 +743,13 @@ def get_portale_alloggi_status(reservation_id):
         }), 200
 
     except Exception as e:
-        logging.error("Error getting Portale Alloggi status: %s", str(e))
+        logger.error("Error getting Portale Alloggi status", extra=safe_extra_fields({
+            'reservation_id': reservation_id,
+            'user_id': get_jwt_identity(),
+            'error_type': type(e).__name__,
+            'error_details': str(e),
+            'operation_result': 'failed'
+        }))
         return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
     finally:
         db_session.close()

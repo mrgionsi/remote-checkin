@@ -45,13 +45,22 @@ from flask import Blueprint, jsonify, request, send_from_directory
 from flask_jwt_extended import jwt_required, verify_jwt_in_request
 
 from models import Client, ClientReservations, Reservation
+from app_logging.config import get_logger
+from app_logging.decorators import log_route, log_database_operation
+from app_logging.utils import safe_extra_fields
 from database import SessionLocal
+
 
 # Blueprint setup
 client_reservation_bp = Blueprint("client_reservations", __name__, url_prefix="/api/v1")
 
+# Configure logging
+logger = get_logger(__name__)
+
 @client_reservation_bp.route("/reservations/<int:reservation_id>/clients", methods=["GET"])
 @jwt_required()
+@log_route(include_request_data=True)
+@log_database_operation("READ")
 def get_clients_by_reservation(reservation_id):
     """
     Get all clients associated with a given reservation ID.
@@ -112,7 +121,7 @@ def get_secure_file_path(reservation_id: str, filename: str) -> Path:
     """
     Get a secure file path by resolving the base directory and filename.
     Ensures the resulting path is within the base upload directory.
-    
+
     Args:
         reservation_id: The reservation ID (will be sanitized)
         filename: The filename (will be sanitized)
@@ -150,12 +159,13 @@ def safe_file_exists(file_path: Path) -> bool:
 
 @client_reservation_bp.route("/reservations/<string:reservation_id>/client-images", methods=["POST"])
 @jwt_required()
+@log_route(include_request_data=False, include_response_data=False)
 def check_images(reservation_id):
     """
     Check whether identity images (back, front, selfie) exist for a given reservation and client.
-    
+
     Validates required JSON fields ("name", "surname", "cf"), confirms the reservation (matched against Reservation.id_reference) and that the client is associated with that reservation, then inspects the reservation's upload folder (UPLOAD_FOLDER/<reservation_id>) for three expected files named `<name>-<surname>-<cf>-backimage.jpg`, `-frontimage.jpg`, and `-selfie.jpg` (name/surname/cf are sanitized). Returns a JSON object with keys "back_image", "front_image", and "selfie" mapped to the API URL for the file if present ("/api/v1/images/<reservation_id>/<filename>") or null if missing.
-    
+
     Responses:
     - 200: JSON object with the three keys and URL or null values.
     - 400: Missing required fields in the request JSON.
@@ -218,16 +228,17 @@ def check_images(reservation_id):
 
 
 @client_reservation_bp.route("/images/<string:reservation_id>/<path:filename>", methods=["GET", "OPTIONS"])
+@log_route(include_request_data=True)
 def get_image(reservation_id, filename):
     """
     Serve a client identity image file for a reservation or respond to CORS preflight.
-    
+
     For GET requests this endpoint requires a valid JWT. If the reservation folder or requested file does not exist, returns a JSON 404 error. For OPTIONS requests it returns an empty JSON body with permissive CORS headers.
-    
+
     Parameters:
         reservation_id (str): Reservation reference used to locate the uploads subfolder.
         filename (str): File name (including extension) inside the reservation folder.
-    
+
     Returns:
         A Flask response containing the requested file on success, or a JSON error response with HTTP 404 when the folder or file is missing. OPTIONS requests return a 200 response with CORS headers.
     """
@@ -245,11 +256,20 @@ def get_image(reservation_id, filename):
     try:
         # Use secure path resolution to prevent path traversal
         file_path = get_secure_file_path(reservation_id, filename)
-        print(f"Looking for image: reservation_id={reservation_id}, filename={filename}")
-        print(f"Resolved file path: {file_path}")
+        logger.debug("Looking for client image file", extra=safe_extra_fields({
+            'reservation_id': reservation_id,
+            'filename': filename,
+            'resolved_path': str(file_path),
+            'operation': 'file_lookup'
+        }))
 
         if not safe_file_exists(file_path):
-            print(f"File not found: {file_path}")
+            logger.warning("Client image file not found", extra=safe_extra_fields({
+                'reservation_id': reservation_id,
+                'filename': filename,
+                'file_path': str(file_path),
+                'operation_result': 'not_found'
+            }))
             return jsonify({"error": "Image not found"}), 404
 
         # Get the directory and filename for send_from_directory
@@ -260,10 +280,22 @@ def get_image(reservation_id, filename):
         response = send_from_directory(folder_path, safe_filename)
 
     except ValueError as e:
-        print(f"Path traversal detected: {e}")
+        logger.error("Path traversal attempt detected", extra=safe_extra_fields({
+            'reservation_id': reservation_id,
+            'filename': filename,
+            'error_type': 'security_violation',
+            'error_details': str(e),
+            'operation_result': 'blocked'
+        }))
         return jsonify({"error": "Invalid file path"}), 400
     except Exception as e:
-        print(f"Error accessing file: {e}")
+        logger.error("Error accessing client image file", extra=safe_extra_fields({
+            'reservation_id': reservation_id,
+            'filename': filename,
+            'error_type': 'file_access_error',
+            'error_details': str(e),
+            'operation_result': 'failed'
+        }))
         return jsonify({"error": "Error accessing file"}), 500
     response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'

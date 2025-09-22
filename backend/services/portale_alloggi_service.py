@@ -1,4 +1,4 @@
-#pylint: disable=W0718,R0902,R0914,C0301,C0303,R0911
+#pylint: disable=W0718,R0902,R0914,C0301,C0303,R0911,E0401
 """
 Portale Alloggi Service for Italian accommodation registry integration.
 
@@ -8,7 +8,6 @@ for submitting guest data to the Italian national accommodation registry.
 
 import os
 import json
-import logging
 import time
 from datetime import datetime
 from typing import Dict, List, Optional, Any, Callable
@@ -16,8 +15,9 @@ from xml.sax.saxutils import escape
 
 import defusedxml.ElementTree as ET
 import requests
+from app_logging.config import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Guest type constants based on guest_types.json
 GUEST_TYPE_SINGLE = "16"  # OSPITE SINGOLO
@@ -531,7 +531,7 @@ class PortaleAlloggiService:
             # Build schedina according to official format (168 characters)
             schedina = ""
             schedina += pad_string(guest_type, 2)  # 0-1: Tipo Alloggiato
-            start_date = reservation_data.get('start_date', '15/09/2025')
+            start_date = reservation_data.get('start_date') or datetime.now()
             start_date_formatted = format_date(start_date)
             schedina += start_date_formatted  # 2-11: Data Arrivo
             

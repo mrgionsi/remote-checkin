@@ -442,7 +442,7 @@ export class RemoteCheckinComponent implements OnInit {
 
   uploadReservationData() {
     console.log("uploadReservationData called");  // For debugging
-    
+
     // Prevent duplicate submissions immediately
     if (this.isSubmitting) {
       console.log("Submission already in progress");
@@ -511,7 +511,7 @@ export class RemoteCheckinComponent implements OnInit {
     // Handle municipality fields (birth and residence)
     const birthMunicipalityCode = this.clientForm.get('comune_nascita_code')?.value;
     const residenceMunicipalityCode = this.clientForm.get('comune_residenza_code')?.value;
-    
+
     // Birth municipality: try code first, then fallback to name
     if (birthMunicipalityCode) {
       formData.append('comune_nascita', birthMunicipalityCode);
@@ -525,7 +525,7 @@ export class RemoteCheckinComponent implements OnInit {
         }
       }
     }
-    
+
     // Residence municipality: try code first, then fallback to name
     if (residenceMunicipalityCode) {
       formData.append('comune_residenza', residenceMunicipalityCode);
@@ -544,16 +544,14 @@ export class RemoteCheckinComponent implements OnInit {
     const birthProvinceCode = this.clientForm.get('provincia_nascita')?.value;
     const residenceProvinceCode = this.clientForm.get('provincia_residenza')?.value;
 
-    // Birth province: use code or mapped name
+    // Birth province: send the acronym (2-character code)
     if (birthProvinceCode) {
-      const provinceName = this.provinceMappings[birthProvinceCode] || birthProvinceCode;
-      formData.append('provincia_nascita', provinceName);
+      formData.append('provincia_nascita', birthProvinceCode);
     }
-    
-    // Residence province: use code or mapped name
+
+    // Residence province: send the acronym (2-character code)
     if (residenceProvinceCode) {
-      const provinceName = this.provinceMappings[residenceProvinceCode] || residenceProvinceCode;
-      formData.append('provincia_residenza', provinceName);
+      formData.append('provincia_residenza', residenceProvinceCode);
     }
 
     // Append reservationId separately

@@ -8,10 +8,9 @@ It supports operations such as creating new reservations and listing all reserva
 """
 
 import calendar
-import traceback
 from datetime import datetime
 
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, jsonify
 from sqlalchemy import  func
 from sqlalchemy.sql import extract
 from flask_jwt_extended import get_jwt_identity, jwt_required
@@ -20,23 +19,35 @@ from models import Reservation, Room, Structure, StructureReservationsView, Emai
 from email_handler import EmailService
 from routes.email_config_routes import get_encryption_key
 from utils.email_utils import get_admin_email_config
+from app_logging.config import get_logger
+from app_logging.decorators import log_route, log_database_operation, log_performance
+from app_logging.utils import safe_extra_fields, log_notification_error
 from database import SessionLocal
+
 
 
 class EmailConfigurationError(Exception):
     """Custom exception for email configuration errors."""
     pass
 
+# Constants
+STATUS_SENT_BACK_TO_CUSTOMER = "Sent back to customer"
+
 # Create a blueprint for reservations
 reservation_bp = Blueprint("reservations", __name__, url_prefix="/api/v1")
+
+# Configure logging
+logger = get_logger(__name__)
 
 
 @reservation_bp.route("/reservations", methods=["POST"])
 @jwt_required()
+@log_route(include_request_data=True, include_response_data=True)
+@log_database_operation("CREATE")
 def create_reservation():
     """
     Create a new reservation from JSON payload, persist it to the database, and (optionally) send a confirmation email.
-    
+
     Expects a POST JSON body with the required fields:
       - reservationNumber (str): external reservation identifier
       - startDate (str): reservation start in YYYY-MM-DD
@@ -47,13 +58,13 @@ def create_reservation():
       - nameReference (str)
       - telephone (str)
       - numberOfPeople (int): number of people for this reservation (default: 1, max: room capacity)
-    
+
     Behavior:
       - Validates required fields and parses dates (format YYYY-MM-DD).
       - Looks up Room by name and returns 404 if not found.
       - Creates and commits a Reservation record (returns 201 on success).
       - After committing, attempts to send a confirmation email using the caller's active EmailConfig; email failures are logged and do not roll back the reservation.
-    
+
     Responses:
       - 201: JSON payload with created reservation details.
       - 400: missing fields or invalid date formats.
@@ -70,18 +81,29 @@ def create_reservation():
     session = SessionLocal()
 
     try:
-        # Debug: Log the received data
-        current_app.logger.info(f"Received reservation data: {data}")
-        current_app.logger.info(f"startDate type: {type(data['startDate'])}, value: {data['startDate']}")
-        current_app.logger.info(f"endDate type: {type(data['endDate'])}, value: {data['endDate']}")
+        # Log the received reservation data
+        logger.info("Processing reservation creation", extra=safe_extra_fields({
+            'reservation_number': data.get('reservationNumber'),
+            'start_date': data.get('startDate'),
+            'end_date': data.get('endDate'),
+            'room_name': data.get('roomName'),
+            'guest_email_present': bool(data.get('email')),
+            'number_of_people': data.get('numberOfPeople', 1),
+            'operation': 'create_reservation_validation'
+        }))
 
         # Validate and parse date fields
         try:
             start_date = datetime.strptime(data["startDate"], "%Y-%m-%d")
             end_date = datetime.strptime(data["endDate"], "%Y-%m-%d")
         except ValueError as e:
-            current_app.logger.error(f"Date parsing error: {e}")
-            current_app.logger.error(f"startDate: '{data['startDate']}', endDate: '{data['endDate']}'")
+            logger.error("Date parsing error in reservation creation", extra=safe_extra_fields({
+                'start_date_input': data.get('startDate'),
+                'end_date_input': data.get('endDate'),
+                'error_type': 'date_parsing_error',
+                'error_details': str(e),
+                'operation_result': 'validation_failed'
+            }))
             return jsonify({"error": f"Invalid date format. Expected YYYY-MM-DD, got startDate: '{data['startDate']}', endDate: '{data['endDate']}'"}), 400
         # Ensure a valid date range
         if end_date < start_date:
@@ -143,11 +165,20 @@ def create_reservation():
                 ).first()
 
                 if not email_config:
-                    current_app.logger.error("No email configuration found for user")
+                    logger.error("No email configuration found for user", extra=safe_extra_fields({
+                        'user_id': get_jwt_identity(),
+                        'operation': 'email_config_lookup',
+                        'error_type': 'missing_email_config',
+                        'operation_result': 'failed'
+                    }))
                     raise EmailConfigurationError("Email configuration not found. Please configure email settings first.")
 
                 # Use database configuration
-                current_app.logger.info("Using database email configuration")
+                logger.info("Using database email configuration", extra=safe_extra_fields({
+                    'user_id': get_jwt_identity(),
+                    'email_config_source': 'database',
+                    'operation': 'email_config_setup'
+                }))
                 encryption_key = get_encryption_key()
                 email_service = EmailService(config=email_config, encryption_key=encryption_key)
 
@@ -163,11 +194,14 @@ def create_reservation():
                 'room_name': room_name
             }
 
-            # Log the data being sent
-            current_app.logger.info(f"Preparing to send email to: {data['email']}")
-            current_app.logger.info(f"Reservation data: {reservation_data}")
-            current_app.logger.info(f"Email service type: {type(email_service)}")
-            # current_app.logger.info(f"Mail instance type: {type(mail)}")  # Removed as mail is not used in new email system
+            # Log the email preparation
+            logger.info("Preparing to send reservation confirmation email", extra=safe_extra_fields({
+                'recipient_email_present': bool(data.get('email')),
+                'reservation_number': data.get('reservationNumber'),
+                'room_name': data.get('roomName'),
+                'email_service_type': type(email_service).__name__,
+                'operation': 'email_preparation'
+            }))
 
             # Send confirmation email
             email_result = email_service.send_reservation_confirmation(
@@ -177,16 +211,29 @@ def create_reservation():
 
             # Log email result
             if email_result['status'] == 'error':
-                current_app.logger.warning(f"Failed to send email: {email_result['message']}")
-                current_app.logger.warning(f"Email error type: {email_result.get('error_type', 'unknown')}")
+                logger.warning("Reservation confirmation email failed", extra=safe_extra_fields({
+                    'recipient_email_present': bool(data.get('email')),
+                    'reservation_number': data.get('reservationNumber'),
+                    'error_message': email_result['message'],
+                    'error_type': email_result.get('error_type', 'unknown'),
+                    'email_result': 'failed'
+                }))
             else:
-                current_app.logger.info("Reservation confirmation email sent successfully")
-                current_app.logger.info(f"Email sent to: {email_result.get('to', 'unknown')}")
+                logger.info("Reservation confirmation email sent successfully", extra=safe_extra_fields({
+                    'recipient_email_present': bool(email_result.get('to') or data.get('email')),
+                    'reservation_number': data.get('reservationNumber'),
+                    'email_result': 'success'
+                }))
 
         except Exception as e:
             # Log email error but don't fail the reservation creation
-            current_app.logger.error(f"Error sending email: {str(e)}")
-            current_app.logger.error(f"Email error traceback: {traceback.format_exc()}")
+            logger.error("Error sending reservation confirmation email", extra=safe_extra_fields({
+                'recipient_email_present': bool(data.get('email')),
+                'reservation_number': data.get('reservationNumber'),
+                'error_type': type(e).__name__,
+                'error_details': str(e),
+                'email_result': 'error'
+            }), exc_info=True)
 
         return (
             jsonify(
@@ -223,12 +270,14 @@ def create_reservation():
 
 @reservation_bp.route("/reservations/<int:reservation_id>", methods=["PATCH"])
 @jwt_required()
+@log_route(include_request_data=True, include_response_data=True)
+@log_database_operation("UPDATE")
 def update_reservation(reservation_id):
     """
     Update an existing reservation's fields by its database ID.
-    
+
     Accepts a JSON payload with any of the updatable fields listed below and persists changes to the database.
-    
+
     Payload fields (all optional except at least one meaningful field):
     - start_date, end_date: strings parsed with format "%a, %d %b %Y %H:%M:%S GMT".
     - name_reference (str)
@@ -238,12 +287,12 @@ def update_reservation(reservation_id):
     - status (str)
     - number_of_people (int): number of people for this reservation (max: room capacity)
     - room: object containing "id" (int) — if provided, the referenced Room must exist.
-    
+
     Behavior:
     - Commits changes and returns the updated reservation representation on success.
     - Returns 404 if the reservation or referenced room is not found.
     - Returns 500 on unexpected errors.
-    
+
     Returns:
     - Flask JSON response with HTTP 200 and the updated reservation on success; otherwise a JSON error with the appropriate HTTP status code.
     """
@@ -342,13 +391,15 @@ def update_reservation(reservation_id):
         db.close()
 @reservation_bp.route("/reservations/<int:reservation_id>", methods=["DELETE"])
 @jwt_required()
+@log_route(include_request_data=True)
+@log_database_operation("DELETE")
 def delete_reservation(reservation_id):
     """
     Delete a reservation by its database ID.
-    
+
     Parameters:
         reservation_id (int): Primary key of the reservation to remove.
-    
+
     Returns:
         A Flask JSON response with:
           - 200 and a success message when the reservation is deleted,
@@ -376,10 +427,12 @@ def delete_reservation(reservation_id):
 
 @reservation_bp.route("/reservations", methods=["GET"])
 @jwt_required()
+@log_route(include_request_data=True)
+@log_database_operation("READ")
 def get_reservations():
     """
     Return a JSON response containing a list of reservations.
-    
+
     This endpoint responds with {"reservations": [...]}. Currently the list is a placeholder (empty) and should be replaced with actual reservation objects retrieved from the database. Requires authenticated access (JWT) in the application routes.
     """
     # This would typically query the database to get reservations
@@ -390,15 +443,17 @@ def get_reservations():
 
 @reservation_bp.route("/reservations/structure/<structure_id>", methods=["GET"])
 @jwt_required()
+@log_route(include_request_data=True)
+@log_database_operation("READ")
 def get_reservations_by_structure(structure_id):
     """
     Return all reservations for the specified structure as a JSON array.
-    
+
     Queries the read-only StructureReservationsView for reservations whose room belongs to the given structure. Each reservation in the response includes structure and room identifiers, reference id, ISO-8601 formatted start and end dates, status, and guest name.
-    
+
     Parameters:
         structure_id (int): ID of the Structure to fetch reservations for.
-    
+
     Returns:
         flask.Response: JSON array of reservation objects. If no reservations exist for the structure, an empty list is returned.
     """
@@ -424,15 +479,17 @@ def get_reservations_by_structure(structure_id):
 
 @reservation_bp.route("/reservations/admin/<int:reservation_id>", methods=["GET"])
 @jwt_required()
+@log_route(include_request_data=True)
+@log_database_operation("READ")
 def get_admin_reservations_by_id(reservation_id):
     """
     Retrieve a reservation by its ID for administrative use.
-    
+
     Looks up the Reservation by primary key (accepts int or string-like IDs) and returns its serialized representation as JSON.
-    
+
     Parameters:
         reservation_id (int | str): Reservation primary key. The value is compared as a string against the stored Reservation.id.
-    
+
     Returns:
         Flask Response: JSON body with the reservation dictionary and HTTP 200 when found; JSON error with HTTP 404 if not found; JSON error with HTTP 500 on unexpected failures.
     """
@@ -456,14 +513,16 @@ def get_admin_reservations_by_id(reservation_id):
 
 @reservation_bp.route("/reservations/check/<string:reservation_id>", methods=["GET"])
 #@jwt_required() Not needed as this endpoint is for public access
+@log_route(include_request_data=True)
+@log_database_operation("READ")
 def check_get_reservations_by_id(reservation_id):
     """
     Check whether a reservation exists by its reference ID and return the reference when found.
     Also returns capacity information needed for client registration.
-    
+
     Parameters:
         reservation_id (str): The reservation reference (id_reference) to look up.
-    
+
     Returns:
         Flask Response: JSON with reservation details including capacity info and HTTP 200 if found;
         JSON error and HTTP 404 if not found; JSON error and HTTP 500 on unexpected errors.
@@ -501,15 +560,18 @@ def check_get_reservations_by_id(reservation_id):
 
 @reservation_bp.route("/reservations/monthly/<int:structure_id>", methods=["GET"])
 @jwt_required()
+@log_route(include_request_data=True)
+@log_database_operation("READ")
+@log_performance(threshold_ms=2000)
 def get_reservations_per_month(structure_id):
     """
     Return the number of reservations per calendar month for a given structure.
-    
+
     Returns a list of 12 entries (January–December) with counts for each month; months with no reservations are returned with a count of 0.
-    
+
     Parameters:
         structure_id (int): ID of the structure to query.
-    
+
     Returns:
         flask.Response: JSON array of objects {"month": "<Month Name>", "total_reservations": <int>} and HTTP status 200.
         If the specified structure does not exist, returns a 404 JSON response {"message": "Structure not found"}.
@@ -554,15 +616,17 @@ def get_reservations_per_month(structure_id):
 
 @reservation_bp.route("/reservations/<int:reservation_id>/status", methods=["PUT"])
 @jwt_required()
+@log_route(include_request_data=False, include_response_data=False)
+@log_database_operation("UPDATE")
 def update_reservation_status(reservation_id):
     """
     Update a reservation's status and notify the structure admin's configured email when appropriate.
-    
-    Updates the Reservation identified by reservation_id to the provided status (one of "Approved", "Pending", "Declined", "Sent back to customer"). If the status changes to "Approved" or "Sent back to customer", the function attempts to send a notification email to the reservation's email using the structure admin's active EmailConfig; email failures are logged and do not prevent the status update. The function returns a JSON response with the updated reservation data on success or an error message with an appropriate HTTP status code on failure.
-    
+
+    Updates the Reservation identified by reservation_id to the provided status (one of "Approved", "Pending", "Declined", STATUS_SENT_BACK_TO_CUSTOMER). If the status changes to "Approved" or STATUS_SENT_BACK_TO_CUSTOMER, the function attempts to send a notification email to the reservation's email using the structure admin's active EmailConfig; email failures are logged and do not prevent the status update. The function returns a JSON response with the updated reservation data on success or an error message with an appropriate HTTP status code on failure.
+
     Parameters:
         reservation_id: The reservation identifier (int or str). The value is compared against Reservation.id.
-    
+
     Returns:
         A Flask JSON response:
           - 200 with the updated reservation object on success.
@@ -571,7 +635,7 @@ def update_reservation_status(reservation_id):
           - 500 for server-side errors.
     """
     data = request.get_json()
-    allowed_statuses = {"Approved", "Pending", "Declined", "Sent back to customer"}
+    allowed_statuses = {"Approved", "Pending", "Declined", STATUS_SENT_BACK_TO_CUSTOMER}
 
     if "status" not in data:
         return jsonify({"error": "Missing 'status' field"}), 400
@@ -595,8 +659,8 @@ def update_reservation_status(reservation_id):
         reservation.status = new_status
         db.commit()
 
-        # Send email notification if status changed to "Approved" or "Sent back to customer"
-        if old_status != new_status and new_status in ["Approved", "Sent back to customer"]:
+        # Send email notification if status changed to "Approved" or STATUS_SENT_BACK_TO_CUSTOMER
+        if old_status != new_status and new_status in ["Approved", STATUS_SENT_BACK_TO_CUSTOMER]:
             try:
                 # Get admin email configuration
                 email_config, _ = get_admin_email_config(reservation)
@@ -618,7 +682,7 @@ def update_reservation_status(reservation_id):
                                 'room_name': reservation.room.name if reservation.room else 'N/A'
                             }
                         )
-                    elif new_status == "Sent back to customer":
+                    elif new_status == STATUS_SENT_BACK_TO_CUSTOMER:
                         email_result = email_service.send_reservation_revision_notification(
                             reservation.email,
                             {
@@ -631,15 +695,33 @@ def update_reservation_status(reservation_id):
                         )
 
                     if email_result and email_result.get('status') == 'success':
-                        current_app.logger.info(f"Status change notification sent successfully to {reservation.email}")
+                        logger.info("Status change notification sent successfully", extra=safe_extra_fields({
+                            'reservation_id': reservation_id,
+                            'recipient_email_present': bool(reservation.email),
+                            'new_status': new_status,
+                            'notification_result': 'success'
+                        }))
                     elif email_result:
-                        current_app.logger.warning(f"Failed to send status change notification: {email_result.get('message', 'Unknown error')}")
+                        logger.warning("Status change notification failed", extra=safe_extra_fields({
+                            'reservation_id': reservation_id,
+                            'recipient_email_present': bool(reservation.email),
+                            'new_status': new_status,
+                            'error_message': email_result.get('message', 'Unknown error'),
+                            'notification_result': 'failed'
+                        }))
                 else:
-                    current_app.logger.warning(f"No email configuration found for admin or no client email for reservation {reservation.id}")
+                    logger.warning("No email configuration or recipient for status notification", extra=safe_extra_fields({
+                        'reservation_id': reservation_id,
+                        'has_admin_config': email_config is not None,
+                        'has_client_email': bool(reservation.email),
+                        'notification_result': 'skipped'
+                    }))
 
             except Exception as e:
-                current_app.logger.error(f"Error sending status change notification: {str(e)}")
-                current_app.logger.error(f"Traceback: {traceback.format_exc()}")
+                log_notification_error(logger, "status change notification", {
+                    'reservation_id': reservation_id,
+                    'new_status': new_status
+                }, e)
 
         return jsonify({
             "message": "Reservation status updated successfully",

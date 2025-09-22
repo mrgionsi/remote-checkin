@@ -7,14 +7,15 @@ and registers blueprints for routing.
 # pylint: disable=C0303,E0401,W0718,C0301
 import os
 import re
-import logging
 
 from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_mail import Mail
-
+from dotenv import load_dotenv
 from config import Config
+from app_logging.config import setup_logging
+from app_logging.middleware import setup_request_logging
 from routes.email_config_routes import email_config_bp
 from routes.admin_routes import admin_bp
 from routes.room_routes import room_bp
@@ -22,26 +23,27 @@ from routes.reservation_routes import reservation_bp
 from routes.upload_reservation_routes import upload_bp
 from routes.client_reservation_routes import client_reservation_bp
 
+# Load environment variables BEFORE setting up logging
+load_dotenv()
+
+
+
 app = Flask(__name__)
 
-# Configure logging for development
-if os.getenv('FLASK_ENV') == 'development' or os.getenv('DEBUG') == 'True':
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        handlers=[
-            logging.StreamHandler(),  # Console output
-        ]
-    )
-    # Enable debug logging for our specific service
-    logging.getLogger('backend.services.portale_alloggi_service').setLevel(logging.DEBUG)
-    logging.getLogger('backend.routes').setLevel(logging.DEBUG)
-else:
-    # Production logging - only WARNING and above
-    logging.basicConfig(
-        level=logging.WARNING,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    )
+# Setup comprehensive logging system
+setup_logging('remote-checkin')
+
+# Setup request/response logging middleware
+setup_request_logging(
+    app,
+    exclude_paths=[
+        '/health', '/ping', '/favicon.ico', '/robots.txt',
+        '/api/v1/images/', '/static/', '/assets/', '/uploads/'
+    ],
+    log_request_body=True,
+    log_response_body=False,
+    max_body_size=1024
+)
 
 # Load configuration
 app.config.from_object(Config())
@@ -143,4 +145,6 @@ def test_email_config():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5001)
+    # Read debug flag from environment
+    debug_flag = os.getenv('DEBUG', 'false').lower() in ('true', '1', 'yes')
+    app.run(debug=debug_flag, port=5001)

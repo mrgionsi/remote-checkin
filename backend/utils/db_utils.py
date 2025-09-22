@@ -24,7 +24,13 @@ Note:
 
 from datetime import datetime
 from models import Client, ClientReservations, Reservation
+from app_logging.config import get_logger
+from app_logging.utils import safe_extra_fields
 from database import get_db
+
+
+# Configure logging
+logger = get_logger(__name__)
 
 def get_reservation_by_id(reservation_id):
     """
@@ -65,7 +71,11 @@ def _parse_date_field(value):
 def _update_existing_client(db, client, form_data):
     """Update an existing client with form data."""
     client = db.merge(client)
-    print("Updating client:", client.id)
+    logger.info("Updating existing client", extra=safe_extra_fields({
+        'client_id': client.id,
+        'client_cf': client.cf,
+        'operation': 'client_update'
+    }))
     
     for key, value in form_data.items():
         if not hasattr(client, key) or key == 'reservationId':
@@ -89,7 +99,11 @@ def _create_new_client(db, form_data):
             form_data[date_field] = _parse_date_field(form_data[date_field])
     
     form_data.pop('reservationId', None)
-    print(form_data)
+    logger.debug("Processing client form data", extra=safe_extra_fields({
+        'form_fields': list(form_data.keys()) if form_data else [],
+        'has_cf': 'cf' in form_data if form_data else False,
+        'operation': 'form_data_processing'
+    }))
     client = Client(**form_data)
     db.add(client)
     db.commit()
@@ -122,7 +136,12 @@ def add_or_update_client(form_data, client=None):
 
     except Exception as e:
         db.rollback()
-        print(f"Error during client add or update: {str(e)}")
+        logger.error("Error during client add or update", extra=safe_extra_fields({
+            'client_cf': form_data.get('cf') if form_data else None,
+            'error_type': type(e).__name__,
+            'error_details': str(e),
+            'operation_result': 'failed'
+        }), exc_info=True)
         raise Exception(f"Error during client add or update: {str(e)}") from e
 
 

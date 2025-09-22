@@ -18,6 +18,11 @@ Usage Example:
 Note: Ensure that the required file permissions and paths are correctly set for all operations.
 """
 import os
+from app_logging.config import get_logger
+from app_logging.utils import safe_extra_fields
+
+# Configure logging
+logger = get_logger(__name__)
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 UPLOAD_FOLDER = 'uploads/'
@@ -66,7 +71,13 @@ def save_file(file, folder, filename):
         file.save(filepath)
         return filepath
     except (OSError, IOError) as e:
-        print(f"Error saving file: {e}")
+        logger.error("Error saving file", extra=safe_extra_fields({
+            'filename': filename,
+            'upload_folder': folder,
+            'error_type': type(e).__name__,
+            'error_details': str(e),
+            'operation_result': 'failed'
+        }))
         return None
 
 def sanitize_filename(name, surname, cf, suffix, extension="jpg"):

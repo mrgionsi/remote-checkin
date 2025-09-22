@@ -10,7 +10,6 @@ Functions:
 
 #pylint: disable=C0301,E0401,R0914,W0718,W0612,E0611,R0912,R0915,R1702
 import os
-import traceback
 from datetime import datetime
 from flask import Blueprint, request, jsonify
 from werkzeug.exceptions import BadRequest
@@ -21,22 +20,39 @@ from utils.db_utils import get_reservation_by_id, get_client_by_cf, add_or_updat
 from utils.email_utils import get_admin_email_config
 from email_handler import EmailService
 from routes.email_config_routes import get_encryption_key
+from app_logging.config import get_logger
+from app_logging.decorators import log_route, log_database_operation, log_performance
+from app_logging.utils import safe_extra_fields, log_notification_error
 
 upload_bp = Blueprint('upload', __name__, url_prefix="/api/v1")
+
+# Configure logging
+logger = get_logger(__name__)
 UPLOAD_FOLDER = 'uploads/'
 
+def _get_gender_display(sesso):
+    """Convert gender code to display string."""
+    if sesso == '1':
+        return 'Male'
+    if sesso == '2':
+        return 'Female'
+    return 'N/A'
+
 @upload_bp.route('/upload', methods=['POST'])
+@log_route(include_request_data=False, include_response_data=False)
+@log_database_operation("CREATE")
+@log_performance(threshold_ms=3000)
 def upload_file():
     """
     Handle POST uploads of identity documents for a reservation.
-    
+
     Accepts three image files in the request.files ('frontimage', 'backimage', 'selfie') and form fields including reservationId, name, surname, birthday, street, city, province, cap, telephone, document_type, document_number, and cf. Saves files under uploads/<reservationId>, runs OCR validation on front/back images, creates or updates the client record, links the client to the reservation, and returns a JSON response with saved filenames, per-file OCR validation results, client summary, and reservation summary.
-    
+
     Side effects:
     - Persists uploaded files to disk.
     - Creates/updates client and links it to the reservation in the database.
     - Attempts to send an admin notification email (best-effort; failures do not affect the main operation).
-    
+
     Responses:
     - 200: JSON with message, files, validation, client, and reservation data on success.
     - 400: Missing/invalid files or required form fields (BadRequest).
@@ -101,6 +117,8 @@ def upload_file():
             if file and allowed_file(file.filename):
                 filename = sanitize_filename(form_data['name'], form_data['surname'], cf, key)
                 filepath = save_file(file, reservation_folder, filename)
+                if not filepath:
+                    raise BadRequest(f"Failed to save {key}")
                 files[key] = filename
 
                 # Validate document text
@@ -115,7 +133,9 @@ def upload_file():
         selfie = request.files['selfie']
         if selfie and allowed_file(selfie.filename):
             selfie_filename = sanitize_filename(form_data['name'], form_data['surname'], cf, "selfie")
-            selfie_filepath = save_file(selfie, reservation_folder, selfie_filename)
+            selfie_path = save_file(selfie, reservation_folder, selfie_filename)
+            if not selfie_path:
+                raise BadRequest("Failed to save selfie")
             files['selfie'] = selfie_filename
         else:
             raise BadRequest("Invalid file type for selfie")
@@ -152,7 +172,7 @@ def upload_file():
                     'has_back_image': 'backimage' in files,
                     'has_selfie': 'selfie' in files,
                     # Portale Alloggi fields for admin notification
-                    'client_gender': 'Male' if client.sesso == '1' else 'Female' if client.sesso == '2' else 'N/A',
+                    'client_gender': _get_gender_display(client.sesso),
                     'client_nationality': client.nazionalita or 'N/A',
                     'client_birth_municipality': client.comune_nascita or 'N/A',
                     'client_birth_province': client.provincia_nascita or 'N/A',
@@ -183,18 +203,35 @@ def upload_file():
                     email_result = email_service.send_admin_checkin_notification(admin_email, checkin_data)
 
                     if email_result.get('status') == 'success':
-                        print(f"Admin notification sent successfully to {admin_email}")
+                        logger.info("Admin notification sent successfully", extra=safe_extra_fields({
+                            'admin_email': admin_email,
+                            'reservation_id': reservation_id,
+                            'client_name': f"{form_data['name']} {form_data['surname']}",
+                            'notification_result': 'success'
+                        }))
                     else:
-                        print(f"Failed to send admin notification: {email_result.get('message', 'Unknown error')}")
+                        logger.warning("Admin notification failed", extra=safe_extra_fields({
+                            'admin_email': admin_email if 'admin_email' in locals() else 'unknown',
+                            'error_message': email_result.get('message', 'Unknown error') if email_result else 'Unknown error',
+                            'notification_result': 'failed'
+                        }))
                 else:
-                    print("No valid admin email address found - skipping notification")
+                    logger.warning("No valid admin email address found", extra=safe_extra_fields({
+                        'admin_user_id': admin_user.id if admin_user else None,
+                        'notification_result': 'skipped'
+                    }))
             else:
-                print(f"No email configuration found for admin user {admin_user.id if admin_user else 'None'}")
+                logger.warning("No email configuration found for admin", extra=safe_extra_fields({
+                    'admin_user_id': admin_user.id if admin_user else None,
+                    'notification_result': 'no_config'
+                }))
 
         except Exception as e:
             # Don't fail the upload if email notification fails
-            print(f"Error sending admin notification: {str(e)}")
-            print(f"Traceback: {traceback.format_exc()}")
+            log_notification_error(logger, "admin notification", {
+                'reservation_id': reservation_id,
+                'client_name': f"{form_data['name']} {form_data['surname']}"
+            }, e)
 
         return jsonify({
             "message": "Files uploaded successfully and client linked to reservation",

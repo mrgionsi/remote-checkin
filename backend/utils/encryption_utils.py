@@ -5,11 +5,11 @@ This module provides functions for handling encryption keys and password encrypt
 """
 #pylint: disable=C0301,E0611,E0401,W0718,R0914
 import os
-import logging
 from flask import current_app
 from cryptography.fernet import Fernet
+from app_logging.config import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def get_encryption_key():
