@@ -37,20 +37,20 @@ export const routes: Routes = [
             { path: 'create-reservation', component: CreateReservationComponent, canActivate: [authGuard] },
             { path: 'admin-info', component: AdminInfoComponent, canActivate: [authGuard] },
             { path: 'settings', component: SettingsComponent, canActivate: [authGuard] },
+            { 
+                path: 'superadmin', 
+                component: SuperadminComponent, 
+                canActivate: [superadminGuard],
+                children: [
+                    { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+                    { path: 'dashboard', component: SuperadminDashboardComponent },
+                    { path: 'structures', component: SuperadminStructuresComponent },
+                    { path: 'users', component: SuperadminUsersComponent },
+                    { path: 'associations', component: SuperadminAssociationsComponent },
+                ]
+            },
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 
-        ]
-    },
-    {
-        path: 'admin/superadmin',
-        component: SuperadminComponent,
-        canActivate: [superadminGuard],
-        children: [
-            { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-            { path: 'dashboard', component: SuperadminDashboardComponent },
-            { path: 'structures', component: SuperadminStructuresComponent },
-            { path: 'users', component: SuperadminUsersComponent },
-            { path: 'associations', component: SuperadminAssociationsComponent },
         ]
     },
 ];
