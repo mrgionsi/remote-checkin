@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AuthService } from './auth.service';
+import { environment } from '../../environments/environments';
 
 export interface Structure {
   id: number;
@@ -20,7 +21,7 @@ export interface User {
   email: string;
   telephone: string;
   role: string;
-  structures: Array<{id: number; name: string}>;
+  structures: Array<{ id: number; name: string }>;
 }
 
 export interface Association {
@@ -60,7 +61,7 @@ export interface PaginationParams {
   providedIn: 'root'
 })
 export class SuperadminService {
-  private baseUrl = '/api/v1/superadmin';
+  private baseUrl = `${environment.apiBaseUrl}/api/v1/superadmin`;
 
   constructor(
     private http: HttpClient,
@@ -138,14 +139,14 @@ export class SuperadminService {
   }
 
   deleteAssociation(userId: number, structureId: number): Observable<any> {
-    return this.http.delete(`${this.baseUrl}/associations`, { 
+    return this.http.delete(`${this.baseUrl}/associations`, {
       headers: this.getHeaders(),
       body: { user_id: userId, structure_id: structureId }
     });
   }
 
   // Dashboard
-  getDashboardData(): Observable<{dashboard: DashboardData}> {
-    return this.http.get<{dashboard: DashboardData}>(`${this.baseUrl}/dashboard`, { headers: this.getHeaders() });
+  getDashboardData(): Observable<{ dashboard: DashboardData }> {
+    return this.http.get<{ dashboard: DashboardData }>(`${this.baseUrl}/dashboard`, { headers: this.getHeaders() });
   }
 }

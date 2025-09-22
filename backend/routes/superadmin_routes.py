@@ -26,7 +26,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Create Blueprint
-superadmin_bp = Blueprint('superadmin', __name__)
+superadmin_bp = Blueprint('superadmin', __name__, url_prefix='/api/v1')
 
 # Constants
 INTERNAL_SERVER_ERROR = "Internal server error"
