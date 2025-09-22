@@ -544,16 +544,14 @@ export class RemoteCheckinComponent implements OnInit {
     const birthProvinceCode = this.clientForm.get('provincia_nascita')?.value;
     const residenceProvinceCode = this.clientForm.get('provincia_residenza')?.value;
 
-    // Birth province: use code or mapped name
+    // Birth province: send the acronym (2-character code)
     if (birthProvinceCode) {
-      const provinceName = this.provinceMappings[birthProvinceCode] || birthProvinceCode;
-      formData.append('provincia_nascita', provinceName);
+      formData.append('provincia_nascita', birthProvinceCode);
     }
     
-    // Residence province: use code or mapped name
+    // Residence province: send the acronym (2-character code)
     if (residenceProvinceCode) {
-      const provinceName = this.provinceMappings[residenceProvinceCode] || residenceProvinceCode;
-      formData.append('provincia_residenza', provinceName);
+      formData.append('provincia_residenza', residenceProvinceCode);
     }
 
     // Append reservationId separately
