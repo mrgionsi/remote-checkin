@@ -3,10 +3,35 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SuperadminService, Structure } from '../../../services/superadmin.service';
 
+// PrimeNG imports
+import { ButtonModule } from 'primeng/button';
+import { CardModule } from 'primeng/card';
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
+import { DialogModule } from 'primeng/dialog';
+import { CheckboxModule } from 'primeng/checkbox';
+import { TagModule } from 'primeng/tag';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { MessageModule } from 'primeng/message';
+import { PaginatorModule } from 'primeng/paginator';
+
 @Component({
     selector: 'app-superadmin-structures',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [
+        CommonModule,
+        FormsModule,
+        ButtonModule,
+        CardModule,
+        InputTextModule,
+        SelectModule,
+        DialogModule,
+        CheckboxModule,
+        TagModule,
+        ProgressSpinnerModule,
+        MessageModule,
+        PaginatorModule
+    ],
     templateUrl: './structures.component.html',
     styleUrls: ['./structures.component.scss']
 })
@@ -20,6 +45,12 @@ export class SuperadminStructuresComponent implements OnInit {
     showModal = false;
     editingStructure: Structure | null = null;
     structureFormData: any = {};
+
+    statusOptions = [
+        { label: 'All Status', value: '' },
+        { label: 'Active', value: 'true' },
+        { label: 'Archived', value: 'false' }
+    ];
 
     constructor(private superadminService: SuperadminService) { }
 
@@ -60,6 +91,11 @@ export class SuperadminStructuresComponent implements OnInit {
 
     changePage(page: number): void {
         this.pagination.page = page;
+        this.loadStructures();
+    }
+
+    onPageChange(event: any): void {
+        this.pagination.page = Math.floor(event.first / event.rows) + 1;
         this.loadStructures();
     }
 

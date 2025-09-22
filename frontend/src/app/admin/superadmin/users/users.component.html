@@ -1,72 +1,116 @@
 <div class="users">
   <div class="users-header">
     <h2>Users Management</h2>
-    <button class="btn btn-primary" (click)="openCreateModal()">Create User</button>
+    <p-button 
+      label="Create User" 
+      icon="pi pi-user-plus" 
+      (onClick)="openCreateModal()"
+      severity="primary">
+    </p-button>
   </div>
   
   <div class="filters">
-    <input 
-      type="text" 
+    <p-inputText 
       placeholder="Search users..." 
       [(ngModel)]="searchTerm"
-      (input)="onSearch()"
-      class="search-input">
-    <select [(ngModel)]="roleFilter" (change)="loadUsers()" class="role-filter">
-      <option value="">All Roles</option>
-      <option value="administrator">Administrator</option>
-      <option value="superadmin">Superadmin</option>
-    </select>
+      (onInput)="onSearch()"
+      styleClass="w-full">
+    </p-inputText>
+    <p-select 
+      [(ngModel)]="roleFilter" 
+      (onChange)="loadUsers()"
+      [options]="roleOptions"
+      placeholder="All Roles"
+      styleClass="w-full">
+    </p-select>
   </div>
   
   <div class="users-list" *ngIf="!loading">
-    <div class="user-card" *ngFor="let user of users">
+    <p-card *ngFor="let user of users" styleClass="user-card">
+      <ng-template pTemplate="header">
+        <div class="user-header">
+          <h3>{{ user.name }} {{ user.surname }}</h3>
+          <p-tag 
+            [value]="user.role"
+            [severity]="user.role === 'superadmin' ? 'danger' : 'info'">
+          </p-tag>
+        </div>
+      </ng-template>
+      
       <div class="user-info">
-        <h3>{{ user.name }} {{ user.surname }}</h3>
         <p><strong>Username:</strong> {{ user.username }}</p>
         <p><strong>Email:</strong> {{ user.email || 'N/A' }}</p>
         <p><strong>Phone:</strong> {{ user.telephone || 'N/A' }}</p>
-        <p><strong>Role:</strong> {{ user.role }}</p>
-        <div class="structures-list" *ngIf="user.structures && user.structures.length > 0">
+        
+        <div class="structures-section" *ngIf="user.structures && user.structures.length > 0">
           <strong>Structures:</strong>
-          <span class="structure-tag" *ngFor="let structure of user.structures">
-            {{ structure.name }}
-          </span>
+          <div class="structures-tags">
+            <p-tag 
+              *ngFor="let structure of user.structures"
+              [value]="structure.name"
+              severity="secondary"
+              styleClass="mr-2 mb-1">
+            </p-tag>
+          </div>
         </div>
         <div class="no-structures" *ngIf="!user.structures || user.structures.length === 0">
-          <em>No structures assigned</em>
+          <p-message 
+            severity="info" 
+            text="No structures assigned"
+            styleClass="w-full">
+          </p-message>
         </div>
       </div>
-      <div class="user-actions">
-        <button class="btn btn-sm btn-secondary" (click)="editUser(user)">Edit</button>
-        <button class="btn btn-sm btn-warning" (click)="resetPassword(user)">Reset Password</button>
-        <button class="btn btn-sm btn-info" (click)="manageAssociations(user)">Manage Structures</button>
-      </div>
-    </div>
+
+      <ng-template pTemplate="footer">
+        <div class="user-actions">
+          <p-button 
+            label="Edit" 
+            icon="pi pi-pencil" 
+            severity="secondary" 
+            size="small"
+            (onClick)="editUser(user)">
+          </p-button>
+          <p-button 
+            label="Reset Password" 
+            icon="pi pi-key" 
+            severity="warning" 
+            size="small"
+            (onClick)="resetPassword(user)">
+          </p-button>
+          <p-button 
+            label="Manage Structures" 
+            icon="pi pi-sitemap" 
+            severity="info" 
+            size="small"
+            (onClick)="manageAssociations(user)">
+          </p-button>
+        </div>
+      </ng-template>
+    </p-card>
   </div>
   
   <div class="loading" *ngIf="loading">
+    <p-progressSpinner></p-progressSpinner>
     <p>Loading users...</p>
   </div>
   
-  <div class="error" *ngIf="error">
-    <p>Error: {{ error }}</p>
-  </div>
+  <p-message 
+    *ngIf="error" 
+    severity="error" 
+    [text]="'Error: ' + error"
+    styleClass="w-full">
+  </p-message>
   
-  <div class="pagination" *ngIf="pagination && pagination.pages > 1">
-    <button 
-      class="btn btn-sm" 
-      [disabled]="pagination.page === 1"
-      (click)="changePage(pagination.page - 1)">
-      Previous
-    </button>
-    <span>Page {{ pagination.page }} of {{ pagination.pages }}</span>
-    <button 
-      class="btn btn-sm" 
-      [disabled]="pagination.page === pagination.pages"
-      (click)="changePage(pagination.page + 1)">
-      Next
-    </button>
-  </div>
+  <p-paginator 
+    *ngIf="pagination && pagination.pages > 1"
+    [rows]="pagination.per_page"
+    [totalRecords]="pagination.total"
+    [first]="(pagination.page - 1) * pagination.per_page"
+    (onPageChange)="onPageChange($event)"
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} users">
+  </p-paginator>
 </div>
 
 <!-- Create/Edit Modal -->
