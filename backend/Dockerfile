@@ -28,7 +28,7 @@ RUN groupadd -r appuser && useradd -r -g appuser appuser
 COPY . .
 
 # Copy and set up entrypoint script
-COPY entrypoint.sh /entrypoint.sh
+COPY backend/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 # Set proper ownership and permissions
