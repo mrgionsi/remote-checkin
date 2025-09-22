@@ -8,7 +8,7 @@ sanitizes Personally Identifiable Information from log records before emission.
 import re
 import logging
 import hashlib
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Optional
 
 
 class PIIRedactionFilter(logging.Filter):
@@ -278,6 +278,6 @@ def setup_pii_filter(logger: logging.Logger,
         use_hash_anonymization=use_hash_anonymization,
         hash_salt=hash_salt
     )
-    
+
     logger.addFilter(pii_filter)
     return pii_filter

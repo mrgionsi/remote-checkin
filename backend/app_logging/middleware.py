@@ -321,7 +321,7 @@ class LoggingMiddleware:
         Returns:
             True if path should be excluded from logging
         """
-        return (path in self.EXCLUDED_PATHS or 
+        return (path in self.EXCLUDED_PATHS or
                 any(path.startswith(pattern) for pattern in self.EXCLUDED_PATH_PATTERNS))
 
     def _filter_sensitive_data(self, data: Any) -> Any:
