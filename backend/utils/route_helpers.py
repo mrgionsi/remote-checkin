@@ -4,11 +4,12 @@ Route helper utilities for common database operations and error handling.
 This module provides shared functions to reduce code duplication across route modules.
 """
 
+import logging
+
 from flask import jsonify
 from flask_jwt_extended import get_jwt_identity
-from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from app_logging.utils import safe_extra_fields
-import logging
+from models import AdminStructure, Structure
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +32,7 @@ def handle_database_error(e, operation_name, user_id=None, **extra_fields):
     Returns:
         tuple: (error_response, error_code)
     """
-    logger.error(f"Error during {operation_name}", extra=safe_extra_fields({
+    logger.error("Error during %s", operation_name, extra=safe_extra_fields({
         'user_id': user_id or get_jwt_identity(),
         'error_type': type(e).__name__,
         'error_details': str(e),
@@ -54,7 +55,7 @@ def handle_integrity_error(e, operation_name, user_id=None, **extra_fields):
     Returns:
         tuple: (error_response, error_code)
     """
-    logger.error(f"Integrity constraint violation during {operation_name}", extra=safe_extra_fields({
+    logger.error("Integrity constraint violation during %s", operation_name, extra=safe_extra_fields({
         'user_id': user_id or get_jwt_identity(),
         'error_type': 'integrity_constraint',
         'error_details': str(e),
@@ -75,7 +76,6 @@ def get_user_structures_query(db_session, user_id):
     Returns:
         Query object for user structures
     """
-    from models import AdminStructure, Structure
     return (
         db_session.query(AdminStructure.id_structure, Structure.name)
         .join(Structure, AdminStructure.id_structure == Structure.id)

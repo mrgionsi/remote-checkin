@@ -16,11 +16,12 @@ import logging
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
 from werkzeug.security import generate_password_hash
-from models import User, AdminStructure, Structure, Reservation, Role
-from database import SessionLocal
+
 from app_logging.decorators import log_route
 from utils.authz import verify_superadmin_access
 from utils.route_helpers import handle_database_error, create_user_response_data
+from models import User, AdminStructure, Structure, Reservation, Role
+from database import SessionLocal
 
 logger = logging.getLogger(__name__)
 
