@@ -39,10 +39,10 @@ USER_NOT_FOUND = "User not found"
 def parse_boolean_value(value):
     """
     Parse a value to boolean, handling strings, numbers, and other types properly.
-    
+
     Args:
         value: The value to parse to boolean
-        
+
     Returns:
         bool: Parsed boolean value
     """
@@ -67,10 +67,10 @@ def parse_boolean_value(value):
 def get_structures():
     """
     Get all structures with optional filtering and pagination.
-    
+
     Superadmin-only endpoint. Returns a list of all structures with their details.
     Supports query parameters: page, per_page, search, is_active.
-    
+
     Returns:
         JSON response with structures list and pagination info
     """
@@ -80,16 +80,16 @@ def get_structures():
 
     try:
         db_session = SessionLocal()
-        
+
         # Get query parameters
         page = request.args.get('page', 1, type=int)
         per_page = min(request.args.get('per_page', 10, type=int), 100)  # Max 100 per page
         search = request.args.get('search', '', type=str).strip()
         is_active = request.args.get('is_active', type=str)
-        
+
         # Build query
         query = db_session.query(Structure)
-        
+
         # Apply search filter
         if search:
             search_filter = f"%{search}%"
@@ -98,18 +98,18 @@ def get_structures():
                 (Structure.city.ilike(search_filter)) |
                 (Structure.street.ilike(search_filter))
             )
-        
+
         # Apply active filter
         if is_active is not None:
             is_active_bool = is_active.lower() in ['true', '1', 'yes']
             query = query.filter(Structure.is_active == is_active_bool)
-        
+
         # Get total count
         total = query.count()
-        
+
         # Apply pagination
         structures = query.offset((page - 1) * per_page).limit(per_page).all()
-        
+
         return jsonify({
             "structures": [structure.to_dict() for structure in structures],
             "pagination": {
@@ -119,7 +119,7 @@ def get_structures():
                 "pages": (total + per_page - 1) // per_page
             }
         }), 200
-        
+
     except Exception as e:
         logger.error("Error getting structures", extra=safe_extra_fields({
             'user_id': get_jwt_identity(),
@@ -138,10 +138,10 @@ def get_structures():
 def create_structure():
     """
     Create a new structure.
-    
+
     Superadmin-only endpoint. Expects JSON body with required fields: name, street, city, cin.
     Optional field: is_active (defaults to True).
-    
+
     Returns:
         JSON response with created structure data
     """
@@ -164,13 +164,13 @@ def create_structure():
 
     try:
         db_session = SessionLocal()
-        
+
         # Check if structure with same name and city already exists
         existing = db_session.query(Structure).filter(
             Structure.name == name,
             Structure.city == city
         ).first()
-        
+
         if existing:
             return jsonify({"error": "A structure with this name and city already exists"}), 400
 
@@ -181,15 +181,15 @@ def create_structure():
             cin=cin,
             is_active=is_active
         )
-        
+
         db_session.add(new_structure)
         db_session.commit()
-        
+
         return jsonify({
             "message": "Structure created successfully",
             "structure": new_structure.to_dict()
         }), 201
-        
+
     except Exception as e:
         db_session.rollback()
         logger.error("Error creating structure", extra=safe_extra_fields({
@@ -210,9 +210,9 @@ def create_structure():
 def update_structure(structure_id):
     """
     Update an existing structure.
-    
+
     Superadmin-only endpoint. Expects JSON body with fields to update: name, street, city, cin, is_active.
-    
+
     Returns:
         JSON response with updated structure data
     """
@@ -226,7 +226,7 @@ def update_structure(structure_id):
 
     try:
         db_session = SessionLocal()
-        
+
         structure = db_session.query(Structure).filter(Structure.id == structure_id).first()
         if not structure:
             return jsonify({"error": STRUCTURE_NOT_FOUND}), 404
@@ -248,12 +248,12 @@ def update_structure(structure_id):
             return jsonify({"error": "Name and city are required"}), 400
 
         db_session.commit()
-        
+
         return jsonify({
             "message": "Structure updated successfully",
             "structure": structure.to_dict()
         }), 200
-        
+
     except Exception as e:
         db_session.rollback()
         logger.error("Error updating structure", extra=safe_extra_fields({
@@ -274,9 +274,9 @@ def update_structure(structure_id):
 def delete_structure(structure_id):
     """
     Archive/deactivate a structure (soft delete).
-    
+
     Superadmin-only endpoint. Sets is_active to False instead of hard deletion.
-    
+
     Returns:
         JSON response with success message
     """
@@ -286,18 +286,18 @@ def delete_structure(structure_id):
 
     try:
         db_session = SessionLocal()
-        
+
         structure = db_session.query(Structure).filter(Structure.id == structure_id).first()
         if not structure:
             return jsonify({"error": STRUCTURE_NOT_FOUND}), 404
 
         structure.is_active = False
         db_session.commit()
-        
+
         return jsonify({
             "message": "Structure archived successfully"
         }), 200
-        
+
     except Exception as e:
         db_session.rollback()
         logger.error("Error archiving structure", extra=safe_extra_fields({
@@ -318,9 +318,9 @@ def delete_structure(structure_id):
 def restore_structure(structure_id):
     """
     Restore/reactivate an archived structure.
-    
+
     Superadmin-only endpoint. Sets is_active to True.
-    
+
     Returns:
         JSON response with success message
     """
@@ -330,18 +330,18 @@ def restore_structure(structure_id):
 
     try:
         db_session = SessionLocal()
-        
+
         structure = db_session.query(Structure).filter(Structure.id == structure_id).first()
         if not structure:
             return jsonify({"error": STRUCTURE_NOT_FOUND}), 404
 
         structure.is_active = True
         db_session.commit()
-        
+
         return jsonify({
             "message": "Structure restored successfully"
         }), 200
-        
+
     except Exception as e:
         db_session.rollback()
         logger.error("Error restoring structure", extra=safe_extra_fields({
@@ -366,10 +366,10 @@ def restore_structure(structure_id):
 def get_users():
     """
     Get all admin and superadmin users with optional filtering and pagination.
-    
+
     Superadmin-only endpoint. Returns a list of all users with admin roles.
     Supports query parameters: page, per_page, search, role.
-    
+
     Returns:
         JSON response with users list and pagination info
     """
@@ -379,18 +379,18 @@ def get_users():
 
     try:
         db_session = SessionLocal()
-        
+
         # Get query parameters
         page = request.args.get('page', 1, type=int)
         per_page = min(request.args.get('per_page', 10, type=int), 100)  # Max 100 per page
         search = request.args.get('search', '', type=str).strip()
         role_filter = request.args.get('role', '', type=str).strip()
-        
+
         # Build query - only admin and superadmin users
         query = db_session.query(User).join(Role).filter(
             Role.name.in_(['administrator', 'superadmin'])
         )
-        
+
         # Apply search filter
         if search:
             search_filter = f"%{search}%"
@@ -400,23 +400,23 @@ def get_users():
                 (User.username.ilike(search_filter)) |
                 (User.email.ilike(search_filter))
             )
-        
+
         # Apply role filter
         if role_filter:
             query = query.filter(Role.name == role_filter)
-        
+
         # Get total count
         total = query.count()
-        
+
         # Apply pagination
         users = query.offset((page - 1) * per_page).limit(per_page).all()
-        
+
         # Get user structures for each user
         users_data = []
         for user in users:
             user_dict = user.to_dict()
             user_dict['role'] = user.role.name if user.role else None
-            
+
             # Get associated structures
             structures = (
                 db_session.query(AdminStructure.id_structure, Structure.name)
@@ -425,9 +425,9 @@ def get_users():
                 .all()
             )
             user_dict['structures'] = [{"id": s.id_structure, "name": s.name} for s in structures]
-            
+
             users_data.append(user_dict)
-        
+
         return jsonify({
             "users": users_data,
             "pagination": {
@@ -437,7 +437,7 @@ def get_users():
                 "pages": (total + per_page - 1) // per_page
             }
         }), 200
-        
+
     except Exception as e:
         logger.error("Error getting users", extra=safe_extra_fields({
             'user_id': get_jwt_identity(),
@@ -456,10 +456,10 @@ def get_users():
 def create_user():
     """
     Create a new admin user.
-    
+
     Superadmin-only endpoint. Expects JSON body with required fields: username, password, name, surname.
     Optional fields: email, telephone, id_role (defaults to administrator role).
-    
+
     Returns:
         JSON response with created user data
     """
@@ -484,7 +484,7 @@ def create_user():
 
     try:
         db_session = SessionLocal()
-        
+
         # Check if username already exists
         existing_user = db_session.query(User).filter(User.username == username).first()
         if existing_user:
@@ -495,7 +495,7 @@ def create_user():
             role = db_session.query(Role).filter(Role.id == id_role).first()
         else:
             role = db_session.query(Role).filter(Role.name == 'administrator').first()
-        
+
         if not role:
             return jsonify({"error": "Invalid role specified"}), 400
 
@@ -511,10 +511,10 @@ def create_user():
             telephone=telephone,
             id_role=role.id
         )
-        
+
         db_session.add(new_user)
         db_session.commit()
-        
+
         return jsonify({
             "message": "User created successfully",
             "user": {
@@ -527,7 +527,7 @@ def create_user():
                 "role": role.name
             }
         }), 201
-        
+
     except Exception as e:
         db_session.rollback()
         logger.error("Error creating user", extra=safe_extra_fields({
@@ -548,10 +548,10 @@ def create_user():
 def update_user(user_id):
     """
     Update an existing user.
-    
+
     Superadmin-only endpoint. Expects JSON body with fields to update.
     Password can be updated separately via reset endpoint.
-    
+
     Returns:
         JSON response with updated user data
     """
@@ -565,7 +565,7 @@ def update_user(user_id):
 
     try:
         db_session = SessionLocal()
-        
+
         user = db_session.query(User).filter(User.id == user_id).first()
         if not user:
             return jsonify({"error": USER_NOT_FOUND}), 404
@@ -591,12 +591,12 @@ def update_user(user_id):
             user.username = new_username
 
         db_session.commit()
-        
+
         return jsonify({
             "message": "User updated successfully",
             "user": user.to_dict()
         }), 200
-        
+
     except Exception as e:
         db_session.rollback()
         logger.error("Error updating user", extra=safe_extra_fields({
@@ -617,9 +617,9 @@ def update_user(user_id):
 def reset_user_password(user_id):
     """
     Reset a user's password.
-    
+
     Superadmin-only endpoint. Expects JSON body with new password.
-    
+
     Returns:
         JSON response with success message
     """
@@ -637,7 +637,7 @@ def reset_user_password(user_id):
 
     try:
         db_session = SessionLocal()
-        
+
         user = db_session.query(User).filter(User.id == user_id).first()
         if not user:
             return jsonify({"error": USER_NOT_FOUND}), 404
@@ -645,11 +645,11 @@ def reset_user_password(user_id):
         # Hash new password
         user.password = generate_password_hash(new_password)
         db_session.commit()
-        
+
         return jsonify({
             "message": "Password reset successfully"
         }), 200
-        
+
     except Exception as e:
         db_session.rollback()
         logger.error("Error resetting password", extra=safe_extra_fields({
@@ -674,9 +674,9 @@ def reset_user_password(user_id):
 def get_associations():
     """
     Get user-structure associations with optional filtering.
-    
+
     Superadmin-only endpoint. Supports query parameters: user_id, structure_id.
-    
+
     Returns:
         JSON response with associations list
     """
@@ -686,25 +686,25 @@ def get_associations():
 
     try:
         db_session = SessionLocal()
-        
+
         user_id = request.args.get('user_id', type=int)
         structure_id = request.args.get('structure_id', type=int)
-        
+
         # Build query
         query = db_session.query(AdminStructure, User, Structure).join(
             User, AdminStructure.id_user == User.id
         ).join(
             Structure, AdminStructure.id_structure == Structure.id
         )
-        
+
         # Apply filters
         if user_id:
             query = query.filter(AdminStructure.id_user == user_id)
         if structure_id:
             query = query.filter(AdminStructure.id_structure == structure_id)
-        
+
         associations = query.all()
-        
+
         result = []
         for assoc, user, structure in associations:
             result.append({
@@ -722,9 +722,9 @@ def get_associations():
                     "city": structure.city
                 }
             })
-        
+
         return jsonify({"associations": result}), 200
-        
+
     except Exception as e:
         logger.error("Error getting associations", extra=safe_extra_fields({
             'user_id': get_jwt_identity(),
@@ -743,9 +743,9 @@ def get_associations():
 def create_association():
     """
     Create a user-structure association.
-    
+
     Superadmin-only endpoint. Expects JSON body with user_id and structure_id.
-    
+
     Returns:
         JSON response with success message
     """
@@ -765,7 +765,7 @@ def create_association():
 
     try:
         db_session = SessionLocal()
-        
+
         # Check if user exists
         user = db_session.query(User).filter(User.id == user_id).first()
         if not user:
@@ -781,7 +781,7 @@ def create_association():
             AdminStructure.id_user == user_id,
             AdminStructure.id_structure == structure_id
         ).first()
-        
+
         if existing:
             return jsonify({"error": "Association already exists"}), 400
 
@@ -790,14 +790,14 @@ def create_association():
             id_user=user_id,
             id_structure=structure_id
         )
-        
+
         db_session.add(new_association)
         db_session.commit()
-        
+
         return jsonify({
             "message": "Association created successfully"
         }), 201
-        
+
     except Exception as e:
         db_session.rollback()
         logger.error("Error creating association", extra=safe_extra_fields({
@@ -819,9 +819,9 @@ def create_association():
 def delete_association():
     """
     Delete a user-structure association.
-    
+
     Superadmin-only endpoint. Expects JSON body with user_id and structure_id.
-    
+
     Returns:
         JSON response with success message
     """
@@ -841,23 +841,23 @@ def delete_association():
 
     try:
         db_session = SessionLocal()
-        
+
         # Find and delete association
         association = db_session.query(AdminStructure).filter(
             AdminStructure.id_user == user_id,
             AdminStructure.id_structure == structure_id
         ).first()
-        
+
         if not association:
             return jsonify({"error": "Association not found"}), 404
 
         db_session.delete(association)
         db_session.commit()
-        
+
         return jsonify({
             "message": "Association deleted successfully"
         }), 200
-        
+
     except Exception as e:
         db_session.rollback()
         logger.error("Error deleting association", extra=safe_extra_fields({
@@ -883,9 +883,9 @@ def delete_association():
 def get_dashboard_data():
     """
     Get dashboard data for superadmin overview.
-    
+
     Superadmin-only endpoint. Returns counts and basic statistics.
-    
+
     Returns:
         JSON response with dashboard data
     """
@@ -895,7 +895,7 @@ def get_dashboard_data():
 
     try:
         db_session = SessionLocal()
-        
+
         # Get counts
         total_structures = db_session.query(Structure).count()
         active_structures = db_session.query(Structure).filter(Structure.is_active == True).count()
@@ -903,12 +903,12 @@ def get_dashboard_data():
             Role.name.in_(['administrator', 'superadmin'])
         ).count()
         total_reservations = db_session.query(Reservation).count()
-        
+
         # Get unassigned admins (users with no structure associations)
         unassigned_admins = db_session.query(User).join(Role).filter(
             Role.name == 'administrator'
         ).outerjoin(AdminStructure).filter(AdminStructure.id_user.is_(None)).count()
-        
+
         return jsonify({
             "dashboard": {
                 "total_structures": total_structures,
@@ -919,7 +919,7 @@ def get_dashboard_data():
                 "total_reservations": total_reservations
             }
         }), 200
-        
+
     except Exception as e:
         logger.error("Error getting dashboard data", extra=safe_extra_fields({
             'user_id': get_jwt_identity(),
