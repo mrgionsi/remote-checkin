@@ -54,6 +54,34 @@ def parse_boolean_value(value):
     return bool(value)
 
 
+def _validate_user_creation_data(data):
+    """Validate user creation data and return error response if invalid."""
+    username = data.get("username", "").strip()
+    password = data.get("password", "").strip()
+    name = data.get("name", "").strip()
+    surname = data.get("surname", "").strip()
+
+    if not username or not password or not name or not surname:
+        return None, jsonify({"error": "Username, password, name and surname are required"}), 400
+
+    return {
+        'username': username, 'password': password, 'name': name, 'surname': surname,
+        'email': data.get("email", "").strip(), 'telephone': data.get("telephone", "").strip(),
+        'id_role': data.get("id_role")
+    }, None, None
+
+
+def _validate_association_data(data):
+    """Validate association data and return error response if invalid."""
+    user_id = data.get("user_id")
+    structure_id = data.get("structure_id")
+
+    if not user_id or not structure_id:
+        return None, None, jsonify({"error": "user_id and structure_id are required"}), 400
+
+    return user_id, structure_id, None, None
+
+
 # ============================================================================
 # STRUCTURE MANAGEMENT ENDPOINTS
 # ============================================================================
@@ -450,7 +478,7 @@ def get_users():
 @superadmin_bp.route("/superadmin/users", methods=["POST"])
 @jwt_required()
 @log_route(include_request_data=False)
-def create_user():
+def create_user():  # pylint: disable=too-many-return-statements
     """
     Create a new admin user.
 
@@ -468,44 +496,27 @@ def create_user():
     if not data:
         return jsonify({"error": JSON_DATA_REQUIRED}), 400
 
-    username = data.get("username", "").strip()
-    password = data.get("password", "").strip()
-    name = data.get("name", "").strip()
-    surname = data.get("surname", "").strip()
-    email = data.get("email", "").strip()
-    telephone = data.get("telephone", "").strip()
-    id_role = data.get("id_role")
+    user_data, error_response, error_code = _validate_user_creation_data(data)
+    if error_response:
+        return error_response, error_code
 
-    if not username or not password or not name or not surname:
-        return jsonify({"error": "Username, password, name and surname are required"}), 400
-
+    db_session = SessionLocal()
     try:
-        db_session = SessionLocal()
-
-        # Check if username already exists
-        existing_user = db_session.query(User).filter(User.username == username).first()
+        # Validate username and role
+        existing_user = db_session.query(User).filter(User.username == user_data['username']).first()
         if existing_user:
             return jsonify({"error": "Username already exists"}), 400
 
-        # Get role - default to administrator if not specified
-        if id_role:
-            role = db_session.query(Role).filter(Role.id == id_role).first()
-        else:
-            role = db_session.query(Role).filter(Role.name == 'administrator').first()
-
+        role = (db_session.query(Role).filter(Role.id == user_data['id_role']).first() if user_data['id_role']
+                else db_session.query(Role).filter(Role.name == 'administrator').first())
         if not role:
             return jsonify({"error": "Invalid role specified"}), 400
 
-        # Hash password
-        hashed_password = generate_password_hash(password)
-
+        # Create user
+        hashed_password = generate_password_hash(user_data['password'])
         new_user = User(
-            username=username,
-            password=hashed_password,
-            name=name,
-            surname=surname,
-            email=email,
-            telephone=telephone,
+            username=user_data['username'], password=hashed_password, name=user_data['name'],
+            surname=user_data['surname'], email=user_data['email'], telephone=user_data['telephone'],
             id_role=role.id
         )
 
@@ -515,12 +526,8 @@ def create_user():
         return jsonify({
             "message": "User created successfully",
             "user": {
-                "id": new_user.id,
-                "username": new_user.username,
-                "name": new_user.name,
-                "surname": new_user.surname,
-                "email": new_user.email,
-                "telephone": new_user.telephone,
+                "id": new_user.id, "username": new_user.username, "name": new_user.name,
+                "surname": new_user.surname, "email": new_user.email, "telephone": new_user.telephone,
                 "role": role.name
             }
         }), 201
@@ -528,11 +535,8 @@ def create_user():
     except Exception as e:
         db_session.rollback()
         logger.error("Error creating user", extra=safe_extra_fields({
-            'user_id': get_jwt_identity(),
-            'username': username,
-            'error_type': type(e).__name__,
-            'error_details': str(e),
-            'operation_result': 'failed'
+            'user_id': get_jwt_identity(), 'username': user_data['username'], 'error_type': type(e).__name__,
+            'error_details': str(e), 'operation_result': 'failed'
         }))
         return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
     finally:
@@ -737,7 +741,7 @@ def get_associations():
 @superadmin_bp.route("/superadmin/associations", methods=["POST"])
 @jwt_required()
 @log_route(include_request_data=True)
-def create_association():
+def create_association():  # pylint: disable=too-many-return-statements
     """
     Create a user-structure association.
 
@@ -754,56 +758,39 @@ def create_association():
     if not data:
         return jsonify({"error": JSON_DATA_REQUIRED}), 400
 
-    user_id = data.get("user_id")
-    structure_id = data.get("structure_id")
+    user_id, structure_id, error_response, error_code = _validate_association_data(data)
+    if error_response:
+        return error_response, error_code
 
-    if not user_id or not structure_id:
-        return jsonify({"error": "user_id and structure_id are required"}), 400
-
+    db_session = SessionLocal()
     try:
-        db_session = SessionLocal()
-
-        # Check if user exists
+        # Validate user, structure, and check for existing association
         user = db_session.query(User).filter(User.id == user_id).first()
         if not user:
             return jsonify({"error": USER_NOT_FOUND}), 404
 
-        # Check if structure exists
         structure = db_session.query(Structure).filter(Structure.id == structure_id).first()
         if not structure:
             return jsonify({"error": STRUCTURE_NOT_FOUND}), 404
 
-        # Check if association already exists
         existing = db_session.query(AdminStructure).filter(
-            AdminStructure.id_user == user_id,
-            AdminStructure.id_structure == structure_id
+            AdminStructure.id_user == user_id, AdminStructure.id_structure == structure_id
         ).first()
-
         if existing:
             return jsonify({"error": "Association already exists"}), 400
 
         # Create association
-        new_association = AdminStructure(
-            id_user=user_id,
-            id_structure=structure_id
-        )
-
+        new_association = AdminStructure(id_user=user_id, id_structure=structure_id)
         db_session.add(new_association)
         db_session.commit()
 
-        return jsonify({
-            "message": "Association created successfully"
-        }), 201
+        return jsonify({"message": "Association created successfully"}), 201
 
     except Exception as e:
         db_session.rollback()
         logger.error("Error creating association", extra=safe_extra_fields({
-            'user_id': get_jwt_identity(),
-            'target_user_id': user_id,
-            'target_structure_id': structure_id,
-            'error_type': type(e).__name__,
-            'error_details': str(e),
-            'operation_result': 'failed'
+            'user_id': get_jwt_identity(), 'target_user_id': user_id, 'target_structure_id': structure_id,
+            'error_type': type(e).__name__, 'error_details': str(e), 'operation_result': 'failed'
         }))
         return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
     finally:
