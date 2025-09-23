@@ -14,7 +14,7 @@ All routes are registered under the '/api/v1/admin' URL prefix and require appro
 from datetime import timedelta,datetime,timezone
 from flask import Blueprint, request, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request, get_jwt
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from models import User, AdminStructure, Structure,Reservation, Client, ClientReservations
 from services.portale_alloggi_service import PortaleAlloggiService
@@ -23,6 +23,7 @@ from app_logging.config import get_logger
 from app_logging.decorators import log_route, log_database_operation, log_performance
 from app_logging.utils import safe_extra_fields
 from database import SessionLocal
+from utils.authz import verify_admin_access, verify_superadmin_access
 
 
 # Blueprint setup
@@ -36,51 +37,6 @@ USER_NOT_FOUND = "User not found"
 INTERNAL_SERVER_ERROR = "Internal server error"
 PORTALE_CREDENTIALS_NOT_CONFIGURED = "Portale Alloggi credentials not configured"
 RESERVATION_NOT_FOUND = "Reservation not found"
-
-def verify_admin_access():
-    """
-    Verify JWT authentication and admin role access.
-
-    Returns:
-        tuple: (error_response, error_code) if verification fails, (None, None) if successful
-    """
-    try:
-        verify_jwt_in_request()
-    except Exception:
-        return jsonify({"error": "Token di autenticazione mancante o non valido"}), 401
-
-    try:
-        claims = get_jwt()
-        user_role = claims.get("role", "").lower()
-        if user_role not in ["admin", "superadmin", "administrator"]:
-            return jsonify({"error": "Permessi insufficienti. È richiesto un ruolo amministratore"}), 403
-    except Exception:
-        return jsonify({"error": "Errore durante la verifica dei permessi"}), 403
-
-    return None, None
-
-
-def verify_superadmin_access():
-    """
-    Verify JWT authentication and superadmin role access.
-
-    Returns:
-        tuple: (error_response, error_code) if verification fails, (None, None) if successful
-    """
-    try:
-        verify_jwt_in_request()
-    except Exception:
-        return jsonify({"error": "Token di autenticazione mancante o non valido"}), 401
-
-    try:
-        claims = get_jwt()
-        user_role = claims.get("role", "").lower()
-        if user_role != "superadmin":
-            return jsonify({"error": "Permessi insufficienti. È richiesto il ruolo superadmin"}), 403
-    except Exception:
-        return jsonify({"error": "Errore durante la verifica dei permessi"}), 403
-
-    return None, None
 
 
 @admin_bp.route("/admin/login", methods=["POST"])

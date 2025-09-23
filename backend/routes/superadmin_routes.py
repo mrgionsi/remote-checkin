@@ -12,7 +12,7 @@ All routes are registered under the '/api/v1/superadmin' URL prefix and require 
 """
 
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_request, get_jwt
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
@@ -22,6 +22,7 @@ from database import SessionLocal
 from app_logging.decorators import log_route
 from app_logging.utils import safe_extra_fields
 import logging
+from utils.authz import verify_superadmin_access
 
 logger = logging.getLogger(__name__)
 
@@ -35,27 +36,25 @@ STRUCTURE_NOT_FOUND = "Structure not found"
 USER_NOT_FOUND = "User not found"
 
 
-def verify_superadmin_access():
+def parse_boolean_value(value):
     """
-    Verify JWT authentication and superadmin role access.
-
+    Parse a value to boolean, handling strings, numbers, and other types properly.
+    
+    Args:
+        value: The value to parse to boolean
+        
     Returns:
-        tuple: (error_response, error_code) if verification fails, (None, None) if successful
+        bool: Parsed boolean value
     """
-    try:
-        verify_jwt_in_request()
-    except Exception:
-        return jsonify({"error": "Authentication token missing or invalid"}), 401
-
-    try:
-        claims = get_jwt()
-        user_role = claims.get("role", "").lower()
-        if user_role != "superadmin":
-            return jsonify({"error": "Insufficient permissions. Superadmin role required"}), 403
-    except Exception:
-        return jsonify({"error": "Error during permission verification"}), 403
-
-    return None, None
+    if isinstance(value, str):
+        # Handle string values - check against accepted true values
+        return value.lower() in ("true", "1", "yes", "y")
+    elif isinstance(value, (int, float)):
+        # Handle numeric values - non-zero is True
+        return value != 0
+    else:
+        # For other types, use standard bool conversion
+        return bool(value)
 
 
 # ============================================================================
@@ -242,7 +241,7 @@ def update_structure(structure_id):
         if "cin" in data:
             structure.cin = data["cin"].strip()
         if "is_active" in data:
-            structure.is_active = bool(data["is_active"])
+            structure.is_active = parse_boolean_value(data["is_active"])
 
         # Validate required fields
         if not structure.name or not structure.city:
