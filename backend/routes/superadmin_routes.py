@@ -452,7 +452,7 @@ def get_users():
 
 @superadmin_bp.route("/superadmin/users", methods=["POST"])
 @jwt_required()
-@log_route(include_request_data=True)
+@log_route(include_request_data=False)
 def create_user():
     """
     Create a new admin user.
@@ -613,7 +613,7 @@ def update_user(user_id):
 
 @superadmin_bp.route("/superadmin/users/<int:user_id>/reset-password", methods=["POST"])
 @jwt_required()
-@log_route(include_request_data=True)
+@log_route(include_request_data=False)
 def reset_user_password(user_id):
     """
     Reset a user's password.

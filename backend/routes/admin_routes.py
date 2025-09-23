@@ -40,7 +40,7 @@ RESERVATION_NOT_FOUND = "Reservation not found"
 
 
 @admin_bp.route("/admin/login", methods=["POST"])
-@log_route(include_request_data=True, include_response_data=True)
+@log_route(include_request_data=False, include_response_data=True)
 def admin_login():
     """
     Authenticate an admin user and return a JWT access token with the user's profile and associated structures.
