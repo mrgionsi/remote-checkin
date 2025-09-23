@@ -17,10 +17,11 @@ from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identi
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from models import User, AdminStructure, Structure,Reservation, Client, ClientReservations
+from models import User, Reservation, Client, ClientReservations
 from services.portale_alloggi_service import PortaleAlloggiService
 from utils.encryption_utils import encrypt_password, decrypt_password
 from utils.authz import verify_admin_access
+from utils.route_helpers import handle_database_error, handle_integrity_error, get_user_structures_query, create_user_response_data
 from app_logging.config import get_logger
 from app_logging.decorators import log_route, log_database_operation, log_performance
 from app_logging.utils import safe_extra_fields
@@ -77,12 +78,8 @@ def admin_login():
             return jsonify({"error": "Non autorizzato"}), 403
 
         # JOIN tra AdminStructure e Structure per ottenere id e nome struttura
-        structures = (
-            db_session.query(AdminStructure.id_structure, Structure.name)
-            .join(Structure, AdminStructure.id_structure == Structure.id)
-            .filter(AdminStructure.id_user == user.id)
-            .all()
-        )
+        structures_query = get_user_structures_query(db_session, user.id)
+        structures = structures_query.all()
         # Array di dizionari con id e name
         structures_list = [{"id": s.id_structure, "name": s.name} for s in structures]
 
@@ -166,45 +163,17 @@ def create_admin_user():
         db_session.add(new_user)
         db_session.commit()
 
-        return jsonify({
-            "message": "User created successfully",
-            "user": {
-                "id": new_user.id,
-                "username": new_user.username,
-                "name": new_user.name,
-                "surname": new_user.surname,
-                "email": new_user.email,
-                "telephone": new_user.telephone,
-                "id_role": new_user.id_role
-            }
-        }), 201
+        return jsonify(create_user_response_data(new_user, new_user.role)), 201
 #pylint: disable=W0703,R0911
     except IntegrityError as e:
         db_session.rollback()
-        logger.error("User creation failed due to integrity constraint", extra=safe_extra_fields({
-            'username': data.get('username'),
-            'email': data.get('email'),
-            'error_type': 'integrity_constraint',
-            'error_details': str(e),
-            'operation_result': 'failed'
-        }), exc_info=True)
-        return jsonify({"error": "User creation failed due to data constraint violation"}), 400
+        return handle_integrity_error(e, "user creation", username=data.get('username'), email=data.get('email'))
     except SQLAlchemyError:
         db_session.rollback()
-        logger.exception("Database error during user creation", extra=safe_extra_fields({
-            'username': data.get('username'),
-            'error_type': 'database_error',
-            'operation_result': 'failed'
-        }))
-        return jsonify({"error": "An error occurred while creating the user"}), 500
+        return handle_database_error(Exception("Database error"), "user creation", username=data.get('username'))
     except Exception:
         db_session.rollback()
-        logger.exception("Unexpected error during user creation", extra=safe_extra_fields({
-            'username': data.get('username'),
-            'error_type': 'unexpected_error',
-            'operation_result': 'failed'
-        }))
-        return jsonify({"error": "An unexpected error occurred"}), 500
+        return handle_database_error(Exception("Unexpected error"), "user creation", username=data.get('username'))
     finally:
         db_session.close()
 
@@ -250,12 +219,8 @@ def get_admin_info():
         if not user:
             return jsonify({"error": USER_NOT_FOUND}), 404
 
-        structures = (
-            db_session.query(AdminStructure.id_structure, Structure.name)
-            .join(Structure, AdminStructure.id_structure == Structure.id)
-            .filter(AdminStructure.id_user == user.id)
-            .all()
-        )
+        structures_query = get_user_structures_query(db_session, user.id)
+        structures = structures_query.all()
         structures_list = [{"id": s.id_structure, "name": s.name} for s in structures]
 
         return jsonify({
@@ -301,13 +266,7 @@ def get_portale_alloggi_config():
         }), 200
 
     except Exception as e:
-        logger.error("Error retrieving Portale Alloggi config", extra=safe_extra_fields({
-            'user_id': get_jwt_identity(),
-            'error_type': type(e).__name__,
-            'error_details': str(e),
-            'operation_result': 'failed'
-        }))
-        return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
+        return handle_database_error(e, "Portale Alloggi config retrieval")
     finally:
         db_session.close()
 
@@ -365,14 +324,8 @@ def update_portale_alloggi_config():
         }), 200
 
     except Exception as e:
-        logger.error("Error updating Portale Alloggi config", extra=safe_extra_fields({
-            'user_id': get_jwt_identity(),
-            'error_type': type(e).__name__,
-            'error_details': str(e),
-            'operation_result': 'failed'
-        }))
         db_session.rollback()
-        return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
+        return handle_database_error(e, "Portale Alloggi config update")
     finally:
         db_session.close()
 
@@ -449,13 +402,7 @@ def test_portale_alloggi_connection():
             }), 400
 
     except Exception as e:
-        logger.error("Error testing Portale Alloggi connection", extra=safe_extra_fields({
-            'user_id': get_jwt_identity(),
-            'error_type': type(e).__name__,
-            'error_details': str(e),
-            'operation_result': 'failed'
-        }))
-        return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
+        return handle_database_error(e, "Portale Alloggi connection test")
     finally:
         db_session.close()
 
@@ -572,14 +519,7 @@ def send_reservation_to_portale_alloggi(reservation_id):
         }), 400
 
     except Exception as e:
-        logger.error("Error sending reservation to Portale Alloggi", extra=safe_extra_fields({
-            'reservation_id': reservation_id,
-            'user_id': get_jwt_identity(),
-            'error_type': type(e).__name__,
-            'error_details': str(e),
-            'operation_result': 'failed'
-        }))
-        return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
+        return handle_database_error(e, "Portale Alloggi reservation submission", reservation_id=reservation_id)
     finally:
         db_session.close()
 
@@ -679,14 +619,7 @@ def send_reservation_to_portale_alloggi_real(reservation_id):
         }), 400
 
     except Exception as e:
-        logger.error("Error sending reservation to Portale Alloggi", extra=safe_extra_fields({
-            'reservation_id': reservation_id,
-            'user_id': get_jwt_identity(),
-            'error_type': type(e).__name__,
-            'error_details': str(e),
-            'operation_result': 'failed'
-        }))
-        return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
+        return handle_database_error(e, "Portale Alloggi reservation submission", reservation_id=reservation_id)
     finally:
         db_session.close()
 
@@ -724,13 +657,6 @@ def get_portale_alloggi_status(reservation_id):
         }), 200
 
     except Exception as e:
-        logger.error("Error getting Portale Alloggi status", extra=safe_extra_fields({
-            'reservation_id': reservation_id,
-            'user_id': get_jwt_identity(),
-            'error_type': type(e).__name__,
-            'error_details': str(e),
-            'operation_result': 'failed'
-        }))
-        return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
+        return handle_database_error(e, "Portale Alloggi status retrieval", reservation_id=reservation_id)
     finally:
         db_session.close()

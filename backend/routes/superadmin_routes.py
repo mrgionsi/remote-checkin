@@ -14,13 +14,13 @@ All routes are registered under the '/api/v1/superadmin' URL prefix and require 
 import logging
 
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required
 from werkzeug.security import generate_password_hash
 from models import User, AdminStructure, Structure, Reservation, Role
 from database import SessionLocal
 from app_logging.decorators import log_route
-from app_logging.utils import safe_extra_fields
 from utils.authz import verify_superadmin_access
+from utils.route_helpers import handle_database_error, create_user_response_data
 
 logger = logging.getLogger(__name__)
 
@@ -146,13 +146,7 @@ def get_structures():
         }), 200
 
     except Exception as e:
-        logger.error("Error getting structures", extra=safe_extra_fields({
-            'user_id': get_jwt_identity(),
-            'error_type': type(e).__name__,
-            'error_details': str(e),
-            'operation_result': 'failed'
-        }))
-        return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
+        return handle_database_error(e, "structures retrieval")
     finally:
         db_session.close()
 
@@ -217,14 +211,7 @@ def create_structure():
 
     except Exception as e:
         db_session.rollback()
-        logger.error("Error creating structure", extra=safe_extra_fields({
-            'user_id': get_jwt_identity(),
-            'structure_name': name,
-            'error_type': type(e).__name__,
-            'error_details': str(e),
-            'operation_result': 'failed'
-        }))
-        return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
+        return handle_database_error(e, "structure creation", structure_name=name)
     finally:
         db_session.close()
 
@@ -281,14 +268,7 @@ def update_structure(structure_id):
 
     except Exception as e:
         db_session.rollback()
-        logger.error("Error updating structure", extra=safe_extra_fields({
-            'user_id': get_jwt_identity(),
-            'structure_id': structure_id,
-            'error_type': type(e).__name__,
-            'error_details': str(e),
-            'operation_result': 'failed'
-        }))
-        return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
+        return handle_database_error(e, "structure update", structure_id=structure_id)
     finally:
         db_session.close()
 
@@ -325,14 +305,7 @@ def delete_structure(structure_id):
 
     except Exception as e:
         db_session.rollback()
-        logger.error("Error archiving structure", extra=safe_extra_fields({
-            'user_id': get_jwt_identity(),
-            'structure_id': structure_id,
-            'error_type': type(e).__name__,
-            'error_details': str(e),
-            'operation_result': 'failed'
-        }))
-        return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
+        return handle_database_error(e, "structure archiving", structure_id=structure_id)
     finally:
         db_session.close()
 
@@ -369,14 +342,7 @@ def restore_structure(structure_id):
 
     except Exception as e:
         db_session.rollback()
-        logger.error("Error restoring structure", extra=safe_extra_fields({
-            'user_id': get_jwt_identity(),
-            'structure_id': structure_id,
-            'error_type': type(e).__name__,
-            'error_details': str(e),
-            'operation_result': 'failed'
-        }))
-        return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
+        return handle_database_error(e, "structure restoration", structure_id=structure_id)
     finally:
         db_session.close()
 
@@ -464,13 +430,7 @@ def get_users():
         }), 200
 
     except Exception as e:
-        logger.error("Error getting users", extra=safe_extra_fields({
-            'user_id': get_jwt_identity(),
-            'error_type': type(e).__name__,
-            'error_details': str(e),
-            'operation_result': 'failed'
-        }))
-        return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
+        return handle_database_error(e, "users retrieval")
     finally:
         db_session.close()
 
@@ -523,22 +483,11 @@ def create_user():  # pylint: disable=too-many-return-statements
         db_session.add(new_user)
         db_session.commit()
 
-        return jsonify({
-            "message": "User created successfully",
-            "user": {
-                "id": new_user.id, "username": new_user.username, "name": new_user.name,
-                "surname": new_user.surname, "email": new_user.email, "telephone": new_user.telephone,
-                "role": role.name
-            }
-        }), 201
+        return jsonify(create_user_response_data(new_user, role)), 201
 
     except Exception as e:
         db_session.rollback()
-        logger.error("Error creating user", extra=safe_extra_fields({
-            'user_id': get_jwt_identity(), 'username': user_data['username'], 'error_type': type(e).__name__,
-            'error_details': str(e), 'operation_result': 'failed'
-        }))
-        return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
+        return handle_database_error(e, "user creation", username=user_data['username'])
     finally:
         db_session.close()
 
@@ -600,14 +549,7 @@ def update_user(user_id):
 
     except Exception as e:
         db_session.rollback()
-        logger.error("Error updating user", extra=safe_extra_fields({
-            'user_id': get_jwt_identity(),
-            'target_user_id': user_id,
-            'error_type': type(e).__name__,
-            'error_details': str(e),
-            'operation_result': 'failed'
-        }))
-        return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
+        return handle_database_error(e, "user update", user_id=user_id)
     finally:
         db_session.close()
 
@@ -653,14 +595,7 @@ def reset_user_password(user_id):
 
     except Exception as e:
         db_session.rollback()
-        logger.error("Error resetting password", extra=safe_extra_fields({
-            'user_id': get_jwt_identity(),
-            'target_user_id': user_id,
-            'error_type': type(e).__name__,
-            'error_details': str(e),
-            'operation_result': 'failed'
-        }))
-        return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
+        return handle_database_error(e, "password reset", user_id=user_id)
     finally:
         db_session.close()
 
@@ -727,13 +662,7 @@ def get_associations():
         return jsonify({"associations": result}), 200
 
     except Exception as e:
-        logger.error("Error getting associations", extra=safe_extra_fields({
-            'user_id': get_jwt_identity(),
-            'error_type': type(e).__name__,
-            'error_details': str(e),
-            'operation_result': 'failed'
-        }))
-        return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
+        return handle_database_error(e, "associations retrieval")
     finally:
         db_session.close()
 
@@ -788,11 +717,7 @@ def create_association():  # pylint: disable=too-many-return-statements
 
     except Exception as e:
         db_session.rollback()
-        logger.error("Error creating association", extra=safe_extra_fields({
-            'user_id': get_jwt_identity(), 'target_user_id': user_id, 'target_structure_id': structure_id,
-            'error_type': type(e).__name__, 'error_details': str(e), 'operation_result': 'failed'
-        }))
-        return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
+        return handle_database_error(e, "association creation", target_user_id=user_id, target_structure_id=structure_id)
     finally:
         db_session.close()
 
@@ -844,15 +769,7 @@ def delete_association():
 
     except Exception as e:
         db_session.rollback()
-        logger.error("Error deleting association", extra=safe_extra_fields({
-            'user_id': get_jwt_identity(),
-            'target_user_id': user_id,
-            'target_structure_id': structure_id,
-            'error_type': type(e).__name__,
-            'error_details': str(e),
-            'operation_result': 'failed'
-        }))
-        return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
+        return handle_database_error(e, "association deletion", target_user_id=user_id, target_structure_id=structure_id)
     finally:
         db_session.close()
 
@@ -905,12 +822,6 @@ def get_dashboard_data():
         }), 200
 
     except Exception as e:
-        logger.error("Error getting dashboard data", extra=safe_extra_fields({
-            'user_id': get_jwt_identity(),
-            'error_type': type(e).__name__,
-            'error_details': str(e),
-            'operation_result': 'failed'
-        }))
-        return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
+        return handle_database_error(e, "dashboard data retrieval")
     finally:
         db_session.close()
