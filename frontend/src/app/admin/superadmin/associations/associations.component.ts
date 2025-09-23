@@ -18,7 +18,7 @@ import { ConfirmationService } from 'primeng/api';
     selector: 'app-superadmin-associations',
     standalone: true,
     imports: [
-        CommonModule, 
+        CommonModule,
         FormsModule,
         ButtonModule,
         CardModule,
@@ -127,8 +127,29 @@ export class SuperadminAssociationsComponent implements OnInit {
     }
 
     createAssociation(): void {
-        const userId = parseInt(this.associationFormData.user_id);
-        const structureId = parseInt(this.associationFormData.structure_id);
+        // Validate user_id
+        const userIdStr = this.associationFormData.user_id?.toString().trim();
+        if (!userIdStr) {
+            this.error = 'User ID is required';
+            return;
+        }
+        const userId = parseInt(userIdStr, 10);
+        if (isNaN(userId)) {
+            this.error = 'User ID must be a valid number';
+            return;
+        }
+
+        // Validate structure_id
+        const structureIdStr = this.associationFormData.structure_id?.toString().trim();
+        if (!structureIdStr) {
+            this.error = 'Structure ID is required';
+            return;
+        }
+        const structureId = parseInt(structureIdStr, 10);
+        if (isNaN(structureId)) {
+            this.error = 'Structure ID must be a valid number';
+            return;
+        }
 
         this.superadminService.createAssociation(userId, structureId).subscribe({
             next: () => {

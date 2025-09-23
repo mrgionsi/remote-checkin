@@ -6,10 +6,10 @@
     </div>
 
     <div class="filters">
-        <p-inputText placeholder="Search structures..." [(ngModel)]="searchTerm" (onInput)="onSearch()"
+        <p-inputText placeholder="Search structures..." [(ngModel)]="searchTerm" (ngModelChange)="onSearch()"
             styleClass="w-full">
         </p-inputText>
-        <p-select [(ngModel)]="statusFilter" (onChange)="loadStructures()" [options]="statusOptions"
+        <p-select [(ngModel)]="statusFilter" (ngModelChange)="loadStructures()" [options]="statusOptions"
             placeholder="All Status" styleClass="w-full">
         </p-select>
     </div>
@@ -20,7 +20,7 @@
                 <div class="structure-header">
                     <h3>{{ structure.name }}</h3>
                     <p-tag [value]="structure.is_active ? 'Active' : 'Archived'"
-                        [severity]="structure.is_active ? 'success' : 'warning'">
+                        [severity]="structure.is_active ? 'success' : 'warn'">
                     </p-tag>
                 </div>
             </ng-template>
@@ -38,7 +38,7 @@
                     </p-button>
                     <p-button [label]="structure.is_active ? 'Archive' : 'Restore'"
                         [icon]="structure.is_active ? 'pi pi-archive' : 'pi pi-refresh'"
-                        [severity]="structure.is_active ? 'warning' : 'success'" size="small"
+                        [severity]="structure.is_active ? 'warn' : 'success'" size="small"
                         (onClick)="toggleStructureStatus(structure)">
                     </p-button>
                 </div>

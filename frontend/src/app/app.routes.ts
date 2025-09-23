@@ -13,7 +13,7 @@ import { superadminGuard } from './guards/superadmin.guard';
 import { AdminInfoComponent } from './admin/admin-info/admin-info.component';
 import { SettingsComponent } from './admin/settings/settings.component';
 import { SuperadminComponent } from './admin/superadmin/superadmin.component';
-import { SuperadminDashboardComponent } from './admin/superadmin/dashboard/superadmin-dashboard.component';
+import { SuperadminDashboardComponent } from './admin/superadmin/superadmin-dashboard/superadmin-dashboard.component';
 import { SuperadminStructuresComponent } from './admin/superadmin/structures/structures.component';
 import { SuperadminUsersComponent } from './admin/superadmin/users/users.component';
 import { SuperadminAssociationsComponent } from './admin/superadmin/associations/associations.component';

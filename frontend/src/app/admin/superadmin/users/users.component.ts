@@ -2,15 +2,28 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SuperadminService, User } from '../../../services/superadmin.service';
+import { ButtonModule } from 'primeng/button';
+import { CardModule } from 'primeng/card';
+import { TagModule } from 'primeng/tag';
+import { MessageModule } from 'primeng/message';
+import { PaginatorModule } from 'primeng/paginator';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { PaginatorState } from 'primeng/paginator';
+import { SelectModule } from 'primeng/select';
+import { InputTextModule } from 'primeng/inputtext';
 
 @Component({
     selector: 'app-superadmin-users',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, ButtonModule, CardModule, TagModule, MessageModule, PaginatorModule, ProgressSpinnerModule, SelectModule, InputTextModule],
     templateUrl: './users.component.html',
     styleUrls: ['./users.component.scss']
 })
 export class SuperadminUsersComponent implements OnInit {
+    onPageChange(event: PaginatorState): void {
+        this.pagination.page = (event.first! / event.rows!) + 1;
+        this.loadUsers();
+    }
     users: User[] = [];
     loading = true;
     error: string | null = null;
@@ -22,6 +35,7 @@ export class SuperadminUsersComponent implements OnInit {
     editingUser: User | null = null;
     userFormData: any = {};
     passwordFormData: any = {};
+    roleOptions: any;
 
     constructor(private superadminService: SuperadminService) { }
 
