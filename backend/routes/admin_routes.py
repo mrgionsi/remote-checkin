@@ -13,17 +13,18 @@ All routes are registered under the '/api/v1/admin' URL prefix and require appro
 
 from datetime import timedelta,datetime,timezone
 from flask import Blueprint, request, jsonify
-from werkzeug.security import check_password_hash, generate_password_hash
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from werkzeug.security import check_password_hash, generate_password_hash
+
 from models import User, AdminStructure, Structure,Reservation, Client, ClientReservations
 from services.portale_alloggi_service import PortaleAlloggiService
 from utils.encryption_utils import encrypt_password, decrypt_password
+from utils.authz import verify_admin_access
 from app_logging.config import get_logger
 from app_logging.decorators import log_route, log_database_operation, log_performance
 from app_logging.utils import safe_extra_fields
 from database import SessionLocal
-from utils.authz import verify_admin_access, verify_superadmin_access
 
 
 # Blueprint setup

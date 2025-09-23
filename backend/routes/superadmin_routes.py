@@ -1,4 +1,4 @@
-# pylint: disable=C0301,E0611,E0401,W0718
+# pylint: disable=C0301,E0611,E0401,W0718,R0914
 """
 Superadmin Routes
 
@@ -11,17 +11,15 @@ This module contains all routes for superadmin functionality including:
 All routes are registered under the '/api/v1/superadmin' URL prefix and require superadmin role.
 """
 
+import logging
+
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from sqlalchemy.exc import SQLAlchemyError, IntegrityError
-from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
-
-from models import User, AdminStructure, Structure, Reservation, Client, ClientReservations, Role
+from werkzeug.security import generate_password_hash
+from models import User, AdminStructure, Structure, Reservation, Role
 from database import SessionLocal
 from app_logging.decorators import log_route
 from app_logging.utils import safe_extra_fields
-import logging
 from utils.authz import verify_superadmin_access
 
 logger = logging.getLogger(__name__)
@@ -49,12 +47,11 @@ def parse_boolean_value(value):
     if isinstance(value, str):
         # Handle string values - check against accepted true values
         return value.lower() in ("true", "1", "yes", "y")
-    elif isinstance(value, (int, float)):
+    if isinstance(value, (int, float)):
         # Handle numeric values - non-zero is True
         return value != 0
-    else:
-        # For other types, use standard bool conversion
-        return bool(value)
+    # For other types, use standard bool conversion
+    return bool(value)
 
 
 # ============================================================================
@@ -898,7 +895,7 @@ def get_dashboard_data():
 
         # Get counts
         total_structures = db_session.query(Structure).count()
-        active_structures = db_session.query(Structure).filter(Structure.is_active == True).count()
+        active_structures = db_session.query(Structure).filter(Structure.is_active.is_(True)).count()
         total_users = db_session.query(User).join(Role).filter(
             Role.name.in_(['administrator', 'superadmin'])
         ).count()
