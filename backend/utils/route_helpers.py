@@ -1,3 +1,4 @@
+# pylint: disable=C0301,E0611,E0401,W0718,R0914,R0912
 """
 Route helper utilities for common database operations and error handling.
 
@@ -32,13 +33,21 @@ def handle_database_error(e, operation_name, user_id=None, **extra_fields):
     Returns:
         tuple: (error_response, error_code)
     """
-    logger.error("Error during %s", operation_name, extra=safe_extra_fields({
-        'user_id': user_id or get_jwt_identity(),
-        'error_type': type(e).__name__,
-        'error_details': str(e),
-        'operation_result': 'failed',
-        **extra_fields
-    }))
+    try:
+        jwt_user = get_jwt_identity()
+    except Exception:  # safe fallback if no request/JWT context
+        jwt_user = None
+    logger.error(
+        "Error during %s",
+        operation_name,
+        extra=safe_extra_fields({
+            'user_id': user_id or jwt_user,
+            'error_type': type(e).__name__,
+            'error_details': str(e),
+            'operation_result': 'failed',
+            **extra_fields
+        })
+    )
     return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
 
 
@@ -55,14 +64,23 @@ def handle_integrity_error(e, operation_name, user_id=None, **extra_fields):
     Returns:
         tuple: (error_response, error_code)
     """
-    logger.error("Integrity constraint violation during %s", operation_name, extra=safe_extra_fields({
-        'user_id': user_id or get_jwt_identity(),
-        'error_type': 'integrity_constraint',
-        'error_details': str(e),
-        'operation_result': 'failed',
-        **extra_fields
-    }), exc_info=True)
-    return jsonify({"error": f"{operation_name} failed due to data constraint violation"}), 400
+    try:
+        jwt_user = get_jwt_identity()
+    except Exception:  # safe fallback if no request/JWT context
+        jwt_user = None
+    logger.error(
+        "Integrity constraint violation during %s",
+        operation_name,
+        extra=safe_extra_fields({
+            'user_id': user_id or jwt_user,
+            'error_type': 'integrity_constraint',
+            'error_details': str(e),
+            'operation_result': 'failed',
+            **extra_fields
+        }),
+        exc_info=True
+    )
+    return jsonify({"error": "%s failed due to data constraint violation" % operation_name}), 400
 
 
 def get_user_structures_query(db_session, user_id):
