@@ -87,8 +87,8 @@ export class SuperadminUsersComponent implements OnInit {
             name: '',
             surname: '',
             email: '',
-            telephone: '',
-            id_role: 1 // Default to administrator role
+            telephone: ''
+            // id_role omitted - backend will default to administrator role
         };
         this.showModal = true;
     }
