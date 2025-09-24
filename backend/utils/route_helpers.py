@@ -80,7 +80,7 @@ def handle_integrity_error(e, operation_name, user_id=None, **extra_fields):
         }),
         exc_info=True
     )
-    return jsonify({"error": "%s failed due to data constraint violation" % operation_name}), 400
+    return jsonify({"error": f"{operation_name} failed due to data constraint violation"}), 400
 
 
 def get_user_structures_query(db_session, user_id):
