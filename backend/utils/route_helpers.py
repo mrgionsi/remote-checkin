@@ -9,6 +9,7 @@ import logging
 
 from flask import jsonify
 from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended.exceptions import NoAuthorizationError, JWTDecodeError
 from app_logging.utils import safe_extra_fields
 from models import AdminStructure, Structure
 
@@ -35,7 +36,7 @@ def handle_database_error(e, operation_name, user_id=None, **extra_fields):
     """
     try:
         jwt_user = get_jwt_identity()
-    except Exception:  # safe fallback if no request/JWT context
+    except (NoAuthorizationError, JWTDecodeError):  # safe fallback if no request/JWT context
         jwt_user = None
     logger.error(
         "Error during %s",
@@ -66,7 +67,7 @@ def handle_integrity_error(e, operation_name, user_id=None, **extra_fields):
     """
     try:
         jwt_user = get_jwt_identity()
-    except Exception:  # safe fallback if no request/JWT context
+    except (NoAuthorizationError, JWTDecodeError):  # safe fallback if no request/JWT context
         jwt_user = None
     logger.error(
         "Integrity constraint violation during %s",
