@@ -21,7 +21,20 @@ import { InputTextModule } from 'primeng/inputtext';
 })
 export class SuperadminUsersComponent implements OnInit {
     onPageChange(event: PaginatorState): void {
-        this.pagination.page = (event.first! / event.rows!) + 1;
+        // Guard against undefined event or missing properties
+        if (!event || event.first === undefined || event.rows === undefined) {
+            return;
+        }
+
+        // Ensure pagination object exists
+        if (!this.pagination) {
+            this.pagination = { page: 1 };
+        }
+
+        // Compute new page with safe arithmetic
+        const newPage = Math.floor((event.first ?? 0) / (event.rows ?? 1)) + 1;
+        this.pagination.page = newPage;
+
         this.loadUsers();
     }
     users: User[] = [];

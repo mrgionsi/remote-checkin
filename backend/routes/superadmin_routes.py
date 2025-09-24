@@ -131,9 +131,9 @@ def get_structures():
             normalized = is_active.strip().lower() if isinstance(is_active, str) else None
             if normalized not in (None, '', 'all'):
                 if normalized in ('true', '1', 'yes', 'y'):
-                    query = query.filter(Structure.is_active is True)
+                    query = query.filter(Structure.is_active.is_(True))
                 elif normalized in ('false', '0', 'no', 'n'):
-                    query = query.filter(Structure.is_active is False)
+                    query = query.filter(Structure.is_active.is_(False))
                 # Any other value: skip filtering
 
         # Get total count
