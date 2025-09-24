@@ -127,8 +127,13 @@ def get_structures():
 
         # Apply active filter
         if is_active is not None:
-            is_active_bool = is_active.lower() in ['true', '1', 'yes']
-            query = query.filter(Structure.is_active == is_active_bool)
+            normalized = is_active.strip().lower() if isinstance(is_active, str) else None
+            if normalized not in (None, '', 'all'):
+                if normalized in ('true', '1', 'yes', 'y'):
+                    query = query.filter(Structure.is_active == True)
+                elif normalized in ('false', '0', 'no', 'n'):
+                    query = query.filter(Structure.is_active == False)
+                # Any other value: skip filtering
 
         # Get total count
         total = query.count()
