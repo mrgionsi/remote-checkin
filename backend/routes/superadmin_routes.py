@@ -182,7 +182,9 @@ def create_structure():
     street = data.get("street", "").strip()
     city = data.get("city", "").strip()
     cin = data.get("cin", "").strip()
-    is_active = data.get("is_active", True)
+    # Coerce is_active properly: default to True when absent or None, otherwise parse
+    raw_is_active = data.get("is_active", None)
+    is_active = True if raw_is_active is None else parse_boolean_value(raw_is_active)
 
     if not name or not city:
         return jsonify({"error": "Name and city are required"}), 400
@@ -258,7 +260,7 @@ def update_structure(structure_id):
             structure.city = data["city"].strip()
         if "cin" in data:
             structure.cin = data["cin"].strip()
-        if "is_active" in data:
+        if "is_active" in data and data["is_active"] is not None:
             structure.is_active = parse_boolean_value(data["is_active"])
 
         # Validate required fields
