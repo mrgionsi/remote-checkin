@@ -7,8 +7,9 @@ This module provides shared functions to reduce code duplication across route mo
 
 import logging
 
-from flask import jsonify
+from flask import jsonify, has_request_context
 from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended.exceptions import JWTExtendedException
 from app_logging.utils import safe_extra_fields
 from models import AdminStructure, Structure
 
