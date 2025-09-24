@@ -1,4 +1,4 @@
-# pylint: disable=C0301,E0611,E0401,W0718,R0914
+# pylint: disable=C0301,E0611,E0401,W0718,R0914,R0912
 """
 Superadmin Routes
 
@@ -104,6 +104,7 @@ def get_structures():
     if error_response:
         return error_response, error_code
 
+    db_session = None
     try:
         db_session = SessionLocal()
 
@@ -130,9 +131,9 @@ def get_structures():
             normalized = is_active.strip().lower() if isinstance(is_active, str) else None
             if normalized not in (None, '', 'all'):
                 if normalized in ('true', '1', 'yes', 'y'):
-                    query = query.filter(Structure.is_active == True)
+                    query = query.filter(Structure.is_active is True)
                 elif normalized in ('false', '0', 'no', 'n'):
-                    query = query.filter(Structure.is_active == False)
+                    query = query.filter(Structure.is_active is False)
                 # Any other value: skip filtering
 
         # Get total count
@@ -154,7 +155,8 @@ def get_structures():
     except Exception as e:
         return handle_database_error(e, "structures retrieval")
     finally:
-        db_session.close()
+        if db_session is not None:
+            db_session.close()
 
 
 @superadmin_bp.route("/superadmin/structures", methods=["POST"])
@@ -189,6 +191,7 @@ def create_structure():
     if not name or not city:
         return jsonify({"error": "Name and city are required"}), 400
 
+    db_session = None
     try:
         db_session = SessionLocal()
 
@@ -218,10 +221,12 @@ def create_structure():
         }), 201
 
     except Exception as e:
-        db_session.rollback()
+        if db_session is not None:
+            db_session.rollback()
         return handle_database_error(e, "structure creation", structure_name=name)
     finally:
-        db_session.close()
+        if db_session is not None:
+            db_session.close()
 
 
 @superadmin_bp.route("/superadmin/structures/<int:structure_id>", methods=["PUT"])
@@ -244,6 +249,7 @@ def update_structure(structure_id):
     if not data:
         return jsonify({"error": JSON_DATA_REQUIRED}), 400
 
+    db_session = None
     try:
         db_session = SessionLocal()
 
@@ -275,10 +281,12 @@ def update_structure(structure_id):
         }), 200
 
     except Exception as e:
-        db_session.rollback()
+        if db_session is not None:
+            db_session.rollback()
         return handle_database_error(e, "structure update", structure_id=structure_id)
     finally:
-        db_session.close()
+        if db_session is not None:
+            db_session.close()
 
 
 @superadmin_bp.route("/superadmin/structures/<int:structure_id>", methods=["DELETE"])
@@ -297,6 +305,7 @@ def delete_structure(structure_id):
     if error_response:
         return error_response, error_code
 
+    db_session = None
     try:
         db_session = SessionLocal()
 
@@ -312,10 +321,12 @@ def delete_structure(structure_id):
         }), 200
 
     except Exception as e:
-        db_session.rollback()
+        if db_session is not None:
+            db_session.rollback()
         return handle_database_error(e, "structure archiving", structure_id=structure_id)
     finally:
-        db_session.close()
+        if db_session is not None:
+            db_session.close()
 
 
 @superadmin_bp.route("/superadmin/structures/<int:structure_id>/restore", methods=["POST"])
@@ -334,6 +345,7 @@ def restore_structure(structure_id):
     if error_response:
         return error_response, error_code
 
+    db_session = None
     try:
         db_session = SessionLocal()
 
@@ -349,10 +361,12 @@ def restore_structure(structure_id):
         }), 200
 
     except Exception as e:
-        db_session.rollback()
+        if db_session is not None:
+            db_session.rollback()
         return handle_database_error(e, "structure restoration", structure_id=structure_id)
     finally:
-        db_session.close()
+        if db_session is not None:
+            db_session.close()
 
 
 # ============================================================================
@@ -376,6 +390,7 @@ def get_users():
     if error_response:
         return error_response, error_code
 
+    db_session = None
     try:
         db_session = SessionLocal()
 
@@ -440,7 +455,8 @@ def get_users():
     except Exception as e:
         return handle_database_error(e, "users retrieval")
     finally:
-        db_session.close()
+        if db_session is not None:
+            db_session.close()
 
 
 @superadmin_bp.route("/superadmin/users", methods=["POST"])
@@ -468,8 +484,9 @@ def create_user():  # pylint: disable=too-many-return-statements
     if error_response:
         return error_response, error_code
 
-    db_session = SessionLocal()
+    db_session = None
     try:
+        db_session = SessionLocal()
         # Validate username and role
         existing_user = db_session.query(User).filter(User.username == user_data['username']).first()
         if existing_user:
@@ -494,10 +511,12 @@ def create_user():  # pylint: disable=too-many-return-statements
         return jsonify(create_user_response_data(new_user, role)), 201
 
     except Exception as e:
-        db_session.rollback()
+        if db_session is not None:
+            db_session.rollback()
         return handle_database_error(e, "user creation", username=user_data['username'])
     finally:
-        db_session.close()
+        if db_session is not None:
+            db_session.close()
 
 
 @superadmin_bp.route("/superadmin/users/<int:user_id>", methods=["PUT"])
@@ -521,6 +540,7 @@ def update_user(user_id):
     if not data:
         return jsonify({"error": JSON_DATA_REQUIRED}), 400
 
+    db_session = None
     try:
         db_session = SessionLocal()
 
@@ -556,10 +576,12 @@ def update_user(user_id):
         }), 200
 
     except Exception as e:
-        db_session.rollback()
+        if db_session is not None:
+            db_session.rollback()
         return handle_database_error(e, "user update", user_id=user_id)
     finally:
-        db_session.close()
+        if db_session is not None:
+            db_session.close()
 
 
 @superadmin_bp.route("/superadmin/users/<int:user_id>/reset-password", methods=["POST"])
@@ -586,6 +608,7 @@ def reset_user_password(user_id):
     if not new_password:
         return jsonify({"error": "Password is required"}), 400
 
+    db_session = None
     try:
         db_session = SessionLocal()
 
@@ -602,10 +625,12 @@ def reset_user_password(user_id):
         }), 200
 
     except Exception as e:
-        db_session.rollback()
+        if db_session is not None:
+            db_session.rollback()
         return handle_database_error(e, "password reset", user_id=user_id)
     finally:
-        db_session.close()
+        if db_session is not None:
+            db_session.close()
 
 
 # ============================================================================
@@ -628,6 +653,7 @@ def get_associations():
     if error_response:
         return error_response, error_code
 
+    db_session = None
     try:
         db_session = SessionLocal()
 
@@ -672,7 +698,8 @@ def get_associations():
     except Exception as e:
         return handle_database_error(e, "associations retrieval")
     finally:
-        db_session.close()
+        if db_session is not None:
+            db_session.close()
 
 
 @superadmin_bp.route("/superadmin/associations", methods=["POST"])
@@ -699,8 +726,9 @@ def create_association():  # pylint: disable=too-many-return-statements
     if error_response:
         return error_response, error_code
 
-    db_session = SessionLocal()
+    db_session = None
     try:
+        db_session = SessionLocal()
         # Validate user, structure, and check for existing association
         user = db_session.query(User).filter(User.id == user_id).first()
         if not user:
@@ -724,10 +752,12 @@ def create_association():  # pylint: disable=too-many-return-statements
         return jsonify({"message": "Association created successfully"}), 201
 
     except Exception as e:
-        db_session.rollback()
+        if db_session is not None:
+            db_session.rollback()
         return handle_database_error(e, "association creation", target_user_id=user_id, target_structure_id=structure_id)
     finally:
-        db_session.close()
+        if db_session is not None:
+            db_session.close()
 
 
 @superadmin_bp.route("/superadmin/associations", methods=["DELETE"])
@@ -756,6 +786,7 @@ def delete_association():
     if not user_id or not structure_id:
         return jsonify({"error": "user_id and structure_id are required"}), 400
 
+    db_session = None
     try:
         db_session = SessionLocal()
 
@@ -776,10 +807,12 @@ def delete_association():
         }), 200
 
     except Exception as e:
-        db_session.rollback()
+        if db_session is not None:
+            db_session.rollback()
         return handle_database_error(e, "association deletion", target_user_id=user_id, target_structure_id=structure_id)
     finally:
-        db_session.close()
+        if db_session is not None:
+            db_session.close()
 
 
 # ============================================================================
@@ -802,6 +835,7 @@ def get_dashboard_data():
     if error_response:
         return error_response, error_code
 
+    db_session = None
     try:
         db_session = SessionLocal()
 
@@ -832,4 +866,5 @@ def get_dashboard_data():
     except Exception as e:
         return handle_database_error(e, "dashboard data retrieval")
     finally:
-        db_session.close()
+        if db_session is not None:
+            db_session.close()
