@@ -1,0 +1,114 @@
+<div class="structures">
+    <div class="structures-header">
+        <h2>Structures Management</h2>
+        <p-button label="Create Structure" icon="pi pi-plus" (onClick)="openCreateModal()" severity="primary">
+        </p-button>
+    </div>
+
+    <div class="filters">
+        <p-inputText placeholder="Search structures..." [(ngModel)]="searchTerm" (ngModelChange)="onSearch()"
+            styleClass="w-full">
+        </p-inputText>
+        <p-select [(ngModel)]="statusFilter" (ngModelChange)="loadStructures()" [options]="statusOptions"
+            placeholder="All Status" styleClass="w-full">
+        </p-select>
+    </div>
+
+    <div class="structures-list" *ngIf="!loading">
+        <p-card *ngFor="let structure of structures" styleClass="structure-card">
+            <ng-template pTemplate="header">
+                <div class="structure-header">
+                    <h3>{{ structure.name }}</h3>
+                    <p-tag [value]="structure.is_active ? 'Active' : 'Archived'"
+                        [severity]="structure.is_active ? 'success' : 'warn'">
+                    </p-tag>
+                </div>
+            </ng-template>
+
+            <div class="structure-info">
+                <p><strong>City:</strong> {{ structure.city }}</p>
+                <p><strong>Address:</strong> {{ structure.street }}</p>
+                <p><strong>CIN:</strong> {{ structure.cin || 'N/A' }}</p>
+            </div>
+
+            <ng-template pTemplate="footer">
+                <div class="structure-actions">
+                    <p-button label="Edit" icon="pi pi-pencil" severity="secondary" size="small"
+                        (onClick)="editStructure(structure)">
+                    </p-button>
+                    <p-button [label]="structure.is_active ? 'Archive' : 'Restore'"
+                        [icon]="structure.is_active ? 'pi pi-archive' : 'pi pi-refresh'"
+                        [severity]="structure.is_active ? 'warn' : 'success'" size="small"
+                        (onClick)="toggleStructureStatus(structure)">
+                    </p-button>
+                </div>
+            </ng-template>
+        </p-card>
+    </div>
+
+    <div class="loading" *ngIf="loading">
+        <p-progressSpinner></p-progressSpinner>
+        <p>Loading structures...</p>
+    </div>
+
+    <p-message *ngIf="error" severity="error" [text]="'Error: ' + error" styleClass="w-full">
+    </p-message>
+
+    <p-paginator *ngIf="pagination && pagination.pages > 1" [rows]="pagination.per_page"
+        [totalRecords]="pagination.total" [first]="(pagination.page - 1) * pagination.per_page"
+        (onPageChange)="onPageChange($event)" [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} structures">
+    </p-paginator>
+</div>
+
+<!-- Create/Edit Modal -->
+<p-dialog [(visible)]="showModal" [modal]="true" [closable]="true"
+    [header]="editingStructure ? 'Edit Structure' : 'Create Structure'" [style]="{ width: '50vw' }"
+    (onHide)="closeModal()">
+
+    <form (ngSubmit)="saveStructure()" #structureForm="ngForm">
+        <div class="p-fluid">
+            <div class="p-field">
+                <label for="name">Name *</label>
+                <p-inputText id="name" name="name" [(ngModel)]="structureFormData.name" required
+                    placeholder="Enter structure name">
+                </p-inputText>
+            </div>
+
+            <div class="p-field">
+                <label for="city">City *</label>
+                <p-inputText id="city" name="city" [(ngModel)]="structureFormData.city" required
+                    placeholder="Enter city">
+                </p-inputText>
+            </div>
+
+            <div class="p-field">
+                <label for="street">Street Address</label>
+                <p-inputText id="street" name="street" [(ngModel)]="structureFormData.street"
+                    placeholder="Enter street address">
+                </p-inputText>
+            </div>
+
+            <div class="p-field">
+                <label for="cin">CIN</label>
+                <p-inputText id="cin" name="cin" [(ngModel)]="structureFormData.cin" placeholder="Enter CIN">
+                </p-inputText>
+            </div>
+
+            <div class="p-field" *ngIf="editingStructure">
+                <p-checkbox [(ngModel)]="structureFormData.is_active" name="is_active" [binary]="true"
+                    inputId="is_active">
+                </p-checkbox>
+                <label for="is_active">Active</label>
+            </div>
+        </div>
+    </form>
+
+    <ng-template pTemplate="footer">
+        <p-button label="Cancel" icon="pi pi-times" severity="secondary" (onClick)="closeModal()">
+        </p-button>
+        <p-button [label]="editingStructure ? 'Update' : 'Create'" icon="pi pi-check" severity="primary"
+            (onClick)="saveStructure()" [disabled]="!structureForm.form.valid">
+        </p-button>
+    </ng-template>
+</p-dialog>

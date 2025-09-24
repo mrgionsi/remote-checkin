@@ -18,6 +18,7 @@ from app_logging.config import setup_logging
 from app_logging.middleware import setup_request_logging
 from routes.email_config_routes import email_config_bp
 from routes.admin_routes import admin_bp
+from routes.superadmin_routes import superadmin_bp
 from routes.room_routes import room_bp
 from routes.reservation_routes import reservation_bp
 from routes.upload_reservation_routes import upload_bp
@@ -96,6 +97,7 @@ CORS(
 
 # Register blueprints
 app.register_blueprint(admin_bp)
+app.register_blueprint(superadmin_bp)
 app.register_blueprint(room_bp)
 app.register_blueprint(reservation_bp)
 app.register_blueprint(upload_bp)

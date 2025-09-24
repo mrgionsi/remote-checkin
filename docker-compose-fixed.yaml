@@ -1,0 +1,110 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: remote-checkin-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-remotecheckin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secure_password}
+      POSTGRES_DB: ${DB_NAME:-remotecheckin}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-remotecheckin}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  flask-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: remote-checkin-backend
+    restart: unless-stopped
+    environment:
+      - FLASK_ENV=${FLASK_ENV:-production}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=${DB_USER:-remotecheckin}
+      - DB_PASSWORD=${DB_PASSWORD:-secure_password}
+      - DB_NAME=${DB_NAME:-remotecheckin}
+      - LOG_TO_FILE=${LOG_TO_FILE:-true}
+      - LOG_DIRECTORY=/usr/src/app/logs
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - MAIL_SERVER=${MAIL_SERVER}
+      - MAIL_PORT=${MAIL_PORT}
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - MAIL_USE_TLS=${MAIL_USE_TLS:-true}
+      - MAIL_USE_SSL=${MAIL_USE_SSL:-false}
+    volumes:
+      # Persistent storage for uploaded files
+      - uploads_data:/usr/src/app/uploads
+      # Persistent storage for application logs
+      - logs_data:/usr/src/app/logs
+      # Optional: Mount configuration files for easier updates (using bind mount)
+      - ./backend/services/mappings:/usr/src/app/services/mappings:ro
+    networks:
+      - traefik_default
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik_default"
+      - "traefik.http.routers.remote-checkin-be.rule=Host(`remote-checkin-be.gionsihome.duckdns.org`)"
+      - "traefik.http.routers.remote-checkin-be.entrypoints=websecure"
+      - "traefik.http.services.remote-checkin-be.loadbalancer.server.port=8000"
+      - "traefik.http.routers.remote-checkin-be.tls.certresolver=letsencrypt"
+    ports:
+      - "8003:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  angular-frontend:
+    image: ghcr.io/mrgionsi/remote-checkin/remote-checkin-fe:alpha
+    container_name: remote-checkin-frontend
+    restart: unless-stopped
+    depends_on:
+      - flask-backend
+    networks:
+      - traefik_default
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik_default"
+      - "traefik.http.routers.remote-checkin.rule=Host(`remote-checkin.gionsihome.duckdns.org`)"
+      - "traefik.http.routers.remote-checkin.entrypoints=websecure"
+      - "traefik.http.routers.remote-checkin.tls.certresolver=letsencrypt"
+    ports:
+      - "8383:80"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  # PostgreSQL data persistence
+  postgres_data:
+    driver: local
+  
+  # Uploaded files persistence (identity documents, images)
+  uploads_data:
+    driver: local
+  
+  # Application logs persistence
+  logs_data:
+    driver: local
+
+networks:
+  traefik_default:
+    external: true

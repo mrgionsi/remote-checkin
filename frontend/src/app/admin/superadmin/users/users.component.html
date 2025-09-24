@@ -1,0 +1,140 @@
+<div class="users">
+  <div class="users-header">
+    <h2>Users Management</h2>
+    <p-button label="Create User" icon="pi pi-user-plus" (onClick)="openCreateModal()" severity="primary">
+    </p-button>
+  </div>
+
+  <div class="filters">
+    <p-inputText placeholder="Search users..." [(ngModel)]="searchTerm" (ngModelChange)="onSearch()"
+      styleClass="w-full">
+    </p-inputText>
+    <p-select [(ngModel)]="roleFilter" (ngModelChange)="loadUsers()" [options]="roleOptions" placeholder="All Roles"
+      styleClass="w-full">
+    </p-select>
+  </div>
+
+  <div class="users-list" *ngIf="!loading">
+    <p-card *ngFor="let user of users" styleClass="user-card">
+      <ng-template pTemplate="header">
+        <div class="user-header">
+          <h3>{{ user.name }} {{ user.surname }}</h3>
+          <p-tag [value]="user.role" [severity]="user.role === 'superadmin' ? 'danger' : 'info'">
+          </p-tag>
+        </div>
+      </ng-template>
+
+      <div class="user-info">
+        <p><strong>Username:</strong> {{ user.username }}</p>
+        <p><strong>Email:</strong> {{ user.email || 'N/A' }}</p>
+        <p><strong>Phone:</strong> {{ user.telephone || 'N/A' }}</p>
+
+        <div class="structures-section" *ngIf="user.structures && user.structures.length > 0">
+          <strong>Structures:</strong>
+          <div class="structures-tags">
+            <p-tag *ngFor="let structure of user.structures" [value]="structure.name" severity="secondary"
+              styleClass="mr-2 mb-1">
+            </p-tag>
+          </div>
+        </div>
+        <div class="no-structures" *ngIf="!user.structures || user.structures.length === 0">
+          <p-message severity="info" text="No structures assigned" styleClass="w-full">
+          </p-message>
+        </div>
+      </div>
+
+      <ng-template pTemplate="footer">
+        <div class="user-actions">
+          <p-button label="Edit" icon="pi pi-pencil" severity="secondary" size="small" (onClick)="editUser(user)">
+          </p-button>
+          <p-button label="Reset Password" icon="pi pi-key" severity="warn" size="small"
+            (onClick)="resetPassword(user)">
+          </p-button>
+          <p-button label="Manage Structures" icon="pi pi-sitemap" severity="info" size="small"
+            (onClick)="manageAssociations(user)">
+          </p-button>
+        </div>
+      </ng-template>
+    </p-card>
+  </div>
+
+  <div class="loading" *ngIf="loading">
+    <p-progressSpinner></p-progressSpinner>
+    <p>Loading users...</p>
+  </div>
+
+  <p-message *ngIf="error" severity="error" [text]="'Error: ' + error" styleClass="w-full">
+  </p-message>
+
+  <p-paginator *ngIf="pagination && pagination.pages > 1" [rows]="pagination.per_page" [totalRecords]="pagination.total"
+    [first]="(pagination.page - 1) * pagination.per_page" (onPageChange)="onPageChange($event)"
+    [showCurrentPageReport]="true" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} users">
+  </p-paginator>
+</div>
+
+<!-- Create/Edit Modal -->
+<div class="modal" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ editingUser ? 'Edit User' : 'Create User' }}</h3>
+      <button class="close-btn" (click)="closeModal()">&times;</button>
+    </div>
+    <form (ngSubmit)="saveUser()" #userForm="ngForm">
+      <div class="form-group">
+        <label for="username">Username *</label>
+        <input type="text" id="username" name="username" [(ngModel)]="userFormData.username" required
+          class="form-control">
+      </div>
+      <div class="form-group" *ngIf="!editingUser">
+        <label for="password">Password *</label>
+        <input type="password" id="password" name="password" [(ngModel)]="userFormData.password" required
+          class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="name">Name *</label>
+        <input type="text" id="name" name="name" [(ngModel)]="userFormData.name" required class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="surname">Surname *</label>
+        <input type="text" id="surname" name="surname" [(ngModel)]="userFormData.surname" required class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" [(ngModel)]="userFormData.email" class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="telephone">Telephone</label>
+        <input type="tel" id="telephone" name="telephone" [(ngModel)]="userFormData.telephone" class="form-control">
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary" [disabled]="!userForm.form.valid">
+          {{ editingUser ? 'Update' : 'Create' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Reset Password Modal -->
+<div class="modal" *ngIf="showPasswordModal" (click)="closePasswordModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Reset Password</h3>
+      <button class="close-btn" (click)="closePasswordModal()">&times;</button>
+    </div>
+    <form (ngSubmit)="confirmResetPassword()" #passwordForm="ngForm">
+      <div class="form-group">
+        <label for="newPassword">New Password *</label>
+        <input type="password" id="newPassword" name="newPassword" [(ngModel)]="passwordFormData.password" required
+          class="form-control">
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="closePasswordModal()">Cancel</button>
+        <button type="submit" class="btn btn-warning" [disabled]="!passwordForm.form.valid">
+          Reset Password
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

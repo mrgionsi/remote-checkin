@@ -1,0 +1,69 @@
+.structures {
+  padding: 20px;
+}
+
+.structures-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.structures-header h2 {
+  margin: 0;
+  color: #333;
+}
+
+.filters {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.structures-list {
+  display: grid;
+  gap: 15px;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+}
+
+::ng-deep .structure-card {
+  .p-card {
+    height: 100%;
+  }
+
+  .structure-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+
+    h3 {
+      margin: 0;
+      color: #333;
+    }
+  }
+
+  .structure-info {
+    p {
+      margin: 5px 0;
+      color: #666;
+      font-size: 14px;
+    }
+  }
+
+  .structure-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+
+  p {
+    margin-top: 10px;
+  }
+}

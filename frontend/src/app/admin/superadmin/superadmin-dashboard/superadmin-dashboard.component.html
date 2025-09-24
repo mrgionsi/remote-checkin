@@ -1,0 +1,61 @@
+<div class="dashboard">
+  <h2>Dashboard Overview</h2>
+  
+  <div class="stats-grid" *ngIf="dashboardData">
+    <div class="stat-card">
+      <div class="stat-icon">🏢</div>
+      <div class="stat-content">
+        <h3>{{ dashboardData.total_structures }}</h3>
+        <p>Total Structures</p>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon">✅</div>
+      <div class="stat-content">
+        <h3>{{ dashboardData.active_structures }}</h3>
+        <p>Active Structures</p>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon">📦</div>
+      <div class="stat-content">
+        <h3>{{ dashboardData.archived_structures }}</h3>
+        <p>Archived Structures</p>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon">👥</div>
+      <div class="stat-content">
+        <h3>{{ dashboardData.total_users }}</h3>
+        <p>Total Users</p>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon">⚠️</div>
+      <div class="stat-content">
+        <h3>{{ dashboardData.unassigned_admins }}</h3>
+        <p>Unassigned Admins</p>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon">📋</div>
+      <div class="stat-content">
+        <h3>{{ dashboardData.total_reservations }}</h3>
+        <p>Total Reservations</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="loading" *ngIf="loading">
+    <p>Loading dashboard data...</p>
+  </div>
+  
+  <div class="error" *ngIf="error">
+    <p>Error loading dashboard: {{ error }}</p>
+  </div>
+</div>

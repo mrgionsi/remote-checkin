@@ -1,0 +1,87 @@
+.associations {
+  padding: 20px;
+}
+
+.associations-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.associations-header h2 {
+  margin: 0;
+  color: #333;
+}
+
+.filters {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.associations-list {
+  display: grid;
+  gap: 15px;
+  grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+}
+
+::ng-deep .association-card {
+  .p-card {
+    height: 100%;
+  }
+
+  .association-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+
+    h4 {
+      margin: 0;
+      color: #333;
+    }
+  }
+
+  .association-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+
+    .user-section,
+    .structure-section {
+      h5 {
+        margin: 0 0 10px 0;
+        color: #333;
+        font-size: 14px;
+        font-weight: 600;
+
+        i {
+          margin-right: 5px;
+        }
+      }
+
+      p {
+        margin: 5px 0;
+        color: #666;
+        font-size: 14px;
+      }
+    }
+  }
+
+  .association-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+
+  p {
+    margin-top: 10px;
+  }
+}
