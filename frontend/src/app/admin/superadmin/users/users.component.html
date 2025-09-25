@@ -9,7 +9,7 @@
     <input pInputText placeholder="Search users..." [(ngModel)]="searchTerm" (ngModelChange)="onSearch()"
       name="searchTerm" class="w-full">
     <p-select [(ngModel)]="roleFilter" (ngModelChange)="loadUsers()" [options]="roleOptions" placeholder="All Roles"
-      name="roleFilter" styleClass="w-full">
+      name="roleFilter" styleClass="w-full" optionLabel="label" optionValue="value">
     </p-select>
   </div>
 

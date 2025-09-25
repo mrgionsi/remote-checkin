@@ -53,7 +53,12 @@ export class SuperadminUsersComponent implements OnInit {
     editingUser: User | null = null;
     userFormData: any = {};
     passwordFormData: any = {};
-    roleOptions: any;
+    roleOptions = [
+        { label: 'All Roles', value: '' },
+        { label: 'Admin', value: 'admin' },
+        { label: 'Superadmin', value: 'superadmin' },
+        { label: 'User', value: 'user' }
+    ];
 
     constructor(
         private superadminService: SuperadminService,
