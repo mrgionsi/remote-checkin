@@ -178,7 +178,7 @@ def create_structure():
 
     data = request.get_json()
     if not data:
-        return jsonify({"error": JSON_DATA_REQUIRED}), 400
+        return jsonify({"message": "Request data is required"}), 400
 
     name = data.get("name", "").strip()
     street = data.get("street", "").strip()
@@ -189,7 +189,7 @@ def create_structure():
     is_active = True if raw_is_active is None else parse_boolean_value(raw_is_active)
 
     if not name or not city:
-        return jsonify({"error": "Name and city are required"}), 400
+        return jsonify({"message": "Structure name and city are required"}), 400
 
     db_session = None
     try:
@@ -202,7 +202,7 @@ def create_structure():
         ).first()
 
         if existing:
-            return jsonify({"error": "A structure with this name and city already exists"}), 400
+            return jsonify({"message": "A structure with this name and city already exists"}), 400
 
         new_structure = Structure(
             name=name,
