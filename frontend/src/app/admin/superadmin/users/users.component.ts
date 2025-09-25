@@ -26,7 +26,7 @@ import { ToastModule } from 'primeng/toast';
 export class SuperadminUsersComponent implements OnInit {
     onPageChange(event: PaginatorState): void {
         // Guard against undefined event or missing properties
-        if (!event || event.first === undefined || event.rows === undefined) {
+        if (!event?.first || !event?.rows) {
             return;
         }
 
@@ -55,9 +55,8 @@ export class SuperadminUsersComponent implements OnInit {
     passwordFormData: any = {};
     roleOptions = [
         { label: 'All Roles', value: '' },
-        { label: 'Admin', value: 'admin' },
+        { label: 'Administrator', value: 'administrator' },
         { label: 'Superadmin', value: 'superadmin' },
-        { label: 'User', value: 'user' }
     ];
 
     constructor(
