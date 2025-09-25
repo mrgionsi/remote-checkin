@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SuperadminService, Structure } from '../../../services/superadmin.service';
+import { ErrorHandlerService } from '../../../services/error-handler.service';
+import { MessageService } from 'primeng/api';
 
 // PrimeNG imports
 import { ButtonModule } from 'primeng/button';
@@ -14,6 +16,7 @@ import { TagModule } from 'primeng/tag';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { MessageModule } from 'primeng/message';
 import { PaginatorModule } from 'primeng/paginator';
+import { ToastModule } from 'primeng/toast';
 
 @Component({
     selector: 'app-superadmin-structures',
@@ -31,15 +34,16 @@ import { PaginatorModule } from 'primeng/paginator';
         TagModule,
         ProgressSpinnerModule,
         MessageModule,
-        PaginatorModule
+        PaginatorModule,
+        ToastModule
     ],
+    providers: [MessageService],
     templateUrl: './structures.component.html',
     styleUrls: ['./structures.component.scss']
 })
 export class SuperadminStructuresComponent implements OnInit {
     structures: Structure[] = [];
     loading = true;
-    error: string | null = null;
     searchTerm = '';
     statusFilter = '';
     pagination: any = null;
@@ -56,7 +60,9 @@ export class SuperadminStructuresComponent implements OnInit {
 
     constructor(
         private superadminService: SuperadminService,
-        private fb: FormBuilder
+        private fb: FormBuilder,
+        private errorHandler: ErrorHandlerService,
+        private messageService: MessageService
     ) { }
 
     ngOnInit(): void {
@@ -77,7 +83,6 @@ export class SuperadminStructuresComponent implements OnInit {
 
     loadStructures(): void {
         this.loading = true;
-        this.error = null;
 
         const params = {
             page: this.pagination?.page || 1,
@@ -93,8 +98,8 @@ export class SuperadminStructuresComponent implements OnInit {
                 this.loading = false;
             },
             error: (error) => {
-                this.error = error.message || 'Failed to load structures';
                 this.loading = false;
+                this.showErrorMessage(this.errorHandler.getErrorMessageString(error));
             }
         });
     }
@@ -164,16 +169,16 @@ export class SuperadminStructuresComponent implements OnInit {
     createStructure(): void {
         if (this.structureForm.valid) {
             this.submitting = true;
-            this.error = null;
             this.superadminService.createStructure(this.structureForm.value).subscribe({
                 next: () => {
                     this.submitting = false;
                     this.closeModal();
                     this.loadStructures();
+                    this.showSuccessMessage('Structure created successfully!');
                 },
                 error: (error) => {
                     this.submitting = false;
-                    this.error = error.message || 'Failed to create structure';
+                    this.showErrorMessage(this.errorHandler.getErrorMessageString(error));
                 }
             });
         } else {
@@ -186,16 +191,16 @@ export class SuperadminStructuresComponent implements OnInit {
 
         if (this.structureForm.valid) {
             this.submitting = true;
-            this.error = null;
             this.superadminService.updateStructure(this.editingStructure.id, this.structureForm.value).subscribe({
                 next: () => {
                     this.submitting = false;
                     this.closeModal();
                     this.loadStructures();
+                    this.showSuccessMessage('Structure updated successfully!');
                 },
                 error: (error) => {
                     this.submitting = false;
-                    this.error = error.message || 'Failed to update structure';
+                    this.showErrorMessage(this.errorHandler.getErrorMessageString(error));
                 }
             });
         } else {
@@ -210,25 +215,46 @@ export class SuperadminStructuresComponent implements OnInit {
         });
     }
 
+
     toggleStructureStatus(structure: Structure): void {
         if (structure.is_active) {
             this.superadminService.deleteStructure(structure.id).subscribe({
                 next: () => {
                     this.loadStructures();
+                    this.showSuccessMessage('Structure archived successfully!');
                 },
                 error: (error) => {
-                    this.error = error.message || 'Failed to archive structure';
+                    this.showErrorMessage(this.errorHandler.getErrorMessageString(error));
                 }
             });
         } else {
             this.superadminService.restoreStructure(structure.id).subscribe({
                 next: () => {
                     this.loadStructures();
+                    this.showSuccessMessage('Structure restored successfully!');
                 },
                 error: (error) => {
-                    this.error = error.message || 'Failed to restore structure';
+                    this.showErrorMessage(this.errorHandler.getErrorMessageString(error));
                 }
             });
         }
+    }
+
+    private showSuccessMessage(message: string): void {
+        this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: message,
+            life: 3000
+        });
+    }
+
+    private showErrorMessage(message: string): void {
+        this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: message,
+            life: 5000
+        });
     }
 }
