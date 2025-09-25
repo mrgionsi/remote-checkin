@@ -69,7 +69,7 @@ def get_user_friendly_error_message(e, operation_name):
         str: User-friendly error message
     """
     error_str = str(e).lower()
-    
+
     # Initialize message with generic fallback
     message = f"An error occurred during {operation_name}. Please try again."
 

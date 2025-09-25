@@ -8,11 +8,11 @@
     <div class="filters">
         <div style="flex: 1;">
             <input pInputText placeholder="Search structures..." [(ngModel)]="searchTerm" (ngModelChange)="onSearch()"
-                name="searchTerm" ngDefaultControl class="w-full">
+                name="searchTerm" class="w-full">
         </div>
         <div style="flex: 1;">
             <p-select [(ngModel)]="statusFilter" (ngModelChange)="loadStructures()" [options]="statusOptions"
-                placeholder="All Status" name="statusFilter" ngDefaultControl styleClass="w-full">
+                placeholder="All Status" name="statusFilter" styleClass="w-full">
             </p-select>
         </div>
     </div>
