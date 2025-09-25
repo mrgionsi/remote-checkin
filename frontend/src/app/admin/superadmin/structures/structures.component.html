@@ -178,7 +178,7 @@
                 class="cancel-btn">
             </p-button>
             <p-button [label]="editingStructure ? 'Update Structure' : 'Create Structure'"
-                [icon]="editingStructure ? 'pi pi-check' : 'pi pi-plus'" severity="primary" (onClick)="saveStructure()"
+                [icon]="editingStructure ? 'pi pi-check' : 'pi pi-plus'" severity="primary" type="submit"
                 [disabled]="!structureForm.valid || submitting" [loading]="submitting" class="submit-btn">
             </p-button>
         </div>
