@@ -46,6 +46,7 @@ export class SuperadminStructuresComponent implements OnInit {
     showModal = false;
     editingStructure: Structure | null = null;
     structureForm!: FormGroup;
+    submitting = false;
 
     statusOptions = [
         { label: 'All Status', value: '' },
@@ -162,12 +163,16 @@ export class SuperadminStructuresComponent implements OnInit {
 
     createStructure(): void {
         if (this.structureForm.valid) {
+            this.submitting = true;
+            this.error = null;
             this.superadminService.createStructure(this.structureForm.value).subscribe({
                 next: () => {
+                    this.submitting = false;
                     this.closeModal();
                     this.loadStructures();
                 },
                 error: (error) => {
+                    this.submitting = false;
                     this.error = error.message || 'Failed to create structure';
                 }
             });
@@ -180,12 +185,16 @@ export class SuperadminStructuresComponent implements OnInit {
         if (!this.editingStructure) return;
 
         if (this.structureForm.valid) {
+            this.submitting = true;
+            this.error = null;
             this.superadminService.updateStructure(this.editingStructure.id, this.structureForm.value).subscribe({
                 next: () => {
+                    this.submitting = false;
                     this.closeModal();
                     this.loadStructures();
                 },
                 error: (error) => {
+                    this.submitting = false;
                     this.error = error.message || 'Failed to update structure';
                 }
             });
