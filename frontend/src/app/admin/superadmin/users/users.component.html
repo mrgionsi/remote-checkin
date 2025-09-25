@@ -6,11 +6,10 @@
   </div>
 
   <div class="filters">
-    <p-inputText placeholder="Search users..." [(ngModel)]="searchTerm" (ngModelChange)="onSearch()"
-      styleClass="w-full">
-    </p-inputText>
+    <input pInputText placeholder="Search users..." [(ngModel)]="searchTerm" (ngModelChange)="onSearch()"
+      name="searchTerm" ngDefaultControl styleClass="w-full">
     <p-select [(ngModel)]="roleFilter" (ngModelChange)="loadUsers()" [options]="roleOptions" placeholder="All Roles"
-      styleClass="w-full">
+      name="roleFilter" ngDefaultControl styleClass="w-full">
     </p-select>
   </div>
 

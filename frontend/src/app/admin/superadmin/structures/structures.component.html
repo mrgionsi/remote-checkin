@@ -6,12 +6,15 @@
     </div>
 
     <div class="filters">
-        <p-inputText placeholder="Search structures..." [(ngModel)]="searchTerm" (ngModelChange)="onSearch()"
-            styleClass="w-full">
-        </p-inputText>
-        <p-select [(ngModel)]="statusFilter" (ngModelChange)="loadStructures()" [options]="statusOptions"
-            placeholder="All Status" styleClass="w-full">
-        </p-select>
+        <div style="flex: 1;">
+            <input pInputText placeholder="Search structures..." [(ngModel)]="searchTerm" (ngModelChange)="onSearch()"
+                name="searchTerm" ngDefaultControl class="w-full">
+        </div>
+        <div style="flex: 1;">
+            <p-select [(ngModel)]="statusFilter" (ngModelChange)="loadStructures()" [options]="statusOptions"
+                placeholder="All Status" name="statusFilter" ngDefaultControl styleClass="w-full">
+            </p-select>
+        </div>
     </div>
 
     <div class="structures-list" *ngIf="!loading">
@@ -66,38 +69,34 @@
     [header]="editingStructure ? 'Edit Structure' : 'Create Structure'" [style]="{ width: '50vw' }"
     (onHide)="closeModal()">
 
-    <form (ngSubmit)="saveStructure()" #structureForm="ngForm">
+    <form [formGroup]="structureForm" (ngSubmit)="saveStructure()">
         <div class="p-fluid">
             <div class="p-field">
                 <label for="name">Name *</label>
-                <p-inputText id="name" name="name" [(ngModel)]="structureFormData.name" required
-                    placeholder="Enter structure name">
-                </p-inputText>
+                <input pInputText id="name" formControlName="name" placeholder="Enter structure name">
+                <small *ngIf="structureForm.get('name')?.invalid && structureForm.get('name')?.touched"
+                    class="p-error">Name is required</small>
             </div>
 
             <div class="p-field">
                 <label for="city">City *</label>
-                <p-inputText id="city" name="city" [(ngModel)]="structureFormData.city" required
-                    placeholder="Enter city">
-                </p-inputText>
+                <input pInputText id="city" formControlName="city" placeholder="Enter city">
+                <small *ngIf="structureForm.get('city')?.invalid && structureForm.get('city')?.touched"
+                    class="p-error">City is required</small>
             </div>
 
             <div class="p-field">
                 <label for="street">Street Address</label>
-                <p-inputText id="street" name="street" [(ngModel)]="structureFormData.street"
-                    placeholder="Enter street address">
-                </p-inputText>
+                <input pInputText id="street" formControlName="street" placeholder="Enter street address">
             </div>
 
             <div class="p-field">
                 <label for="cin">CIN</label>
-                <p-inputText id="cin" name="cin" [(ngModel)]="structureFormData.cin" placeholder="Enter CIN">
-                </p-inputText>
+                <input pInputText id="cin" formControlName="cin" placeholder="Enter CIN">
             </div>
 
             <div class="p-field" *ngIf="editingStructure">
-                <p-checkbox [(ngModel)]="structureFormData.is_active" name="is_active" [binary]="true"
-                    inputId="is_active">
+                <p-checkbox formControlName="is_active" [binary]="true" inputId="is_active">
                 </p-checkbox>
                 <label for="is_active">Active</label>
             </div>
@@ -108,7 +107,7 @@
         <p-button label="Cancel" icon="pi pi-times" severity="secondary" (onClick)="closeModal()">
         </p-button>
         <p-button [label]="editingStructure ? 'Update' : 'Create'" icon="pi pi-check" severity="primary"
-            (onClick)="saveStructure()" [disabled]="!structureForm.form.valid">
+            (onClick)="saveStructure()" [disabled]="!structureForm.valid">
         </p-button>
     </ng-template>
 </p-dialog>
