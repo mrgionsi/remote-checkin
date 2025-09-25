@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SuperadminService, Structure } from '../../../services/superadmin.service';
 
 // PrimeNG imports
@@ -20,6 +20,7 @@ import { PaginatorModule } from 'primeng/paginator';
     standalone: true,
     imports: [
         CommonModule,
+        ReactiveFormsModule,
         FormsModule,
         ButtonModule,
         CardModule,
@@ -44,7 +45,7 @@ export class SuperadminStructuresComponent implements OnInit {
     pagination: any = null;
     showModal = false;
     editingStructure: Structure | null = null;
-    structureFormData: any = {};
+    structureForm!: FormGroup;
 
     statusOptions = [
         { label: 'All Status', value: '' },
@@ -52,11 +53,26 @@ export class SuperadminStructuresComponent implements OnInit {
         { label: 'Archived', value: 'false' }
     ];
 
-    constructor(private superadminService: SuperadminService) { }
+    constructor(
+        private superadminService: SuperadminService,
+        private fb: FormBuilder
+    ) { }
 
     ngOnInit(): void {
+        this.initializeForm();
         this.loadStructures();
     }
+
+    private initializeForm(): void {
+        this.structureForm = this.fb.group({
+            name: ['', [Validators.required]],
+            city: ['', [Validators.required]],
+            street: [''],
+            cin: [''],
+            is_active: [true]
+        });
+    }
+
 
     loadStructures(): void {
         this.loading = true;
@@ -71,6 +87,8 @@ export class SuperadminStructuresComponent implements OnInit {
 
         this.superadminService.getStructures(params).subscribe({
             next: (response) => {
+
+                console.log(response);
                 this.structures = response.structures;
                 this.pagination = response.pagination;
                 this.loading = false;
@@ -95,32 +113,45 @@ export class SuperadminStructuresComponent implements OnInit {
     }
 
     onPageChange(event: any): void {
-        this.pagination.page = Math.floor(event.first / event.rows) + 1;
+        // Guard against undefined event or missing properties
+        if (!event || event.first === undefined || event.rows === undefined) {
+            return;
+        }
+
+        // Ensure pagination object exists
+        if (!this.pagination) {
+            this.pagination = { page: 1 };
+        }
+
+        // Compute new page with safe arithmetic
+        const newPage = Math.floor((event.first ?? 0) / (event.rows ?? 1)) + 1;
+        this.pagination.page = newPage;
+
         this.loadStructures();
     }
 
     openCreateModal(): void {
         this.editingStructure = null;
-        this.structureFormData = {
-            name: '',
-            city: '',
-            street: '',
-            cin: '',
-            is_active: true
-        };
+        this.initializeForm();
         this.showModal = true;
     }
 
     editStructure(structure: Structure): void {
         this.editingStructure = structure;
-        this.structureFormData = { ...structure };
+        this.structureForm.patchValue({
+            name: structure.name,
+            city: structure.city,
+            street: structure.street,
+            cin: structure.cin,
+            is_active: structure.is_active
+        });
         this.showModal = true;
     }
 
     closeModal(): void {
         this.showModal = false;
         this.editingStructure = null;
-        this.structureFormData = {};
+        this.initializeForm();
     }
 
     saveStructure(): void {
@@ -132,28 +163,43 @@ export class SuperadminStructuresComponent implements OnInit {
     }
 
     createStructure(): void {
-        this.superadminService.createStructure(this.structureFormData).subscribe({
-            next: () => {
-                this.closeModal();
-                this.loadStructures();
-            },
-            error: (error) => {
-                this.error = error.message || 'Failed to create structure';
-            }
-        });
+        if (this.structureForm.valid) {
+            this.superadminService.createStructure(this.structureForm.value).subscribe({
+                next: () => {
+                    this.closeModal();
+                    this.loadStructures();
+                },
+                error: (error) => {
+                    this.error = error.message || 'Failed to create structure';
+                }
+            });
+        } else {
+            this.markFormGroupTouched();
+        }
     }
 
     updateStructure(): void {
         if (!this.editingStructure) return;
 
-        this.superadminService.updateStructure(this.editingStructure.id, this.structureFormData).subscribe({
-            next: () => {
-                this.closeModal();
-                this.loadStructures();
-            },
-            error: (error) => {
-                this.error = error.message || 'Failed to update structure';
-            }
+        if (this.structureForm.valid) {
+            this.superadminService.updateStructure(this.editingStructure.id, this.structureForm.value).subscribe({
+                next: () => {
+                    this.closeModal();
+                    this.loadStructures();
+                },
+                error: (error) => {
+                    this.error = error.message || 'Failed to update structure';
+                }
+            });
+        } else {
+            this.markFormGroupTouched();
+        }
+    }
+
+    private markFormGroupTouched(): void {
+        Object.keys(this.structureForm.controls).forEach(key => {
+            const control = this.structureForm.get(key);
+            control?.markAsTouched();
         });
     }
 
