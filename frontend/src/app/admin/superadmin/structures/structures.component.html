@@ -40,7 +40,7 @@
                         (onClick)="editStructure(structure)">
                     </p-button>
                     <p-button [label]="structure.is_active ? 'Archive' : 'Restore'"
-                        [icon]="structure.is_active ? 'pi pi-archive' : 'pi pi-refresh'"
+                        [icon]="structure.is_active ? 'pi pi-file-export' : 'pi pi-refresh'"
                         [severity]="structure.is_active ? 'warn' : 'success'" size="small"
                         (onClick)="toggleStructureStatus(structure)">
                     </p-button>
@@ -77,12 +77,7 @@
         </div>
     </ng-template>
 
-    <form [formGroup]="structureForm" (ngSubmit)="saveStructure()" class="structure-form">
-        <!-- Error Message -->
-        <div class="error-banner" *ngIf="error">
-            <i class="pi pi-exclamation-triangle"></i>
-            <span>{{ error }}</span>
-        </div>
+            <form [formGroup]="structureForm" (ngSubmit)="saveStructure()" class="structure-form">
 
         <div class="form-content">
             <!-- Basic Information Section -->
@@ -191,3 +186,6 @@
         </div>
     </ng-template>
 </p-dialog>
+
+<!-- Toast for notifications -->
+<p-toast></p-toast>

@@ -118,23 +118,6 @@
 }
 
 .structure-form {
-  .error-banner {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: #f8d7da;
-    color: #721c24;
-    padding: 12px 20px;
-    margin: 0 24px 20px 24px;
-    border-radius: 8px;
-    border: 1px solid #f5c6cb;
-    font-weight: 500;
-    font-size: 0.9rem;
-
-    i {
-      font-size: 1rem;
-    }
-  }
 
   .form-content {
     padding: 24px;
