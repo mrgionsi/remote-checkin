@@ -69,34 +69,32 @@ def get_user_friendly_error_message(e, operation_name):
         str: User-friendly error message
     """
     error_str = str(e).lower()
+    
+    # Initialize message with generic fallback
+    message = f"An error occurred during {operation_name}. Please try again."
 
     # Database constraint violations
     if 'unique constraint' in error_str or 'duplicate key' in error_str:
         if 'structure' in operation_name.lower():
-            return "A structure with this name and city already exists."
-        if 'user' in operation_name.lower():
-            return "A user with this username or email already exists."
+            message = "A structure with this name and city already exists."
+        elif 'user' in operation_name.lower():
+            message = "A user with this username or email already exists."
         else:
-            return "This record already exists."
-
+            message = "This record already exists."
     # Foreign key violations
-    if 'foreign key constraint' in error_str:
-        return "Cannot perform this action because related data exists."
-
+    elif 'foreign key constraint' in error_str:
+        message = "Cannot perform this action because related data exists."
     # Not null violations
-    if 'not null constraint' in error_str:
-        return "Required information is missing. Please check all required fields."
-
+    elif 'not null constraint' in error_str:
+        message = "Required information is missing. Please check all required fields."
     # Sequence/table not found
-    if 'does not exist' in error_str:
-        return "Database configuration error. Please contact support."
-
+    elif 'does not exist' in error_str:
+        message = "Database configuration error. Please contact support."
     # Connection errors
-    if 'connection' in error_str or 'timeout' in error_str:
-        return "Database connection error. Please try again."
+    elif 'connection' in error_str or 'timeout' in error_str:
+        message = "Database connection error. Please try again."
 
-    # Generic fallback
-    return f"An error occurred during {operation_name}. Please try again."
+    return message
 
 def handle_integrity_error(e, operation_name, user_id=None, **extra_fields):
     """
