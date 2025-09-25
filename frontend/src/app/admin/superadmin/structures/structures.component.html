@@ -6,12 +6,15 @@
     </div>
 
     <div class="filters">
-        <p-inputText placeholder="Search structures..." [(ngModel)]="searchTerm" (ngModelChange)="onSearch()"
-            styleClass="w-full">
-        </p-inputText>
-        <p-select [(ngModel)]="statusFilter" (ngModelChange)="loadStructures()" [options]="statusOptions"
-            placeholder="All Status" styleClass="w-full">
-        </p-select>
+        <div style="flex: 1;">
+            <input pInputText placeholder="Search structures..." [(ngModel)]="searchTerm" (ngModelChange)="onSearch()"
+                name="searchTerm" class="w-full">
+        </div>
+        <div style="flex: 1;">
+            <p-select [(ngModel)]="statusFilter" (ngModelChange)="loadStructures()" [options]="statusOptions"
+                placeholder="All Status" name="statusFilter" styleClass="w-full">
+            </p-select>
+        </div>
     </div>
 
     <div class="structures-list" *ngIf="!loading">
@@ -37,7 +40,7 @@
                         (onClick)="editStructure(structure)">
                     </p-button>
                     <p-button [label]="structure.is_active ? 'Archive' : 'Restore'"
-                        [icon]="structure.is_active ? 'pi pi-archive' : 'pi pi-refresh'"
+                        [icon]="structure.is_active ? 'pi pi-file-export' : 'pi pi-refresh'"
                         [severity]="structure.is_active ? 'warn' : 'success'" size="small"
                         (onClick)="toggleStructureStatus(structure)">
                     </p-button>
@@ -51,8 +54,6 @@
         <p>Loading structures...</p>
     </div>
 
-    <p-message *ngIf="error" severity="error" [text]="'Error: ' + error" styleClass="w-full">
-    </p-message>
 
     <p-paginator *ngIf="pagination && pagination.pages > 1" [rows]="pagination.per_page"
         [totalRecords]="pagination.total" [first]="(pagination.page - 1) * pagination.per_page"
@@ -63,52 +64,126 @@
 
 <!-- Create/Edit Modal -->
 <p-dialog [(visible)]="showModal" [modal]="true" [closable]="true"
-    [header]="editingStructure ? 'Edit Structure' : 'Create Structure'" [style]="{ width: '50vw' }"
-    (onHide)="closeModal()">
+    [header]="editingStructure ? 'Edit Structure' : 'Create New Structure'"
+    [style]="{ width: '600px', maxWidth: '90vw' }" [draggable]="false" [resizable]="false" (onHide)="closeModal()"
+    styleClass="structure-dialog">
 
-    <form (ngSubmit)="saveStructure()" #structureForm="ngForm">
-        <div class="p-fluid">
-            <div class="p-field">
-                <label for="name">Name *</label>
-                <p-inputText id="name" name="name" [(ngModel)]="structureFormData.name" required
-                    placeholder="Enter structure name">
-                </p-inputText>
+    <ng-template pTemplate="header">
+        <div class="dialog-header">
+            <i class="header-icon" [ngClass]="editingStructure ? 'pi pi-pencil' : 'pi pi-plus'"></i>
+            <span class="header-title">{{ editingStructure ? 'Edit Structure' : 'Create New Structure' }}</span>
+        </div>
+    </ng-template>
+
+    <form [formGroup]="structureForm" (ngSubmit)="saveStructure()" class="structure-form">
+
+        <div class="form-content">
+            <!-- Basic Information Section -->
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="pi pi-info-circle section-icon"></i>
+                    <h4>Basic Information</h4>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-field">
+                        <label for="name" class="field-label">
+                            <i class="pi pi-building"></i>
+                            Structure Name *
+                        </label>
+                        <input pInputText id="name" formControlName="name" placeholder="Enter structure name"
+                            class="form-input">
+                        <small *ngIf="structureForm.get('name')?.invalid && structureForm.get('name')?.touched"
+                            class="error-message">
+                            <i class="pi pi-exclamation-triangle"></i>
+                            Structure name is required
+                        </small>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-field">
+                        <label for="city" class="field-label">
+                            <i class="pi pi-map-marker"></i>
+                            City *
+                        </label>
+                        <input pInputText id="city" formControlName="city" placeholder="Enter city name"
+                            class="form-input">
+                        <small *ngIf="structureForm.get('city')?.invalid && structureForm.get('city')?.touched"
+                            class="error-message">
+                            <i class="pi pi-exclamation-triangle"></i>
+                            City is required
+                        </small>
+                    </div>
+                </div>
             </div>
 
-            <div class="p-field">
-                <label for="city">City *</label>
-                <p-inputText id="city" name="city" [(ngModel)]="structureFormData.city" required
-                    placeholder="Enter city">
-                </p-inputText>
+            <!-- Address Information Section -->
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="pi pi-home section-icon"></i>
+                    <h4>Address Information</h4>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-field">
+                        <label for="street" class="field-label">
+                            <i class="pi pi-map"></i>
+                            Street Address
+                        </label>
+                        <input pInputText id="street" formControlName="street" placeholder="Enter street address"
+                            class="form-input">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-field">
+                        <label for="cin" class="field-label">
+                            <i class="pi pi-id-card"></i>
+                            CIN (Company Identification Number)
+                        </label>
+                        <input pInputText id="cin" formControlName="cin" placeholder="Enter CIN" class="form-input">
+                    </div>
+                </div>
             </div>
 
-            <div class="p-field">
-                <label for="street">Street Address</label>
-                <p-inputText id="street" name="street" [(ngModel)]="structureFormData.street"
-                    placeholder="Enter street address">
-                </p-inputText>
-            </div>
+            <!-- Status Section (only for editing) -->
+            <div class="form-section" *ngIf="editingStructure">
+                <div class="section-header">
+                    <i class="pi pi-cog section-icon"></i>
+                    <h4>Status</h4>
+                </div>
 
-            <div class="p-field">
-                <label for="cin">CIN</label>
-                <p-inputText id="cin" name="cin" [(ngModel)]="structureFormData.cin" placeholder="Enter CIN">
-                </p-inputText>
-            </div>
-
-            <div class="p-field" *ngIf="editingStructure">
-                <p-checkbox [(ngModel)]="structureFormData.is_active" name="is_active" [binary]="true"
-                    inputId="is_active">
-                </p-checkbox>
-                <label for="is_active">Active</label>
+                <div class="form-row">
+                    <div class="form-field checkbox-field">
+                        <div class="checkbox-container">
+                            <p-checkbox formControlName="is_active" [binary]="true" inputId="is_active"
+                                class="status-checkbox">
+                            </p-checkbox>
+                            <label for="is_active" class="checkbox-label">
+                                <i class="pi pi-check-circle"></i>
+                                Structure is active
+                            </label>
+                        </div>
+                        <small class="field-hint">Uncheck to archive this structure</small>
+                    </div>
+                </div>
             </div>
         </div>
-    </form>
 
     <ng-template pTemplate="footer">
-        <p-button label="Cancel" icon="pi pi-times" severity="secondary" (onClick)="closeModal()">
-        </p-button>
-        <p-button [label]="editingStructure ? 'Update' : 'Create'" icon="pi pi-check" severity="primary"
-            (onClick)="saveStructure()" [disabled]="!structureForm.form.valid">
-        </p-button>
+        <div class="dialog-footer">
+            <p-button label="Cancel" icon="pi pi-times" severity="secondary" (onClick)="closeModal()" [outlined]="true"
+                class="cancel-btn">
+            </p-button>
+            <p-button [label]="editingStructure ? 'Update Structure' : 'Create Structure'"
+                [icon]="editingStructure ? 'pi pi-check' : 'pi pi-plus'" severity="primary" type="submit"
+                [disabled]="!structureForm.valid || submitting" [loading]="submitting" class="submit-btn">
+            </p-button>
+        </div>
     </ng-template>
+    </form>
 </p-dialog>
+
+<!-- Toast for notifications -->
+<p-toast></p-toast>

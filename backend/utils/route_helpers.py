@@ -7,7 +7,7 @@ This module provides shared functions to reduce code duplication across route mo
 
 import logging
 
-from flask import jsonify, has_request_context
+from flask import jsonify
 from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended.exceptions import JWTExtendedException
 from app_logging.utils import safe_extra_fields
@@ -23,7 +23,7 @@ STRUCTURE_NOT_FOUND = "Structure not found"
 
 def handle_database_error(e, operation_name, user_id=None, **extra_fields):
     """
-    Handle database errors with consistent logging and response.
+    Handle database errors with consistent logging and user-friendly response.
     
     Args:
         e: The exception that occurred
@@ -38,6 +38,8 @@ def handle_database_error(e, operation_name, user_id=None, **extra_fields):
         jwt_user = get_jwt_identity()
     except JWTExtendedException:  # safe fallback if no request/JWT context
         jwt_user = None
+
+    # Log the technical error details
     logger.error(
         "Error during %s",
         operation_name,
@@ -49,8 +51,50 @@ def handle_database_error(e, operation_name, user_id=None, **extra_fields):
             **extra_fields
         })
     )
-    return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
 
+    # Return user-friendly error message
+    user_message = get_user_friendly_error_message(e, operation_name)
+    return jsonify({"message": user_message}), 500
+
+
+def get_user_friendly_error_message(e, operation_name):
+    """
+    Convert technical errors to user-friendly messages.
+    
+    Args:
+        e: The exception that occurred
+        operation_name: Name of the operation that failed
+        
+    Returns:
+        str: User-friendly error message
+    """
+    error_str = str(e).lower()
+
+    # Initialize message with generic fallback
+    message = f"An error occurred during {operation_name}. Please try again."
+
+    # Database constraint violations
+    if 'unique constraint' in error_str or 'duplicate key' in error_str:
+        if 'structure' in operation_name.lower():
+            message = "A structure with this name and city already exists."
+        elif 'user' in operation_name.lower():
+            message = "A user with this username or email already exists."
+        else:
+            message = "This record already exists."
+    # Foreign key violations
+    elif 'foreign key constraint' in error_str:
+        message = "Cannot perform this action because related data exists."
+    # Not null violations
+    elif 'not null constraint' in error_str:
+        message = "Required information is missing. Please check all required fields."
+    # Sequence/table not found
+    elif 'does not exist' in error_str:
+        message = "Database configuration error. Please contact support."
+    # Connection errors
+    elif 'connection' in error_str or 'timeout' in error_str:
+        message = "Database connection error. Please try again."
+
+    return message
 
 def handle_integrity_error(e, operation_name, user_id=None, **extra_fields):
     """

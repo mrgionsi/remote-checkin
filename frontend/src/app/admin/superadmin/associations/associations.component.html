@@ -7,10 +7,10 @@
 
   <div class="filters">
     <p-select [(ngModel)]="userFilter" (ngModelChange)="loadAssociations()" [options]="userOptions"
-      placeholder="All Users" styleClass="w-full">
+      placeholder="All Users" name="userFilter" styleClass="w-full">
     </p-select>
     <p-select [(ngModel)]="structureFilter" (ngModelChange)="loadAssociations()" [options]="structureOptions"
-      placeholder="All Structures" styleClass="w-full">
+      placeholder="All Structures" name="structureFilter" styleClass="w-full">
     </p-select>
   </div>
 
