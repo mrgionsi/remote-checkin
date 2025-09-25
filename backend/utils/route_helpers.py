@@ -7,7 +7,7 @@ This module provides shared functions to reduce code duplication across route mo
 
 import logging
 
-from flask import jsonify, has_request_context
+from flask import jsonify
 from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended.exceptions import JWTExtendedException
 from app_logging.utils import safe_extra_fields
@@ -38,7 +38,7 @@ def handle_database_error(e, operation_name, user_id=None, **extra_fields):
         jwt_user = get_jwt_identity()
     except JWTExtendedException:  # safe fallback if no request/JWT context
         jwt_user = None
-    
+
     # Log the technical error details
     logger.error(
         "Error during %s",
@@ -51,7 +51,7 @@ def handle_database_error(e, operation_name, user_id=None, **extra_fields):
             **extra_fields
         })
     )
-    
+
     # Return user-friendly error message
     user_message = get_user_friendly_error_message(e, operation_name)
     return jsonify({"message": user_message}), 500
@@ -69,35 +69,34 @@ def get_user_friendly_error_message(e, operation_name):
         str: User-friendly error message
     """
     error_str = str(e).lower()
-    
+
     # Database constraint violations
     if 'unique constraint' in error_str or 'duplicate key' in error_str:
         if 'structure' in operation_name.lower():
             return "A structure with this name and city already exists."
-        elif 'user' in operation_name.lower():
+        if 'user' in operation_name.lower():
             return "A user with this username or email already exists."
         else:
             return "This record already exists."
-    
+
     # Foreign key violations
     if 'foreign key constraint' in error_str:
         return "Cannot perform this action because related data exists."
-    
+
     # Not null violations
     if 'not null constraint' in error_str:
         return "Required information is missing. Please check all required fields."
-    
+
     # Sequence/table not found
     if 'does not exist' in error_str:
         return "Database configuration error. Please contact support."
-    
+
     # Connection errors
     if 'connection' in error_str or 'timeout' in error_str:
         return "Database connection error. Please try again."
-    
+
     # Generic fallback
     return f"An error occurred during {operation_name}. Please try again."
-
 
 def handle_integrity_error(e, operation_name, user_id=None, **extra_fields):
     """
