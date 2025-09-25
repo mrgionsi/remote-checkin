@@ -2,20 +2,24 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SuperadminService, User } from '../../../services/superadmin.service';
+import { ErrorHandlerService } from '../../../services/error-handler.service';
+import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { MessageModule } from 'primeng/message';
-import { PaginatorModule } from 'primeng/paginator';
+import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { PaginatorState } from 'primeng/paginator';
 import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
+import { DialogModule } from 'primeng/dialog';
+import { ToastModule } from 'primeng/toast';
 
 @Component({
     selector: 'app-superadmin-users',
     standalone: true,
-    imports: [CommonModule, FormsModule, ButtonModule, CardModule, TagModule, MessageModule, PaginatorModule, ProgressSpinnerModule, SelectModule, InputTextModule],
+    imports: [CommonModule, FormsModule, ButtonModule, CardModule, TagModule, MessageModule, PaginatorModule, ProgressSpinnerModule, SelectModule, InputTextModule, DialogModule, ToastModule],
+    providers: [MessageService],
     templateUrl: './users.component.html',
     styleUrls: ['./users.component.scss']
 })
@@ -39,6 +43,7 @@ export class SuperadminUsersComponent implements OnInit {
     }
     users: User[] = [];
     loading = true;
+    submitting = false;
     error: string | null = null;
     searchTerm = '';
     roleFilter = '';
@@ -50,7 +55,11 @@ export class SuperadminUsersComponent implements OnInit {
     passwordFormData: any = {};
     roleOptions: any;
 
-    constructor(private superadminService: SuperadminService) { }
+    constructor(
+        private superadminService: SuperadminService,
+        private errorHandler: ErrorHandlerService,
+        private messageService: MessageService
+    ) { }
 
     ngOnInit(): void {
         this.loadUsers();
@@ -74,8 +83,8 @@ export class SuperadminUsersComponent implements OnInit {
                 this.loading = false;
             },
             error: (error) => {
-                this.error = error.message || 'Failed to load users';
                 this.loading = false;
+                this.showErrorMessage(this.errorHandler.getErrorMessageString(error));
             }
         });
     }
@@ -127,13 +136,17 @@ export class SuperadminUsersComponent implements OnInit {
     }
 
     createUser(): void {
+        this.submitting = true;
         this.superadminService.createUser(this.userFormData).subscribe({
             next: () => {
+                this.submitting = false;
                 this.closeModal();
                 this.loadUsers();
+                this.showSuccessMessage('User created successfully!');
             },
             error: (error) => {
-                this.error = error.message || 'Failed to create user';
+                this.submitting = false;
+                this.showErrorMessage(this.errorHandler.getErrorMessageString(error));
             }
         });
     }
@@ -141,13 +154,17 @@ export class SuperadminUsersComponent implements OnInit {
     updateUser(): void {
         if (!this.editingUser) return;
 
+        this.submitting = true;
         this.superadminService.updateUser(this.editingUser.id, this.userFormData).subscribe({
             next: () => {
+                this.submitting = false;
                 this.closeModal();
                 this.loadUsers();
+                this.showSuccessMessage('User updated successfully!');
             },
             error: (error) => {
-                this.error = error.message || 'Failed to update user';
+                this.submitting = false;
+                this.showErrorMessage(this.errorHandler.getErrorMessageString(error));
             }
         });
     }
@@ -167,20 +184,49 @@ export class SuperadminUsersComponent implements OnInit {
     confirmResetPassword(): void {
         if (!this.editingUser) return;
 
+        this.submitting = true;
         this.superadminService.resetUserPassword(this.editingUser.id, this.passwordFormData.password).subscribe({
             next: () => {
+                this.submitting = false;
                 this.closePasswordModal();
-                // Show success message
-                alert('Password reset successfully');
+                this.showSuccessMessage('Password reset successfully!');
             },
             error: (error) => {
-                this.error = error.message || 'Failed to reset password';
+                this.submitting = false;
+                this.showErrorMessage(this.errorHandler.getErrorMessageString(error));
             }
         });
     }
 
     manageAssociations(user: User): void {
         // TODO: Implement association management
-        alert(`Manage associations for user: ${user.username}`);
+        this.showInfoMessage(`Manage associations for user: ${user.username}`);
+    }
+
+    private showSuccessMessage(message: string): void {
+        this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: message,
+            life: 3000
+        });
+    }
+
+    private showErrorMessage(message: string): void {
+        this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: message,
+            life: 5000
+        });
+    }
+
+    private showInfoMessage(message: string): void {
+        this.messageService.add({
+            severity: 'info',
+            summary: 'Info',
+            detail: message,
+            life: 3000
+        });
     }
 }
