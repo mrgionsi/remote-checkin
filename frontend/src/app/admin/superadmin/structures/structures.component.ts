@@ -87,8 +87,6 @@ export class SuperadminStructuresComponent implements OnInit {
 
         this.superadminService.getStructures(params).subscribe({
             next: (response) => {
-
-                console.log(response);
                 this.structures = response.structures;
                 this.pagination = response.pagination;
                 this.loading = false;

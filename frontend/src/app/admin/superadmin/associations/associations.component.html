@@ -7,10 +7,10 @@
 
   <div class="filters">
     <p-select [(ngModel)]="userFilter" (ngModelChange)="loadAssociations()" [options]="userOptions"
-      placeholder="All Users" styleClass="w-full">
+      placeholder="All Users" name="userFilter" ngDefaultControl styleClass="w-full">
     </p-select>
     <p-select [(ngModel)]="structureFilter" (ngModelChange)="loadAssociations()" [options]="structureOptions"
-      placeholder="All Structures" styleClass="w-full">
+      placeholder="All Structures" name="structureFilter" ngDefaultControl styleClass="w-full">
     </p-select>
   </div>
 
@@ -69,14 +69,14 @@
       <div class="p-field">
         <label for="userId">User *</label>
         <p-select id="userId" name="userId" [(ngModel)]="associationFormData.user_id" [options]="userOptions"
-          placeholder="Select a user" required>
+          placeholder="Select a user" ngDefaultControl required>
         </p-select>
       </div>
 
       <div class="p-field">
         <label for="structureId">Structure *</label>
         <p-select id="structureId" name="structureId" [(ngModel)]="associationFormData.structure_id"
-          [options]="structureOptions" placeholder="Select a structure" required>
+          [options]="structureOptions" placeholder="Select a structure" ngDefaultControl required>
         </p-select>
       </div>
     </div>
