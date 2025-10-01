@@ -223,19 +223,20 @@
         </div>
       </div>
     </div>
-
-    <ng-template pTemplate="footer">
-      <div class="dialog-footer">
-        <p-button label="Cancel" icon="pi pi-times" severity="secondary" (onClick)="closeModal()" [outlined]="true"
-          class="cancel-btn">
-        </p-button>
-        <p-button [label]="editingUser ? 'Update User' : 'Create User'"
-          [icon]="editingUser ? 'pi pi-check' : 'pi pi-plus'" severity="primary" type="submit"
-          [disabled]="!userForm.form.valid || submitting" [loading]="submitting" class="submit-btn">
-        </p-button>
-      </div>
-    </ng-template>
   </form>
+
+  <ng-template pTemplate="footer">
+    <div class="dialog-footer">
+      <p-button label="Cancel" icon="pi pi-times" severity="secondary" (onClick)="closeModal()" [outlined]="true"
+        class="cancel-btn">
+      </p-button>
+      <p-button [label]="editingUser ? 'Update User' : 'Create User'"
+        [icon]="editingUser ? 'pi pi-check' : 'pi pi-plus'" severity="primary" type="submit"
+        [disabled]="!userForm.form.valid || submitting" [loading]="submitting" class="submit-btn"
+        (onClick)="saveUser()">
+      </p-button>
+    </div>
+  </ng-template>
 </p-dialog>
 
 <!-- Reset Password Dialog -->
@@ -271,18 +272,19 @@
         </div>
       </div>
     </div>
-
-    <ng-template pTemplate="footer">
-      <div class="dialog-footer">
-        <p-button label="Cancel" icon="pi pi-times" severity="secondary" (onClick)="closePasswordModal()"
-          [outlined]="true" class="cancel-btn">
-        </p-button>
-        <p-button label="Reset Password" icon="pi pi-key" severity="warn" type="submit"
-          [disabled]="!passwordForm.form.valid || submitting" [loading]="submitting" class="submit-btn">
-        </p-button>
-      </div>
-    </ng-template>
   </form>
+
+  <ng-template pTemplate="footer">
+    <div class="dialog-footer">
+      <p-button label="Cancel" icon="pi pi-times" severity="danger" (onClick)="closePasswordModal()" [outlined]="true"
+        class="cancel-btn">
+      </p-button>
+      <p-button label="Reset Password" icon="pi pi-key" severity="info" type="submit"
+        [disabled]="!passwordForm.form.valid || submitting" [loading]="submitting" class="submit-btn"
+        (onClick)="confirmResetPassword()">
+      </p-button>
+    </div>
+  </ng-template>
 </p-dialog>
 
 <!-- Toast for notifications -->

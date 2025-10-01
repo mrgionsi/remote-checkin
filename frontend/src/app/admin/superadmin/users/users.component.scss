@@ -232,14 +232,14 @@
 
 .user-actions {
   display: flex;
+  flex-direction: column;
   gap: 8px;
-  flex-wrap: wrap;
 
   .action-btn {
-    flex: 1;
+    width: 100%;
     font-size: 0.75rem;
     font-weight: 600;
-    padding: 10px 16px;
+    padding: 12px 16px;
     border-radius: 8px;
     transition: all 0.3s ease;
     position: relative;
@@ -253,6 +253,9 @@
     justify-content: center;
     gap: 6px;
     font-family: inherit;
+    min-height: 40px;
+    line-height: 1.2;
+    text-align: center;
 
     &.edit-btn {
       background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
@@ -538,7 +541,9 @@
 
     .action-btn {
       font-size: 0.7rem;
-      padding: 8px 12px;
+      padding: 10px 14px;
+      min-height: 38px;
+      letter-spacing: 0.3px;
     }
   }
 
