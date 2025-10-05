@@ -7,12 +7,14 @@ export const superadminGuard: CanActivateFn = () => {
     const router = inject(Router);
 
     if (!authService.isLoggedIn()) {
-        return router.createUrlTree(['/admin/login']);
+        router.navigate(['/admin/login']);
+        return false;
     }
 
     if (!authService.isSuperAdmin()) {
         // Redirect to admin dashboard if not superadmin
-        return router.createUrlTree(['/admin/dashboard']);
+        router.navigate(['/admin/dashboard']);
+        return false;
     }
 
     return true;
