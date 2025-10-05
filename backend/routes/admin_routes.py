@@ -39,6 +39,7 @@ USER_NOT_FOUND = "User not found"
 INTERNAL_SERVER_ERROR = "Internal server error"
 PORTALE_CREDENTIALS_NOT_CONFIGURED = "Portale Alloggi credentials not configured"
 RESERVATION_NOT_FOUND = "Reservation not found"
+USER_CREATION_OPERATION = "user creation"
 
 
 @admin_bp.route("/admin/login", methods=["POST"])
@@ -167,13 +168,13 @@ def create_admin_user():
 #pylint: disable=W0703,R0911
     except IntegrityError as e:
         db_session.rollback()
-        return handle_integrity_error(e, "user creation", username=data.get('username'), email=data.get('email'))
+        return handle_integrity_error(e, USER_CREATION_OPERATION, username=data.get('username'), email=data.get('email'))
     except SQLAlchemyError:
         db_session.rollback()
-        return handle_database_error(Exception("Database error"), "user creation", username=data.get('username'))
+        return handle_database_error(Exception("Database error"), USER_CREATION_OPERATION, username=data.get('username'))
     except Exception:
         db_session.rollback()
-        return handle_database_error(Exception("Unexpected error"), "user creation", username=data.get('username'))
+        return handle_database_error(Exception("Unexpected error"), USER_CREATION_OPERATION, username=data.get('username'))
     finally:
         db_session.close()
 
