@@ -74,20 +74,23 @@ export class DashboardComponent implements OnInit {
     if (isPlatformBrowser(this.platformId)) {
       const structureIdStr = localStorage.getItem('selected_structure_id');
       const structureId = structureIdStr ? +structureIdStr : null;
+      console.log('Selected structure ID from localStorage:', structureIdStr, 'Parsed as:', structureId);
       if (structureId && !isNaN(structureId) && structureId > 0) {
         this.reservationService.getReservationByStructureId(structureId).subscribe({
           next: (reservations) => {
-            console.log(reservations);
-            this.reservations = reservations;
-            // Handle the response data here
+            console.log('Reservations received:', reservations);
+            this.reservations = reservations || [];
           },
           error: (error) => {
             console.error('Error fetching reservations:', error);
-            // Handle the error here (e.g., show a message to the user)
+            this.reservations = [];
+            // Show error message to user
+            if (error.status === 404) {
+              console.log('No reservations found for structure:', structureId);
+            }
           },
           complete: () => {
-            console.log('Reservation fetch completed.');
-            // Optional: Handle completion logic
+            console.log('Reservation fetch completed for structure:', structureId);
           }
         });
         this.reservationService.getMonthlyReservation(structureId).subscribe({
@@ -124,6 +127,12 @@ export class DashboardComponent implements OnInit {
             console.log('Reservation fetch completed.');
             // Optional: Handle completion logic
           }
+        });
+      } else {
+        console.log('No valid structure ID found. Structure ID:', structureId);
+        console.log('localStorage selected_structure_id:', localStorage.getItem('selected_structure_id'));
+        this.authService.user$.subscribe(user => {
+          console.log('Available structures for user:', user?.structures);
         });
       }
     }
