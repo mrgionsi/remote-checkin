@@ -50,9 +50,19 @@ export class SuperadminUsersComponent implements OnInit {
     pagination: any = null;
     showModal = false;
     showPasswordModal = false;
+    showStructuresModal = false;
     editingUser: User | null = null;
+    selectedUser: User | null = null;
     userFormData: any = {};
     passwordFormData: any = {};
+    userStructures: Array<{ id: number; name: string; city: string }> = [];
+    availableStructures: Array<{ id: number; name: string; city: string }> = [];
+    selectedStructureId: number | null = null;
+
+    // Role change properties
+    showRoleModal: boolean = false;
+    availableRoles: any[] = [];
+    selectedRoleId: number | null = null;
     roleOptions = [
         { label: 'All Roles', value: '' },
         { label: 'Administrator', value: 'administrator' },
@@ -203,8 +213,123 @@ export class SuperadminUsersComponent implements OnInit {
     }
 
     manageAssociations(user: User): void {
-        // TODO: Implement association management
-        this.showInfoMessage(`Manage associations for user: ${user.username}`);
+        this.selectedUser = user;
+        this.userStructures = (user.structures || []).map(s => ({ ...s, city: '' }));
+        this.selectedStructureId = null;
+        this.loadAvailableStructures();
+        this.showStructuresModal = true;
+    }
+
+    closeStructuresModal(): void {
+        this.showStructuresModal = false;
+        this.selectedUser = null;
+        this.userStructures = [];
+        this.availableStructures = [];
+        this.selectedStructureId = null;
+    }
+
+    loadAvailableStructures(): void {
+        this.superadminService.getStructures({ per_page: 1000 }).subscribe({
+            next: (response) => {
+                const allStructures = response.structures || [];
+                const userStructureIds = this.userStructures.map(s => s.id);
+                this.availableStructures = allStructures
+                    .filter((structure: any) => !userStructureIds.includes(structure.id))
+                    .map((structure: any) => ({
+                        id: structure.id,
+                        name: structure.name,
+                        city: structure.city
+                    }));
+            },
+            error: (error) => {
+                this.showErrorMessage(this.errorHandler.getErrorMessageString(error));
+            }
+        });
+    }
+
+    addStructureToUser(): void {
+        if (!this.selectedUser || !this.selectedStructureId) return;
+
+        this.submitting = true;
+        this.superadminService.createAssociation(this.selectedUser.id, this.selectedStructureId).subscribe({
+            next: () => {
+                this.submitting = false;
+                this.closeStructuresModal();
+                this.loadAvailableStructures();
+                this.loadUsers(); // Refresh the user list
+                this.selectedStructureId = null;
+                this.showSuccessMessage('Structure assigned successfully!');
+            },
+            error: (error) => {
+                this.submitting = false;
+                this.showErrorMessage(this.errorHandler.getErrorMessageString(error));
+            }
+        });
+    }
+
+    removeStructureFromUser(structureId: number): void {
+        if (!this.selectedUser) return;
+
+        this.submitting = true;
+        this.superadminService.deleteAssociation(this.selectedUser.id, structureId).subscribe({
+            next: () => {
+                this.submitting = false;
+                this.showSuccessMessage('Structure removed successfully!');
+                this.loadAvailableStructures();
+                this.loadUsers(); // Refresh the user list
+            },
+            error: (error) => {
+                this.submitting = false;
+                this.showErrorMessage(this.errorHandler.getErrorMessageString(error));
+            }
+        });
+    }
+
+    // Role Management Methods
+    openRoleChangeModal(user: User): void {
+        this.selectedUser = user;
+        this.selectedRoleId = user.id_role;
+        this.loadAvailableRoles();
+        this.showRoleModal = true;
+    }
+
+    closeRoleModal(): void {
+        this.showRoleModal = false;
+        this.selectedUser = null;
+        this.selectedRoleId = null;
+        this.availableRoles = [];
+    }
+
+    loadAvailableRoles(): void {
+        this.superadminService.getRoles().subscribe({
+            next: (response) => {
+                // Filter to only show administrator and superadmin roles
+                this.availableRoles = response.roles.filter((role: any) =>
+                    role.name === 'administrator' || role.name === 'superadmin'
+                );
+            },
+            error: (error) => {
+                this.showErrorMessage(this.errorHandler.getErrorMessageString(error));
+            }
+        });
+    }
+
+    confirmRoleChange(): void {
+        if (!this.selectedUser || !this.selectedRoleId) return;
+
+        this.submitting = true;
+        this.superadminService.changeUserRole(this.selectedUser.id, this.selectedRoleId).subscribe({
+            next: () => {
+                this.submitting = false;
+                this.closeRoleModal();
+                this.loadUsers(); // Refresh the user list
+                this.showSuccessMessage('User role changed successfully!');
+            },
+            error: (error) => {
+                this.submitting = false;
+                this.showErrorMessage(this.errorHandler.getErrorMessageString(error));
+            }
+        });
     }
 
     private showSuccessMessage(message: string): void {

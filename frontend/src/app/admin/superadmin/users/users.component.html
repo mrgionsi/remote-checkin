@@ -80,6 +80,10 @@
             <i class="pi pi-sitemap"></i>
             Manage Structures
           </button>
+          <button type="button" (click)="openRoleChangeModal(user)" class="action-btn role-btn">
+            <i class="pi pi-users"></i>
+            Change Role
+          </button>
         </div>
       </ng-template>
     </p-card>
@@ -372,6 +376,76 @@
       </p-button>
       <p-button label="Add Structure" icon="pi pi-plus" severity="info" [disabled]="!selectedStructureId || submitting"
         [loading]="submitting" class="submit-btn" (onClick)="addStructureToUser()">
+      </p-button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Change Role Dialog -->
+<p-dialog [(visible)]="showRoleModal" [modal]="true" [closable]="false" header="Change User Role"
+  [style]="{ width: '500px', maxWidth: '90vw' }" [draggable]="false" [resizable]="false" (onHide)="closeRoleModal()"
+  styleClass="role-dialog">
+
+  <ng-template pTemplate="header">
+    <div class="dialog-header">
+      <div class="header-content">
+        <i class="header-icon pi pi-users"></i>
+        <span class="header-title">Change Role for {{ selectedUser?.name }} {{ selectedUser?.surname }}</span>
+      </div>
+      <button type="button" class="header-close-btn" (click)="closeRoleModal()">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+  </ng-template>
+
+  <div class="role-content">
+    <div class="current-role-section">
+      <div class="section-header">
+        <i class="pi pi-info-circle section-icon"></i>
+        <h4>Current Role</h4>
+      </div>
+      <div class="current-role-info">
+        <p-tag [value]="selectedUser?.role || 'Unknown'"
+          [severity]="selectedUser?.role === 'superadmin' ? 'danger' : 'info'" styleClass="role-tag">
+        </p-tag>
+      </div>
+    </div>
+
+    <div class="new-role-section">
+      <div class="section-header">
+        <i class="pi pi-arrow-right section-icon"></i>
+        <h4>Select New Role</h4>
+      </div>
+
+      <div class="role-form">
+        <div class="form-field">
+          <label for="newRole" class="field-label">
+            <i class="pi pi-users"></i>
+            New Role
+          </label>
+          <p-select id="newRole" name="newRole" [(ngModel)]="selectedRoleId" [options]="availableRoles"
+            placeholder="Select a new role" optionLabel="name" optionValue="id" styleClass="w-full">
+            <ng-template pTemplate="item" let-role>
+              <div class="role-option">
+                <span class="role-name">{{ role.name }}</span>
+                <span class="role-description">{{ role.name === 'superadmin' ? 'Full system access' : 'Structure
+                  management access' }}</span>
+              </div>
+            </ng-template>
+          </p-select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="dialog-footer">
+      <p-button label="Cancel" icon="pi pi-times" severity="secondary" (onClick)="closeRoleModal()" [outlined]="true"
+        class="cancel-btn">
+      </p-button>
+      <p-button label="Change Role" icon="pi pi-check" severity="primary"
+        [disabled]="!selectedRoleId || submitting || selectedRoleId === selectedUser?.id_role" [loading]="submitting"
+        class="submit-btn" (onClick)="confirmRoleChange()">
       </p-button>
     </div>
   </ng-template>

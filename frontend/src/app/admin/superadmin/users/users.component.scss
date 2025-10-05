@@ -324,7 +324,8 @@
 // Modern Dialog Styling
 ::ng-deep .user-dialog,
 ::ng-deep .password-dialog,
-::ng-deep .structures-dialog {
+::ng-deep .structures-dialog,
+::ng-deep .role-dialog {
   .p-dialog {
     border-radius: 12px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
@@ -555,6 +556,124 @@
   }
 }
 
+// Role Modal Specific Styling
+.role-content {
+  padding: 24px;
+
+  .current-role-section,
+  .new-role-section {
+    margin-bottom: 24px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+
+      .section-icon {
+        font-size: 1.2rem;
+        color: #667eea;
+      }
+
+      h4 {
+        margin: 0;
+        color: #495057;
+        font-size: 1.1rem;
+        font-weight: 600;
+      }
+    }
+
+    .current-role-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      .role-tag {
+        font-size: 0.9rem;
+        padding: 8px 16px;
+      }
+    }
+
+    .role-form {
+      .form-field {
+        .field-label {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-weight: 600;
+          color: #495057;
+          margin-bottom: 8px;
+          font-size: 0.9rem;
+
+          i {
+            font-size: 0.85rem;
+            color: #667eea;
+          }
+        }
+      }
+    }
+  }
+}
+
+.role-option {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  .role-name {
+    font-weight: 600;
+    color: #495057;
+    text-transform: capitalize;
+  }
+
+  .role-description {
+    font-size: 0.85rem;
+    color: #6c757d;
+  }
+}
+
+// Role Button Styling
+.role-btn {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  justify-content: center;
+
+  &:hover:not(:disabled) {
+    background: linear-gradient(135deg, #218838 0%, #1aa179 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
 .structure-option {
   display: flex;
   align-items: center;
@@ -753,11 +872,11 @@
 
   .submit-btn {
     min-width: 140px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: transparent !important;
     border: none;
 
     &:hover:not(:disabled) {
-      background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+      background: transparent !important;
       transform: translateY(-1px);
       box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
     }
@@ -807,7 +926,8 @@
 
   ::ng-deep .user-dialog .p-dialog,
   ::ng-deep .password-dialog .p-dialog,
-  ::ng-deep .structures-dialog .p-dialog {
+  ::ng-deep .structures-dialog .p-dialog,
+  ::ng-deep .role-dialog .p-dialog {
     width: 95vw !important;
     margin: 10px;
   }

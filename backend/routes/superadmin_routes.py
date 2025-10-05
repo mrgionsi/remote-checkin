@@ -584,6 +584,73 @@ def update_user(user_id):
             db_session.close()
 
 
+@superadmin_bp.route("/superadmin/users/<int:user_id>/change-role", methods=["PUT"])
+@jwt_required()
+@log_route(include_request_data=True)
+def change_user_role(user_id):
+    """
+    Change a user's role.
+
+    Superadmin-only endpoint. Expects JSON body with new role id.
+
+    Returns:
+        JSON response with success message
+    """
+    error_response, error_code = verify_superadmin_access()
+    if error_response:
+        return error_response, error_code
+
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": JSON_DATA_REQUIRED}), 400
+
+    new_role_id = data.get("id_role")
+    if not new_role_id:
+        return jsonify({"error": "id_role is required"}), 400
+
+    db_session = None
+    try:
+        db_session = SessionLocal()
+
+        # Verify user exists
+        user = db_session.query(User).filter(User.id == user_id).first()
+        if not user:
+            return jsonify({"error": USER_NOT_FOUND}), 404
+
+        # Verify new role exists and is valid
+        new_role = db_session.query(Role).filter(Role.id == new_role_id).first()
+        if not new_role:
+            return jsonify({"error": "Invalid role specified"}), 400
+
+        # Validate role is admin or superadmin
+        if new_role.name not in ['administrator', 'superadmin']:
+            return jsonify({"error": "Role must be administrator or superadmin"}), 400
+
+        # Update user role
+        old_role_name = user.role.name if user.role else None
+        user.id_role = new_role_id
+        db_session.commit()
+
+        return jsonify({
+            "message": f"User role changed successfully from {old_role_name} to {new_role.name}",
+            "user": {
+                "id": user.id,
+                "username": user.username,
+                "name": user.name,
+                "surname": user.surname,
+                "role": new_role.name
+            }
+        }), 200
+
+    except Exception as e:
+        if db_session is not None:
+            db_session.rollback()
+        return handle_database_error(e, "role change", user_id=user_id)
+    finally:
+        if db_session is not None:
+            db_session.close()
+
+
 @superadmin_bp.route("/superadmin/users/<int:user_id>/reset-password", methods=["POST"])
 @jwt_required()
 @log_route(include_request_data=False)
@@ -628,6 +695,43 @@ def reset_user_password(user_id):
         if db_session is not None:
             db_session.rollback()
         return handle_database_error(e, "password reset", user_id=user_id)
+    finally:
+        if db_session is not None:
+            db_session.close()
+
+
+# ============================================================================
+# ROLE MANAGEMENT ENDPOINTS
+# ============================================================================
+
+@superadmin_bp.route("/superadmin/roles", methods=["GET"])
+@jwt_required()
+@log_route(include_request_data=True)
+def get_roles():
+    """
+    Get all available roles.
+
+    Superadmin-only endpoint. Returns a list of all roles in the system.
+
+    Returns:
+        JSON response with roles list
+    """
+    error_response, error_code = verify_superadmin_access()
+    if error_response:
+        return error_response, error_code
+
+    db_session = None
+    try:
+        db_session = SessionLocal()
+
+        # Get all roles
+        roles = db_session.query(Role).all()
+        roles_data = [role.to_dict() for role in roles]
+
+        return jsonify({"roles": roles_data}), 200
+
+    except Exception as e:
+        return handle_database_error(e, "roles retrieval")
     finally:
         if db_session is not None:
             db_session.close()
