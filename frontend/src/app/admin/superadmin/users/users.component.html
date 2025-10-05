@@ -153,7 +153,7 @@
               Password *
             </label>
             <input pInputText id="password" name="password" [(ngModel)]="userFormData.password"
-              placeholder="Enter password" type="password" required class="form-input">
+              placeholder="Enter password" type="password" autocomplete="new-password" required class="form-input">
             <small *ngIf="userForm.form.get('password')?.invalid && userForm.form.get('password')?.touched"
               class="error-message">
               <i class="pi pi-exclamation-triangle"></i>
@@ -276,7 +276,7 @@
               New Password *
             </label>
             <input pInputText id="newPassword" name="newPassword" [(ngModel)]="passwordFormData.password"
-              placeholder="Enter new password" type="password" required class="form-input">
+              placeholder="Enter new password" type="password" autocomplete="new-password" required class="form-input">
             <small
               *ngIf="passwordForm.form.get('newPassword')?.invalid && passwordForm.form.get('newPassword')?.touched"
               class="error-message">

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SuperadminService, User } from '../../../services/superadmin.service';
@@ -77,6 +77,20 @@ export class SuperadminUsersComponent implements OnInit {
 
     ngOnInit(): void {
         this.loadUsers();
+    }
+
+    @HostListener('document:keydown.escape', ['$event'])
+    onEscapeKey(event: KeyboardEvent): void {
+        // Close any open dialog when ESC is pressed
+        if (this.showModal) {
+            this.closeModal();
+        } else if (this.showPasswordModal) {
+            this.closePasswordModal();
+        } else if (this.showStructuresModal) {
+            this.closeStructuresModal();
+        } else if (this.showRoleModal) {
+            this.closeRoleModal();
+        }
     }
 
     loadUsers(): void {
