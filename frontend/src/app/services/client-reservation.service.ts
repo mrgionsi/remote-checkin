@@ -14,7 +14,7 @@ export class ClientReservationService {
   constructor(private http: HttpClient, private authService: AuthService) { }
 
   private checkAuthOrError(): boolean {
-    return this.authService.isLoggedIn();
+    return this.authService.checkAuthAndRedirect();
   }
 
 

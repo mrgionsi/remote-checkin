@@ -7,10 +7,29 @@ import { Router } from '@angular/router';
     providedIn: 'root'
 })
 export class AuthService {
-    private userSubject = new BehaviorSubject<any>(this.getUser());
+    private userSubject = new BehaviorSubject<any>(null);
     user$ = this.userSubject.asObservable();
+    private isInitialized = false;
 
-    constructor(private router: Router) { }
+    constructor(private router: Router) {
+        // Initialize user state from localStorage on service creation
+        this.initializeAuthState();
+    }
+
+    private initializeAuthState(): void {
+        if (typeof window === 'undefined' || !window.localStorage) return;
+        
+        const user = this.getUser();
+        const token = localStorage.getItem('admin_token');
+        
+        if (user && token && this.isTokenValid()) {
+            this.userSubject.next(user);
+        } else {
+            // Clear invalid state
+            this.clearUser();
+        }
+        this.isInitialized = true;
+    }
 
     setUser(user: any) {
         localStorage.setItem('user', JSON.stringify(user));
@@ -53,9 +72,17 @@ export class AuthService {
     isLoggedIn(): boolean {
         if (typeof window === 'undefined' || !window.localStorage) return false;
         const user = this.getUser();
-        if (!user || !this.isTokenValid()) {
+        return !!(user && this.isTokenValid());
+    }
+
+    checkAuthAndRedirect(): boolean {
+        if (!this.isInitialized) {
+            // Wait for initialization
+            return false;
+        }
+        if (!this.isLoggedIn()) {
             this.logout();
-            this.router.navigate(['/admin/login']); //Implemented here the redirect because in auth.guard.ts the login page is showed at every refresh
+            this.router.navigate(['/admin/login']);
             return false;
         }
         return true;

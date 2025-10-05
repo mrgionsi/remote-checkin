@@ -13,7 +13,7 @@ export class ReservationService {
   constructor(private http: HttpClient, private authService: AuthService) { }
 
   private checkAuthOrError(): boolean {
-    return this.authService.isLoggedIn();
+    return this.authService.checkAuthAndRedirect();
   }
 
   createReservation(reservation: any): Observable<any> {
