@@ -100,14 +100,20 @@
 </div>
 
 <!-- Create/Edit Dialog -->
-<p-dialog [(visible)]="showModal" [modal]="true" [closable]="true"
-  [header]="editingUser ? 'Edit User' : 'Create New User'" [style]="{ width: '600px', maxWidth: '90vw' }"
-  [draggable]="false" [resizable]="false" (onHide)="closeModal()" styleClass="user-dialog">
+<p-dialog [(visible)]="showModal" [modal]="true" [closable]="false"
+  [header]="editingUser ? 'Edit User' : 'Create New User'"
+  [style]="{ width: '600px', maxWidth: '90vw', maxHeight: '90vh' }" [draggable]="false" [resizable]="false"
+  (onHide)="closeModal()" styleClass="user-dialog">
 
   <ng-template pTemplate="header">
     <div class="dialog-header">
-      <i class="header-icon" [ngClass]="editingUser ? 'pi pi-user-edit' : 'pi pi-user-plus'"></i>
-      <span class="header-title">{{ editingUser ? 'Edit User' : 'Create New User' }}</span>
+      <div class="header-content">
+        <i class="header-icon" [ngClass]="editingUser ? 'pi pi-user-edit' : 'pi pi-user-plus'"></i>
+        <span class="header-title">{{ editingUser ? 'Edit User' : 'Create New User' }}</span>
+      </div>
+      <button type="button" class="header-close-btn" (click)="closeModal()">
+        <i class="pi pi-times"></i>
+      </button>
     </div>
   </ng-template>
 
@@ -240,14 +246,19 @@
 </p-dialog>
 
 <!-- Reset Password Dialog -->
-<p-dialog [(visible)]="showPasswordModal" [modal]="true" [closable]="true" header="Reset Password"
+<p-dialog [(visible)]="showPasswordModal" [modal]="true" [closable]="false" header="Reset Password"
   [style]="{ width: '400px', maxWidth: '90vw' }" [draggable]="false" [resizable]="false" (onHide)="closePasswordModal()"
   styleClass="password-dialog">
 
   <ng-template pTemplate="header">
     <div class="dialog-header">
-      <i class="header-icon pi pi-key"></i>
-      <span class="header-title">Reset Password</span>
+      <div class="header-content">
+        <i class="header-icon pi pi-key"></i>
+        <span class="header-title">Reset Password</span>
+      </div>
+      <button type="button" class="header-close-btn" (click)="closePasswordModal()">
+        <i class="pi pi-times"></i>
+      </button>
     </div>
   </ng-template>
 
@@ -282,6 +293,85 @@
       <p-button label="Reset Password" icon="pi pi-key" severity="info" type="submit"
         [disabled]="!passwordForm.form.valid || submitting" [loading]="submitting" class="submit-btn"
         (onClick)="confirmResetPassword()">
+      </p-button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Manage Structures Dialog -->
+<p-dialog [(visible)]="showStructuresModal" [modal]="true" [closable]="false" header="Manage User Structures"
+  [style]="{ width: '700px', maxWidth: '90vw', height: '600px' }" [draggable]="false" [resizable]="false"
+  (onHide)="closeStructuresModal()" styleClass="structures-dialog">
+
+  <ng-template pTemplate="header">
+    <div class="dialog-header">
+      <div class="header-content">
+        <i class="header-icon pi pi-sitemap"></i>
+        <span class="header-title">Manage Structures for {{ selectedUser?.name }} {{ selectedUser?.surname }}</span>
+      </div>
+      <button type="button" class="header-close-btn" (click)="closeStructuresModal()">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+  </ng-template>
+
+  <div class="structures-content">
+    <!-- Current Structures Section -->
+    <div class="current-structures-section" *ngIf="userStructures.length > 0">
+      <div class="section-header">
+        <i class="pi pi-sitemap section-icon"></i>
+        <h4>Current Structures</h4>
+      </div>
+
+      <div class="structures-list">
+        <div class="structure-item" *ngFor="let structure of userStructures">
+          <div class="structure-info">
+            <i class="pi pi-building structure-icon"></i>
+            <span class="structure-name">{{ structure.name }}</span>
+            <span class="structure-city">{{ structure.city }}</span>
+          </div>
+          <button type="button" class="remove-btn" (click)="removeStructureFromUser(structure.id)">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Structure Section -->
+    <div class="add-structure-section">
+      <div class="section-header">
+        <i class="pi pi-plus section-icon"></i>
+        <h4>Add Structure</h4>
+      </div>
+
+      <div class="add-structure-form">
+        <div class="form-field">
+          <label for="availableStructures" class="field-label">
+            <i class="pi pi-building"></i>
+            Select Structure
+          </label>
+          <p-select id="availableStructures" name="availableStructures" [(ngModel)]="selectedStructureId"
+            [options]="availableStructures" placeholder="Choose a structure to assign" optionLabel="name"
+            optionValue="id" styleClass="w-full" [panelStyleClass]="'structures-dropdown-panel'">
+            <ng-template pTemplate="item" let-structure>
+              <div class="structure-option">
+                <span class="structure-name">{{ structure.name }}</span>
+                <span class="structure-city">{{ structure.city }}</span>
+              </div>
+            </ng-template>
+          </p-select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="dialog-footer">
+      <p-button label="Cancel" icon="pi pi-times" severity="danger" (onClick)="closeStructuresModal()" [outlined]="true"
+        class="cancel-btn">
+      </p-button>
+      <p-button label="Add Structure" icon="pi pi-plus" severity="info" [disabled]="!selectedStructureId || submitting"
+        [loading]="submitting" class="submit-btn" (onClick)="addStructureToUser()">
       </p-button>
     </div>
   </ng-template>
