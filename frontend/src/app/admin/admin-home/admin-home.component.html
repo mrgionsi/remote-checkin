@@ -1,32 +1,51 @@
-<ng-container *ngIf="isAuthenticated; else loading">
-    <div class="admin-header" *ngIf="!isLoginPage()">
-        <button pButton label="Menu" (click)="toggleSidebar()" class="p-mr-2">☰</button>
-        <p-dropdown [options]="structures" optionLabel="name" optionValue="id" [(ngModel)]="selectedStructureId"
-            (onChange)="onStructureChange($event)" [placeholder]="'select-structure-placeholder' | transloco"
-            styleClass="structure-select" *ngIf="structures.length > 0">
-        </p-dropdown>
-        <div class="user-area">
-            <span>{{ 'hello-label' | transloco }}, {{ userName }}</span>
-            <button pButton icon="pi pi-user" class="user-btn" (click)="toggleUserMenu($event)"></button>
-            <p-menu #userMenu [popup]="true" [model]="userMenuItems"></p-menu>
-        </div>
+<!-- Show loading until component is initialized -->
+<div *ngIf="!isInitialized"
+    style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: #f5f5f5;">
+    <div class="spinner"
+        style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite;">
     </div>
+    <div style="margin-top: 16px; font-size: 1.2em; color: #555;">Loading...</div>
+</div>
 
-    <p-sidebar *ngIf="!isLoginPage()" [(visible)]="visible" [baseZIndex]="10000" [showCloseIcon]="true">
-        <h3>{{ 'admin-panel-title' | transloco }}</h3>
-        <p-menu [model]="menuItems"></p-menu>
-    </p-sidebar>
-
-    <router-outlet></router-outlet>
-</ng-container>
-<ng-template #loading>
-    <div class="" *ngIf="!isLoginPage()">
-        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 60vh;">
-            <div class="spinner"></div>
-            <div style="margin-top: 16px; font-size: 1.2em; color: #555;">{{ 'loading-label' | transloco }}</div>
+<!-- Show content only when initialized -->
+<div *ngIf="isInitialized">
+    <!-- Admin interface for authenticated users -->
+    <div *ngIf="isAuthenticated">
+        <div class="admin-header" *ngIf="!isLoginPage()">
+            <button pButton label="Menu" (click)="toggleSidebar()" class="p-mr-2">☰</button>
+            <p-dropdown [options]="structures" optionLabel="name" optionValue="id" [(ngModel)]="selectedStructureId"
+                (onChange)="onStructureChange($event)" [placeholder]="'select-structure-placeholder' | transloco"
+                styleClass="structure-select" *ngIf="structures.length > 0">
+            </p-dropdown>
+            <div class="user-area">
+                <span>{{ 'hello-label' | transloco }}, {{ userName }}</span>
+                <button pButton icon="pi pi-user" class="user-btn" (click)="toggleUserMenu($event)"></button>
+                <p-menu #userMenu [popup]="true" [model]="userMenuItems"></p-menu>
+            </div>
         </div>
-    </div>
-    <div class="" *ngIf="isLoginPage()">
+
+        <p-sidebar *ngIf="!isLoginPage()" [(visible)]="visible" [baseZIndex]="10000" [showCloseIcon]="true">
+            <h3>{{ 'admin-panel-title' | transloco }}</h3>
+            <p-menu [model]="menuItems"></p-menu>
+        </p-sidebar>
+
         <router-outlet></router-outlet>
     </div>
-</ng-template>
+
+    <!-- Login page for unauthenticated users -->
+    <div *ngIf="!isAuthenticated">
+        <router-outlet></router-outlet>
+    </div>
+</div>
+
+<style>
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>

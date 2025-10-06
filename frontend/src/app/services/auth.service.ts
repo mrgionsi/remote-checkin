@@ -65,7 +65,9 @@ export class AuthService {
 
     isTokenValid(): boolean {
         const token = localStorage.getItem('admin_token');
-        if (!token) return false;
+        if (!token) {
+            return false;
+        }
 
         try {
             // Decodifica il payload del JWT
@@ -81,9 +83,20 @@ export class AuthService {
     }
 
     isLoggedIn(): boolean {
-        if (typeof window === 'undefined' || !window.localStorage) return false;
+        // Check if we're in a browser environment
+        if (typeof window === 'undefined') {
+            return false;
+        }
+
+        // Check if localStorage is available
+        if (!window.localStorage) {
+            return false;
+        }
+
         const user = this.getUser();
-        return !!(user && this.isTokenValid());
+        const tokenValid = this.isTokenValid();
+
+        return !!(user && tokenValid);
     }
 
     checkAuthAndRedirect(): boolean {
