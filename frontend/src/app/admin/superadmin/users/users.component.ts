@@ -87,10 +87,7 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
     ) { }
 
     ngOnInit(): void {
-        // Only load users if not already loading
-        if (!this.loading) {
-            this.loadUsers();
-        }
+        this.loadUsers();
     }
 
     ngOnDestroy(): void {
@@ -122,12 +119,7 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
     }
 
     loadUsers(): void {
-        // Prevent duplicate API calls
-        if (this.loading) {
-            console.log('SuperadminUsersComponent: Already loading users, skipping...');
-            return;
-        }
-        
+        console.log('SuperadminUsersComponent: loadUsers called, loading =', this.loading);
         this.loading = true;
         this.error = null;
 
@@ -138,13 +130,18 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
             role: this.roleFilter
         };
 
+        console.log('SuperadminUsersComponent: API params:', params);
+
         const subscription = this.superadminService.getUsers(params).subscribe({
             next: (response) => {
+                console.log('SuperadminUsersComponent: API response received:', response);
                 this.users = response.users || [];
                 this.pagination = response.pagination;
                 this.loading = false;
+                console.log('SuperadminUsersComponent: Users loaded:', this.users.length, 'users, loading =', this.loading);
             },
             error: (error) => {
+                console.error('SuperadminUsersComponent: API error:', error);
                 this.loading = false;
                 this.handleError(error, 'Loading users');
             }
