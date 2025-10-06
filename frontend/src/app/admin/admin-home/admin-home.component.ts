@@ -9,7 +9,7 @@ import { Router, RouterOutlet } from '@angular/router';
 import { SidebarModule } from 'primeng/sidebar';
 import { ButtonModule } from 'primeng/button';
 import { AuthService } from '../../services/auth.service';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { Menu } from 'primeng/menu';
 import { Subscription } from 'rxjs';
@@ -17,7 +17,7 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-admin-home',
-  imports: [MenuModule, BadgeModule, RippleModule, AvatarModule, CommonModule, DropdownModule, FormsModule,
+  imports: [MenuModule, BadgeModule, RippleModule, AvatarModule, CommonModule, SelectModule, FormsModule,
     RouterOutlet, SidebarModule, ButtonModule, TranslocoPipe],
   templateUrl: './admin-home.component.html',
   styleUrl: './admin-home.component.scss'

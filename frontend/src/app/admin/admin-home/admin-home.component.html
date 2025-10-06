@@ -13,10 +13,10 @@
     <div *ngIf="isAuthenticated">
         <div class="admin-header" *ngIf="!isLoginPage()">
             <button pButton label="Menu" (click)="toggleSidebar()" class="p-mr-2">☰</button>
-            <p-dropdown [options]="structures" optionLabel="name" optionValue="id" [(ngModel)]="selectedStructureId"
+            <p-select [options]="structures" optionLabel="name" optionValue="id" [(ngModel)]="selectedStructureId"
                 (onChange)="onStructureChange($event)" [placeholder]="'select-structure-placeholder' | transloco"
                 styleClass="structure-select" *ngIf="structures.length > 0">
-            </p-dropdown>
+            </p-select>
             <div class="user-area">
                 <span>{{ 'hello-label' | transloco }}, {{ userName }}</span>
                 <button pButton icon="pi pi-user" class="user-btn" (click)="toggleUserMenu($event)"></button>
