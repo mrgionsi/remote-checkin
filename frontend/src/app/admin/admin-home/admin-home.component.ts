@@ -30,6 +30,7 @@ export class AdminHomeComponent implements OnInit, OnDestroy {
   userName: string = '';
   structures: { id: number, name: string }[] = [];
   selectedStructureId: number | null = null;
+  isAuthenticated: boolean = false;
 
   @ViewChild('userMenu') userMenu!: Menu;
   private userSubscription!: Subscription;
@@ -53,9 +54,11 @@ export class AdminHomeComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-
+    // Set initial authentication state
+    this.isAuthenticated = this.authService.isLoggedIn();
 
     this.userSubscription = this.authService.user$.subscribe(user => {
+      this.isAuthenticated = !!user;
       if (user) {
         this.userName = user?.username || '';
         this.structures = user?.structures || [];

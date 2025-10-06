@@ -1,4 +1,4 @@
-<ng-container *ngIf="(authService.user$ | async) as user; else loading">
+<ng-container *ngIf="isAuthenticated; else loading">
     <div class="admin-header" *ngIf="!isLoginPage()">
         <button pButton label="Menu" (click)="toggleSidebar()" class="p-mr-2">☰</button>
         <p-dropdown [options]="structures" optionLabel="name" optionValue="id" [(ngModel)]="selectedStructureId"
