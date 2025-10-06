@@ -25,6 +25,8 @@ import { ToastModule } from 'primeng/toast';
     styleUrls: ['./users.component.scss']
 })
 export class SuperadminUsersComponent implements OnInit, OnDestroy {
+    private componentId = Math.random().toString(36).substr(2, 9); // Unique component ID
+
     onPageChange(event: PaginatorState): void {
         // Guard against undefined event or missing properties
         if (!event?.first || !event?.rows) {
@@ -63,7 +65,7 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
     // Subscription management
     private subscriptions: Subscription[] = [];
     private isLoadingUsers = false; // Prevent duplicate API calls
-    
+
     // Loading states for individual operations
     loadingStructures = false;
     loadingRoles = false;
@@ -88,6 +90,7 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
     ) { }
 
     ngOnInit(): void {
+        console.log('SuperadminUsersComponent: ngOnInit called for component ID:', this.componentId);
         this.loadUsers();
     }
 
@@ -120,13 +123,14 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
     }
 
     loadUsers(): void {
+        console.log('SuperadminUsersComponent: loadUsers called for component ID:', this.componentId, 'loading =', this.loading, 'isLoadingUsers =', this.isLoadingUsers);
+        
         // Prevent duplicate API calls
         if (this.isLoadingUsers) {
-            console.log('SuperadminUsersComponent: Already loading users, skipping...');
+            console.log('SuperadminUsersComponent: Already loading users, skipping for component ID:', this.componentId);
             return;
         }
         
-        console.log('SuperadminUsersComponent: loadUsers called, loading =', this.loading);
         this.isLoadingUsers = true;
         this.loading = true;
         this.error = null;
@@ -142,15 +146,15 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
 
         const subscription = this.superadminService.getUsers(params).subscribe({
             next: (response) => {
-                console.log('SuperadminUsersComponent: API response received:', response);
+                console.log('SuperadminUsersComponent: API response received for component ID:', this.componentId, 'response:', response);
                 this.users = response.users || [];
                 this.pagination = response.pagination;
                 this.loading = false;
                 this.isLoadingUsers = false;
-                console.log('SuperadminUsersComponent: Users loaded:', this.users.length, 'users, loading =', this.loading);
+                console.log('SuperadminUsersComponent: Users loaded for component ID:', this.componentId, 'users:', this.users.length, 'loading =', this.loading);
             },
             error: (error) => {
-                console.error('SuperadminUsersComponent: API error:', error);
+                console.error('SuperadminUsersComponent: API error for component ID:', this.componentId, 'error:', error);
                 this.loading = false;
                 this.isLoadingUsers = false;
                 this.handleError(error, 'Loading users');
