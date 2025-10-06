@@ -13,7 +13,7 @@ import { provideTransloco } from '@jsverse/transloco';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideAnimationsAsync(), 
+    provideAnimationsAsync(),
     provideHttpClient(withInterceptorsFromDi(), withFetch()),
     providePrimeNG({
       theme: {
@@ -27,10 +27,10 @@ export const appConfig: ApplicationConfig = {
         }
       }
     }),
-    provideZoneChangeDetection({ eventCoalescing: true }), 
-    provideRouter(routes), 
-    provideClientHydration(), 
-    provideHttpClient(), 
+    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideRouter(routes),
+    provideClientHydration(),
+    provideHttpClient(),
     provideTransloco({
       config: {
         availableLangs: ['en', 'es', 'it', 'fr', 'de'],
@@ -41,13 +41,7 @@ export const appConfig: ApplicationConfig = {
         prodMode: !isDevMode(),
       },
       loader: TranslocoHttpLoader
-    }),
-    {
-      provide: APP_INITIALIZER,
-      useFactory: authInitializer,
-      deps: [AuthInitializerService],
-      multi: true
-    }
+    })
   ]
 };
 

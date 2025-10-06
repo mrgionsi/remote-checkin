@@ -18,10 +18,10 @@ export class AuthService {
 
     private getInitialUser(): any {
         if (typeof window === 'undefined' || !window.localStorage) return null;
-        
+
         const user = this.getUser();
         const token = localStorage.getItem('admin_token');
-        
+
         if (user && token && this.isTokenValid()) {
             return user;
         }
@@ -30,10 +30,10 @@ export class AuthService {
 
     private initializeAuthState(): void {
         if (typeof window === 'undefined' || !window.localStorage) return;
-        
+
         const user = this.getUser();
         const token = localStorage.getItem('admin_token');
-        
+
         if (user && token && this.isTokenValid()) {
             this.userSubject.next(user);
         } else {
