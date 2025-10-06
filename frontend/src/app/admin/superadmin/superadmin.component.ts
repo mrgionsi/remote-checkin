@@ -15,6 +15,7 @@ export class SuperadminComponent implements OnInit, OnDestroy {
     isAuthenticated: boolean = false;
     isInitialized: boolean = false;
     private userSubscription!: Subscription;
+    private isInitializing: boolean = false; // Prevent duplicate initialization
 
     constructor(
         private router: Router,
@@ -22,13 +23,15 @@ export class SuperadminComponent implements OnInit, OnDestroy {
     ) { }
 
     ngOnInit(): void {
-        console.log('SuperadminComponent: ngOnInit called, isInitialized =', this.isInitialized);
+        console.log('SuperadminComponent: ngOnInit called, isInitialized =', this.isInitialized, 'isInitializing =', this.isInitializing);
         
         // Prevent duplicate initialization
-        if (this.isInitialized) {
-            console.log('SuperadminComponent: Already initialized, skipping...');
+        if (this.isInitialized || this.isInitializing) {
+            console.log('SuperadminComponent: Already initialized or initializing, skipping...');
             return;
         }
+
+        this.isInitializing = true;
 
         // Wait for localStorage to be available
         if (typeof window === 'undefined' || !window.localStorage) {
@@ -56,6 +59,7 @@ export class SuperadminComponent implements OnInit, OnDestroy {
             
             // Mark as initialized after auth state is determined
             this.isInitialized = true;
+            this.isInitializing = false;
 
             // Check if user is superadmin
             if (user && !this.authService.isSuperAdmin()) {

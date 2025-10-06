@@ -62,7 +62,8 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
 
     // Subscription management
     private subscriptions: Subscription[] = [];
-
+    private isLoadingUsers = false; // Prevent duplicate API calls
+    
     // Loading states for individual operations
     loadingStructures = false;
     loadingRoles = false;
@@ -119,7 +120,14 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
     }
 
     loadUsers(): void {
+        // Prevent duplicate API calls
+        if (this.isLoadingUsers) {
+            console.log('SuperadminUsersComponent: Already loading users, skipping...');
+            return;
+        }
+        
         console.log('SuperadminUsersComponent: loadUsers called, loading =', this.loading);
+        this.isLoadingUsers = true;
         this.loading = true;
         this.error = null;
 
@@ -138,11 +146,13 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
                 this.users = response.users || [];
                 this.pagination = response.pagination;
                 this.loading = false;
+                this.isLoadingUsers = false;
                 console.log('SuperadminUsersComponent: Users loaded:', this.users.length, 'users, loading =', this.loading);
             },
             error: (error) => {
                 console.error('SuperadminUsersComponent: API error:', error);
                 this.loading = false;
+                this.isLoadingUsers = false;
                 this.handleError(error, 'Loading users');
             }
         });
