@@ -14,7 +14,7 @@
     </p-select>
   </div>
 
-  <ul class="users-list" *ngIf="!loading" aria-labelledby="users-title">
+  <ul class="users-list" *ngIf="!loading && users.length > 0" aria-labelledby="users-title">
     <li *ngFor="let user of users; trackBy: trackByUserId">
       <p-card styleClass="user-card">
         <ng-template pTemplate="header">
@@ -96,6 +96,16 @@
       </p-card>
     </li>
   </ul>
+
+  <div class="no-users" *ngIf="!loading && users.length === 0">
+    <div class="empty-state">
+      <i class="pi pi-users empty-icon"></i>
+      <h3>No users found</h3>
+      <p>No users match your current search criteria.</p>
+      <button pButton label="Create First User" icon="pi pi-user-plus" (onClick)="openCreateModal()" severity="primary">
+      </button>
+    </div>
+  </div>
 
   <div class="loading" *ngIf="loading">
     <p-progressSpinner></p-progressSpinner>

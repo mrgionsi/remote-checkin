@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, HostListener, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -22,8 +22,7 @@ import { ToastModule } from 'primeng/toast';
     imports: [CommonModule, FormsModule, ButtonModule, CardModule, TagModule, MessageModule, PaginatorModule, ProgressSpinnerModule, SelectModule, InputTextModule, DialogModule, ToastModule],
     providers: [MessageService],
     templateUrl: './users.component.html',
-    styleUrls: ['./users.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    styleUrls: ['./users.component.scss']
 })
 export class SuperadminUsersComponent implements OnInit, OnDestroy {
     onPageChange(event: PaginatorState): void {
@@ -120,6 +119,7 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
     }
 
     loadUsers(): void {
+        console.log('SuperadminUsersComponent: Starting to load users...');
         this.loading = true;
         this.error = null;
 
@@ -130,18 +130,23 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
             role: this.roleFilter
         };
 
+        console.log('SuperadminUsersComponent: API params:', params);
+
         const subscription = this.superadminService.getUsers(params).subscribe({
             next: (response) => {
-                this.users = response.users;
+                console.log('SuperadminUsersComponent: API response received:', response);
+                this.users = response.users || [];
                 this.pagination = response.pagination;
                 this.loading = false;
+                console.log('SuperadminUsersComponent: Users loaded:', this.users.length, 'users');
             },
             error: (error) => {
+                console.error('SuperadminUsersComponent: API error:', error);
                 this.loading = false;
                 this.handleError(error, 'Loading users');
             }
         });
-
+        
         this.subscriptions.push(subscription);
     }
 
