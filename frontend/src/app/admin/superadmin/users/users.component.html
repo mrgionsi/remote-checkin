@@ -17,82 +17,83 @@
   <ul class="users-list" *ngIf="!loading" aria-labelledby="users-title">
     <li *ngFor="let user of users; trackBy: trackByUserId">
       <p-card styleClass="user-card">
-      <ng-template pTemplate="header">
-        <div class="user-header">
-          <div class="user-avatar">
-            <i class="pi pi-user"></i>
-          </div>
-          <div class="user-title">
-            <h3>{{ user.name }} {{ user.surname }}</h3>
-            <span class="user-username">{{ user.username }}</span>
-          </div>
-          <p-tag [value]="user.role" [severity]="user.role === 'superadmin' ? 'danger' : 'info'" styleClass="role-tag">
-          </p-tag>
-        </div>
-      </ng-template>
-
-      <div class="user-info">
-        <div class="info-section">
-          <div class="info-item" *ngIf="user.email">
-            <i class="pi pi-envelope info-icon"></i>
-            <span class="info-label">Email:</span>
-            <span class="info-value">{{ user.email }}</span>
-          </div>
-          <div class="info-item" *ngIf="user.telephone">
-            <i class="pi pi-phone info-icon"></i>
-            <span class="info-label">Phone:</span>
-            <span class="info-value">{{ user.telephone }}</span>
-          </div>
-          <div class="info-item" *ngIf="!user.email && !user.telephone">
-            <i class="pi pi-info-circle info-icon"></i>
-            <span class="info-value no-contact">No contact information provided</span>
-          </div>
-        </div>
-
-        <div class="structures-section" *ngIf="user.structures && user.structures.length > 0">
-          <div class="section-header">
-            <i class="pi pi-sitemap section-icon"></i>
-            <span class="section-title">Assigned Structures</span>
-          </div>
-          <div class="structures-tags">
-            <p-tag *ngFor="let structure of user.structures" [value]="structure.name" severity="secondary"
-              styleClass="structure-tag">
+        <ng-template pTemplate="header">
+          <div class="user-header">
+            <div class="user-avatar">
+              <i class="pi pi-user"></i>
+            </div>
+            <div class="user-title">
+              <h3>{{ user.name }} {{ user.surname }}</h3>
+              <span class="user-username">{{ user.username }}</span>
+            </div>
+            <p-tag [value]="user.role" [severity]="user.role === 'superadmin' ? 'danger' : 'info'"
+              styleClass="role-tag">
             </p-tag>
           </div>
-        </div>
-        <div class="no-structures" *ngIf="!user.structures || user.structures.length === 0">
-          <div class="empty-state">
-            <i class="pi pi-sitemap empty-icon"></i>
-            <span class="empty-text">No structures assigned</span>
+        </ng-template>
+
+        <div class="user-info">
+          <div class="info-section">
+            <div class="info-item" *ngIf="user.email">
+              <i class="pi pi-envelope info-icon"></i>
+              <span class="info-label">Email:</span>
+              <span class="info-value">{{ user.email }}</span>
+            </div>
+            <div class="info-item" *ngIf="user.telephone">
+              <i class="pi pi-phone info-icon"></i>
+              <span class="info-label">Phone:</span>
+              <span class="info-value">{{ user.telephone }}</span>
+            </div>
+            <div class="info-item" *ngIf="!user.email && !user.telephone">
+              <i class="pi pi-info-circle info-icon"></i>
+              <span class="info-value no-contact">No contact information provided</span>
+            </div>
+          </div>
+
+          <div class="structures-section" *ngIf="user.structures && user.structures.length > 0">
+            <div class="section-header">
+              <i class="pi pi-sitemap section-icon"></i>
+              <span class="section-title">Assigned Structures</span>
+            </div>
+            <div class="structures-tags">
+              <p-tag *ngFor="let structure of user.structures" [value]="structure.name" severity="secondary"
+                styleClass="structure-tag">
+              </p-tag>
+            </div>
+          </div>
+          <div class="no-structures" *ngIf="!user.structures || user.structures.length === 0">
+            <div class="empty-state">
+              <i class="pi pi-sitemap empty-icon"></i>
+              <span class="empty-text">No structures assigned</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      <ng-template pTemplate="footer">
-        <div class="user-actions">
-          <button type="button" (click)="editUser(user)" class="action-btn edit-btn" 
-            [attr.aria-label]="'Edit user ' + user.name + ' ' + user.surname">
-            <i class="pi pi-pencil" aria-hidden="true"></i>
-            Edit
-          </button>
-          <button type="button" (click)="resetPassword(user)" class="action-btn password-btn"
-            [attr.aria-label]="'Reset password for user ' + user.name + ' ' + user.surname">
-            <i class="pi pi-key" aria-hidden="true"></i>
-            Reset Password
-          </button>
-          <button type="button" (click)="manageAssociations(user)" class="action-btn structures-btn"
-            [attr.aria-label]="'Manage structures for user ' + user.name + ' ' + user.surname">
-            <i class="pi pi-sitemap" aria-hidden="true"></i>
-            Manage Structures
-          </button>
-          <button type="button" (click)="openRoleChangeModal(user)" class="action-btn role-btn"
-            [attr.aria-label]="'Change role for user ' + user.name + ' ' + user.surname">
-            <i class="pi pi-users" aria-hidden="true"></i>
-            Change Role
-          </button>
-        </div>
-      </ng-template>
-    </p-card>
+        <ng-template pTemplate="footer">
+          <div class="user-actions">
+            <button type="button" (click)="editUser(user)" class="action-btn edit-btn"
+              [attr.aria-label]="'Edit user ' + user.name + ' ' + user.surname">
+              <i class="pi pi-pencil" aria-hidden="true"></i>
+              Edit
+            </button>
+            <button type="button" (click)="resetPassword(user)" class="action-btn password-btn"
+              [attr.aria-label]="'Reset password for user ' + user.name + ' ' + user.surname">
+              <i class="pi pi-key" aria-hidden="true"></i>
+              Reset Password
+            </button>
+            <button type="button" (click)="manageAssociations(user)" class="action-btn structures-btn"
+              [attr.aria-label]="'Manage structures for user ' + user.name + ' ' + user.surname">
+              <i class="pi pi-sitemap" aria-hidden="true"></i>
+              Manage Structures
+            </button>
+            <button type="button" (click)="openRoleChangeModal(user)" class="action-btn role-btn"
+              [attr.aria-label]="'Change role for user ' + user.name + ' ' + user.surname">
+              <i class="pi pi-users" aria-hidden="true"></i>
+              Change Role
+            </button>
+          </div>
+        </ng-template>
+      </p-card>
     </li>
   </ul>
 
@@ -114,8 +115,8 @@
 <p-dialog [(visible)]="showModal" [modal]="true" [closable]="false"
   [header]="editingUser ? 'Edit User' : 'Create New User'"
   [style]="{ width: '600px', maxWidth: '90vw', maxHeight: '90vh' }" [draggable]="false" [resizable]="false"
-  (onHide)="closeModal()" styleClass="user-dialog" 
-  [attr.aria-labelledby]="'user-dialog-title'" [attr.aria-describedby]="'user-dialog-content'">
+  (onHide)="closeModal()" styleClass="user-dialog" [attr.aria-labelledby]="'user-dialog-title'"
+  [attr.aria-describedby]="'user-dialog-content'">
 
   <ng-template pTemplate="header">
     <div class="dialog-header">
@@ -364,7 +365,8 @@
           </label>
           <p-select id="availableStructures" name="availableStructures" [(ngModel)]="selectedStructureId"
             [options]="availableStructures" placeholder="Choose a structure to assign" optionLabel="name"
-            optionValue="id" styleClass="w-full" [panelStyleClass]="'structures-dropdown-panel'" [loading]="loadingStructures">
+            optionValue="id" styleClass="w-full" [panelStyleClass]="'structures-dropdown-panel'"
+            [loading]="loadingStructures">
             <ng-template pTemplate="item" let-structure>
               <div class="structure-option">
                 <span class="structure-name">{{ structure.name }}</span>
@@ -382,8 +384,9 @@
       <p-button label="Cancel" icon="pi pi-times" severity="danger" (onClick)="closeStructuresModal()" [outlined]="true"
         class="cancel-btn">
       </p-button>
-      <p-button label="Add Structure" icon="pi pi-plus" severity="info" [disabled]="!selectedStructureId || submittingStructure"
-        [loading]="submittingStructure" class="submit-btn" (onClick)="addStructureToUser()">
+      <p-button label="Add Structure" icon="pi pi-plus" severity="info"
+        [disabled]="!selectedStructureId || submittingStructure" [loading]="submittingStructure" class="submit-btn"
+        (onClick)="addStructureToUser()">
       </p-button>
     </div>
   </ng-template>
@@ -432,7 +435,8 @@
             New Role
           </label>
           <p-select id="newRole" name="newRole" [(ngModel)]="selectedRoleId" [options]="availableRoles"
-            placeholder="Select a new role" optionLabel="name" optionValue="id" styleClass="w-full" [loading]="loadingRoles">
+            placeholder="Select a new role" optionLabel="name" optionValue="id" styleClass="w-full"
+            [loading]="loadingRoles">
             <ng-template pTemplate="item" let-role>
               <div class="role-option">
                 <span class="role-name">{{ role.name }}</span>
@@ -452,8 +456,8 @@
         class="cancel-btn">
       </p-button>
       <p-button label="Change Role" icon="pi pi-check" severity="primary"
-        [disabled]="!selectedRoleId || submittingRole || selectedRoleId === selectedUser?.id_role" [loading]="submittingRole"
-        class="submit-btn" (onClick)="confirmRoleChange()">
+        [disabled]="!selectedRoleId || submittingRole || selectedRoleId === selectedUser?.id_role"
+        [loading]="submittingRole" class="submit-btn" (onClick)="confirmRoleChange()">
       </p-button>
     </div>
   </ng-template>

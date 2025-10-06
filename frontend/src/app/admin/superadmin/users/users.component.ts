@@ -60,10 +60,10 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
     userStructures: Array<{ id: number; name: string; city: string }> = [];
     availableStructures: Array<{ id: number; name: string; city: string }> = [];
     selectedStructureId: number | null = null;
-    
+
     // Subscription management
     private subscriptions: Subscription[] = [];
-    
+
     // Loading states for individual operations
     loadingStructures = false;
     loadingRoles = false;
@@ -141,7 +141,7 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
                 this.handleError(error, 'Loading users');
             }
         });
-        
+
         this.subscriptions.push(subscription);
     }
 
@@ -254,7 +254,7 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
                 this.handleError(error, 'Creating user');
             }
         });
-        
+
         this.subscriptions.push(subscription);
     }
 
@@ -274,7 +274,7 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
                 this.handleError(error, 'Updating user');
             }
         });
-        
+
         this.subscriptions.push(subscription);
     }
 
@@ -309,7 +309,7 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
                 this.handleError(error, 'Resetting password');
             }
         });
-        
+
         this.subscriptions.push(subscription);
     }
 
@@ -363,7 +363,7 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
                 this.handleError(error, 'Loading structures');
             }
         });
-        
+
         this.subscriptions.push(subscription);
     }
 
@@ -385,7 +385,7 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
                 this.handleError(error, 'Adding structure');
             }
         });
-        
+
         this.subscriptions.push(subscription);
     }
 
@@ -405,7 +405,7 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
                 this.handleError(error, 'Removing structure');
             }
         });
-        
+
         this.subscriptions.push(subscription);
     }
 
@@ -439,7 +439,7 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
                 this.handleError(error, 'Loading roles');
             }
         });
-        
+
         this.subscriptions.push(subscription);
     }
 
@@ -459,7 +459,7 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
                 this.handleError(error, 'Changing role');
             }
         });
-        
+
         this.subscriptions.push(subscription);
     }
 
@@ -505,9 +505,9 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
 
     private handleError(error: any, operation: string): void {
         console.error(`${operation} failed:`, error);
-        
+
         let errorMessage = 'An unexpected error occurred. Please try again.';
-        
+
         if (error?.error?.message) {
             errorMessage = error.error.message;
         } else if (error?.message) {
@@ -515,7 +515,7 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
         } else if (typeof error === 'string') {
             errorMessage = error;
         }
-        
+
         // Handle specific HTTP status codes
         if (error?.status) {
             switch (error.status) {
@@ -545,7 +545,7 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
                     break;
             }
         }
-        
+
         this.showErrorMessage(`${operation}: ${errorMessage}`);
     }
 }
