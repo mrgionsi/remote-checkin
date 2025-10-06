@@ -37,6 +37,14 @@
   display: grid;
   gap: 16px;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  li {
+    margin: 0;
+    padding: 0;
+  }
 }
 
 // Modern User Card Styling

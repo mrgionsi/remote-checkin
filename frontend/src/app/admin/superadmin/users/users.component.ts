@@ -1,4 +1,5 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, ChangeDetectionStrategy } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SuperadminService, User } from '../../../services/superadmin.service';
@@ -21,9 +22,10 @@ import { ToastModule } from 'primeng/toast';
     imports: [CommonModule, FormsModule, ButtonModule, CardModule, TagModule, MessageModule, PaginatorModule, ProgressSpinnerModule, SelectModule, InputTextModule, DialogModule, ToastModule],
     providers: [MessageService],
     templateUrl: './users.component.html',
-    styleUrls: ['./users.component.scss']
+    styleUrls: ['./users.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SuperadminUsersComponent implements OnInit {
+export class SuperadminUsersComponent implements OnInit, OnDestroy {
     onPageChange(event: PaginatorState): void {
         // Guard against undefined event or missing properties
         if (!event?.first || !event?.rows) {
@@ -58,6 +60,16 @@ export class SuperadminUsersComponent implements OnInit {
     userStructures: Array<{ id: number; name: string; city: string }> = [];
     availableStructures: Array<{ id: number; name: string; city: string }> = [];
     selectedStructureId: number | null = null;
+    
+    // Subscription management
+    private subscriptions: Subscription[] = [];
+    
+    // Loading states for individual operations
+    loadingStructures = false;
+    loadingRoles = false;
+    submittingPassword = false;
+    submittingStructure = false;
+    submittingRole = false;
 
     // Role change properties
     showRoleModal: boolean = false;
@@ -77,6 +89,20 @@ export class SuperadminUsersComponent implements OnInit {
 
     ngOnInit(): void {
         this.loadUsers();
+    }
+
+    ngOnDestroy(): void {
+        // Clean up all subscriptions to prevent memory leaks
+        this.subscriptions.forEach(sub => {
+            if (sub && !sub.closed) {
+                sub.unsubscribe();
+            }
+        });
+        this.subscriptions = [];
+    }
+
+    trackByUserId(index: number, user: User): number {
+        return user.id;
     }
 
     @HostListener('document:keydown.escape', ['$event'])
@@ -104,7 +130,7 @@ export class SuperadminUsersComponent implements OnInit {
             role: this.roleFilter
         };
 
-        this.superadminService.getUsers(params).subscribe({
+        const subscription = this.superadminService.getUsers(params).subscribe({
             next: (response) => {
                 this.users = response.users;
                 this.pagination = response.pagination;
@@ -112,9 +138,11 @@ export class SuperadminUsersComponent implements OnInit {
             },
             error: (error) => {
                 this.loading = false;
-                this.showErrorMessage(this.errorHandler.getErrorMessageString(error));
+                this.handleError(error, 'Loading users');
             }
         });
+        
+        this.subscriptions.push(subscription);
     }
 
     onSearch(): void {
@@ -156,16 +184,65 @@ export class SuperadminUsersComponent implements OnInit {
     }
 
     saveUser(): void {
-        if (this.editingUser) {
-            this.updateUser();
-        } else {
-            this.createUser();
+        if (this.validateUserForm()) {
+            if (this.editingUser) {
+                this.updateUser();
+            } else {
+                this.createUser();
+            }
         }
+    }
+
+    private validateUserForm(): boolean {
+        if (!this.userFormData.username?.trim()) {
+            this.showErrorMessage('Username is required');
+            return false;
+        }
+
+        if (!this.editingUser && !this.userFormData.password?.trim()) {
+            this.showErrorMessage('Password is required for new users');
+            return false;
+        }
+
+        if (!this.userFormData.name?.trim()) {
+            this.showErrorMessage('First name is required');
+            return false;
+        }
+
+        if (!this.userFormData.surname?.trim()) {
+            this.showErrorMessage('Last name is required');
+            return false;
+        }
+
+        // Email validation if provided
+        if (this.userFormData.email && !this.isValidEmail(this.userFormData.email)) {
+            this.showErrorMessage('Please enter a valid email address');
+            return false;
+        }
+
+        // Password strength validation for new users
+        if (!this.editingUser && this.userFormData.password && !this.isValidPassword(this.userFormData.password)) {
+            this.showErrorMessage('Password must be at least 8 characters long and contain at least one letter and one number');
+            return false;
+        }
+
+        return true;
+    }
+
+    private isValidEmail(email: string): boolean {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+
+    private isValidPassword(password: string): boolean {
+        // At least 8 characters, one letter, one number
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{8,}$/;
+        return passwordRegex.test(password);
     }
 
     createUser(): void {
         this.submitting = true;
-        this.superadminService.createUser(this.userFormData).subscribe({
+        const subscription = this.superadminService.createUser(this.userFormData).subscribe({
             next: () => {
                 this.submitting = false;
                 this.closeModal();
@@ -174,16 +251,18 @@ export class SuperadminUsersComponent implements OnInit {
             },
             error: (error) => {
                 this.submitting = false;
-                this.showErrorMessage(this.errorHandler.getErrorMessageString(error));
+                this.handleError(error, 'Creating user');
             }
         });
+        
+        this.subscriptions.push(subscription);
     }
 
     updateUser(): void {
         if (!this.editingUser) return;
 
         this.submitting = true;
-        this.superadminService.updateUser(this.editingUser.id, this.userFormData).subscribe({
+        const subscription = this.superadminService.updateUser(this.editingUser.id, this.userFormData).subscribe({
             next: () => {
                 this.submitting = false;
                 this.closeModal();
@@ -192,9 +271,11 @@ export class SuperadminUsersComponent implements OnInit {
             },
             error: (error) => {
                 this.submitting = false;
-                this.showErrorMessage(this.errorHandler.getErrorMessageString(error));
+                this.handleError(error, 'Updating user');
             }
         });
+        
+        this.subscriptions.push(subscription);
     }
 
     resetPassword(user: User): void {
@@ -212,18 +293,38 @@ export class SuperadminUsersComponent implements OnInit {
     confirmResetPassword(): void {
         if (!this.editingUser) return;
 
-        this.submitting = true;
-        this.superadminService.resetUserPassword(this.editingUser.id, this.passwordFormData.password).subscribe({
+        if (!this.validatePasswordForm()) {
+            return;
+        }
+
+        this.submittingPassword = true;
+        const subscription = this.superadminService.resetUserPassword(this.editingUser.id, this.passwordFormData.password).subscribe({
             next: () => {
-                this.submitting = false;
+                this.submittingPassword = false;
                 this.closePasswordModal();
                 this.showSuccessMessage('Password reset successfully!');
             },
             error: (error) => {
-                this.submitting = false;
-                this.showErrorMessage(this.errorHandler.getErrorMessageString(error));
+                this.submittingPassword = false;
+                this.handleError(error, 'Resetting password');
             }
         });
+        
+        this.subscriptions.push(subscription);
+    }
+
+    private validatePasswordForm(): boolean {
+        if (!this.passwordFormData.password?.trim()) {
+            this.showErrorMessage('New password is required');
+            return false;
+        }
+
+        if (!this.isValidPassword(this.passwordFormData.password)) {
+            this.showErrorMessage('Password must be at least 8 characters long and contain at least one letter and one number');
+            return false;
+        }
+
+        return true;
     }
 
     manageAssociations(user: User): void {
@@ -243,7 +344,8 @@ export class SuperadminUsersComponent implements OnInit {
     }
 
     loadAvailableStructures(): void {
-        this.superadminService.getStructures({ per_page: 1000 }).subscribe({
+        this.loadingStructures = true;
+        const subscription = this.superadminService.getStructures({ per_page: 1000 }).subscribe({
             next: (response) => {
                 const allStructures = response.structures || [];
                 const userStructureIds = this.userStructures.map(s => s.id);
@@ -254,20 +356,24 @@ export class SuperadminUsersComponent implements OnInit {
                         name: structure.name,
                         city: structure.city
                     }));
+                this.loadingStructures = false;
             },
             error: (error) => {
-                this.showErrorMessage(this.errorHandler.getErrorMessageString(error));
+                this.loadingStructures = false;
+                this.handleError(error, 'Loading structures');
             }
         });
+        
+        this.subscriptions.push(subscription);
     }
 
     addStructureToUser(): void {
         if (!this.selectedUser || !this.selectedStructureId) return;
 
-        this.submitting = true;
-        this.superadminService.createAssociation(this.selectedUser.id, this.selectedStructureId).subscribe({
+        this.submittingStructure = true;
+        const subscription = this.superadminService.createAssociation(this.selectedUser.id, this.selectedStructureId).subscribe({
             next: () => {
-                this.submitting = false;
+                this.submittingStructure = false;
                 this.closeStructuresModal();
                 this.loadAvailableStructures();
                 this.loadUsers(); // Refresh the user list
@@ -275,28 +381,32 @@ export class SuperadminUsersComponent implements OnInit {
                 this.showSuccessMessage('Structure assigned successfully!');
             },
             error: (error) => {
-                this.submitting = false;
-                this.showErrorMessage(this.errorHandler.getErrorMessageString(error));
+                this.submittingStructure = false;
+                this.handleError(error, 'Adding structure');
             }
         });
+        
+        this.subscriptions.push(subscription);
     }
 
     removeStructureFromUser(structureId: number): void {
         if (!this.selectedUser) return;
 
-        this.submitting = true;
-        this.superadminService.deleteAssociation(this.selectedUser.id, structureId).subscribe({
+        this.submittingStructure = true;
+        const subscription = this.superadminService.deleteAssociation(this.selectedUser.id, structureId).subscribe({
             next: () => {
-                this.submitting = false;
+                this.submittingStructure = false;
                 this.showSuccessMessage('Structure removed successfully!');
                 this.loadAvailableStructures();
                 this.loadUsers(); // Refresh the user list
             },
             error: (error) => {
-                this.submitting = false;
-                this.showErrorMessage(this.errorHandler.getErrorMessageString(error));
+                this.submittingStructure = false;
+                this.handleError(error, 'Removing structure');
             }
         });
+        
+        this.subscriptions.push(subscription);
     }
 
     // Role Management Methods
@@ -315,35 +425,42 @@ export class SuperadminUsersComponent implements OnInit {
     }
 
     loadAvailableRoles(): void {
-        this.superadminService.getRoles().subscribe({
+        this.loadingRoles = true;
+        const subscription = this.superadminService.getRoles().subscribe({
             next: (response) => {
                 // Filter to only show administrator and superadmin roles
                 this.availableRoles = response.roles.filter((role: any) =>
                     role.name === 'administrator' || role.name === 'superadmin'
                 );
+                this.loadingRoles = false;
             },
             error: (error) => {
-                this.showErrorMessage(this.errorHandler.getErrorMessageString(error));
+                this.loadingRoles = false;
+                this.handleError(error, 'Loading roles');
             }
         });
+        
+        this.subscriptions.push(subscription);
     }
 
     confirmRoleChange(): void {
         if (!this.selectedUser || !this.selectedRoleId) return;
 
-        this.submitting = true;
-        this.superadminService.changeUserRole(this.selectedUser.id, this.selectedRoleId).subscribe({
+        this.submittingRole = true;
+        const subscription = this.superadminService.changeUserRole(this.selectedUser.id, this.selectedRoleId).subscribe({
             next: () => {
-                this.submitting = false;
+                this.submittingRole = false;
                 this.closeRoleModal();
                 this.loadUsers(); // Refresh the user list
                 this.showSuccessMessage('User role changed successfully!');
             },
             error: (error) => {
-                this.submitting = false;
-                this.showErrorMessage(this.errorHandler.getErrorMessageString(error));
+                this.submittingRole = false;
+                this.handleError(error, 'Changing role');
             }
         });
+        
+        this.subscriptions.push(subscription);
     }
 
     private showSuccessMessage(message: string): void {
@@ -351,7 +468,8 @@ export class SuperadminUsersComponent implements OnInit {
             severity: 'success',
             summary: 'Success',
             detail: message,
-            life: 3000
+            life: 4000,
+            closable: true
         });
     }
 
@@ -360,7 +478,8 @@ export class SuperadminUsersComponent implements OnInit {
             severity: 'error',
             summary: 'Error',
             detail: message,
-            life: 5000
+            life: 6000,
+            closable: true
         });
     }
 
@@ -369,7 +488,64 @@ export class SuperadminUsersComponent implements OnInit {
             severity: 'info',
             summary: 'Info',
             detail: message,
-            life: 3000
+            life: 4000,
+            closable: true
         });
+    }
+
+    private showWarningMessage(message: string): void {
+        this.messageService.add({
+            severity: 'warn',
+            summary: 'Warning',
+            detail: message,
+            life: 4000,
+            closable: true
+        });
+    }
+
+    private handleError(error: any, operation: string): void {
+        console.error(`${operation} failed:`, error);
+        
+        let errorMessage = 'An unexpected error occurred. Please try again.';
+        
+        if (error?.error?.message) {
+            errorMessage = error.error.message;
+        } else if (error?.message) {
+            errorMessage = error.message;
+        } else if (typeof error === 'string') {
+            errorMessage = error;
+        }
+        
+        // Handle specific HTTP status codes
+        if (error?.status) {
+            switch (error.status) {
+                case 400:
+                    errorMessage = 'Invalid request. Please check your input and try again.';
+                    break;
+                case 401:
+                    errorMessage = 'You are not authorized to perform this action.';
+                    break;
+                case 403:
+                    errorMessage = 'Access denied. You do not have permission to perform this action.';
+                    break;
+                case 404:
+                    errorMessage = 'The requested resource was not found.';
+                    break;
+                case 409:
+                    errorMessage = 'A conflict occurred. The resource may already exist or be in use.';
+                    break;
+                case 422:
+                    errorMessage = 'Validation error. Please check your input and try again.';
+                    break;
+                case 500:
+                    errorMessage = 'Server error. Please try again later.';
+                    break;
+                case 503:
+                    errorMessage = 'Service temporarily unavailable. Please try again later.';
+                    break;
+            }
+        }
+        
+        this.showErrorMessage(`${operation}: ${errorMessage}`);
     }
 }

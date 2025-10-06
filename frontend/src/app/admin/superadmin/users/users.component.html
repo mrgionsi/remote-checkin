@@ -1,20 +1,22 @@
 <div class="users">
   <div class="users-header">
-    <h2>Users Management</h2>
-    <p-button label="Create User" icon="pi pi-user-plus" (onClick)="openCreateModal()" severity="primary">
+    <h2 id="users-title">Users Management</h2>
+    <p-button label="Create User" icon="pi pi-user-plus" (onClick)="openCreateModal()" severity="primary"
+      aria-label="Create new user account">
     </p-button>
   </div>
 
   <div class="filters">
     <input pInputText placeholder="Search users..." [(ngModel)]="searchTerm" (ngModelChange)="onSearch()"
-      name="searchTerm" class="w-full">
+      name="searchTerm" class="w-full" aria-label="Search users by name, username, or email">
     <p-select [(ngModel)]="roleFilter" (ngModelChange)="loadUsers()" [options]="roleOptions" placeholder="All Roles"
-      name="roleFilter" styleClass="w-full" optionLabel="label" optionValue="value">
+      name="roleFilter" styleClass="w-full" optionLabel="label" optionValue="value" aria-label="Filter users by role">
     </p-select>
   </div>
 
-  <div class="users-list" *ngIf="!loading">
-    <p-card *ngFor="let user of users" styleClass="user-card">
+  <ul class="users-list" *ngIf="!loading" aria-labelledby="users-title">
+    <li *ngFor="let user of users; trackBy: trackByUserId">
+      <p-card styleClass="user-card">
       <ng-template pTemplate="header">
         <div class="user-header">
           <div class="user-avatar">
@@ -68,26 +70,31 @@
 
       <ng-template pTemplate="footer">
         <div class="user-actions">
-          <button type="button" (click)="editUser(user)" class="action-btn edit-btn">
-            <i class="pi pi-pencil"></i>
+          <button type="button" (click)="editUser(user)" class="action-btn edit-btn" 
+            [attr.aria-label]="'Edit user ' + user.name + ' ' + user.surname">
+            <i class="pi pi-pencil" aria-hidden="true"></i>
             Edit
           </button>
-          <button type="button" (click)="resetPassword(user)" class="action-btn password-btn">
-            <i class="pi pi-key"></i>
+          <button type="button" (click)="resetPassword(user)" class="action-btn password-btn"
+            [attr.aria-label]="'Reset password for user ' + user.name + ' ' + user.surname">
+            <i class="pi pi-key" aria-hidden="true"></i>
             Reset Password
           </button>
-          <button type="button" (click)="manageAssociations(user)" class="action-btn structures-btn">
-            <i class="pi pi-sitemap"></i>
+          <button type="button" (click)="manageAssociations(user)" class="action-btn structures-btn"
+            [attr.aria-label]="'Manage structures for user ' + user.name + ' ' + user.surname">
+            <i class="pi pi-sitemap" aria-hidden="true"></i>
             Manage Structures
           </button>
-          <button type="button" (click)="openRoleChangeModal(user)" class="action-btn role-btn">
-            <i class="pi pi-users"></i>
+          <button type="button" (click)="openRoleChangeModal(user)" class="action-btn role-btn"
+            [attr.aria-label]="'Change role for user ' + user.name + ' ' + user.surname">
+            <i class="pi pi-users" aria-hidden="true"></i>
             Change Role
           </button>
         </div>
       </ng-template>
     </p-card>
-  </div>
+    </li>
+  </ul>
 
   <div class="loading" *ngIf="loading">
     <p-progressSpinner></p-progressSpinner>
@@ -107,13 +114,14 @@
 <p-dialog [(visible)]="showModal" [modal]="true" [closable]="false"
   [header]="editingUser ? 'Edit User' : 'Create New User'"
   [style]="{ width: '600px', maxWidth: '90vw', maxHeight: '90vh' }" [draggable]="false" [resizable]="false"
-  (onHide)="closeModal()" styleClass="user-dialog">
+  (onHide)="closeModal()" styleClass="user-dialog" 
+  [attr.aria-labelledby]="'user-dialog-title'" [attr.aria-describedby]="'user-dialog-content'">
 
   <ng-template pTemplate="header">
     <div class="dialog-header">
       <div class="header-content">
         <i class="header-icon" [ngClass]="editingUser ? 'pi pi-user-edit' : 'pi pi-user-plus'"></i>
-        <span class="header-title">{{ editingUser ? 'Edit User' : 'Create New User' }}</span>
+        <span class="header-title" id="user-dialog-title">{{ editingUser ? 'Edit User' : 'Create New User' }}</span>
       </div>
       <button type="button" class="header-close-btn" (click)="closeModal()">
         <i class="pi pi-times"></i>
@@ -121,7 +129,7 @@
     </div>
   </ng-template>
 
-  <form (ngSubmit)="saveUser()" #userForm="ngForm" class="user-form">
+  <form (ngSubmit)="saveUser()" #userForm="ngForm" class="user-form" id="user-dialog-content">
     <div class="form-content">
       <!-- Basic Information Section -->
       <div class="form-section">
@@ -295,7 +303,7 @@
         class="cancel-btn">
       </p-button>
       <p-button label="Reset Password" icon="pi pi-key" severity="info" type="submit"
-        [disabled]="!passwordForm.form.valid || submitting" [loading]="submitting" class="submit-btn"
+        [disabled]="!passwordForm.form.valid || submittingPassword" [loading]="submittingPassword" class="submit-btn"
         (onClick)="confirmResetPassword()">
       </p-button>
     </div>
@@ -356,7 +364,7 @@
           </label>
           <p-select id="availableStructures" name="availableStructures" [(ngModel)]="selectedStructureId"
             [options]="availableStructures" placeholder="Choose a structure to assign" optionLabel="name"
-            optionValue="id" styleClass="w-full" [panelStyleClass]="'structures-dropdown-panel'">
+            optionValue="id" styleClass="w-full" [panelStyleClass]="'structures-dropdown-panel'" [loading]="loadingStructures">
             <ng-template pTemplate="item" let-structure>
               <div class="structure-option">
                 <span class="structure-name">{{ structure.name }}</span>
@@ -374,8 +382,8 @@
       <p-button label="Cancel" icon="pi pi-times" severity="danger" (onClick)="closeStructuresModal()" [outlined]="true"
         class="cancel-btn">
       </p-button>
-      <p-button label="Add Structure" icon="pi pi-plus" severity="info" [disabled]="!selectedStructureId || submitting"
-        [loading]="submitting" class="submit-btn" (onClick)="addStructureToUser()">
+      <p-button label="Add Structure" icon="pi pi-plus" severity="info" [disabled]="!selectedStructureId || submittingStructure"
+        [loading]="submittingStructure" class="submit-btn" (onClick)="addStructureToUser()">
       </p-button>
     </div>
   </ng-template>
@@ -424,7 +432,7 @@
             New Role
           </label>
           <p-select id="newRole" name="newRole" [(ngModel)]="selectedRoleId" [options]="availableRoles"
-            placeholder="Select a new role" optionLabel="name" optionValue="id" styleClass="w-full">
+            placeholder="Select a new role" optionLabel="name" optionValue="id" styleClass="w-full" [loading]="loadingRoles">
             <ng-template pTemplate="item" let-role>
               <div class="role-option">
                 <span class="role-name">{{ role.name }}</span>
@@ -444,7 +452,7 @@
         class="cancel-btn">
       </p-button>
       <p-button label="Change Role" icon="pi pi-check" severity="primary"
-        [disabled]="!selectedRoleId || submitting || selectedRoleId === selectedUser?.id_role" [loading]="submitting"
+        [disabled]="!selectedRoleId || submittingRole || selectedRoleId === selectedUser?.id_role" [loading]="submittingRole"
         class="submit-btn" (onClick)="confirmRoleChange()">
       </p-button>
     </div>
