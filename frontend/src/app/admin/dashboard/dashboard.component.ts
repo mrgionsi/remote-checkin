@@ -140,10 +140,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
       } else {
         console.log('No valid structure ID found. Structure ID:', structureId);
         console.log('localStorage selected_structure_id:', localStorage.getItem('selected_structure_id'));
-        const userSub = this.authService.user$.subscribe(user => {
-          console.log('Available structures for user:', user?.structures);
-        });
-        this.subscriptions.push(userSub);
+       } else {
+         console.log('No valid structure ID found. Structure ID:', structureId);
+         console.log('localStorage selected_structure_id:', localStorage.getItem('selected_structure_id'));
+       }
       }
     }
   }
