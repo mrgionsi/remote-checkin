@@ -415,6 +415,11 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
         const subscription = this.superadminService.deleteAssociation(this.selectedUser.id, structureId).subscribe({
             next: () => {
                 this.submittingStructure = false;
+                // Keep local lists in sync before reloading
+                this.userStructures = this.userStructures.filter(s => s.id !== structureId);
+                if (this.selectedUser) {
+                    this.selectedUser.structures = (this.selectedUser.structures || []).filter(s => s.id !== structureId);
+                }
                 this.showSuccessMessage('Structure removed successfully!');
                 this.loadAvailableStructures();
                 this.loadUsers(); // Refresh the user list
