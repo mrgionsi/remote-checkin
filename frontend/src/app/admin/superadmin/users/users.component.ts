@@ -29,7 +29,7 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
 
     onPageChange(event: PaginatorState): void {
         // Guard against undefined event or missing properties
-        if (!event?.first || !event?.rows) {
+        if (event?.first === undefined || event?.first === null || event?.rows === undefined || event?.rows === null) {
             return;
         }
 
@@ -348,7 +348,7 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
 
     manageAssociations(user: User): void {
         this.selectedUser = user;
-        this.userStructures = (user.structures || []).map(s => ({ ...s, city: '' }));
+        this.userStructures = (user.structures || []).map(s => ({ ...s, city: (s as any).city || '' }));
         this.selectedStructureId = null;
         this.loadAvailableStructures();
         this.showStructuresModal = true;
