@@ -49,6 +49,7 @@ export class AuthService {
 
     clearUser() {
         localStorage.removeItem('user');
+        localStorage.removeItem('admin_token');
         this.userSubject.next(null);
     }
 
