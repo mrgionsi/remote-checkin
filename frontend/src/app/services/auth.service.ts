@@ -127,10 +127,14 @@ export class AuthService {
     }
 
     getAuthHeaders(): HttpHeaders {
+        // Guard for SSR where window/localStorage are not available
+        if (typeof window === 'undefined' || !window.localStorage) {
+            return new HttpHeaders();
+        }
+
         const token = localStorage.getItem('admin_token');
-        //console.log(token)
-        return new HttpHeaders({
-            'Authorization': `Bearer ${token}`
-        });
+        return token
+            ? new HttpHeaders({ 'Authorization': `Bearer ${token}` })
+            : new HttpHeaders();
     }
 }

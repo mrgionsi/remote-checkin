@@ -65,6 +65,7 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
     // Subscription management
     private subscriptions: Subscription[] = [];
     private isLoadingUsers = false; // Prevent duplicate API calls
+    private static globalUsersLoading = false; // Global flag to prevent multiple API calls
 
     // Loading states for individual operations
     loadingStructures = false;
@@ -90,7 +91,6 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
     ) { }
 
     ngOnInit(): void {
-        console.log('SuperadminUsersComponent: ngOnInit called for component ID:', this.componentId);
         this.loadUsers();
     }
 
@@ -102,6 +102,9 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
             }
         });
         this.subscriptions = [];
+
+        // Reset global loading flag when component is destroyed
+        SuperadminUsersComponent.globalUsersLoading = false;
     }
 
     trackByUserId(index: number, user: User): number {
@@ -123,14 +126,14 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
     }
 
     loadUsers(): void {
-        console.log('SuperadminUsersComponent: loadUsers called for component ID:', this.componentId, 'loading =', this.loading, 'isLoadingUsers =', this.isLoadingUsers);
-        
-        // Prevent duplicate API calls
-        if (this.isLoadingUsers) {
-            console.log('SuperadminUsersComponent: Already loading users, skipping for component ID:', this.componentId);
+        // Prevent duplicate API calls globally
+        if (SuperadminUsersComponent.globalUsersLoading) {
+            // Set loading state to true for UI consistency
+            this.loading = true;
             return;
         }
-        
+
+        SuperadminUsersComponent.globalUsersLoading = true;
         this.isLoadingUsers = true;
         this.loading = true;
         this.error = null;
@@ -142,21 +145,18 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
             role: this.roleFilter
         };
 
-        console.log('SuperadminUsersComponent: API params:', params);
-
         const subscription = this.superadminService.getUsers(params).subscribe({
             next: (response) => {
-                console.log('SuperadminUsersComponent: API response received for component ID:', this.componentId, 'response:', response);
                 this.users = response.users || [];
                 this.pagination = response.pagination;
                 this.loading = false;
                 this.isLoadingUsers = false;
-                console.log('SuperadminUsersComponent: Users loaded for component ID:', this.componentId, 'users:', this.users.length, 'loading =', this.loading);
+                SuperadminUsersComponent.globalUsersLoading = false;
             },
             error: (error) => {
-                console.error('SuperadminUsersComponent: API error for component ID:', this.componentId, 'error:', error);
                 this.loading = false;
                 this.isLoadingUsers = false;
+                SuperadminUsersComponent.globalUsersLoading = false;
                 this.handleError(error, 'Loading users');
             }
         });
