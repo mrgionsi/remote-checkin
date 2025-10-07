@@ -169,3 +169,21 @@ def create_user_response_data(new_user, role):
             "role": role.name
         }
     }
+
+
+def build_user_brief(user):
+    """
+    Build a brief user dictionary with basic identity fields.
+
+    Args:
+        user: User model instance
+
+    Returns:
+        dict: Brief user representation
+    """
+    return {
+        "id": user.id,
+        "username": user.username,
+        "name": user.name,
+        "surname": user.surname
+    }

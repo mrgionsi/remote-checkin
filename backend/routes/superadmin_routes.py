@@ -19,7 +19,7 @@ from werkzeug.security import generate_password_hash
 
 from app_logging.decorators import log_route
 from utils.authz import verify_superadmin_access
-from utils.route_helpers import handle_database_error, create_user_response_data
+from utils.route_helpers import handle_database_error, create_user_response_data, build_user_brief
 from models import User, AdminStructure, Structure, Reservation, Role
 from database import SessionLocal
 
@@ -587,7 +587,7 @@ def update_user(user_id):
 @superadmin_bp.route("/superadmin/users/<int:user_id>/change-role", methods=["PUT"])
 @jwt_required()
 @log_route(include_request_data=True)
-def change_user_role(user_id):
+def change_user_role(user_id):  # pylint: disable=too-many-return-statements
     """
     Change a user's role.
 
@@ -631,15 +631,12 @@ def change_user_role(user_id):
         user.id_role = new_role_id
         db_session.commit()
 
+        user_brief = build_user_brief(user)
+        user_brief["role"] = new_role.name
+
         return jsonify({
             "message": f"User role changed successfully from {old_role_name} to {new_role.name}",
-            "user": {
-                "id": user.id,
-                "username": user.username,
-                "name": user.name,
-                "surname": user.surname,
-                "role": new_role.name
-            }
+            "user": user_brief
         }), 200
 
     except Exception as e:
