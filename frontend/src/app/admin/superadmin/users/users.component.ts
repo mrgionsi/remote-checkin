@@ -128,8 +128,7 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
     loadUsers(): void {
         // Prevent duplicate API calls globally
         if (SuperadminUsersComponent.globalUsersLoading) {
-            // Set loading state to true for UI consistency
-            this.loading = true;
+            // Simply return - don't mutate loading state as there's no actual request happening
             return;
         }
 
@@ -556,17 +555,22 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
         console.error(`${operation} failed:`, error);
 
         let errorMessage = 'An unexpected error occurred. Please try again.';
+        let hasBackendMessage = false;
 
+        // Try to extract backend-provided error message
         if (error?.error?.message) {
             errorMessage = error.error.message;
+            hasBackendMessage = true;
         } else if (error?.message) {
             errorMessage = error.message;
+            hasBackendMessage = true;
         } else if (typeof error === 'string') {
             errorMessage = error;
+            hasBackendMessage = true;
         }
 
-        // Handle specific HTTP status codes
-        if (error?.status) {
+        // Only apply generic status-based messages if no backend message was provided
+        if (!hasBackendMessage && error?.status) {
             switch (error.status) {
                 case 400:
                     errorMessage = 'Invalid request. Please check your input and try again.';

@@ -142,8 +142,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
             };
           },
           error: (error) => {
-            console.error('Error fetching reservations:', error);
-            // Handle the error here (e.g., show a message to the user)
+            console.error('Error fetching monthly reservations:', error);
+            const errorMessage = error?.error?.message || error?.message || 'Failed to load monthly reservations chart. Please try again.';
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Chart load failed',
+              detail: errorMessage,
+              life: 6000
+            });
           },
           complete: () => {
             console.log('Reservation fetch completed.');
