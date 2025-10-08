@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, EMPTY } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { environment } from '../../environments/environments';
 import { AuthService } from './auth.service';
 
@@ -16,14 +16,14 @@ export class ClientReservationService {
 
   getClientByReservationId(id_reservation: number): Observable<any> {
     if (!this.authService.checkAuthAndRedirect()) {
-      return EMPTY;
+      return throwError(() => new Error('Authentication failed'));
     }
     return this.http.get(this.apiUrl + '/' + id_reservation + '/clients', { headers: this.authService.getAuthHeaders() })
   }
 
   getUserPhoto(id_reservation: number, name: string, surname: string, cf: string): Observable<any> {
     if (!this.authService.checkAuthAndRedirect()) {
-      return EMPTY;
+      return throwError(() => new Error('Authentication failed'));
     }
     return this.http.post(this.apiUrl + '/' + id_reservation + '/client-images', { name, surname, cf }, { headers: this.authService.getAuthHeaders() })
   }
