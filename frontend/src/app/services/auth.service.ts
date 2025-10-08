@@ -9,7 +9,6 @@ import { Router } from '@angular/router';
 export class AuthService {
     private userSubject = new BehaviorSubject<any>(this.getInitialUser());
     user$ = this.userSubject.asObservable();
-    private isInitialized = false;
 
     constructor(private router: Router) {
         // Initialize user state from localStorage on service creation
@@ -30,7 +29,6 @@ export class AuthService {
 
     private initializeAuthState(): void {
         if (typeof window === 'undefined' || !window.localStorage) {
-            this.isInitialized = true;
             return;
         }
 
@@ -43,8 +41,6 @@ export class AuthService {
             // Clear invalid state
             this.clearUser();
         }
-
-        this.isInitialized = true;
     }
 
     setUser(user: any) {
@@ -106,10 +102,6 @@ export class AuthService {
     }
 
     checkAuthAndRedirect(): boolean {
-        if (!this.isInitialized) {
-            // Wait for initialization
-            return false;
-        }
         if (!this.isLoggedIn()) {
             this.logout();
             this.router.navigate(['/admin/login']);
