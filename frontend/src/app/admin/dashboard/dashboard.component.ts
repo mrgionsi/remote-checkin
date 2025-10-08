@@ -43,7 +43,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private router: Router,
     private authService: AuthService,
     @Inject(PLATFORM_ID) private platformId: object,
-
+    private messageService: MessageService
   ) {
 
   }
@@ -89,9 +89,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
           error: (error) => {
             console.error('Error fetching reservations:', error);
             this.reservations = [];
-            // Show error message to user
+
             if (error.status === 404) {
               console.log('No reservations found for structure:', structureId);
+              this.messageService.add({
+                severity: 'info',
+                summary: 'No Reservations',
+                detail: 'No reservations found for this structure',
+                life: 4000
+              });
+            } else {
+              const errorMessage = error?.error?.message || error?.message || 'Failed to load reservations. Please try again.';
+              this.messageService.add({
+                severity: 'error',
+                summary: 'Reservations load failed',
+                detail: errorMessage,
+                life: 6000
+              });
             }
           },
           complete: () => {
@@ -140,10 +154,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       } else {
         console.log('No valid structure ID found. Structure ID:', structureId);
         console.log('localStorage selected_structure_id:', localStorage.getItem('selected_structure_id'));
-       } else {
-         console.log('No valid structure ID found. Structure ID:', structureId);
-         console.log('localStorage selected_structure_id:', localStorage.getItem('selected_structure_id'));
-       }
       }
     }
   }
@@ -159,5 +169,4 @@ export class DashboardComponent implements OnInit, OnDestroy {
     console.log('DashboardComponent destroyed with ID:', this.componentId, '- subscriptions cleaned up');
   }
 }
-
 

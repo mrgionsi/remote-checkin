@@ -466,7 +466,7 @@
         class="cancel-btn">
       </p-button>
       <p-button label="Change Role" icon="pi pi-check" severity="primary"
-        [disabled]="!selectedRoleId || submittingRole || selectedRoleId === selectedUser?.id_role"
+        [disabled]="!selectedRoleId || submittingRole || selectedRoleId === getCurrentRoleId()"
         [loading]="submittingRole" class="submit-btn" (onClick)="confirmRoleChange()">
       </p-button>
     </div>

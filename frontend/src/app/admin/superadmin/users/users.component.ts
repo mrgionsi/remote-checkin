@@ -436,7 +436,8 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
     // Role Management Methods
     openRoleChangeModal(user: User): void {
         this.selectedUser = user;
-        this.selectedRoleId = user.id_role;
+        // Initialize with null - will be set after roles are loaded
+        this.selectedRoleId = null;
         this.loadAvailableRoles();
         this.showRoleModal = true;
     }
@@ -456,6 +457,16 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
                 this.availableRoles = response.roles.filter((role: any) =>
                     role.name === 'administrator' || role.name === 'superadmin'
                 );
+
+                // Set the initial selected role based on the user's current role NAME
+                // This is more robust than using id_role which may contain incorrect data
+                if (this.selectedUser && this.selectedUser.role) {
+                    const currentRole = this.availableRoles.find((role: any) =>
+                        role.name === this.selectedUser?.role
+                    );
+                    this.selectedRoleId = currentRole ? currentRole.id : null;
+                }
+
                 this.loadingRoles = false;
             },
             error: (error) => {
@@ -465,6 +476,20 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
         });
 
         this.subscriptions.push(subscription);
+    }
+
+    getCurrentRoleId(): number | null {
+        // Get the current role ID based on the user's role name
+        // This is more reliable than using id_role which may contain incorrect data
+        if (!this.selectedUser || !this.selectedUser.role || !this.availableRoles.length) {
+            return null;
+        }
+
+        const currentRole = this.availableRoles.find((role: any) =>
+            role.name === this.selectedUser?.role
+        );
+
+        return currentRole ? currentRole.id : null;
     }
 
     confirmRoleChange(): void {
