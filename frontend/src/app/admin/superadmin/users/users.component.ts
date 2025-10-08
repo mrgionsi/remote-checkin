@@ -458,14 +458,8 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
                     role.name === 'administrator' || role.name === 'superadmin'
                 );
 
-                // Set the initial selected role based on the user's current role NAME
-                // This is more robust than using id_role which may contain incorrect data
-                if (this.selectedUser && this.selectedUser.role) {
-                    const currentRole = this.availableRoles.find((role: any) =>
-                        role.name === this.selectedUser?.role
-                    );
-                    this.selectedRoleId = currentRole ? currentRole.id : null;
-                }
+                // Do not pre-select the current role - let the user choose from the dropdown
+                // This ensures the "Change Role" button is not disabled from the start
 
                 this.loadingRoles = false;
             },
