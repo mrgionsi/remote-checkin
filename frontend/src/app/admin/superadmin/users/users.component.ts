@@ -458,8 +458,9 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
                     role.name === 'administrator' || role.name === 'superadmin'
                 );
 
-                // Do not pre-select the current role - let the user choose from the dropdown
-                // This ensures the "Change Role" button is not disabled from the start
+                // Initialize selectedRoleId to the user's current role
+                // This ensures the "Change Role" button is disabled until a different role is selected
+                this.selectedRoleId = this.getCurrentRoleId();
 
                 this.loadingRoles = false;
             },
