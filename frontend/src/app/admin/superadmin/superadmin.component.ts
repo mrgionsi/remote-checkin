@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-superadmin',
@@ -9,8 +11,60 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
     templateUrl: './superadmin.component.html',
     styleUrls: ['./superadmin.component.scss']
 })
-export class SuperadminComponent {
+export class SuperadminComponent implements OnInit, OnDestroy {
+    isAuthenticated: boolean = false;
+    isInitialized: boolean = false;
+    private userSubscription!: Subscription;
+    private isInitializing: boolean = false; // Prevent duplicate initialization
 
-    constructor() { }
+    constructor(
+        private router: Router,
+        private authService: AuthService
+    ) { }
 
+    ngOnInit(): void {
+        // Prevent duplicate initialization
+        if (this.isInitialized || this.isInitializing) {
+            return;
+        }
+
+        this.isInitializing = true;
+
+        // Wait for localStorage to be available
+        if (typeof window === 'undefined' || !window.localStorage) {
+            setTimeout(() => this.initializeAuth(), 100);
+            return;
+        }
+
+        this.initializeAuth();
+    }
+
+    private initializeAuth(): void {
+        // Prevent duplicate initialization
+        if (this.isInitialized) {
+            return;
+        }
+
+        // Set initial authentication state
+        this.isAuthenticated = this.authService.isLoggedIn();
+
+        this.userSubscription = this.authService.user$.subscribe(user => {
+            this.isAuthenticated = !!user;
+
+            // Mark as initialized after auth state is determined
+            this.isInitialized = true;
+            this.isInitializing = false;
+
+            // Check if user is superadmin
+            if (user && !this.authService.isSuperAdmin()) {
+                this.router.navigate(['/admin/dashboard']);
+            }
+        });
+    }
+
+    ngOnDestroy(): void {
+        if (this.userSubscription) {
+            this.userSubscription.unsubscribe();
+        }
+    }
 }

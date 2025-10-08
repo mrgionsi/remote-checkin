@@ -7,10 +7,41 @@ import { Router } from '@angular/router';
     providedIn: 'root'
 })
 export class AuthService {
-    private userSubject = new BehaviorSubject<any>(this.getUser());
+    private userSubject = new BehaviorSubject<any>(this.getInitialUser());
     user$ = this.userSubject.asObservable();
 
-    constructor(private router: Router) { }
+    constructor(private router: Router) {
+        // Initialize user state from localStorage on service creation
+        this.initializeAuthState();
+    }
+
+    private getInitialUser(): any {
+        if (typeof window === 'undefined' || !window.localStorage) return null;
+
+        const user = this.getUser();
+        const token = localStorage.getItem('admin_token');
+
+        if (user && token && this.isTokenValid()) {
+            return user;
+        }
+        return null;
+    }
+
+    private initializeAuthState(): void {
+        if (typeof window === 'undefined' || !window.localStorage) {
+            return;
+        }
+
+        const user = this.getUser();
+        const token = localStorage.getItem('admin_token');
+
+        if (user && token && this.isTokenValid()) {
+            this.userSubject.next(user);
+        } else {
+            // Clear invalid state
+            this.clearUser();
+        }
+    }
 
     setUser(user: any) {
         localStorage.setItem('user', JSON.stringify(user));
@@ -19,6 +50,7 @@ export class AuthService {
 
     clearUser() {
         localStorage.removeItem('user');
+        localStorage.removeItem('admin_token');
         this.userSubject.next(null);
     }
 
@@ -35,7 +67,9 @@ export class AuthService {
 
     isTokenValid(): boolean {
         const token = localStorage.getItem('admin_token');
-        if (!token) return false;
+        if (!token) {
+            return false;
+        }
 
         try {
             // Decodifica il payload del JWT
@@ -51,11 +85,26 @@ export class AuthService {
     }
 
     isLoggedIn(): boolean {
-        if (typeof window === 'undefined' || !window.localStorage) return false;
+        // Check if we're in a browser environment
+        if (typeof window === 'undefined') {
+            return false;
+        }
+
+        // Check if localStorage is available
+        if (!window.localStorage) {
+            return false;
+        }
+
         const user = this.getUser();
-        if (!user || !this.isTokenValid()) {
+        const tokenValid = this.isTokenValid();
+
+        return !!(user && tokenValid);
+    }
+
+    checkAuthAndRedirect(): boolean {
+        if (!this.isLoggedIn()) {
             this.logout();
-            this.router.navigate(['/admin/login']); //Implemented here the redirect because in auth.guard.ts the login page is showed at every refresh
+            this.router.navigate(['/admin/login']);
             return false;
         }
         return true;
@@ -76,10 +125,14 @@ export class AuthService {
     }
 
     getAuthHeaders(): HttpHeaders {
+        // Guard for SSR where window/localStorage are not available
+        if (typeof window === 'undefined' || !window.localStorage) {
+            return new HttpHeaders();
+        }
+
         const token = localStorage.getItem('admin_token');
-        //console.log(token)
-        return new HttpHeaders({
-            'Authorization': `Bearer ${token}`
-        });
+        return token
+            ? new HttpHeaders({ 'Authorization': `Bearer ${token}` })
+            : new HttpHeaders();
     }
 }

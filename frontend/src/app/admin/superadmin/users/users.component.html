@@ -1,60 +1,110 @@
 <div class="users">
   <div class="users-header">
-    <h2>Users Management</h2>
-    <p-button label="Create User" icon="pi pi-user-plus" (onClick)="openCreateModal()" severity="primary">
+    <h2 id="users-title">Users Management</h2>
+    <p-button label="Create User" icon="pi pi-user-plus" (onClick)="openCreateModal()" severity="primary"
+      aria-label="Create new user account">
     </p-button>
   </div>
 
   <div class="filters">
     <input pInputText placeholder="Search users..." [(ngModel)]="searchTerm" (ngModelChange)="onSearch()"
-      name="searchTerm" ngDefaultControl styleClass="w-full">
+      name="searchTerm" class="w-full" aria-label="Search users by name, username, or email">
     <p-select [(ngModel)]="roleFilter" (ngModelChange)="loadUsers()" [options]="roleOptions" placeholder="All Roles"
-      name="roleFilter" ngDefaultControl styleClass="w-full">
+      name="roleFilter" styleClass="w-full" optionLabel="label" optionValue="value" aria-label="Filter users by role">
     </p-select>
   </div>
 
-  <div class="users-list" *ngIf="!loading">
-    <p-card *ngFor="let user of users" styleClass="user-card">
-      <ng-template pTemplate="header">
-        <div class="user-header">
-          <h3>{{ user.name }} {{ user.surname }}</h3>
-          <p-tag [value]="user.role" [severity]="user.role === 'superadmin' ? 'danger' : 'info'">
-          </p-tag>
-        </div>
-      </ng-template>
-
-      <div class="user-info">
-        <p><strong>Username:</strong> {{ user.username }}</p>
-        <p><strong>Email:</strong> {{ user.email || 'N/A' }}</p>
-        <p><strong>Phone:</strong> {{ user.telephone || 'N/A' }}</p>
-
-        <div class="structures-section" *ngIf="user.structures && user.structures.length > 0">
-          <strong>Structures:</strong>
-          <div class="structures-tags">
-            <p-tag *ngFor="let structure of user.structures" [value]="structure.name" severity="secondary"
-              styleClass="mr-2 mb-1">
+  <ul class="users-list" *ngIf="!loading && users.length > 0" aria-labelledby="users-title">
+    <li *ngFor="let user of users; trackBy: trackByUserId">
+      <p-card styleClass="user-card">
+        <ng-template pTemplate="header">
+          <div class="user-header">
+            <div class="user-avatar">
+              <i class="pi pi-user"></i>
+            </div>
+            <div class="user-title">
+              <h3>{{ user.name }} {{ user.surname }}</h3>
+              <span class="user-username">{{ user.username }}</span>
+            </div>
+            <p-tag [value]="user.role" [severity]="user.role === 'superadmin' ? 'danger' : 'info'"
+              styleClass="role-tag">
             </p-tag>
           </div>
-        </div>
-        <div class="no-structures" *ngIf="!user.structures || user.structures.length === 0">
-          <p-message severity="info" text="No structures assigned" styleClass="w-full">
-          </p-message>
-        </div>
-      </div>
+        </ng-template>
 
-      <ng-template pTemplate="footer">
-        <div class="user-actions">
-          <p-button label="Edit" icon="pi pi-pencil" severity="secondary" size="small" (onClick)="editUser(user)">
-          </p-button>
-          <p-button label="Reset Password" icon="pi pi-key" severity="warn" size="small"
-            (onClick)="resetPassword(user)">
-          </p-button>
-          <p-button label="Manage Structures" icon="pi pi-sitemap" severity="info" size="small"
-            (onClick)="manageAssociations(user)">
-          </p-button>
+        <div class="user-info">
+          <div class="info-section">
+            <div class="info-item" *ngIf="user.email">
+              <i class="pi pi-envelope info-icon"></i>
+              <span class="info-label">Email:</span>
+              <span class="info-value">{{ user.email }}</span>
+            </div>
+            <div class="info-item" *ngIf="user.telephone">
+              <i class="pi pi-phone info-icon"></i>
+              <span class="info-label">Phone:</span>
+              <span class="info-value">{{ user.telephone }}</span>
+            </div>
+            <div class="info-item" *ngIf="!user.email && !user.telephone">
+              <i class="pi pi-info-circle info-icon"></i>
+              <span class="info-value no-contact">No contact information provided</span>
+            </div>
+          </div>
+
+          <div class="structures-section" *ngIf="user.structures && user.structures.length > 0">
+            <div class="section-header">
+              <i class="pi pi-sitemap section-icon"></i>
+              <span class="section-title">Assigned Structures</span>
+            </div>
+            <div class="structures-tags">
+              <p-tag *ngFor="let structure of user.structures" [value]="structure.name" severity="secondary"
+                styleClass="structure-tag">
+              </p-tag>
+            </div>
+          </div>
+          <div class="no-structures" *ngIf="!user.structures || user.structures.length === 0">
+            <div class="empty-state">
+              <i class="pi pi-sitemap empty-icon"></i>
+              <span class="empty-text">No structures assigned</span>
+            </div>
+          </div>
         </div>
-      </ng-template>
-    </p-card>
+
+        <ng-template pTemplate="footer">
+          <div class="user-actions">
+            <button type="button" (click)="editUser(user)" class="action-btn edit-btn"
+              [attr.aria-label]="'Edit user ' + user.name + ' ' + user.surname">
+              <i class="pi pi-pencil" aria-hidden="true"></i>
+              Edit
+            </button>
+            <button type="button" (click)="resetPassword(user)" class="action-btn password-btn"
+              [attr.aria-label]="'Reset password for user ' + user.name + ' ' + user.surname">
+              <i class="pi pi-key" aria-hidden="true"></i>
+              Reset Password
+            </button>
+            <button type="button" (click)="manageAssociations(user)" class="action-btn structures-btn"
+              [attr.aria-label]="'Manage structures for user ' + user.name + ' ' + user.surname">
+              <i class="pi pi-sitemap" aria-hidden="true"></i>
+              Manage Structures
+            </button>
+            <button type="button" (click)="openRoleChangeModal(user)" class="action-btn role-btn"
+              [attr.aria-label]="'Change role for user ' + user.name + ' ' + user.surname">
+              <i class="pi pi-users" aria-hidden="true"></i>
+              Change Role
+            </button>
+          </div>
+        </ng-template>
+      </p-card>
+    </li>
+  </ul>
+
+  <div class="no-users" *ngIf="!loading && users.length === 0">
+    <div class="empty-state">
+      <i class="pi pi-users empty-icon"></i>
+      <h3>No users found</h3>
+      <p>No users match your current search criteria.</p>
+      <button pButton label="Create First User" icon="pi pi-user-plus" (onClick)="openCreateModal()" severity="primary">
+      </button>
+    </div>
   </div>
 
   <div class="loading" *ngIf="loading">
@@ -71,69 +121,357 @@
   </p-paginator>
 </div>
 
-<!-- Create/Edit Modal -->
-<div class="modal" *ngIf="showModal" (click)="closeModal()">
-  <div class="modal-content" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h3>{{ editingUser ? 'Edit User' : 'Create User' }}</h3>
-      <button class="close-btn" (click)="closeModal()">&times;</button>
-    </div>
-    <form (ngSubmit)="saveUser()" #userForm="ngForm">
-      <div class="form-group">
-        <label for="username">Username *</label>
-        <input type="text" id="username" name="username" [(ngModel)]="userFormData.username" required
-          class="form-control">
-      </div>
-      <div class="form-group" *ngIf="!editingUser">
-        <label for="password">Password *</label>
-        <input type="password" id="password" name="password" [(ngModel)]="userFormData.password" required
-          class="form-control">
-      </div>
-      <div class="form-group">
-        <label for="name">Name *</label>
-        <input type="text" id="name" name="name" [(ngModel)]="userFormData.name" required class="form-control">
-      </div>
-      <div class="form-group">
-        <label for="surname">Surname *</label>
-        <input type="text" id="surname" name="surname" [(ngModel)]="userFormData.surname" required class="form-control">
-      </div>
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" [(ngModel)]="userFormData.email" class="form-control">
-      </div>
-      <div class="form-group">
-        <label for="telephone">Telephone</label>
-        <input type="tel" id="telephone" name="telephone" [(ngModel)]="userFormData.telephone" class="form-control">
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancel</button>
-        <button type="submit" class="btn btn-primary" [disabled]="!userForm.form.valid">
-          {{ editingUser ? 'Update' : 'Create' }}
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
+<!-- Create/Edit Dialog -->
+<p-dialog [(visible)]="showModal" [modal]="true" [closable]="false"
+  [header]="editingUser ? 'Edit User' : 'Create New User'"
+  [style]="{ width: '600px', maxWidth: '90vw', maxHeight: '90vh' }" [draggable]="false" [resizable]="false"
+  (onHide)="closeModal()" styleClass="user-dialog" [attr.aria-labelledby]="'user-dialog-title'"
+  [attr.aria-describedby]="'user-dialog-content'">
 
-<!-- Reset Password Modal -->
-<div class="modal" *ngIf="showPasswordModal" (click)="closePasswordModal()">
-  <div class="modal-content" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h3>Reset Password</h3>
-      <button class="close-btn" (click)="closePasswordModal()">&times;</button>
+  <ng-template pTemplate="header">
+    <div class="dialog-header">
+      <div class="header-content">
+        <i class="header-icon" [ngClass]="editingUser ? 'pi pi-user-edit' : 'pi pi-user-plus'"></i>
+        <span class="header-title" id="user-dialog-title">{{ editingUser ? 'Edit User' : 'Create New User' }}</span>
+      </div>
+      <button type="button" class="header-close-btn" (click)="closeModal()">
+        <i class="pi pi-times"></i>
+      </button>
     </div>
-    <form (ngSubmit)="confirmResetPassword()" #passwordForm="ngForm">
-      <div class="form-group">
-        <label for="newPassword">New Password *</label>
-        <input type="password" id="newPassword" name="newPassword" [(ngModel)]="passwordFormData.password" required
-          class="form-control">
+  </ng-template>
+
+  <form (ngSubmit)="saveUser()" #userForm="ngForm" class="user-form" id="user-dialog-content">
+    <div class="form-content">
+      <!-- Basic Information Section -->
+      <div class="form-section">
+        <div class="section-header">
+          <i class="pi pi-user section-icon"></i>
+          <h4>Basic Information</h4>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label for="username" class="field-label">
+              <i class="pi pi-at"></i>
+              Username *
+            </label>
+            <input pInputText id="username" name="username" [(ngModel)]="userFormData.username"
+              placeholder="Enter username" required class="form-input">
+            <small *ngIf="userForm.form.get('username')?.invalid && userForm.form.get('username')?.touched"
+              class="error-message">
+              <i class="pi pi-exclamation-triangle"></i>
+              Username is required
+            </small>
+          </div>
+        </div>
+
+        <div class="form-row" *ngIf="!editingUser">
+          <div class="form-field">
+            <label for="password" class="field-label">
+              <i class="pi pi-lock"></i>
+              Password *
+            </label>
+            <input pInputText id="password" name="password" [(ngModel)]="userFormData.password"
+              placeholder="Enter password" type="password" autocomplete="new-password" required class="form-input">
+            <small *ngIf="userForm.form.get('password')?.invalid && userForm.form.get('password')?.touched"
+              class="error-message">
+              <i class="pi pi-exclamation-triangle"></i>
+              Password is required
+            </small>
+          </div>
+        </div>
       </div>
-      <div class="modal-actions">
-        <button type="button" class="btn btn-secondary" (click)="closePasswordModal()">Cancel</button>
-        <button type="submit" class="btn btn-warning" [disabled]="!passwordForm.form.valid">
-          Reset Password
-        </button>
+
+      <!-- Personal Information Section -->
+      <div class="form-section">
+        <div class="section-header">
+          <i class="pi pi-id-card section-icon"></i>
+          <h4>Personal Information</h4>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label for="name" class="field-label">
+              <i class="pi pi-user"></i>
+              First Name *
+            </label>
+            <input pInputText id="name" name="name" [(ngModel)]="userFormData.name" placeholder="Enter first name"
+              required class="form-input">
+            <small *ngIf="userForm.form.get('name')?.invalid && userForm.form.get('name')?.touched"
+              class="error-message">
+              <i class="pi pi-exclamation-triangle"></i>
+              First name is required
+            </small>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label for="surname" class="field-label">
+              <i class="pi pi-users"></i>
+              Last Name *
+            </label>
+            <input pInputText id="surname" name="surname" [(ngModel)]="userFormData.surname"
+              placeholder="Enter last name" required class="form-input">
+            <small *ngIf="userForm.form.get('surname')?.invalid && userForm.form.get('surname')?.touched"
+              class="error-message">
+              <i class="pi pi-exclamation-triangle"></i>
+              Last name is required
+            </small>
+          </div>
+        </div>
       </div>
-    </form>
+
+      <!-- Contact Information Section -->
+      <div class="form-section">
+        <div class="section-header">
+          <i class="pi pi-phone section-icon"></i>
+          <h4>Contact Information</h4>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label for="email" class="field-label">
+              <i class="pi pi-envelope"></i>
+              Email Address
+            </label>
+            <input pInputText id="email" name="email" [(ngModel)]="userFormData.email" placeholder="Enter email address"
+              type="email" class="form-input">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label for="telephone" class="field-label">
+              <i class="pi pi-phone"></i>
+              Phone Number
+            </label>
+            <input pInputText id="telephone" name="telephone" [(ngModel)]="userFormData.telephone"
+              placeholder="Enter phone number" type="tel" class="form-input">
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <div class="dialog-footer">
+      <p-button label="Cancel" icon="pi pi-times" severity="secondary" (onClick)="closeModal()" [outlined]="true"
+        class="cancel-btn">
+      </p-button>
+      <p-button [label]="editingUser ? 'Update User' : 'Create User'"
+        [icon]="editingUser ? 'pi pi-check' : 'pi pi-plus'" severity="primary" type="submit"
+        [disabled]="!userForm.form.valid || submitting" [loading]="submitting" class="submit-btn"
+        (onClick)="saveUser()">
+      </p-button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Reset Password Dialog -->
+<p-dialog [(visible)]="showPasswordModal" [modal]="true" [closable]="false" header="Reset Password"
+  [style]="{ width: '400px', maxWidth: '90vw' }" [draggable]="false" [resizable]="false" (onHide)="closePasswordModal()"
+  styleClass="password-dialog">
+
+  <ng-template pTemplate="header">
+    <div class="dialog-header">
+      <div class="header-content">
+        <i class="header-icon pi pi-key"></i>
+        <span class="header-title">Reset Password</span>
+      </div>
+      <button type="button" class="header-close-btn" (click)="closePasswordModal()">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+  </ng-template>
+
+  <form (ngSubmit)="confirmResetPassword()" #passwordForm="ngForm" class="password-form">
+    <div class="form-content">
+      <div class="form-section">
+        <div class="form-row">
+          <div class="form-field">
+            <label for="newPassword" class="field-label">
+              <i class="pi pi-lock"></i>
+              New Password *
+            </label>
+            <input pInputText id="newPassword" name="newPassword" [(ngModel)]="passwordFormData.password"
+              placeholder="Enter new password" type="password" autocomplete="new-password" required class="form-input">
+            <small
+              *ngIf="passwordForm.form.get('newPassword')?.invalid && passwordForm.form.get('newPassword')?.touched"
+              class="error-message">
+              <i class="pi pi-exclamation-triangle"></i>
+              New password is required
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <div class="dialog-footer">
+      <p-button label="Cancel" icon="pi pi-times" severity="danger" (onClick)="closePasswordModal()" [outlined]="true"
+        class="cancel-btn">
+      </p-button>
+      <p-button label="Reset Password" icon="pi pi-key" severity="info" type="submit"
+        [disabled]="!passwordForm.form.valid || submittingPassword" [loading]="submittingPassword" class="submit-btn"
+        (onClick)="confirmResetPassword()">
+      </p-button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Manage Structures Dialog -->
+<p-dialog [(visible)]="showStructuresModal" [modal]="true" [closable]="false" header="Manage User Structures"
+  [style]="{ width: '700px', maxWidth: '90vw', height: '600px' }" [draggable]="false" [resizable]="false"
+  (onHide)="closeStructuresModal()" styleClass="structures-dialog">
+
+  <ng-template pTemplate="header">
+    <div class="dialog-header">
+      <div class="header-content">
+        <i class="header-icon pi pi-sitemap"></i>
+        <span class="header-title">Manage Structures for {{ selectedUser?.name }} {{ selectedUser?.surname }}</span>
+      </div>
+      <button type="button" class="header-close-btn" (click)="closeStructuresModal()">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+  </ng-template>
+
+  <div class="structures-content">
+    <!-- Current Structures Section -->
+    <div class="current-structures-section" *ngIf="userStructures.length > 0">
+      <div class="section-header">
+        <i class="pi pi-sitemap section-icon"></i>
+        <h4>Current Structures</h4>
+      </div>
+
+      <div class="structures-list">
+        <div class="structure-item" *ngFor="let structure of userStructures">
+          <div class="structure-info">
+            <i class="pi pi-building structure-icon"></i>
+            <span class="structure-name">{{ structure.name }}</span>
+            <span class="structure-city">{{ structure.city }}</span>
+          </div>
+          <button type="button" class="remove-btn" (click)="removeStructureFromUser(structure.id)">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Structure Section -->
+    <div class="add-structure-section">
+      <div class="section-header">
+        <i class="pi pi-plus section-icon"></i>
+        <h4>Add Structure</h4>
+      </div>
+
+      <div class="add-structure-form">
+        <div class="form-field">
+          <label for="availableStructures" class="field-label">
+            <i class="pi pi-building"></i>
+            Select Structure
+          </label>
+          <p-select id="availableStructures" name="availableStructures" [(ngModel)]="selectedStructureId"
+            [options]="availableStructures" placeholder="Choose a structure to assign" optionLabel="name"
+            optionValue="id" styleClass="w-full" [panelStyleClass]="'structures-dropdown-panel'"
+            [loading]="loadingStructures">
+            <ng-template pTemplate="item" let-structure>
+              <div class="structure-option">
+                <span class="structure-name">{{ structure.name }}</span>
+                <span class="structure-city">{{ structure.city }}</span>
+              </div>
+            </ng-template>
+          </p-select>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
+
+  <ng-template pTemplate="footer">
+    <div class="dialog-footer">
+      <p-button label="Cancel" icon="pi pi-times" severity="danger" (onClick)="closeStructuresModal()" [outlined]="true"
+        class="cancel-btn">
+      </p-button>
+      <p-button label="Add Structure" icon="pi pi-plus" severity="info"
+        [disabled]="!selectedStructureId || submittingStructure" [loading]="submittingStructure" class="submit-btn"
+        (onClick)="addStructureToUser()">
+      </p-button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Change Role Dialog -->
+<p-dialog [(visible)]="showRoleModal" [modal]="true" [closable]="false" header="Change User Role"
+  [style]="{ width: '500px', maxWidth: '90vw' }" [draggable]="false" [resizable]="false" (onHide)="closeRoleModal()"
+  styleClass="role-dialog">
+
+  <ng-template pTemplate="header">
+    <div class="dialog-header">
+      <div class="header-content">
+        <i class="header-icon pi pi-users"></i>
+        <span class="header-title">Change Role for {{ selectedUser?.name }} {{ selectedUser?.surname }}</span>
+      </div>
+      <button type="button" class="header-close-btn" (click)="closeRoleModal()">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+  </ng-template>
+
+  <div class="role-content">
+    <div class="current-role-section">
+      <div class="section-header">
+        <i class="pi pi-info-circle section-icon"></i>
+        <h4>Current Role</h4>
+      </div>
+      <div class="current-role-info">
+        <p-tag [value]="selectedUser?.role || 'Unknown'"
+          [severity]="selectedUser?.role === 'superadmin' ? 'danger' : 'info'" styleClass="role-tag">
+        </p-tag>
+      </div>
+    </div>
+
+    <div class="new-role-section">
+      <div class="section-header">
+        <i class="pi pi-arrow-right section-icon"></i>
+        <h4>Select New Role</h4>
+      </div>
+
+      <div class="role-form">
+        <div class="form-field">
+          <label for="newRole" class="field-label">
+            <i class="pi pi-users"></i>
+            New Role
+          </label>
+          <p-select id="newRole" name="newRole" [(ngModel)]="selectedRoleId" [options]="availableRoles"
+            placeholder="Select a new role" optionLabel="name" optionValue="id" styleClass="w-full"
+            [loading]="loadingRoles">
+            <ng-template pTemplate="item" let-role>
+              <div class="role-option">
+                <span class="role-name">{{ role.name }}</span>
+                <span class="role-description">{{ role.name === 'superadmin' ? 'Full system access' : 'Structure
+                  management access' }}</span>
+              </div>
+            </ng-template>
+          </p-select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="dialog-footer">
+      <p-button label="Cancel" icon="pi pi-times" severity="secondary" (onClick)="closeRoleModal()" [outlined]="true"
+        class="cancel-btn">
+      </p-button>
+      <p-button label="Change Role" icon="pi pi-check" severity="primary"
+        [disabled]="!selectedRoleId || submittingRole || selectedRoleId === getCurrentRoleId()"
+        [loading]="submittingRole" class="submit-btn" (onClick)="confirmRoleChange()">
+      </p-button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Toast for notifications -->
+<p-toast></p-toast>

@@ -9,7 +9,7 @@ import { Router, RouterOutlet } from '@angular/router';
 import { SidebarModule } from 'primeng/sidebar';
 import { ButtonModule } from 'primeng/button';
 import { AuthService } from '../../services/auth.service';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { Menu } from 'primeng/menu';
 import { Subscription } from 'rxjs';
@@ -17,7 +17,7 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-admin-home',
-  imports: [MenuModule, BadgeModule, RippleModule, AvatarModule, CommonModule, DropdownModule, FormsModule,
+  imports: [MenuModule, BadgeModule, RippleModule, AvatarModule, CommonModule, SelectModule, FormsModule,
     RouterOutlet, SidebarModule, ButtonModule, TranslocoPipe],
   templateUrl: './admin-home.component.html',
   styleUrl: './admin-home.component.scss'
@@ -30,6 +30,8 @@ export class AdminHomeComponent implements OnInit, OnDestroy {
   userName: string = '';
   structures: { id: number, name: string }[] = [];
   selectedStructureId: number | null = null;
+  isAuthenticated: boolean = false;
+  isInitialized: boolean = false;
 
   @ViewChild('userMenu') userMenu!: Menu;
   private userSubscription!: Subscription;
@@ -53,9 +55,28 @@ export class AdminHomeComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    // Always show loading initially, regardless of localStorage availability
 
+    // Wait for localStorage to be available
+    if (typeof window === 'undefined' || !window.localStorage) {
+      // Wait a bit for localStorage to become available
+      setTimeout(() => this.initializeAuth(), 100);
+      return;
+    }
+
+    this.initializeAuth();
+  }
+
+  private initializeAuth() {
+    // Set initial authentication state
+    this.isAuthenticated = this.authService.isLoggedIn();
 
     this.userSubscription = this.authService.user$.subscribe(user => {
+      this.isAuthenticated = !!user;
+
+      // Mark as initialized after auth state is determined
+      this.isInitialized = true;
+
       if (user) {
         this.userName = user?.username || '';
         this.structures = user?.structures || [];
@@ -107,11 +128,7 @@ export class AdminHomeComponent implements OnInit, OnDestroy {
           ];
         });
       }
-      else {
-        this.router.navigate(['/admin/login']);
-      }
     });
-
   }
 
   ngOnDestroy() {
@@ -129,7 +146,6 @@ export class AdminHomeComponent implements OnInit, OnDestroy {
   }
 
   isLoginPage(): boolean {
-    //console.log('Current URL:', this.router.url);
     return this.router.url === '/admin/login';
   }
 

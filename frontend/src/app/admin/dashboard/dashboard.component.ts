@@ -1,5 +1,6 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { InputTextModule } from 'primeng/inputtext';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
@@ -23,7 +24,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   options: any;
 
   // Example remote check-ins data
@@ -34,12 +35,15 @@ export class DashboardComponent implements OnInit {
   checkInData: any;
   chartOptions: ChartOptions | undefined;
 
+  private subscriptions: Subscription[] = [];
+  private componentId = Math.random().toString(36).substr(2, 9);
+
   constructor(
     private reservationService: ReservationService,
     private router: Router,
     private authService: AuthService,
     @Inject(PLATFORM_ID) private platformId: object,
-
+    private messageService: MessageService
   ) {
 
   }
@@ -70,27 +74,48 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log('DashboardComponent initialized');
+    console.log('DashboardComponent initialized with ID:', this.componentId);
     if (isPlatformBrowser(this.platformId)) {
       const structureIdStr = localStorage.getItem('selected_structure_id');
       const structureId = structureIdStr ? +structureIdStr : null;
+      console.log('Selected structure ID from localStorage:', structureIdStr, 'Parsed as:', structureId);
       if (structureId && !isNaN(structureId) && structureId > 0) {
-        this.reservationService.getReservationByStructureId(structureId).subscribe({
+        // Subscribe to reservations and store subscription
+        const reservationSub = this.reservationService.getReservationByStructureId(structureId).subscribe({
           next: (reservations) => {
-            console.log(reservations);
-            this.reservations = reservations;
-            // Handle the response data here
+            console.log('Reservations received:', reservations);
+            this.reservations = reservations || [];
           },
           error: (error) => {
             console.error('Error fetching reservations:', error);
-            // Handle the error here (e.g., show a message to the user)
+            this.reservations = [];
+
+            if (error.status === 404) {
+              console.log('No reservations found for structure:', structureId);
+              this.messageService.add({
+                severity: 'info',
+                summary: 'No Reservations',
+                detail: 'No reservations found for this structure',
+                life: 4000
+              });
+            } else {
+              const errorMessage = error?.error?.message || error?.message || 'Failed to load reservations. Please try again.';
+              this.messageService.add({
+                severity: 'error',
+                summary: 'Reservations load failed',
+                detail: errorMessage,
+                life: 6000
+              });
+            }
           },
           complete: () => {
-            console.log('Reservation fetch completed.');
-            // Optional: Handle completion logic
+            console.log('Reservation fetch completed for structure:', structureId);
           }
         });
-        this.reservationService.getMonthlyReservation(structureId).subscribe({
+        this.subscriptions.push(reservationSub);
+
+        // Subscribe to monthly reservations and store subscription
+        const monthlySub = this.reservationService.getMonthlyReservation(structureId).subscribe({
           next: (monthly_reserv) => {
             console.log('Reservations:', monthly_reserv);
             // Handle the response data here
@@ -117,16 +142,37 @@ export class DashboardComponent implements OnInit {
             };
           },
           error: (error) => {
-            console.error('Error fetching reservations:', error);
-            // Handle the error here (e.g., show a message to the user)
+            console.error('Error fetching monthly reservations:', error);
+            const errorMessage = error?.error?.message || error?.message || 'Failed to load monthly reservations chart. Please try again.';
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Chart load failed',
+              detail: errorMessage,
+              life: 6000
+            });
           },
           complete: () => {
             console.log('Reservation fetch completed.');
             // Optional: Handle completion logic
           }
         });
+        this.subscriptions.push(monthlySub);
+      } else {
+        console.log('No valid structure ID found. Structure ID:', structureId);
+        console.log('localStorage selected_structure_id:', localStorage.getItem('selected_structure_id'));
       }
     }
+  }
+
+  ngOnDestroy(): void {
+    // Clean up all subscriptions to prevent memory leaks and duplicate calls
+    this.subscriptions.forEach(sub => {
+      if (sub && !sub.closed) {
+        sub.unsubscribe();
+      }
+    });
+    this.subscriptions = [];
+    console.log('DashboardComponent destroyed with ID:', this.componentId, '- subscriptions cleaned up');
   }
 }
 

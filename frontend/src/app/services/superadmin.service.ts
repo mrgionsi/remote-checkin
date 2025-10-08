@@ -21,6 +21,7 @@ export interface User {
   email: string;
   telephone: string;
   role: string;
+  id_role: number;
   structures: Array<{ id: number; name: string }>;
 }
 
@@ -143,6 +144,18 @@ export class SuperadminService {
       headers: this.getHeaders(),
       body: { user_id: userId, structure_id: structureId }
     });
+  }
+
+  // Role Management
+  getRoles(): Observable<{ roles: any[] }> {
+    return this.http.get<{ roles: any[] }>(`${this.baseUrl}/roles`, { headers: this.getHeaders() });
+  }
+
+  changeUserRole(userId: number, roleId: number): Observable<any> {
+    return this.http.put(`${this.baseUrl}/users/${userId}/change-role`,
+      { id_role: roleId },
+      { headers: this.getHeaders() }
+    );
   }
 
   // Dashboard

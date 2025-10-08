@@ -13,25 +13,18 @@ export class ClientReservationService {
 
   constructor(private http: HttpClient, private authService: AuthService) { }
 
-  private checkAuthOrError(): boolean {
-    return this.authService.isLoggedIn();
-  }
-
 
   getClientByReservationId(id_reservation: number): Observable<any> {
-    if (!this.checkAuthOrError()) {
-      return throwError(() => new Error('User not authenticated'));
+    if (!this.authService.checkAuthAndRedirect()) {
+      return throwError(() => new Error('Authentication failed'));
     }
     return this.http.get(this.apiUrl + '/' + id_reservation + '/clients', { headers: this.authService.getAuthHeaders() })
   }
 
-  getUserPhoto(id_reservation: number, name: string, surname: string, cf: string) {
-    if (!this.checkAuthOrError()) {
-      return throwError(() => new Error('User not authenticated'));
+  getUserPhoto(id_reservation: number, name: string, surname: string, cf: string): Observable<any> {
+    if (!this.authService.checkAuthAndRedirect()) {
+      return throwError(() => new Error('Authentication failed'));
     }
     return this.http.post(this.apiUrl + '/' + id_reservation + '/client-images', { name, surname, cf }, { headers: this.authService.getAuthHeaders() })
-
-
-
   }
 }

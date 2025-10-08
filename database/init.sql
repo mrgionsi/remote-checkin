@@ -110,8 +110,6 @@ INSERT INTO "structure" ("id", "name", "street", "city") VALUES
 (2,	'B&B Chapeau',	'Via Torrino 14',	'Casagiove'),
 (1,	'B&B Chapeau',	'Via Torrino 14',	'Casagiove');
 
-DROP VIEW IF EXISTS "structure_reservations";
-CREATE TABLE "structure_reservations" ("structure_id" bigint, "structure_name" character varying, "reservation_id" bigint, "id_reference" character varying(500), "name_reference" text, "start_date" date, "end_date" date, "status" text, "room_id" bigint, "room_name" character varying);
 
 
 DROP TABLE IF EXISTS "user";
