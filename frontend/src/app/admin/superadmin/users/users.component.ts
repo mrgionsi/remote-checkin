@@ -439,7 +439,7 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
         // Initialize with null - will be set after roles are loaded
         this.selectedRoleId = null;
         this.loadAvailableRoles();
-        this.showRoleModal = true;
+        // Don't show modal here - it will be shown after roles are loaded
     }
 
     closeRoleModal(): void {
@@ -463,6 +463,10 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
                 this.selectedRoleId = this.getCurrentRoleId();
 
                 this.loadingRoles = false;
+
+                // Show modal only after roles are loaded and selectedRoleId is properly initialized
+                // This prevents the race condition where the button appears enabled incorrectly
+                this.showRoleModal = true;
             },
             error: (error) => {
                 this.loadingRoles = false;
