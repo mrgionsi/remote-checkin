@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { throwError, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from '../../environments/environments';
 import { AuthService } from './auth.service';
 
@@ -12,28 +12,18 @@ export class ReservationService {
 
   constructor(private http: HttpClient, private authService: AuthService) { }
 
-  private checkAuthOrError(): boolean {
-    return this.authService.checkAuthAndRedirect();
-  }
-
   createReservation(reservation: any): Observable<any> {
-    if (!this.checkAuthOrError()) {
-      return throwError(() => new Error('User not authenticated'));
-    }
+    this.authService.checkAuthAndRedirect();
     return this.http.post(this.apiUrl, reservation, { headers: this.authService.getAuthHeaders() });
   }
 
   updateReservation(reservation: any, reservationId: number): Observable<any> {
-    if (!this.checkAuthOrError()) {
-      return throwError(() => new Error('User not authenticated'));
-    }
+    this.authService.checkAuthAndRedirect();
     return this.http.patch(this.apiUrl + '/' + reservationId, reservation, { headers: this.authService.getAuthHeaders() });
   }
 
   getReservationByStructureId(id: number): Observable<any> {
-    if (!this.checkAuthOrError()) {
-      return throwError(() => new Error('User not authenticated'));
-    }
+    this.authService.checkAuthAndRedirect();
     return this.http.get(
       `${this.apiUrl}/structure/${id}`,
       { headers: this.authService.getAuthHeaders() }
@@ -41,9 +31,7 @@ export class ReservationService {
   }
 
   getMonthlyReservation(id_structure: number): Observable<any> {
-    if (!this.checkAuthOrError()) {
-      return throwError(() => new Error('User not authenticated'));
-    }
+    this.authService.checkAuthAndRedirect();
     return this.http.get(`${this.apiUrl}/monthly/${id_structure}`, { headers: this.authService.getAuthHeaders() });
   }
 
@@ -56,25 +44,19 @@ export class ReservationService {
     return this.http.get(`${this.apiUrl}/check/${id_reference}`,);
   }
   getAdminReservationById(id_structure: number): Observable<any> {
-    if (!this.checkAuthOrError()) {
-      return throwError(() => new Error('User not authenticated'));
-    }
+    this.authService.checkAuthAndRedirect();
     return this.http.get(`${this.apiUrl}/admin/${id_structure}`, { headers: this.authService.getAuthHeaders() });
   }
 
   updateReservationStatus(reservationId: number, status: any): Observable<any> {
-    if (!this.checkAuthOrError()) {
-      return throwError(() => new Error('User not authenticated'));
-    }
+    this.authService.checkAuthAndRedirect();
     const url = `${this.apiUrl}/${reservationId}/status`;
     const body = { status };
     return this.http.put(url, body, { headers: this.authService.getAuthHeaders() });
   }
 
   deleteReservation(reservationId: number): Observable<any> {
-    if (!this.checkAuthOrError()) {
-      return throwError(() => new Error('User not authenticated'));
-    }
+    this.authService.checkAuthAndRedirect();
     return this.http.delete(this.apiUrl + '/' + reservationId, { headers: this.authService.getAuthHeaders() });
   }
 
