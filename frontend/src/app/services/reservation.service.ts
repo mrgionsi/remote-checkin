@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, EMPTY } from 'rxjs';
 import { environment } from '../../environments/environments';
 import { AuthService } from './auth.service';
 
@@ -13,17 +13,23 @@ export class ReservationService {
   constructor(private http: HttpClient, private authService: AuthService) { }
 
   createReservation(reservation: any): Observable<any> {
-    this.authService.checkAuthAndRedirect();
+    if (!this.authService.checkAuthAndRedirect()) {
+      return EMPTY;
+    }
     return this.http.post(this.apiUrl, reservation, { headers: this.authService.getAuthHeaders() });
   }
 
   updateReservation(reservation: any, reservationId: number): Observable<any> {
-    this.authService.checkAuthAndRedirect();
+    if (!this.authService.checkAuthAndRedirect()) {
+      return EMPTY;
+    }
     return this.http.patch(this.apiUrl + '/' + reservationId, reservation, { headers: this.authService.getAuthHeaders() });
   }
 
   getReservationByStructureId(id: number): Observable<any> {
-    this.authService.checkAuthAndRedirect();
+    if (!this.authService.checkAuthAndRedirect()) {
+      return EMPTY;
+    }
     return this.http.get(
       `${this.apiUrl}/structure/${id}`,
       { headers: this.authService.getAuthHeaders() }
@@ -31,7 +37,9 @@ export class ReservationService {
   }
 
   getMonthlyReservation(id_structure: number): Observable<any> {
-    this.authService.checkAuthAndRedirect();
+    if (!this.authService.checkAuthAndRedirect()) {
+      return EMPTY;
+    }
     return this.http.get(`${this.apiUrl}/monthly/${id_structure}`, { headers: this.authService.getAuthHeaders() });
   }
 
@@ -44,19 +52,25 @@ export class ReservationService {
     return this.http.get(`${this.apiUrl}/check/${id_reference}`,);
   }
   getAdminReservationById(id_structure: number): Observable<any> {
-    this.authService.checkAuthAndRedirect();
+    if (!this.authService.checkAuthAndRedirect()) {
+      return EMPTY;
+    }
     return this.http.get(`${this.apiUrl}/admin/${id_structure}`, { headers: this.authService.getAuthHeaders() });
   }
 
   updateReservationStatus(reservationId: number, status: any): Observable<any> {
-    this.authService.checkAuthAndRedirect();
+    if (!this.authService.checkAuthAndRedirect()) {
+      return EMPTY;
+    }
     const url = `${this.apiUrl}/${reservationId}/status`;
     const body = { status };
     return this.http.put(url, body, { headers: this.authService.getAuthHeaders() });
   }
 
   deleteReservation(reservationId: number): Observable<any> {
-    this.authService.checkAuthAndRedirect();
+    if (!this.authService.checkAuthAndRedirect()) {
+      return EMPTY;
+    }
     return this.http.delete(this.apiUrl + '/' + reservationId, { headers: this.authService.getAuthHeaders() });
   }
 
