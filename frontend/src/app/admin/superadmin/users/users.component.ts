@@ -128,7 +128,8 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
     loadUsers(): void {
         // Prevent duplicate API calls globally
         if (SuperadminUsersComponent.globalUsersLoading) {
-            // Simply return - don't mutate loading state as there's no actual request happening
+            // Reset loading state since we're not making a new request
+            this.loading = false;
             return;
         }
 
