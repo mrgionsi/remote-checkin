@@ -833,22 +833,53 @@ def create_association():  # pylint: disable=too-many-return-statements
         # Validate user, structure, and check for existing association
         user = db_session.query(User).filter(User.id == user_id).first()
         if not user:
+            logger.warning(
+                "Attempt to create association with non-existent user",
+                extra={'user_id': user_id, 'structure_id': structure_id, 'operation': 'create_association'}
+            )
             return jsonify({"error": USER_NOT_FOUND}), 404
 
         structure = db_session.query(Structure).filter(Structure.id == structure_id).first()
         if not structure:
+            logger.warning(
+                "Attempt to create association with non-existent structure",
+                extra={'user_id': user_id, 'structure_id': structure_id, 'operation': 'create_association'}
+            )
             return jsonify({"error": STRUCTURE_NOT_FOUND}), 404
 
         existing = db_session.query(AdminStructure).filter(
             AdminStructure.id_user == user_id, AdminStructure.id_structure == structure_id
         ).first()
         if existing:
+            logger.warning(
+                "Attempt to create duplicate association",
+                extra={
+                    'user_id': user_id,
+                    'structure_id': structure_id,
+                    'user_username': user.username,
+                    'structure_name': structure.name,
+                    'operation': 'create_association',
+                    'result': 'duplicate_rejected'
+                }
+            )
             return jsonify({"error": "Association already exists"}), 400
 
         # Create association
         new_association = AdminStructure(id_user=user_id, id_structure=structure_id)
         db_session.add(new_association)
         db_session.commit()
+
+        logger.info(
+            "Association created successfully",
+            extra={
+                'user_id': user_id,
+                'structure_id': structure_id,
+                'user_username': user.username,
+                'structure_name': structure.name,
+                'operation': 'create_association',
+                'result': 'success'
+            }
+        )
 
         return jsonify({"message": "Association created successfully"}), 201
 
