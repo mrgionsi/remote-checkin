@@ -20,15 +20,286 @@
   margin-bottom: 20px;
 }
 
-.associations-list {
-  display: grid;
-  gap: 15px;
-  grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+// Modern Table Styling
+.associations-table-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e9ecef;
+  overflow: hidden;
+  margin-top: 20px;
+}
+
+::ng-deep .associations-table {
+  .p-table {
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .p-table-caption {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 1px solid #e9ecef;
+    padding: 0;
+  }
+
+  .p-table-thead>tr>th {
+    background: #f8f9fa;
+    border-bottom: 2px solid #e9ecef;
+    color: #495057;
+    font-weight: 600;
+    padding: 16px 12px;
+    font-size: 0.9rem;
+  }
+
+  .p-table-tbody>tr {
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: #f8f9fa;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    &:nth-child(even) {
+      background-color: #fafafa;
+    }
+  }
+
+  .p-table-tbody>tr>td {
+    padding: 16px 12px;
+    border-bottom: 1px solid #f1f3f4;
+    vertical-align: middle;
+  }
+
+  .p-paginator {
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    padding: 12px 16px;
+  }
+}
+
+// Table Header Styling
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-bottom: 1px solid #e9ecef;
+
+  .table-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2c3e50;
+
+    .table-icon {
+      color: #667eea;
+      font-size: 1.2rem;
+    }
+
+    .association-count {
+      font-size: 0.9rem;
+      font-weight: 400;
+      color: #6c757d;
+      margin-left: 8px;
+    }
+  }
+
+  .table-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+
+    .search-input {
+      width: 250px;
+      padding: 8px 12px 8px 32px;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+
+      &:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        outline: none;
+      }
+
+      &::placeholder {
+        color: #adb5bd;
+      }
+    }
+
+    .bulk-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 16px;
+      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+      border-radius: 8px;
+      border: 1px solid #90caf9;
+
+      .selection-count {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #1976d2;
+        white-space: nowrap;
+      }
+    }
+  }
+}
+
+// Column Headers
+.column-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #495057;
+
+  .column-icon {
+    color: #667eea;
+    font-size: 0.9rem;
+  }
+}
+
+// Table Cell Styling
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+
+  .user-info {
+    .user-name {
+      font-weight: 600;
+      color: #2c3e50;
+      font-size: 0.9rem;
+    }
+  }
+}
+
+.username-tag {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border: 1px solid #bbdefb;
+}
+
+.structure-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .structure-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+
+  .structure-info {
+    .structure-name {
+      font-weight: 600;
+      color: #2c3e50;
+      font-size: 0.9rem;
+    }
+  }
+}
+
+.city-badge {
+  background: #f8f9fa;
+  color: #6c757d;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border: 1px solid #dee2e6;
+}
+
+.status-tag {
+  font-size: 0.75rem;
+  padding: 4px 12px;
+  border-radius: 12px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.empty-message {
+  text-align: center;
+  padding: 40px 20px;
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    color: #6c757d;
+
+    .empty-icon {
+      font-size: 2rem;
+      color: #adb5bd;
+    }
+  }
 }
 
 ::ng-deep .association-card {
   .p-card {
     height: 100%;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      border-color: #667eea;
+    }
+  }
+
+  .p-card-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 1px solid #e9ecef;
+    padding: 16px 20px;
+  }
+
+  .p-card-content {
+    padding: 16px 20px;
+  }
+
+  .p-card-footer {
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    padding: 12px 20px;
   }
 
   .association-header {
@@ -39,7 +310,9 @@
 
     h4 {
       margin: 0;
-      color: #333;
+      color: #2c3e50;
+      font-size: 1.1rem;
+      font-weight: 600;
     }
   }
 
@@ -52,19 +325,27 @@
     .structure-section {
       h5 {
         margin: 0 0 10px 0;
-        color: #333;
-        font-size: 14px;
+        color: #495057;
+        font-size: 0.9rem;
         font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
 
         i {
-          margin-right: 5px;
+          color: #667eea;
+          font-size: 0.85rem;
         }
       }
 
       p {
         margin: 5px 0;
-        color: #666;
-        font-size: 14px;
+        color: #6c757d;
+        font-size: 0.85rem;
+
+        strong {
+          color: #495057;
+        }
       }
     }
   }
@@ -76,6 +357,40 @@
   }
 }
 
+.no-associations {
+  text-align: center;
+  padding: 40px;
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 40px 20px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border: 2px dashed #dee2e6;
+
+    .empty-icon {
+      font-size: 3rem;
+      color: #adb5bd;
+    }
+
+    h3 {
+      margin: 0;
+      color: #495057;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    p {
+      margin: 0;
+      color: #6c757d;
+      font-size: 1rem;
+    }
+  }
+}
+
 .loading {
   text-align: center;
   padding: 40px;
@@ -83,5 +398,330 @@
 
   p {
     margin-top: 10px;
+  }
+}
+
+// Association Dialog Styles
+::ng-deep .association-dialog {
+  .p-dialog {
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    border: none;
+  }
+
+  .p-dialog-header {
+    color: white;
+    padding: 0;
+    border: none;
+
+    .p-dialog-title {
+      display: none;
+    }
+
+    .p-dialog-header-icons {
+      display: none !important;
+    }
+
+    .p-dialog-header-icon {
+      display: none !important;
+    }
+  }
+
+  .p-dialog-content {
+    padding: 0;
+    background: #fafafa;
+    border-radius: 0 0 12px 12px;
+    overflow: visible !important;
+  }
+
+  .p-dialog-footer {
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}
+
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  border-radius: 12px 12px 0 0;
+
+  .header-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+  }
+
+  .header-icon {
+    font-size: 1.5rem;
+    opacity: 0.9;
+  }
+
+  .header-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+
+  .header-close-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: scale(1.05);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    i {
+      font-size: 0.8rem;
+    }
+  }
+}
+
+.association-form {
+  .form-content {
+    padding: 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .form-section {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e9ecef;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #f1f3f4;
+
+      .section-icon {
+        color: #667eea;
+        font-size: 1.1rem;
+      }
+
+      h4 {
+        margin: 0;
+        color: #2c3e50;
+        font-weight: 600;
+        font-size: 1rem;
+      }
+    }
+
+    .form-row {
+      margin-bottom: 20px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    .form-field {
+      .field-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 500;
+        color: #495057;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+
+        i {
+          color: #6c757d;
+          font-size: 0.85rem;
+        }
+      }
+
+      .error-message {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #dc3545;
+        font-size: 0.8rem;
+        margin-top: 6px;
+        font-weight: 500;
+
+        i {
+          font-size: 0.75rem;
+        }
+      }
+    }
+  }
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px 24px;
+  background: #f8f9fa;
+  border-radius: 0 0 12px 12px;
+  border-top: 1px solid #e9ecef;
+
+  .cancel-btn {
+    min-width: 100px;
+  }
+
+  .submit-btn {
+    min-width: 140px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+
+    &:hover:not(:disabled) {
+      background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// Confirm Dialog Styles
+::ng-deep .confirm-dialog {
+  .p-dialog {
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  }
+
+  .p-dialog-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px 12px 0 0;
+    padding: 20px 24px;
+
+    .p-dialog-title {
+      font-weight: 600;
+      font-size: 1.2rem;
+    }
+
+    .p-dialog-header-icon {
+      color: white;
+    }
+  }
+
+  .p-dialog-content {
+    padding: 24px;
+    background: #fafafa;
+  }
+
+  .p-dialog-footer {
+    padding: 20px 24px;
+    background: #f8f9fa;
+    border-radius: 0 0 12px 12px;
+    border-top: 1px solid #e9ecef;
+  }
+}
+
+// Fix PrimeNG Select dropdown z-index in modal - Same approach as users component
+::ng-deep .association-dialog {
+  .p-dialog {
+    z-index: 1000;
+  }
+
+  .p-select {
+    position: relative;
+    z-index: 1001;
+
+    .p-dropdown-panel {
+      z-index: 9999 !important;
+      position: absolute !important;
+    }
+  }
+
+  .p-dialog-mask {
+    z-index: 999;
+  }
+}
+
+// Styles for dropdown panel within modal - Same as users component
+::ng-deep .association-dropdown-panel {
+  z-index: 99999 !important;
+  position: absolute !important;
+  max-height: 200px !important;
+  overflow-y: auto !important;
+  background: white !important;
+  border: 1px solid #dee2e6 !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  margin-top: 4px !important;
+
+  .p-select-item {
+    padding: 12px 16px !important;
+    border-bottom: 1px solid #e9ecef !important;
+
+    &:last-child {
+      border-bottom: none !important;
+    }
+
+    &:hover {
+      background-color: #f8f9fa !important;
+    }
+  }
+}
+
+
+// Responsive design
+@media (max-width: 768px) {
+  .associations-list {
+    grid-template-columns: 1fr;
+  }
+
+  ::ng-deep .association-dialog .p-dialog {
+    width: 95vw !important;
+    margin: 10px;
+  }
+
+  .association-form .form-content {
+    padding: 16px;
+  }
+
+  .form-section {
+    padding: 16px;
+  }
+
+  .dialog-footer {
+    flex-direction: column;
+    gap: 8px;
+
+    .cancel-btn,
+    .submit-btn {
+      width: 100%;
+    }
   }
 }
