@@ -229,7 +229,12 @@ export class SuperadminAssociationsComponent implements OnInit {
         let hasBackendMessage = false;
 
         // Try to extract backend-provided error message
-        if (error?.error?.message) {
+        if (error?.error?.error) {
+            // Backend returns error in "error" field
+            errorMessage = error.error.error;
+            hasBackendMessage = true;
+        } else if (error?.error?.message) {
+            // Some endpoints might use "message" field
             errorMessage = error.error.message;
             hasBackendMessage = true;
         } else if (error?.message) {
@@ -270,7 +275,13 @@ export class SuperadminAssociationsComponent implements OnInit {
             }
         }
 
-        this.showErrorMessage(`${operation}: ${errorMessage}`);
+        // Show user-friendly error message
+        // If backend provided a message, show it directly; otherwise include operation context
+        if (hasBackendMessage) {
+            this.showErrorMessage(errorMessage);
+        } else {
+            this.showErrorMessage(`${operation}: ${errorMessage}`);
+        }
     }
 
     onGlobalFilter(event: any): void {
