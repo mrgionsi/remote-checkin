@@ -1,8 +1,6 @@
 <div class="associations">
   <div class="associations-header">
     <h2>User-Structure Associations</h2>
-    <p-button label="Create Association" icon="pi pi-link" (onClick)="openCreateModal()" severity="primary">
-    </p-button>
   </div>
 
   <div class="filters">
@@ -14,79 +12,261 @@
     </p-select>
   </div>
 
-  <div class="associations-list" *ngIf="!loading">
-    <p-card *ngFor="let association of associations" styleClass="association-card">
+  <!-- Advanced Data Table View -->
+  <div class="associations-table-container" *ngIf="!loading && associations.length > 0">
+    <p-table #associationsTable [value]="associations" [paginator]="true" [rows]="10" [showCurrentPageReport]="true"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} associations"
+      [rowsPerPageOptions]="[5, 10, 25, 50]" styleClass="associations-table"
+      [globalFilterFields]="['user.name', 'user.surname', 'user.username', 'structure.name', 'structure.city']">
+
+      <ng-template pTemplate="caption">
+        <div class="table-header">
+          <div class="table-title">
+            <i class="pi pi-link table-icon"></i>
+            <span>User-Structure Associations</span>
+            <span class="association-count" *ngIf="associations.length > 0">({{ associations.length }} total)</span>
+          </div>
+          <div class="table-actions">
+            <span class="p-input-icon-left">
+              <i class="pi pi-search"></i>
+              <input pInputText type="text" placeholder="Search associations..." (input)="onGlobalFilter($event)"
+                class="search-input">
+            </span>
+
+            <!-- Bulk Actions (shown when selections exist) -->
+            <div class="bulk-actions" *ngIf="selectedAssociations.length > 0">
+              <span class="selection-count">{{ selectedAssociations.length }} selected</span>
+              <p-button label="Export Selected" icon="pi pi-download" severity="secondary" size="small"
+                [outlined]="true" (onClick)="exportSelected()">
+              </p-button>
+              <p-button label="Delete Selected" icon="pi pi-trash" severity="danger" size="small" [outlined]="true"
+                (onClick)="deleteSelected()">
+              </p-button>
+            </div>
+
+            <p-button label="Export All" icon="pi pi-download" severity="secondary" size="small" [outlined]="true"
+              (onClick)="exportAll()">
+            </p-button>
+            <p-button label="Create Association" icon="pi pi-plus" severity="primary" size="small"
+              (onClick)="openCreateModal()">
+            </p-button>
+          </div>
+        </div>
+      </ng-template>
+
       <ng-template pTemplate="header">
-        <div class="association-header">
-          <h4>{{ association.user.name }} {{ association.user.surname }}</h4>
-          <p-tag value="Associated" severity="success" icon="pi pi-check">
-          </p-tag>
-        </div>
+        <tr>
+          <th style="width: 5%">
+            <p-checkbox [(ngModel)]="selectAll" (onChange)="onSelectAllChange($event)" [binary]="true">
+            </p-checkbox>
+          </th>
+          <th pSortableColumn="user.name" style="width: 18%">
+            <div class="column-header">
+              <i class="pi pi-user column-icon"></i>
+              User
+              <p-sortIcon field="user.name"></p-sortIcon>
+            </div>
+          </th>
+          <th pSortableColumn="user.username" style="width: 15%">
+            <div class="column-header">
+              <i class="pi pi-at column-icon"></i>
+              Username
+              <p-sortIcon field="user.username"></p-sortIcon>
+            </div>
+          </th>
+          <th pSortableColumn="structure.name" style="width: 25%">
+            <div class="column-header">
+              <i class="pi pi-building column-icon"></i>
+              Structure
+              <p-sortIcon field="structure.name"></p-sortIcon>
+            </div>
+          </th>
+          <th pSortableColumn="structure.city" style="width: 15%">
+            <div class="column-header">
+              <i class="pi pi-map-marker column-icon"></i>
+              City
+              <p-sortIcon field="structure.city"></p-sortIcon>
+            </div>
+          </th>
+          <th style="width: 15%">
+            <div class="column-header">
+              <i class="pi pi-cog column-icon"></i>
+              Status
+            </div>
+          </th>
+          <th style="width: 10%">
+            <div class="column-header">
+              <i class="pi pi-ellipsis-v column-icon"></i>
+              Actions
+            </div>
+          </th>
+        </tr>
       </ng-template>
 
-      <div class="association-info">
-        <div class="user-section">
-          <h5><i class="pi pi-user"></i> User Details</h5>
-          <p><strong>Username:</strong> {{ association.user.username }}</p>
-        </div>
-
-        <div class="structure-section">
-          <h5><i class="pi pi-building"></i> Structure Details</h5>
-          <p><strong>Name:</strong> {{ association.structure.name }}</p>
-          <p><strong>City:</strong> {{ association.structure.city }}</p>
-        </div>
-      </div>
-
-      <ng-template pTemplate="footer">
-        <div class="association-actions">
-          <p-button label="Remove Association" icon="pi pi-trash" severity="danger" size="small"
-            (onClick)="deleteAssociation(association)">
-          </p-button>
-        </div>
+      <ng-template pTemplate="body" let-association>
+        <tr class="association-row">
+          <td>
+            <p-checkbox [value]="association" [(ngModel)]="selectedAssociations" [binary]="false"
+              (onChange)="onSelectionChange()">
+            </p-checkbox>
+          </td>
+          <td>
+            <div class="user-cell">
+              <div class="user-avatar">
+                <i class="pi pi-user"></i>
+              </div>
+              <div class="user-info">
+                <span class="user-name">{{ association.user.name }} {{ association.user.surname }}</span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="username-tag">{{ association.user.username }}</span>
+          </td>
+          <td>
+            <div class="structure-cell">
+              <div class="structure-icon">
+                <i class="pi pi-building"></i>
+              </div>
+              <div class="structure-info">
+                <span class="structure-name">{{ association.structure.name }}</span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="city-badge">{{ association.structure.city }}</span>
+          </td>
+          <td>
+            <p-tag value="Active" severity="success" icon="pi pi-check" styleClass="status-tag">
+            </p-tag>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <p-button icon="pi pi-trash" severity="danger" size="small" [outlined]="true" [rounded]="true"
+                pTooltip="Remove Association" (onClick)="deleteAssociation(association)">
+              </p-button>
+            </div>
+          </td>
+        </tr>
       </ng-template>
-    </p-card>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7" class="empty-message">
+            <div class="empty-state">
+              <i class="pi pi-search empty-icon"></i>
+              <span>No associations found matching your search criteria.</span>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <div class="no-associations" *ngIf="!loading && associations.length === 0">
+    <div class="empty-state">
+      <i class="pi pi-link empty-icon"></i>
+      <h3>No associations found</h3>
+      <p>No user-structure associations match your current filter criteria.</p>
+      <button pButton label="Create First Association" icon="pi pi-link" (onClick)="openCreateModal()"
+        severity="primary">
+      </button>
+    </div>
   </div>
 
   <div class="loading" *ngIf="loading">
     <p-progressSpinner></p-progressSpinner>
     <p>Loading associations...</p>
   </div>
-
-  <p-message *ngIf="error" severity="error" [text]="'Error: ' + error" styleClass="w-full">
-  </p-message>
-
-  <p-message *ngIf="!loading && associations.length === 0" severity="info" text="No associations found"
-    styleClass="w-full">
-  </p-message>
 </div>
 
 <!-- Create Association Modal -->
-<p-dialog [(visible)]="showModal" [modal]="true" [closable]="true" header="Create Association"
-  [style]="{ width: '50vw' }" (onHide)="closeModal()">
+<p-dialog [(visible)]="showModal" [modal]="true" [closable]="false" header="Create Association"
+  [style]="{ width: '600px', maxWidth: '90vw' }" [draggable]="false" [resizable]="false" (onHide)="closeModal()"
+  styleClass="association-dialog">
 
-  <form (ngSubmit)="createAssociation()" #associationForm="ngForm">
-    <div class="p-fluid">
-      <div class="p-field">
-        <label for="userId">User *</label>
-        <p-select id="userId" name="userId" [(ngModel)]="associationFormData.user_id" [options]="userOptions"
-          placeholder="Select a user" required>
-        </p-select>
+  <ng-template pTemplate="header">
+    <div class="dialog-header">
+      <div class="header-content">
+        <i class="header-icon pi pi-link"></i>
+        <span class="header-title">Create Association</span>
+      </div>
+      <button type="button" class="header-close-btn" (click)="closeModal()">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+  </ng-template>
+
+  <form (ngSubmit)="createAssociation()" #associationForm="ngForm" class="association-form">
+    <div class="form-content">
+      <!-- User Selection Section -->
+      <div class="form-section">
+        <div class="section-header">
+          <i class="pi pi-user section-icon"></i>
+          <h4>User Selection</h4>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label for="userId" class="field-label">
+              <i class="pi pi-user"></i>
+              Select User *
+            </label>
+            <p-select id="userId" name="userId" [(ngModel)]="associationFormData.user_id" [options]="userOptions"
+              placeholder="Choose a user" required styleClass="w-full" [panelStyleClass]="'association-dropdown-panel'">
+            </p-select>
+            <small *ngIf="associationForm.controls['userId']?.invalid && associationForm.controls['userId']?.touched"
+              class="error-message">
+              <i class="pi pi-exclamation-triangle"></i>
+              User selection is required
+            </small>
+          </div>
+        </div>
       </div>
 
-      <div class="p-field">
-        <label for="structureId">Structure *</label>
-        <p-select id="structureId" name="structureId" [(ngModel)]="associationFormData.structure_id"
-          [options]="structureOptions" placeholder="Select a structure" required>
-        </p-select>
+      <!-- Structure Selection Section -->
+      <div class="form-section">
+        <div class="section-header">
+          <i class="pi pi-building section-icon"></i>
+          <h4>Structure Selection</h4>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label for="structureId" class="field-label">
+              <i class="pi pi-building"></i>
+              Select Structure *
+            </label>
+            <p-select id="structureId" name="structureId" [(ngModel)]="associationFormData.structure_id"
+              [options]="structureOptions" placeholder="Choose a structure" required styleClass="w-full"
+              [panelStyleClass]="'association-dropdown-panel'">
+            </p-select>
+            <small
+              *ngIf="associationForm.controls['structureId']?.invalid && associationForm.controls['structureId']?.touched"
+              class="error-message">
+              <i class="pi pi-exclamation-triangle"></i>
+              Structure selection is required
+            </small>
+          </div>
+        </div>
       </div>
     </div>
   </form>
 
   <ng-template pTemplate="footer">
-    <p-button label="Cancel" icon="pi pi-times" severity="secondary" (onClick)="closeModal()">
-    </p-button>
-    <p-button label="Create Association" icon="pi pi-check" severity="primary" (onClick)="createAssociation()"
-      [disabled]="!associationForm.form.valid">
-    </p-button>
+    <div class="dialog-footer">
+      <p-button label="Cancel" icon="pi pi-times" severity="secondary" (onClick)="closeModal()" [outlined]="true"
+        class="cancel-btn">
+      </p-button>
+      <p-button label="Create Association" icon="pi pi-check" severity="primary" type="submit"
+        [disabled]="!associationForm.form.valid || submitting" [loading]="submitting" class="submit-btn">
+      </p-button>
+    </div>
   </ng-template>
 </p-dialog>
+
+<!-- Confirm Dialog -->
+<p-confirmDialog styleClass="confirm-dialog"></p-confirmDialog>
+
+<!-- Toast for notifications -->
+<p-toast></p-toast>
