@@ -2,8 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SuperadminService, Association, Structure, User } from '../../../services/superadmin.service';
-import { forkJoin, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 
 // PrimeNG imports
 import { ButtonModule } from 'primeng/button';
@@ -362,39 +361,19 @@ export class SuperadminAssociationsComponent implements OnInit {
     }
 
     private performBulkDelete(): void {
-        const deleteObservables = this.selectedAssociations.map(association =>
-            this.superadminService.deleteAssociation(association.user_id, association.structure_id).pipe(
-                catchError(error => of({ error, association }))
-            )
+        const deletePromises = this.selectedAssociations.map(association =>
+            firstValueFrom(this.superadminService.deleteAssociation(association.user_id, association.structure_id))
         );
 
-        forkJoin(deleteObservables).subscribe({
-            next: (results) => {
-                const failures = results.filter((result: any) => result?.error);
-                const successCount = results.length - failures.length;
-
+        Promise.all(deletePromises)
+            .then(() => {
                 this.selectedAssociations = [];
                 this.selectAll = false;
                 this.loadAssociations();
-
-                if (failures.length === 0) {
-                    this.showSuccessMessage(`All ${successCount} association(s) deleted successfully!`);
-                } else if (successCount > 0) {
-                    this.messageService.add({
-                        severity: 'warn',
-                        summary: 'Partial Success',
-                        detail: `${successCount} association(s) deleted successfully, but ${failures.length} failed.`,
-                        life: 6000,
-                        closable: true
-                    });
-                } else {
-                    this.showErrorMessage('Failed to delete all selected associations.');
-                }
-            },
-            error: (error) => {
+                this.showSuccessMessage('Selected associations deleted successfully!');
+            })
+            .catch((error) => {
                 this.handleError(error, 'Deleting selected associations');
-                this.loadAssociations();
-            }
-        });
+            });
     }
 }
