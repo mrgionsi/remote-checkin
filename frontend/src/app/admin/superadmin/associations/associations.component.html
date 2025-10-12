@@ -14,7 +14,7 @@
 
   <!-- Advanced Data Table View -->
   <div class="associations-table-container" *ngIf="!loading && associations.length > 0">
-    <p-table [value]="associations" [paginator]="true" [rows]="10" [showCurrentPageReport]="true"
+    <p-table #associationsTable [value]="associations" [paginator]="true" [rows]="10" [showCurrentPageReport]="true"
       currentPageReportTemplate="Showing {first} to {last} of {totalRecords} associations"
       [rowsPerPageOptions]="[5, 10, 25, 50]" styleClass="associations-table"
       [globalFilterFields]="['user.name', 'user.surname', 'user.username', 'structure.name', 'structure.city']">
