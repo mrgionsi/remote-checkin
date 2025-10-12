@@ -1,4 +1,4 @@
-# pylint: disable=C0301,E0611,E0401,W0718,R0914,R0912
+# pylint: disable=C0301,E0611,E0401,W0718,R0914,R0912,C0302
 """
 Superadmin Routes
 
