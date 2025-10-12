@@ -215,7 +215,7 @@
             <p-select id="userId" name="userId" [(ngModel)]="associationFormData.user_id" [options]="userOptions"
               placeholder="Choose a user" required styleClass="w-full" [panelStyleClass]="'association-dropdown-panel'">
             </p-select>
-            <small *ngIf="associationForm.form.get('userId')?.invalid && associationForm.form.get('userId')?.touched"
+            <small *ngIf="associationForm.controls['userId']?.invalid && associationForm.controls['userId']?.touched"
               class="error-message">
               <i class="pi pi-exclamation-triangle"></i>
               User selection is required
@@ -242,7 +242,7 @@
               [panelStyleClass]="'association-dropdown-panel'">
             </p-select>
             <small
-              *ngIf="associationForm.form.get('structureId')?.invalid && associationForm.form.get('structureId')?.touched"
+              *ngIf="associationForm.controls['structureId']?.invalid && associationForm.controls['structureId']?.touched"
               class="error-message">
               <i class="pi pi-exclamation-triangle"></i>
               Structure selection is required
