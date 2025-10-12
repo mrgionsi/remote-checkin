@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SuperadminService, Association, Structure, User } from '../../../services/superadmin.service';
@@ -15,7 +15,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { MessageModule } from 'primeng/message';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
-import { TableModule } from 'primeng/table';
+import { TableModule, Table } from 'primeng/table';
 import { InputTextModule } from 'primeng/inputtext';
 import { TooltipModule } from 'primeng/tooltip';
 import { CheckboxModule } from 'primeng/checkbox';
@@ -62,6 +62,8 @@ export class SuperadminAssociationsComponent implements OnInit {
 
     userOptions: any[] = [];
     structureOptions: any[] = [];
+
+    @ViewChild('associationsTable') private table!: Table;
 
     constructor(
         private superadminService: SuperadminService,
@@ -288,7 +290,7 @@ export class SuperadminAssociationsComponent implements OnInit {
 
     onGlobalFilter(event: any): void {
         this.globalFilterValue = event.target.value;
-        // The table will automatically filter based on the globalFilterFields
+        this.table.filterGlobal(this.globalFilterValue, 'contains');
     }
 
     onSelectAllChange(event: any): void {
