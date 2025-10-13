@@ -167,57 +167,110 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   updateChartData(): void {
-    const isFilled = this.selectedChartType === 'area';
-
+    const isAreaChart = this.selectedChartType === 'area';
+    const isLineChart = this.selectedChartType === 'line';
+    
     this.checkInData = {
       labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
       datasets: [
         {
           label: 'Check-ins',
           data: this.monthly_reservatvion,
-          fill: isFilled,
+          fill: isAreaChart ? '+1' : false, // Use Chart.js fill syntax
           borderColor: '#42A5F5',
-          backgroundColor: isFilled ? 'rgba(66, 165, 245, 0.2)' : 'rgba(66, 165, 245, 0.8)',
+          backgroundColor: isAreaChart ? 'rgba(66, 165, 245, 0.15)' : (isLineChart ? 'rgba(66, 165, 245, 0.05)' : 'rgba(66, 165, 245, 0.8)'),
+          borderWidth: 3,
+          pointBackgroundColor: '#42A5F5',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2,
+          pointRadius: 6,
+          pointHoverRadius: 8,
           tension: 0.4
         }
       ]
     };
 
+    // Calculate max value for proper y-axis scaling
+    const maxValue = Math.max(...this.monthly_reservatvion, 1);
+    const suggestedMax = Math.ceil(maxValue * 1.1);
+
     this.chartOptions = {
       responsive: true,
       maintainAspectRatio: false,
+      interaction: {
+        intersect: false,
+        mode: 'index'
+      },
       plugins: {
         legend: {
           display: true,
-          position: 'top'
+          position: 'top',
+          labels: {
+            usePointStyle: true,
+            padding: 20,
+            font: {
+              size: 14,
+              weight: 500
+            }
+          }
         },
         tooltip: {
-          mode: 'index',
-          intersect: false
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          titleColor: '#ffffff',
+          bodyColor: '#ffffff',
+          borderColor: '#42A5F5',
+          borderWidth: 1,
+          cornerRadius: 8,
+          displayColors: true,
+          padding: 12
         }
       },
       scales: {
-        x: {
-          title: {
-            display: true,
-            text: 'Month'
+        x: { 
+          title: { 
+            display: true, 
+            text: 'Month',
+            font: {
+              size: 14,
+              weight: 600
+            },
+            color: '#374151'
           },
           grid: {
             display: false
+          },
+          ticks: {
+            font: {
+              size: 12
+            },
+            color: '#6B7280'
           }
         },
-        y: {
-          title: {
-            display: true,
-            text: 'Number of Check-ins'
+        y: { 
+          title: { 
+            display: true, 
+            text: 'Number of Check-ins',
+            font: {
+              size: 14,
+              weight: 600
+            },
+            color: '#374151'
           },
           beginAtZero: true,
+          suggestedMax: suggestedMax,
           ticks: {
             stepSize: 1,
-            precision: 0
+            precision: 0,
+            font: {
+              size: 12
+            },
+            color: '#6B7280',
+            callback: function(value) {
+              return Number.isInteger(value) ? value : '';
+            }
           },
           grid: {
-            color: 'rgba(0, 0, 0, 0.05)'
+            color: 'rgba(0, 0, 0, 0.04)'
           }
         }
       }
