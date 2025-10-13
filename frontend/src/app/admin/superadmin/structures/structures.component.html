@@ -170,6 +170,7 @@
                 </div>
             </div>
         </div>
+    </form>
 
     <ng-template pTemplate="footer">
         <div class="dialog-footer">
@@ -177,12 +178,11 @@
                 class="cancel-btn">
             </p-button>
             <p-button [label]="editingStructure ? 'Update Structure' : 'Create Structure'"
-                [icon]="editingStructure ? 'pi pi-check' : 'pi pi-plus'" severity="primary" type="submit"
+                [icon]="editingStructure ? 'pi pi-check' : 'pi pi-plus'" severity="primary" (onClick)="saveStructure()"
                 [disabled]="!structureForm.valid || submitting" [loading]="submitting" class="submit-btn">
             </p-button>
         </div>
     </ng-template>
-    </form>
 </p-dialog>
 
 <!-- Toast for notifications -->
