@@ -3,7 +3,28 @@
 <div class="p-fluid">
     <h2 class="text-center mb-4">Remote Check-ins Dashboard</h2>
 
-
+    <!-- Chart Section -->
+    <div class="chart-section">
+        <div class="chart-header">
+            <h3><i class="pi pi-chart-line"></i> Monthly Check-ins Overview</h3>
+            <div class="chart-controls">
+                <p-select 
+                    [(ngModel)]="selectedChartType" 
+                    [options]="chartTypeOptions" 
+                    (onChange)="onChartTypeChange()"
+                    placeholder="Chart Type"
+                    styleClass="chart-type-selector">
+                </p-select>
+            </div>
+        </div>
+        <div class="chart-container">
+            <p-chart 
+                [type]="chartType" 
+                [data]="checkInData" 
+                [options]="chartOptions">
+            </p-chart>
+        </div>
+    </div>
 
     <!-- Check-in Table -->
     <!-- @ts-ignore -->
@@ -54,6 +75,3 @@
     </p-table>
 
 </div>
-
-<!-- dashboard-remote-checkin.component.html -->
-<p-chart type="line" [data]="checkInData" [options]="chartOptions"></p-chart>
