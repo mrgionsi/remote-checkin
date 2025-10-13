@@ -37,7 +37,7 @@ h2 {
     border-radius: 12px;
     overflow: hidden;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-    
+
     &:hover {
         transform: translateY(-4px);
         box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
@@ -94,7 +94,7 @@ h2 {
 ::ng-deep .stat-card-primary {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    
+
     .stat-icon {
         background: rgba(255, 255, 255, 0.2);
         color: white;
@@ -104,7 +104,7 @@ h2 {
 ::ng-deep .stat-card-warning {
     background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
     color: white;
-    
+
     .stat-icon {
         background: rgba(255, 255, 255, 0.2);
         color: white;
@@ -114,7 +114,7 @@ h2 {
 ::ng-deep .stat-card-success {
     background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
     color: white;
-    
+
     .stat-icon {
         background: rgba(255, 255, 255, 0.2);
         color: white;
@@ -124,7 +124,7 @@ h2 {
 ::ng-deep .stat-card-info {
     background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
     color: white;
-    
+
     .stat-icon {
         background: rgba(255, 255, 255, 0.2);
         color: white;
@@ -185,7 +185,7 @@ h2 {
     ::ng-deep .chart-type-selector {
         min-width: 160px;
         border-radius: 8px;
-        
+
         .p-select {
             border-radius: 8px;
             border: 2px solid #e5e7eb;
@@ -204,7 +204,7 @@ h2 {
 }
 
 .chart-container {
-    min-height: 450px;
+    min-height: 400px;
     padding: 1.5rem;
     background: #ffffff;
     border-radius: 12px;
@@ -266,7 +266,7 @@ h2 {
     }
 
     .chart-container {
-        min-height: 350px;
+        min-height: 300px;
         padding: 1rem;
     }
 }

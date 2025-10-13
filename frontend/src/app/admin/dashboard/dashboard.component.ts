@@ -43,8 +43,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   selectedChartType: string = 'line';
   chartTypeOptions = [
     { label: 'Line Chart', value: 'line' },
-    { label: 'Bar Chart', value: 'bar' },
-    { label: 'Area Chart', value: 'area' }
+    { label: 'Bar Chart', value: 'bar' }
   ];
 
   // Summary statistics
@@ -167,18 +166,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   updateChartData(): void {
-    const isAreaChart = this.selectedChartType === 'area';
     const isLineChart = this.selectedChartType === 'line';
-    
+
     this.checkInData = {
       labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
       datasets: [
         {
           label: 'Check-ins',
           data: this.monthly_reservatvion,
-          fill: isAreaChart ? '+1' : false, // Use Chart.js fill syntax
+          fill: false,
           borderColor: '#42A5F5',
-          backgroundColor: isAreaChart ? 'rgba(66, 165, 245, 0.15)' : (isLineChart ? 'rgba(66, 165, 245, 0.05)' : 'rgba(66, 165, 245, 0.8)'),
+          backgroundColor: isLineChart ? 'rgba(66, 165, 245, 0.1)' : 'rgba(66, 165, 245, 0.8)',
           borderWidth: 3,
           pointBackgroundColor: '#42A5F5',
           pointBorderColor: '#ffffff',
@@ -191,8 +189,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     };
 
     // Calculate max value for proper y-axis scaling
-    const maxValue = Math.max(...this.monthly_reservatvion, 1);
-    const suggestedMax = Math.ceil(maxValue * 1.1);
+    const maxValue = Math.max(...this.monthly_reservatvion);
+    const suggestedMax = Math.max(maxValue + 1, 5); // Ensure at least 5 for better visibility
 
     this.chartOptions = {
       responsive: true,
@@ -226,9 +224,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }
       },
       scales: {
-        x: { 
-          title: { 
-            display: true, 
+        x: {
+          title: {
+            display: true,
             text: 'Month',
             font: {
               size: 14,
@@ -246,9 +244,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
             color: '#6B7280'
           }
         },
-        y: { 
-          title: { 
-            display: true, 
+        y: {
+          title: {
+            display: true,
             text: 'Number of Check-ins',
             font: {
               size: 14,
@@ -257,17 +255,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
             color: '#374151'
           },
           beginAtZero: true,
-          suggestedMax: suggestedMax,
+          max: suggestedMax,
           ticks: {
             stepSize: 1,
             precision: 0,
             font: {
               size: 12
             },
-            color: '#6B7280',
-            callback: function(value) {
-              return Number.isInteger(value) ? value : '';
-            }
+            color: '#6B7280'
           },
           grid: {
             color: 'rgba(0, 0, 0, 0.04)'
@@ -282,7 +277,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   get chartType(): 'line' | 'bar' {
-    return this.selectedChartType === 'area' ? 'line' : (this.selectedChartType as 'line' | 'bar');
+    return this.selectedChartType as 'line' | 'bar';
   }
 
   calculateSummaryStats(): void {
