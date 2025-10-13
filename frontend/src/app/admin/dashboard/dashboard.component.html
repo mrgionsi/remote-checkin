@@ -72,18 +72,57 @@
 
     <!-- Check-in Table -->
     <!-- @ts-ignore -->
-    <p-table #dt2 [value]="reservations" [paginator]="true" [rows]="10" dataKey="id_reference" selectionMode="single"
-        [globalFilterFields]="['id_reference','room_name','status']" responsiveLayout="scroll"
-        (onRowSelect)="navigateToDetails($event)">
+    <p-table #dt2 [value]="filteredReservations" [paginator]="true" [rows]="10" dataKey="id_reference"
+        selectionMode="single" responsiveLayout="scroll" (onRowSelect)="navigateToDetails($event)">
+
         <ng-template #caption>
-            <div class="flex">
-                <p-iconfield iconPosition="left" class="ml-auto">
-                    <p-inputicon>
-                        <i class="pi pi-search"></i>
-                    </p-inputicon>
-                    <input pInputText type="text" (input)="dt2.filterGlobal($any($event.target).value, 'contains')"
-                        [placeholder]="'global-search-placeholder' | transloco" />
-                </p-iconfield>
+            <!-- Quick Action Buttons -->
+            <div class="table-filters">
+                <div class="quick-actions">
+                    <p-button label="Pending Approvals" icon="pi pi-clock" severity="warn" size="small"
+                        [outlined]="true" (onClick)="filterPendingApprovals()">
+                    </p-button>
+                    <p-button label="Clear Filters" icon="pi pi-filter-slash" severity="secondary" size="small"
+                        [outlined]="true" (onClick)="clearFilters()">
+                    </p-button>
+                </div>
+
+                <!-- Filter Controls -->
+                <div class="filter-controls">
+                    <div class="filter-row">
+                        <div class="filter-item">
+                            <label class="filter-label">Status:</label>
+                            <p-select [(ngModel)]="statusFilter" [options]="statusOptions" (onChange)="onFilterChange()"
+                                placeholder="All Status" styleClass="filter-select">
+                            </p-select>
+                        </div>
+
+                        <div class="filter-item">
+                            <label class="filter-label">Date Range:</label>
+                            <p-select [(ngModel)]="dateRangeFilter" [options]="dateRangeOptions"
+                                (onChange)="onFilterChange()" placeholder="All Dates" styleClass="filter-select">
+                            </p-select>
+                        </div>
+
+                        <div class="filter-item">
+                            <label class="filter-label">Room:</label>
+                            <p-select [(ngModel)]="roomFilter" [options]="roomOptions" (onChange)="onFilterChange()"
+                                placeholder="All Rooms" styleClass="filter-select">
+                            </p-select>
+                        </div>
+                    </div>
+
+                    <!-- Global Search -->
+                    <div class="search-row">
+                        <p-iconfield iconPosition="left" class="global-search">
+                            <p-inputicon>
+                                <i class="pi pi-search"></i>
+                            </p-inputicon>
+                            <input pInputText type="text" (input)="onGlobalSearch($event)"
+                                [placeholder]="'global-search-placeholder' | transloco" />
+                        </p-iconfield>
+                    </div>
+                </div>
             </div>
         </ng-template>
         <ng-template pTemplate="header">

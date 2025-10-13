@@ -54,6 +54,31 @@ export class DashboardComponent implements OnInit, OnDestroy {
     checkoutsToday: 0
   };
 
+  // Table filters
+  statusFilter: string = '';
+  dateRangeFilter: string = '';
+  roomFilter: string = '';
+  globalSearchTerm: string = '';
+
+  // Filter options
+  statusOptions = [
+    { label: 'All Status', value: '' },
+    { label: 'Pending', value: 'Pending' },
+    { label: 'Approved', value: 'Approved' },
+    { label: 'Declined', value: 'Declined' },
+    { label: 'Sent back to customer', value: 'Sent back to customer' }
+  ];
+
+  dateRangeOptions = [
+    { label: 'All Dates', value: '' },
+    { label: 'Today', value: 'today' },
+    { label: 'This Week', value: 'week' },
+    { label: 'This Month', value: 'month' }
+  ];
+
+  roomOptions: any[] = [];
+  filteredReservations: any[] = [];
+
   private subscriptions: Subscription[] = [];
   private componentId = Math.random().toString(36).substr(2, 9);
 
@@ -104,7 +129,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
           next: (reservations) => {
             console.log('Reservations received:', reservations);
             this.reservations = reservations || [];
+            this.filteredReservations = [...this.reservations];
             this.calculateSummaryStats();
+            this.extractRoomOptions();
           },
           error: (error) => {
             console.error('Error fetching reservations:', error);
@@ -299,6 +326,92 @@ export class DashboardComponent implements OnInit, OnDestroy {
         return endDate.toISOString().split('T')[0] === todayStr;
       }).length
     };
+  }
+
+  extractRoomOptions(): void {
+    const uniqueRooms = [...new Set(this.reservations.map((r: any) => r.room_name))];
+    this.roomOptions = [
+      { label: 'All Rooms', value: '' },
+      ...uniqueRooms.map(room => ({ label: room, value: room }))
+    ];
+  }
+
+  applyFilters(): void {
+    let filtered = [...this.reservations];
+
+    // Status filter
+    if (this.statusFilter) {
+      filtered = filtered.filter((r: any) => r.status === this.statusFilter);
+    }
+
+    // Date range filter
+    if (this.dateRangeFilter) {
+      const today = new Date();
+      const todayStr = today.toISOString().split('T')[0];
+
+      filtered = filtered.filter((r: any) => {
+        const startDate = new Date(r.start_date);
+        const startDateStr = startDate.toISOString().split('T')[0];
+
+        switch (this.dateRangeFilter) {
+          case 'today':
+            return startDateStr === todayStr;
+          case 'week':
+            const weekAgo = new Date(today);
+            weekAgo.setDate(today.getDate() - 7);
+            return startDate >= weekAgo;
+          case 'month':
+            const monthAgo = new Date(today);
+            monthAgo.setMonth(today.getMonth() - 1);
+            return startDate >= monthAgo;
+          default:
+            return true;
+        }
+      });
+    }
+
+    // Room filter
+    if (this.roomFilter) {
+      filtered = filtered.filter((r: any) => r.room_name === this.roomFilter);
+    }
+
+    // Global search
+    if (this.globalSearchTerm) {
+      const searchTerm = this.globalSearchTerm.toLowerCase();
+      filtered = filtered.filter((r: any) =>
+        r.id_reference?.toLowerCase().includes(searchTerm) ||
+        r.name_reference?.toLowerCase().includes(searchTerm) ||
+        r.room_name?.toLowerCase().includes(searchTerm) ||
+        r.status?.toLowerCase().includes(searchTerm)
+      );
+    }
+
+    this.filteredReservations = filtered;
+  }
+
+  onFilterChange(): void {
+    this.applyFilters();
+  }
+
+  onGlobalSearch(event: any): void {
+    this.globalSearchTerm = event.target.value;
+    this.applyFilters();
+  }
+
+  clearFilters(): void {
+    this.statusFilter = '';
+    this.dateRangeFilter = '';
+    this.roomFilter = '';
+    this.globalSearchTerm = '';
+    this.applyFilters();
+  }
+
+  filterPendingApprovals(): void {
+    this.statusFilter = 'Pending';
+    this.dateRangeFilter = '';
+    this.roomFilter = '';
+    this.globalSearchTerm = '';
+    this.applyFilters();
   }
 
   ngOnDestroy(): void {
