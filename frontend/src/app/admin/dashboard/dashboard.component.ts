@@ -1,5 +1,5 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID, HostListener } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { InputTextModule } from 'primeng/inputtext';
 import { TableModule } from 'primeng/table';
@@ -18,11 +18,13 @@ import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
+import { DialogModule } from 'primeng/dialog';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 
 @Component({
   selector: 'app-dashboard',
-  imports: [ToastModule, IconFieldModule, InputIconModule, Toast, ChartModule, TableModule, InputTextModule, TagModule, CommonModule, TranslocoPipe, ButtonModule, SelectModule, FormsModule, CardModule],
+  imports: [ToastModule, IconFieldModule, InputIconModule, Toast, ChartModule, TableModule, InputTextModule, TagModule, CommonModule, TranslocoPipe, ButtonModule, SelectModule, FormsModule, CardModule, DialogModule, ProgressSpinnerModule],
   providers: [MessageService],
   host: { ngSkipHydration: 'true' },
   templateUrl: './dashboard.component.html',
@@ -79,6 +81,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
   roomOptions: any[] = [];
   filteredReservations: any[] = [];
 
+  // Loading and error states
+  loadingReservations: boolean = false;
+  loadingChart: boolean = false;
+  errorReservations: string | null = null;
+  errorChart: string | null = null;
+
+  // Keyboard shortcuts
+  showShortcuts: boolean = false;
+
   private subscriptions: Subscription[] = [];
   private componentId = Math.random().toString(36).substr(2, 9);
 
@@ -125,6 +136,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
       console.log('Selected structure ID from localStorage:', structureIdStr, 'Parsed as:', structureId);
       if (structureId && !isNaN(structureId) && structureId > 0) {
         // Subscribe to reservations and store subscription
+        this.loadingReservations = true;
+        this.errorReservations = null;
+
         const reservationSub = this.reservationService.getReservationByStructureId(structureId).subscribe({
           next: (reservations) => {
             console.log('Reservations received:', reservations);
@@ -132,13 +146,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this.filteredReservations = [...this.reservations];
             this.calculateSummaryStats();
             this.extractRoomOptions();
+            this.loadingReservations = false;
           },
           error: (error) => {
             console.error('Error fetching reservations:', error);
             this.reservations = [];
+            this.filteredReservations = [];
+            this.loadingReservations = false;
 
             if (error.status === 404) {
               console.log('No reservations found for structure:', structureId);
+              this.errorReservations = 'No reservations found for this structure';
               this.messageService.add({
                 severity: 'info',
                 summary: 'No Reservations',
@@ -147,6 +165,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
               });
             } else {
               const errorMessage = error?.error?.message || error?.message || 'Failed to load reservations. Please try again.';
+              this.errorReservations = errorMessage;
               this.messageService.add({
                 severity: 'error',
                 summary: 'Reservations load failed',
@@ -162,16 +181,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.subscriptions.push(reservationSub);
 
         // Subscribe to monthly reservations and store subscription
+        this.loadingChart = true;
+        this.errorChart = null;
+
         const monthlySub = this.reservationService.getMonthlyReservation(structureId).subscribe({
           next: (monthly_reserv) => {
             console.log('Reservations:', monthly_reserv);
             // Handle the response data here
             this.monthly_reservatvion = monthly_reserv.map((item: { total_reservations: any; }) => item.total_reservations);
             this.updateChartData();
+            this.loadingChart = false;
           },
           error: (error) => {
             console.error('Error fetching monthly reservations:', error);
             const errorMessage = error?.error?.message || error?.message || 'Failed to load monthly reservations chart. Please try again.';
+            this.errorChart = errorMessage;
+            this.loadingChart = false;
             this.messageService.add({
               severity: 'error',
               summary: 'Chart load failed',
@@ -412,6 +437,109 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.roomFilter = '';
     this.globalSearchTerm = '';
     this.applyFilters();
+  }
+
+  retryLoadData(): void {
+    const structureIdStr = localStorage.getItem('selected_structure_id');
+    const structureId = structureIdStr ? +structureIdStr : null;
+
+    if (structureId && !isNaN(structureId) && structureId > 0) {
+      // Retry reservations
+      this.loadingReservations = true;
+      this.errorReservations = null;
+
+      const reservationSub = this.reservationService.getReservationByStructureId(structureId).subscribe({
+        next: (reservations) => {
+          this.reservations = reservations || [];
+          this.filteredReservations = [...this.reservations];
+          this.calculateSummaryStats();
+          this.extractRoomOptions();
+          this.loadingReservations = false;
+        },
+        error: (error) => {
+          this.reservations = [];
+          this.filteredReservations = [];
+          this.loadingReservations = false;
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load reservations. Please try again.';
+          this.errorReservations = errorMessage;
+        }
+      });
+      this.subscriptions.push(reservationSub);
+
+      // Retry chart
+      this.loadingChart = true;
+      this.errorChart = null;
+
+      const monthlySub = this.reservationService.getMonthlyReservation(structureId).subscribe({
+        next: (monthly_reserv) => {
+          this.monthly_reservatvion = monthly_reserv.map((item: { total_reservations: any; }) => item.total_reservations);
+          this.updateChartData();
+          this.loadingChart = false;
+        },
+        error: (error) => {
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load monthly reservations chart. Please try again.';
+          this.errorChart = errorMessage;
+          this.loadingChart = false;
+        }
+      });
+      this.subscriptions.push(monthlySub);
+    }
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent): void {
+    // Don't trigger shortcuts when user is typing in input fields
+    const target = event.target as HTMLElement;
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.contentEditable === 'true') {
+      return;
+    }
+
+    // Handle keyboard shortcuts
+    if (event.ctrlKey || event.metaKey) {
+      switch (event.key.toLowerCase()) {
+        case 'p':
+          event.preventDefault();
+          this.filterPendingApprovals();
+          this.messageService.add({
+            severity: 'info',
+            summary: 'Keyboard Shortcut',
+            detail: 'Filtered to pending approvals',
+            life: 2000
+          });
+          break;
+        case 'f':
+          event.preventDefault();
+          this.clearFilters();
+          this.messageService.add({
+            severity: 'info',
+            summary: 'Keyboard Shortcut',
+            detail: 'Cleared all filters',
+            life: 2000
+          });
+          break;
+        case 'r':
+          event.preventDefault();
+          this.retryLoadData();
+          this.messageService.add({
+            severity: 'info',
+            summary: 'Keyboard Shortcut',
+            detail: 'Retrying data load',
+            life: 2000
+          });
+          break;
+        case '/':
+          event.preventDefault();
+          this.showShortcuts = !this.showShortcuts;
+          break;
+      }
+    }
+
+    // Handle single key shortcuts
+    switch (event.key.toLowerCase()) {
+      case 'escape':
+        this.showShortcuts = false;
+        break;
+    }
   }
 
   ngOnDestroy(): void {

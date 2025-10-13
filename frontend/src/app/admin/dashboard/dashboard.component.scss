@@ -2,6 +2,7 @@
 .p-fluid {
     max-width: 1200px;
     margin: auto;
+    transition: all 0.3s ease;
 }
 
 h2 {
@@ -345,6 +346,26 @@ h2 {
         outline: 2px solid #42A5F5;
         outline-offset: -2px;
     }
+
+    // Error message styling
+    .error-message {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        padding: 2rem;
+
+        i {
+            font-size: 2rem;
+            color: #ef4444;
+        }
+
+        span {
+            color: #6b7280;
+            font-size: 0.875rem;
+            text-align: center;
+        }
+    }
 }
 
 /* Chart Section Styles */
@@ -430,6 +451,44 @@ h2 {
     ::ng-deep canvas {
         border-radius: 8px;
     }
+
+    .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 200px;
+        gap: 1rem;
+
+        .loading-text {
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin: 0;
+        }
+    }
+
+    .error-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 200px;
+        gap: 1rem;
+        padding: 2rem;
+
+        .error-icon {
+            font-size: 3rem;
+            color: #ef4444;
+        }
+
+        .error-text {
+            color: #6b7280;
+            font-size: 0.875rem;
+            text-align: center;
+            margin: 0;
+            max-width: 300px;
+        }
+    }
 }
 
 /* Responsive adjustments */
@@ -512,6 +571,73 @@ h2 {
             padding: 0.75rem 1rem 0.75rem 2.5rem;
         }
     }
+}
+
+/* Keyboard Shortcuts Dialog */
+::ng-deep .shortcuts-dialog {
+    .p-dialog-content {
+        padding: 0;
+    }
+}
+
+.shortcuts-content {
+    padding: 1.5rem;
+}
+
+.shortcut-category {
+    margin-bottom: 2rem;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+
+    h4 {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #374151;
+        margin: 0 0 1rem 0;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #e5e7eb;
+
+        i {
+            color: #42A5F5;
+        }
+    }
+}
+
+.shortcut-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f3f4f6;
+
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+.shortcut-key {
+    background: #f3f4f6;
+    color: #374151;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid #d1d5db;
+    min-width: 80px;
+    text-align: center;
+}
+
+.shortcut-desc {
+    color: #6b7280;
+    font-size: 0.875rem;
+    flex: 1;
+    margin-left: 1rem;
 }
 
 @media (min-width: 769px) and (max-width: 1024px) {
