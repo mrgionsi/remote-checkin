@@ -17,11 +17,12 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
+import { CardModule } from 'primeng/card';
 
 
 @Component({
   selector: 'app-dashboard',
-  imports: [ToastModule, IconFieldModule, InputIconModule, Toast, ChartModule, TableModule, InputTextModule, TagModule, CommonModule, TranslocoPipe, ButtonModule, SelectModule, FormsModule],
+  imports: [ToastModule, IconFieldModule, InputIconModule, Toast, ChartModule, TableModule, InputTextModule, TagModule, CommonModule, TranslocoPipe, ButtonModule, SelectModule, FormsModule, CardModule],
   providers: [MessageService],
   host: { ngSkipHydration: 'true' },
   templateUrl: './dashboard.component.html',
@@ -45,6 +46,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
     { label: 'Bar Chart', value: 'bar' },
     { label: 'Area Chart', value: 'area' }
   ];
+
+  // Summary statistics
+  summaryStats = {
+    totalReservations: 0,
+    pendingApprovals: 0,
+    checkinsToday: 0,
+    checkoutsToday: 0
+  };
 
   private subscriptions: Subscription[] = [];
   private componentId = Math.random().toString(36).substr(2, 9);
@@ -96,6 +105,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           next: (reservations) => {
             console.log('Reservations received:', reservations);
             this.reservations = reservations || [];
+            this.calculateSummaryStats();
           },
           error: (error) => {
             console.error('Error fetching reservations:', error);
@@ -158,7 +168,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   updateChartData(): void {
     const isFilled = this.selectedChartType === 'area';
-    
+
     this.checkInData = {
       labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
       datasets: [
@@ -187,19 +197,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }
       },
       scales: {
-        x: { 
-          title: { 
-            display: true, 
-            text: 'Month' 
+        x: {
+          title: {
+            display: true,
+            text: 'Month'
           },
           grid: {
             display: false
           }
         },
-        y: { 
-          title: { 
-            display: true, 
-            text: 'Number of Check-ins' 
+        y: {
+          title: {
+            display: true,
+            text: 'Number of Check-ins'
           },
           beginAtZero: true,
           ticks: {
@@ -220,6 +230,27 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   get chartType(): 'line' | 'bar' {
     return this.selectedChartType === 'area' ? 'line' : (this.selectedChartType as 'line' | 'bar');
+  }
+
+  calculateSummaryStats(): void {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayStr = today.toISOString().split('T')[0];
+
+    this.summaryStats = {
+      totalReservations: this.reservations.length,
+      pendingApprovals: this.reservations.filter((r: any) => r.status === 'Pending').length,
+      checkinsToday: this.reservations.filter((r: any) => {
+        const startDate = new Date(r.start_date);
+        startDate.setHours(0, 0, 0, 0);
+        return startDate.toISOString().split('T')[0] === todayStr;
+      }).length,
+      checkoutsToday: this.reservations.filter((r: any) => {
+        const endDate = new Date(r.end_date);
+        endDate.setHours(0, 0, 0, 0);
+        return endDate.toISOString().split('T')[0] === todayStr;
+      }).length
+    };
   }
 
   ngOnDestroy(): void {

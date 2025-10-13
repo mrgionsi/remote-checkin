@@ -25,6 +25,112 @@ h2 {
     width: 25em;
 }
 
+/* Summary Statistics Cards */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+::ng-deep .stat-card {
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    .p-card-body {
+        padding: 0;
+    }
+
+    .p-card-content {
+        padding: 0;
+    }
+}
+
+.stat-content {
+    display: flex;
+    align-items: center;
+    padding: 1.5rem;
+    gap: 1.25rem;
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    flex-shrink: 0;
+}
+
+.stat-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    opacity: 0.8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Card color themes */
+::ng-deep .stat-card-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    
+    .stat-icon {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+    }
+}
+
+::ng-deep .stat-card-warning {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    
+    .stat-icon {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+    }
+}
+
+::ng-deep .stat-card-success {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+    
+    .stat-icon {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+    }
+}
+
+::ng-deep .stat-card-info {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    color: white;
+    
+    .stat-icon {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+    }
+}
+
 /* Chart Section Styles */
 .chart-section {
     background: #ffffff;
@@ -74,6 +180,29 @@ h2 {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .stat-content {
+        padding: 1.25rem;
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+    }
+
+    .stat-value {
+        font-size: 1.75rem;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+    }
+
     .chart-header {
         flex-direction: column;
         align-items: flex-start;
@@ -91,5 +220,11 @@ h2 {
 
     .chart-container {
         min-height: 300px;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
