@@ -1,0 +1,239 @@
+<div class="landing" [@pageFade] id="top">
+    <header class="landing__header">
+        <div class="header__brand">
+            <span class="brand__mark">Remote Check-in</span>
+            <span class="brand__tagline">Guest journeys without guesswork</span>
+        </div>
+        <nav class="header__nav">
+            <a class="nav-link" *ngFor="let link of navLinks" [attr.href]="link.href">{{ link.label }}</a>
+        </nav>
+        <div class="header__actions">
+            <a class="header__signin" routerLink="/admin/login">Sign in</a>
+            <a class="btn btn--primary header__cta" href="#pricing">Claim your spot</a>
+        </div>
+    </header>
+
+    <main class="landing__content">
+        <section class="hero" id="hero" [@heroReveal]>
+            <div class="hero__copy">
+                <p class="hero__eyebrow">Remote hospitality, real-world trust</p>
+                <h1>Deliver a frictionless remote check-in experience for every guest.</h1>
+                <p class="hero__description">
+                    Remote Check-in is the hospitality-grade SaaS that captures documents, synchronises with your PMS,
+                    and keeps every arrival compliant and on brand—no kiosks, no paperwork, just delighted guests.
+                </p>
+                <div class="hero__cta">
+                    <a class="btn btn--primary" routerLink="/admin/login">Sign in to dashboard</a>
+                    <a class="btn btn--ghost" routerLink="/">Preview guest journey</a>
+                </div>
+                <ul class="hero__features" [@staggerReveal]>
+                    <li class="stagger-item"><i class="pi pi-check"></i> Secure identity verification</li>
+                    <li class="stagger-item"><i class="pi pi-check"></i> Automated legal declarations</li>
+                    <li class="stagger-item"><i class="pi pi-check"></i> Multi-property analytics</li>
+                </ul>
+            </div>
+            <div class="hero__visual" [@cardFlip]>
+                <div class="hero__dashboard">
+                    <div class="dashboard__header">
+                        <span class="status">Live properties</span>
+                        <span class="count">48</span>
+                    </div>
+                    <div class="dashboard__tiles">
+                        <article class="tile tile--primary">
+                            <div class="tile__value">92%</div>
+                            <div class="tile__label">Self check-ins completed</div>
+                        </article>
+                        <article class="tile tile--secondary">
+                            <div class="tile__value">1.8 hrs</div>
+                            <div class="tile__label">Average time saved / guest</div>
+                        </article>
+                        <article class="tile tile--accent">
+                            <div class="tile__value">+36%</div>
+                            <div class="tile__label">Upsell conversion lift</div>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="social-proof" id="social-proof" [@staggerReveal]>
+            <div class="badges stagger-item">
+                <span class="badge"><i class="pi pi-shield"></i> GDPR-native</span>
+                <span class="badge"><i class="pi pi-lock"></i> TLS 1.3 & data encryption</span>
+                <span class="badge"><i class="pi pi-globe"></i> 12+ languages</span>
+                <span class="badge"><i class="pi pi-github"></i> Open API</span>
+            </div>
+            <p class="social-proof__text stagger-item">
+                Inspired by modern productivity leaders who combine transparency with community-driven roadmaps to stay
+                ahead.<cite> / Remote Check-in Product Team</cite>
+            </p>
+        </section>
+
+        <section class="features" id="features" [@staggerReveal]>
+            <header class="section-head stagger-item">
+                <p class="section-eyebrow">Why hospitality teams switch</p>
+                <h2>Designed for front desk heroes, revenue leaders, and operations pros.</h2>
+                <p>Everything you need to orchestrate delightful arrivals, reduce manual compliance steps, and empower
+                    teams
+                    to collaborate.</p>
+            </header>
+            <div class="features__grid">
+                <article class="feature-card stagger-item" *ngFor="let feature of featureCards">
+                    <span class="feature-card__icon"><i class="{{ feature.icon }}"></i></span>
+                    <h3>{{ feature.title }}</h3>
+                    <p>{{ feature.description }}</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="pricing" id="pricing" [@staggerReveal]>
+            <header class="section-head stagger-item">
+                <p class="section-eyebrow">Pricing</p>
+                <h2>Plans built for every property portfolio.</h2>
+                <p>Launch for free with the first 20 subscribers or host it yourself. Scale when you are ready—no hidden
+                    fees.</p>
+            </header>
+            <div class="pricing__grid">
+                <article class="pricing-card stagger-item" *ngFor="let plan of pricingPlans"
+                    [class.pricing-card--highlight]="plan.highlight">
+                    <div class="pricing-card__header">
+                        <h3>{{ plan.name }}</h3>
+                        <p class="pricing-card__price">{{ plan.price }}<span
+                                *ngIf="plan.price !== 'Let’s talk'">/month</span></p>
+                        <p class="pricing-card__tagline">{{ plan.tagline }}</p>
+                    </div>
+                    <ul class="pricing-card__list">
+                        <li *ngFor="let bullet of plan.bullets"><i class="pi pi-check"></i>{{ bullet }}</li>
+                    </ul>
+                    <div class="pricing-card__cta">
+                        <a class="btn btn--primary" *ngIf="plan.price !== 'Let’s talk'" routerLink="/admin/login">Get
+                            started</a>
+                        <a class="btn btn--outline" *ngIf="plan.price === 'Let’s talk'"
+                            href="mailto:hello@remote-checkin.io">Talk to sales</a>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="self-host" id="self-host" [@staggerReveal]>
+            <div class="self-host__copy stagger-item">
+                <p class="section-eyebrow">Prefer self-hosting?</p>
+                <h2>Deploy Remote Check-in on your own stack.</h2>
+                <p>You get the same delightful guest experience paired with complete control over infrastructure and
+                    data
+                    residency.</p>
+                <ul class="self-host__list">
+                    <li *ngFor="let benefit of selfHostBenefits"><i class="pi pi-cog"></i>{{ benefit }}</li>
+                </ul>
+                <div class="self-host__actions">
+                    <a class="btn btn--ghost"
+                        href="mailto:hello@remote-checkin.io?subject=Remote%20Check-in%20Self-host%20Request">Request
+                        deployment guide</a>
+                </div>
+            </div>
+            <div class="self-host__visual stagger-item" [@cardFlip]>
+                <div class="terminal">
+                    <div class="terminal__bar">
+                        <span></span><span></span><span></span>
+                    </div>
+                    <pre>
+docker compose pull
+docker compose up -d
+
+# Provision S3-compatible storage
+remote-checkin ctl storage sync
+        </pre>
+                </div>
+            </div>
+        </section>
+
+        <section class="faq" id="faq" [@staggerReveal]>
+            <header class="section-head stagger-item">
+                <p class="section-eyebrow">FAQ</p>
+                <h2>Answers that keep your rollout on track.</h2>
+            </header>
+            <div class="faq__grid">
+                <article class="faq-card stagger-item">
+                    <h3>How fast can we launch?</h3>
+                    <p>Most customers go live in under two weeks: connect PMS, add email templates, invite staff. We
+                        provide
+                        migration templates and proven onboarding playbooks.</p>
+                </article>
+                <article class="faq-card stagger-item">
+                    <h3>What compliance coverage is included?</h3>
+                    <p>We ship with configurable legal forms for multiple regions. Export reports directly for
+                        authorities
+                        with the same encryption standards proven across our remote check-in workflows.</p>
+                </article>
+                <article class="faq-card stagger-item">
+                    <h3>Can we extend the platform?</h3>
+                    <p>Yes. Use our REST and webhook APIs to connect marketing automation, housekeeping platforms, or
+                        custom
+                        guest apps. SDKs ship with authentication helpers and sample bots.</p>
+                </article>
+                <article class="faq-card stagger-item">
+                    <h3>Do you support mobile-first experiences?</h3>
+                    <p>Absolutely. Guests can complete the journey on any device, with real-time validation optimised
+                        for
+                        cameras and offline capture queues for limited connectivity.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="cta" id="cta" [@cardFlip]>
+            <div class="cta__content">
+                <h2>Deliver effortless guest arrivals starting today.</h2>
+                <p>Join the first 20 teams to unlock the Launch plan for free or explore self-hosting for complete
+                    control.
+                </p>
+                <div class="cta__actions">
+                    <a class="btn btn--primary" routerLink="/admin/login">Claim your spot</a>
+                    <a class="btn btn--ghost" href="mailto:hello@remote-checkin.io">Schedule a walkthrough</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="landing-footer">
+        <div class="landing-footer__primary">
+            <div class="landing-footer__brand">
+                <span class="brand__mark">Remote Check-in</span>
+                <p>From document capture to compliant reporting—everything hospitality leaders need to delight every
+                    arrival.</p>
+                <div class="landing-footer__badges">
+                    <span><i class="pi pi-shield"></i> SOC 2-ready</span>
+                    <span><i class="pi pi-lock"></i> Data encrypted end-to-end</span>
+                </div>
+            </div>
+            <div class="landing-footer__columns">
+                <div class="footer-column" *ngFor="let column of footerColumns">
+                    <h4>{{ column.heading }}</h4>
+                    <ul>
+                        <li *ngFor="let link of column.links">
+                            <a [attr.href]="link.href">{{ link.label }}</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="landing-footer__secondary">
+            <p>© {{ currentYear }} Remote Check-in Labs. All rights reserved.</p>
+            <div class="landing-footer__legal">
+                <a href="mailto:legal@remote-checkin.io?subject=Privacy%20Policy">Privacy Policy</a>
+                <a href="mailto:legal@remote-checkin.io?subject=Terms%20of%20Use">Terms</a>
+                <a href="mailto:support@remote-checkin.io">Support</a>
+            </div>
+        </div>
+    </footer>
+
+    <div class="sticky-cta" role="dialog" aria-live="polite">
+        <div class="sticky-cta__content">
+            <p><strong>Launch plan is free for the first 20 hospitality teams.</strong></p>
+            <div class="sticky-cta__actions">
+                <a class="btn btn--primary" href="#pricing">Claim your spot</a>
+                <a class="btn btn--ghost"
+                    href="mailto:hello@remote-checkin.io?subject=Schedule%20a%20walkthrough">Schedule a walkthrough</a>
+            </div>
+        </div>
+    </div>
+</div>
