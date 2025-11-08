@@ -19,6 +19,10 @@ import { SuperadminUsersComponent } from './admin/superadmin/users/users.compone
 import { SuperadminAssociationsComponent } from './admin/superadmin/associations/associations.component';
 
 export const routes: Routes = [
+    {
+        path: 'landing',
+        loadComponent: () => import('./landing/landing.component').then(m => m.LandingComponent)
+    },
     { path: '', component: LanguageComponent },
     { path: ':id', component: LanguageComponent }, // Optional reservation ID in language selection
     { path: 'reservation-check/:code', component: ReservationCheckComponent }, // Check reservation
