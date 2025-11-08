@@ -1,115 +1,141 @@
 <div class="landing" [@pageFade] id="top">
-    <header class="landing__header">
-        <div class="header__brand">
-            <span class="brand__mark">Remote Check-in</span>
-            <span class="brand__tagline">Guest journeys without guesswork</span>
-        </div>
-        <nav class="header__nav">
-            <a class="nav-link" *ngFor="let link of navLinks" [attr.href]="link.href">{{ link.label }}</a>
-        </nav>
-        <div class="header__actions">
-            <a class="header__signin" routerLink="/admin/login">Sign in</a>
-            <a class="btn btn--primary header__cta" href="#pricing">Claim your spot</a>
-        </div>
-    </header>
+  <header class="landing__header">
+    <div class="header__brand">
+      <span class="brand__mark">{{ 'landing.brand.title' | transloco }}</span>
+      <span class="brand__tagline">{{ 'landing.brand.tagline' | transloco }}</span>
+    </div>
+    <nav class="header__nav">
+      <a class="nav-link" *ngFor="let link of navLinks" [attr.href]="link.href">
+        {{ link.labelKey | transloco }}
+      </a>
+    </nav>
+    <div class="header__actions">
+      <a class="header__signin" routerLink="/admin/login">{{ 'landing.actions.signIn' | transloco }}</a>
+      <a class="btn btn--primary header__cta" href="#pricing">{{ 'landing.actions.claimSpot' | transloco }}</a>
+    </div>
+  </header>
 
     <main class="landing__content">
-        <section class="hero" id="hero" [@heroReveal]>
-            <div class="hero__copy">
-                <p class="hero__eyebrow">Remote hospitality, real-world trust</p>
-                <h1>Deliver a frictionless remote check-in experience for every guest.</h1>
-                <p class="hero__description">
-                    Remote Check-in is the hospitality-grade SaaS that captures documents, synchronises with your PMS,
-                    and keeps every arrival compliant and on brand—no kiosks, no paperwork, just delighted guests.
-                </p>
-                <div class="hero__cta">
-                    <a class="btn btn--primary" routerLink="/admin/login">Sign in to dashboard</a>
-                    <a class="btn btn--ghost" routerLink="/">Preview guest journey</a>
+    <section class="hero" id="hero" [@heroReveal]>
+      <div class="hero__copy">
+        <p class="hero__eyebrow">{{ 'landing.hero.eyebrow' | transloco }}</p>
+        <h1>{{ 'landing.hero.title' | transloco }}</h1>
+        <p class="hero__description">
+          {{ 'landing.hero.description' | transloco }}
+        </p>
+        <div class="hero__cta">
+          <a class="btn btn--primary" href="#pricing">{{ 'landing.actions.claimSpot' | transloco }}</a>
+          <a class="btn btn--ghost" routerLink="/admin/login">{{ 'landing.actions.signIn' | transloco }}</a>
+          <a class="btn btn--outline" routerLink="/">{{ 'landing.actions.previewJourney' | transloco }}</a>
+        </div>
+        <ul class="hero__features" [@staggerReveal]>
+          <li class="stagger-item"><i class="pi pi-check"></i> {{ 'landing.hero.highlights.identity' | transloco }}</li>
+          <li class="stagger-item"><i class="pi pi-check"></i> {{ 'landing.hero.highlights.compliance' | transloco }}</li>
+          <li class="stagger-item"><i class="pi pi-check"></i> {{ 'landing.hero.highlights.analytics' | transloco }}</li>
+        </ul>
+      </div>
+      <div class="hero__visual" [@cardFlip]>
+        <div class="hero__dashboard" #heroStatsSection>
+          <div class="dashboard__header">
+            <span class="status">{{ 'landing.hero.stats.header' | transloco }}</span>
+            <span class="count">
+              {{ heroStats[0].valuePrefix || '' }}{{ heroStats[0].displayValue | number:heroStats[0].format }}{{ heroStats[0].valueSuffix || '' }}
+            </span>
+          </div>
+          <div class="dashboard__tiles">
+            <ng-container *ngFor="let stat of heroStats; let index = index">
+              <article *ngIf="index > 0" class="tile" [ngClass]="stat.className">
+                <div class="tile__value">
+                  {{ stat.valuePrefix || '' }}{{ stat.displayValue | number:stat.format }}{{ stat.valueSuffix || '' }}{{ stat.valueSuffixKey ? (' ' + (stat.valueSuffixKey | transloco)) : '' }}
                 </div>
-                <ul class="hero__features" [@staggerReveal]>
-                    <li class="stagger-item"><i class="pi pi-check"></i> Secure identity verification</li>
-                    <li class="stagger-item"><i class="pi pi-check"></i> Automated legal declarations</li>
-                    <li class="stagger-item"><i class="pi pi-check"></i> Multi-property analytics</li>
-                </ul>
-            </div>
-            <div class="hero__visual" [@cardFlip]>
-                <div class="hero__dashboard">
-                    <div class="dashboard__header">
-                        <span class="status">Live properties</span>
-                        <span class="count">48</span>
+                <div class="tile__label">{{ stat.labelKey | transloco }}</div>
+              </article>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+    </section>
+
+        <section class="how-it-works" id="how-it-works" [@staggerReveal]>
+            <header class="section-head stagger-item">
+                <p class="section-eyebrow">{{ 'landing.howItWorks.eyebrow' | transloco }}</p>
+                <h2>{{ 'landing.howItWorks.title' | transloco }}</h2>
+                <p>{{ 'landing.howItWorks.description' | transloco }}</p>
+            </header>
+            <div class="how-it-works__timeline">
+                <article class="how-step stagger-item" *ngFor="let step of howItWorksSteps; let idx = index">
+                    <div class="how-step__marker">
+                        <span class="how-step__index">{{ idx + 1 }}</span>
+                        <span class="how-step__icon"><i class="{{ step.icon }}"></i></span>
                     </div>
-                    <div class="dashboard__tiles">
-                        <article class="tile tile--primary">
-                            <div class="tile__value">92%</div>
-                            <div class="tile__label">Self check-ins completed</div>
-                        </article>
-                        <article class="tile tile--secondary">
-                            <div class="tile__value">1.8 hrs</div>
-                            <div class="tile__label">Average time saved / guest</div>
-                        </article>
-                        <article class="tile tile--accent">
-                            <div class="tile__value">+36%</div>
-                            <div class="tile__label">Upsell conversion lift</div>
-                        </article>
+                    <div class="how-step__content">
+                        <p class="how-step__stage">{{ step.stageKey | transloco }}</p>
+                        <h3>{{ step.titleKey | transloco }}</h3>
+                        <p>{{ step.descriptionKey | transloco }}</p>
                     </div>
-                </div>
+                </article>
             </div>
         </section>
 
         <section class="social-proof" id="social-proof" [@staggerReveal]>
             <div class="badges stagger-item">
-                <span class="badge"><i class="pi pi-shield"></i> GDPR-native</span>
-                <span class="badge"><i class="pi pi-lock"></i> TLS 1.3 & data encryption</span>
-                <span class="badge"><i class="pi pi-globe"></i> 12+ languages</span>
-                <span class="badge"><i class="pi pi-github"></i> Open API</span>
+                <span class="badge"><i class="pi pi-shield"></i> {{ 'landing.socialProof.gdpr' | transloco }}</span>
+                <span class="badge"><i class="pi pi-lock"></i> {{ 'landing.socialProof.security' | transloco }}</span>
+                <span class="badge"><i class="pi pi-globe"></i> {{ 'landing.socialProof.languages' | transloco }}</span>
+                <span class="badge"><i class="pi pi-github"></i> {{ 'landing.socialProof.api' | transloco }}</span>
             </div>
             <p class="social-proof__text stagger-item">
-                Inspired by modern productivity leaders who combine transparency with community-driven roadmaps to stay
-                ahead.<cite> / Remote Check-in Product Team</cite>
+                {{ 'landing.socialProof.quote' | transloco }}<cite> / {{ 'landing.socialProof.attribution' | transloco }}</cite>
             </p>
         </section>
 
         <section class="features" id="features" [@staggerReveal]>
             <header class="section-head stagger-item">
-                <p class="section-eyebrow">Why hospitality teams switch</p>
-                <h2>Designed for front desk heroes, revenue leaders, and operations pros.</h2>
-                <p>Everything you need to orchestrate delightful arrivals, reduce manual compliance steps, and empower
-                    teams
-                    to collaborate.</p>
+                <p class="section-eyebrow">{{ 'landing.features.eyebrow' | transloco }}</p>
+                <h2>{{ 'landing.features.title' | transloco }}</h2>
+                <p>{{ 'landing.features.description' | transloco }}</p>
             </header>
             <div class="features__grid">
                 <article class="feature-card stagger-item" *ngFor="let feature of featureCards">
                     <span class="feature-card__icon"><i class="{{ feature.icon }}"></i></span>
-                    <h3>{{ feature.title }}</h3>
-                    <p>{{ feature.description }}</p>
+                    <h3>{{ feature.titleKey | transloco }}</h3>
+                    <p>{{ feature.descriptionKey | transloco }}</p>
                 </article>
             </div>
         </section>
 
         <section class="pricing" id="pricing" [@staggerReveal]>
             <header class="section-head stagger-item">
-                <p class="section-eyebrow">Pricing</p>
-                <h2>Plans built for every property portfolio.</h2>
-                <p>Launch for free with the first 20 subscribers or host it yourself. Scale when you are ready—no hidden
-                    fees.</p>
+                <p class="section-eyebrow">{{ 'landing.pricing.eyebrow' | transloco }}</p>
+                <h2>{{ 'landing.pricing.title' | transloco }}</h2>
+                <p>{{ 'landing.pricing.description' | transloco }}</p>
             </header>
             <div class="pricing__grid">
                 <article class="pricing-card stagger-item" *ngFor="let plan of pricingPlans"
                     [class.pricing-card--highlight]="plan.highlight">
                     <div class="pricing-card__header">
-                        <h3>{{ plan.name }}</h3>
-                        <p class="pricing-card__price">{{ plan.price }}<span
-                                *ngIf="plan.price !== 'Let’s talk'">/month</span></p>
-                        <p class="pricing-card__tagline">{{ plan.tagline }}</p>
+                        <h3>{{ plan.nameKey | transloco }}</h3>
+                        <p class="pricing-card__price">
+                            <ng-container *ngIf="plan.price; else translatedPrice">
+                                {{ plan.price }}
+                            </ng-container>
+                            <ng-template #translatedPrice>
+                                {{ plan.priceLabelKey ? (plan.priceLabelKey | transloco) : '' }}
+                            </ng-template>
+                        </p>
+                        <p class="pricing-card__note">{{ plan.priceNoteKey | transloco }}</p>
+                        <p class="pricing-card__tagline">{{ plan.taglineKey | transloco }}</p>
                     </div>
                     <ul class="pricing-card__list">
-                        <li *ngFor="let bullet of plan.bullets"><i class="pi pi-check"></i>{{ bullet }}</li>
+                        <li *ngFor="let bullet of plan.bulletKeys"><i class="pi pi-check"></i>{{ bullet | transloco }}
+                        </li>
                     </ul>
                     <div class="pricing-card__cta">
-                        <a class="btn btn--primary" *ngIf="plan.price !== 'Let’s talk'" routerLink="/admin/login">Get
-                            started</a>
-                        <a class="btn btn--outline" *ngIf="plan.price === 'Let’s talk'"
-                            href="mailto:hello@remote-checkin.io">Talk to sales</a>
+                        <a class="btn btn--primary" *ngIf="plan.price; else contactSales"
+                            routerLink="/admin/login">{{ 'landing.actions.getStarted' | transloco }}</a>
+                        <ng-template #contactSales>
+                            <a class="btn btn--outline" href="mailto:hello@remote-checkin.io">{{ 'landing.actions.contactSales' | transloco }}</a>
+                        </ng-template>
                     </div>
                 </article>
             </div>
@@ -117,18 +143,15 @@
 
         <section class="self-host" id="self-host" [@staggerReveal]>
             <div class="self-host__copy stagger-item">
-                <p class="section-eyebrow">Prefer self-hosting?</p>
-                <h2>Deploy Remote Check-in on your own stack.</h2>
-                <p>You get the same delightful guest experience paired with complete control over infrastructure and
-                    data
-                    residency.</p>
+                <p class="section-eyebrow">{{ 'landing.selfHost.eyebrow' | transloco }}</p>
+                <h2>{{ 'landing.selfHost.title' | transloco }}</h2>
+                <p>{{ 'landing.selfHost.description' | transloco }}</p>
                 <ul class="self-host__list">
-                    <li *ngFor="let benefit of selfHostBenefits"><i class="pi pi-cog"></i>{{ benefit }}</li>
+                    <li *ngFor="let benefit of selfHostBenefits"><i class="pi pi-cog"></i>{{ benefit | transloco }}</li>
                 </ul>
                 <div class="self-host__actions">
                     <a class="btn btn--ghost"
-                        href="mailto:hello@remote-checkin.io?subject=Remote%20Check-in%20Self-host%20Request">Request
-                        deployment guide</a>
+                        href="mailto:hello@remote-checkin.io?subject=Remote%20Check-in%20Self-host%20Request">{{ 'landing.actions.requestGuide' | transloco }}</a>
                 </div>
             </div>
             <div class="self-host__visual stagger-item" [@cardFlip]>
@@ -140,55 +163,45 @@
 docker compose pull
 docker compose up -d
 
-# Provision S3-compatible storage
+# {{ 'landing.selfHost.terminal.comment' | transloco }}
 remote-checkin ctl storage sync
-        </pre>
+                    </pre>
                 </div>
             </div>
         </section>
 
         <section class="faq" id="faq" [@staggerReveal]>
             <header class="section-head stagger-item">
-                <p class="section-eyebrow">FAQ</p>
-                <h2>Answers that keep your rollout on track.</h2>
+                <p class="section-eyebrow">{{ 'landing.faq.eyebrow' | transloco }}</p>
+                <h2>{{ 'landing.faq.title' | transloco }}</h2>
             </header>
             <div class="faq__grid">
                 <article class="faq-card stagger-item">
-                    <h3>How fast can we launch?</h3>
-                    <p>Most customers go live in under two weeks: connect PMS, add email templates, invite staff. We
-                        provide
-                        migration templates and proven onboarding playbooks.</p>
+                    <h3>{{ 'landing.faq.items.launch.question' | transloco }}</h3>
+                    <p>{{ 'landing.faq.items.launch.answer' | transloco }}</p>
                 </article>
                 <article class="faq-card stagger-item">
-                    <h3>What compliance coverage is included?</h3>
-                    <p>We ship with configurable legal forms for multiple regions. Export reports directly for
-                        authorities
-                        with the same encryption standards proven across our remote check-in workflows.</p>
+                    <h3>{{ 'landing.faq.items.compliance.question' | transloco }}</h3>
+                    <p>{{ 'landing.faq.items.compliance.answer' | transloco }}</p>
                 </article>
                 <article class="faq-card stagger-item">
-                    <h3>Can we extend the platform?</h3>
-                    <p>Yes. Use our REST and webhook APIs to connect marketing automation, housekeeping platforms, or
-                        custom
-                        guest apps. SDKs ship with authentication helpers and sample bots.</p>
+                    <h3>{{ 'landing.faq.items.extend.question' | transloco }}</h3>
+                    <p>{{ 'landing.faq.items.extend.answer' | transloco }}</p>
                 </article>
                 <article class="faq-card stagger-item">
-                    <h3>Do you support mobile-first experiences?</h3>
-                    <p>Absolutely. Guests can complete the journey on any device, with real-time validation optimised
-                        for
-                        cameras and offline capture queues for limited connectivity.</p>
+                    <h3>{{ 'landing.faq.items.mobile.question' | transloco }}</h3>
+                    <p>{{ 'landing.faq.items.mobile.answer' | transloco }}</p>
                 </article>
             </div>
         </section>
 
         <section class="cta" id="cta" [@cardFlip]>
             <div class="cta__content">
-                <h2>Deliver effortless guest arrivals starting today.</h2>
-                <p>Join the first 20 teams to unlock the Launch plan for free or explore self-hosting for complete
-                    control.
-                </p>
+                <h2>{{ 'landing.cta.title' | transloco }}</h2>
+                <p>{{ 'landing.cta.description' | transloco }}</p>
                 <div class="cta__actions">
-                    <a class="btn btn--primary" routerLink="/admin/login">Claim your spot</a>
-                    <a class="btn btn--ghost" href="mailto:hello@remote-checkin.io">Schedule a walkthrough</a>
+                    <a class="btn btn--primary" href="#pricing">{{ 'landing.actions.claimSpot' | transloco }}</a>
+                    <a class="btn btn--ghost" href="mailto:hello@remote-checkin.io">{{ 'landing.actions.scheduleWalkthrough' | transloco }}</a>
                 </div>
             </div>
         </section>
@@ -197,42 +210,45 @@ remote-checkin ctl storage sync
     <footer class="landing-footer">
         <div class="landing-footer__primary">
             <div class="landing-footer__brand">
-                <span class="brand__mark">Remote Check-in</span>
-                <p>From document capture to compliant reporting—everything hospitality leaders need to delight every
-                    arrival.</p>
+                <span class="brand__mark">{{ 'landing.brand.title' | transloco }}</span>
+                <p>{{ 'landing.footer.description' | transloco }}</p>
                 <div class="landing-footer__badges">
-                    <span><i class="pi pi-shield"></i> SOC 2-ready</span>
-                    <span><i class="pi pi-lock"></i> Data encrypted end-to-end</span>
+                    <span><i class="pi pi-shield"></i> {{ 'landing.footer.badges.soc2' | transloco }}</span>
+                    <span><i class="pi pi-lock"></i> {{ 'landing.footer.badges.encrypted' | transloco }}</span>
                 </div>
             </div>
             <div class="landing-footer__columns">
                 <div class="footer-column" *ngFor="let column of footerColumns">
-                    <h4>{{ column.heading }}</h4>
+                    <h4>{{ column.headingKey | transloco }}</h4>
                     <ul>
                         <li *ngFor="let link of column.links">
-                            <a [attr.href]="link.href">{{ link.label }}</a>
+                            <a [attr.href]="link.href">{{ link.labelKey | transloco }}</a>
                         </li>
                     </ul>
                 </div>
             </div>
         </div>
         <div class="landing-footer__secondary">
-            <p>© {{ currentYear }} Remote Check-in Labs. All rights reserved.</p>
+            <p>{{ 'landing.footer.copyright' | transloco:{ year: currentYear } }}</p>
             <div class="landing-footer__legal">
-                <a href="mailto:legal@remote-checkin.io?subject=Privacy%20Policy">Privacy Policy</a>
-                <a href="mailto:legal@remote-checkin.io?subject=Terms%20of%20Use">Terms</a>
-                <a href="mailto:support@remote-checkin.io">Support</a>
+                <a href="mailto:legal@remote-checkin.io?subject=Privacy%20Policy">{{ 'landing.footer.privacy' | transloco }}</a>
+                <a href="mailto:legal@remote-checkin.io?subject=Terms%20of%20Use">{{ 'landing.footer.terms' | transloco }}</a>
+                <a href="mailto:support@remote-checkin.io">{{ 'landing.footer.support' | transloco }}</a>
             </div>
         </div>
     </footer>
 
-    <div class="sticky-cta" role="dialog" aria-live="polite">
+    <div class="sticky-cta" role="dialog" aria-live="polite" *ngIf="showStickyCta()">
+        <button class="sticky-cta__close" type="button" (click)="dismissStickyCta()"
+            [attr.aria-label]="'landing.stickyCta.close' | transloco">
+            <i class="pi pi-times"></i>
+        </button>
         <div class="sticky-cta__content">
-            <p><strong>Launch plan is free for the first 20 hospitality teams.</strong></p>
+            <p><strong>{{ 'landing.stickyCta.message' | transloco }}</strong></p>
             <div class="sticky-cta__actions">
-                <a class="btn btn--primary" href="#pricing">Claim your spot</a>
+                <a class="btn btn--primary" href="#pricing">{{ 'landing.actions.claimSpot' | transloco }}</a>
                 <a class="btn btn--ghost"
-                    href="mailto:hello@remote-checkin.io?subject=Schedule%20a%20walkthrough">Schedule a walkthrough</a>
+                    href="mailto:hello@remote-checkin.io?subject=Schedule%20a%20walkthrough">{{ 'landing.actions.scheduleWalkthrough' | transloco }}</a>
             </div>
         </div>
     </div>

@@ -1,5 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  OnDestroy,
+  ViewChild,
+  signal
+} from '@angular/core';
 import { RouterModule } from '@angular/router';
 import {
   animate,
@@ -10,35 +19,57 @@ import {
   transition,
   trigger
 } from '@angular/animations';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 interface FeatureCard {
-  title: string;
-  description: string;
+  titleKey: string;
+  descriptionKey: string;
   icon: string;
 }
 
 interface PricingPlan {
-  name: string;
-  price: string;
-  tagline: string;
-  bullets: string[];
+  nameKey: string;
+  price?: string;
+  priceLabelKey?: string;
+  priceNoteKey: string;
+  taglineKey: string;
+  bulletKeys: string[];
   highlight?: boolean;
 }
 
 interface NavigationLink {
-  label: string;
+  labelKey: string;
   href: string;
 }
 
 interface FooterColumn {
-  heading: string;
-  links: { label: string; href: string }[];
+  headingKey: string;
+  links: { labelKey: string; href: string }[];
+}
+
+interface HowItWorksStep {
+  stageKey: string;
+  titleKey: string;
+  descriptionKey: string;
+  icon: string;
+}
+
+interface HeroStat {
+  target: number;
+  decimals?: number;
+  valuePrefix?: string;
+  valueSuffix?: string;
+  valueSuffixKey?: string;
+  labelKey: string;
+  displayValue: number;
+  className?: string;
+  format: string;
 }
 
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, TranslocoPipe],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss',
   animations: [
@@ -80,112 +111,233 @@ interface FooterColumn {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class LandingComponent {
+export class LandingComponent implements AfterViewInit, OnDestroy {
+  @ViewChild('heroStatsSection') private heroStatsSection?: ElementRef<HTMLElement>;
+
+  readonly showStickyCta = signal(true);
+
+  private heroStatsAnimated = false;
+  private observer?: IntersectionObserver;
+
+  constructor(private readonly cdr: ChangeDetectorRef) {}
+
   readonly navLinks: NavigationLink[] = [
-    { label: 'Features', href: '#features' },
-    { label: 'Pricing', href: '#pricing' },
-    { label: 'Self-host', href: '#self-host' },
-    { label: 'FAQ', href: '#faq' }
+    { labelKey: 'landing.nav.howItWorks', href: '#how-it-works' },
+    { labelKey: 'landing.nav.features', href: '#features' },
+    { labelKey: 'landing.nav.pricing', href: '#pricing' },
+    { labelKey: 'landing.nav.selfHost', href: '#self-host' },
+    { labelKey: 'landing.nav.faq', href: '#faq' }
   ];
 
   readonly featureCards: FeatureCard[] = [
     {
-      title: 'Automated Guest Experience',
-      description:
-        'Remote document capture, identity validation, and digital signatures streamline every arrival.',
+      titleKey: 'landing.features.cards.automated.title',
+      descriptionKey: 'landing.features.cards.automated.description',
       icon: 'pi pi-bolt'
     },
     {
-      title: 'Compliance Ready',
-      description:
-        'Generate and dispatch the required hospitality declarations in minutes, compliant with local regulations.',
+      titleKey: 'landing.features.cards.compliance.title',
+      descriptionKey: 'landing.features.cards.compliance.description',
       icon: 'pi pi-shield'
     },
     {
-      title: 'Real-Time Insights',
-      description:
-        'Monitor occupancy, guest progress, and revenue forecasts from a single multi-property dashboard.',
+      titleKey: 'landing.features.cards.insights.title',
+      descriptionKey: 'landing.features.cards.insights.description',
       icon: 'pi pi-chart-line'
     },
     {
-      title: 'Team Collaboration',
-      description:
-        'Invite partners, cleaning teams, and front desk staff with role-based permissions that scale with you.',
+      titleKey: 'landing.features.cards.collaboration.title',
+      descriptionKey: 'landing.features.cards.collaboration.description',
       icon: 'pi pi-users'
     }
   ];
 
   readonly pricingPlans: PricingPlan[] = [
     {
-      name: 'Launch',
+      nameKey: 'landing.pricing.plans.launch.name',
       price: '$0',
-      tagline: 'First 20 subscribers — everything you need to get started.',
-      bullets: [
-        'Unlimited properties & bookings',
-        'Digital guest journey with document upload',
-        'Automated confirmation emails',
-        'Community support & product roadmap voting'
+      priceNoteKey: 'landing.pricing.pricePerMonth',
+      taglineKey: 'landing.pricing.plans.launch.tagline',
+      bulletKeys: [
+        'landing.pricing.plans.launch.bullets.properties',
+        'landing.pricing.plans.launch.bullets.journey',
+        'landing.pricing.plans.launch.bullets.emails',
+        'landing.pricing.plans.launch.bullets.community'
       ],
       highlight: true
     },
     {
-      name: 'Growth',
+      nameKey: 'landing.pricing.plans.growth.name',
       price: '$79',
-      tagline: 'Ideal for boutique hotels and serviced apartments scaling operations.',
-      bullets: [
-        'Everything in Launch',
-        'Brandable guest portal & SMS notifications',
-        'Two-way PMS integrations & automation flows',
-        'Priority in-app and email support'
+      priceNoteKey: 'landing.pricing.pricePerMonth',
+      taglineKey: 'landing.pricing.plans.growth.tagline',
+      bulletKeys: [
+        'landing.pricing.plans.growth.bullets.allLaunch',
+        'landing.pricing.plans.growth.bullets.brandable',
+        'landing.pricing.plans.growth.bullets.integrations',
+        'landing.pricing.plans.growth.bullets.support'
       ]
     },
     {
-      name: 'Enterprise',
-      price: 'Let’s talk',
-      tagline: 'Custom implementations for hotel groups and hospitality brands.',
-      bullets: [
-        'Dedicated onboarding and success manager',
-        'Advanced analytics and BI exports',
-        'Custom compliance workflows per region',
-        'SAML SSO & SOC 2 report upon request'
+      nameKey: 'landing.pricing.plans.enterprise.name',
+      priceLabelKey: 'landing.pricing.plans.enterprise.priceLabel',
+      priceNoteKey: 'landing.pricing.plans.enterprise.priceNote',
+      taglineKey: 'landing.pricing.plans.enterprise.tagline',
+      bulletKeys: [
+        'landing.pricing.plans.enterprise.bullets.onboarding',
+        'landing.pricing.plans.enterprise.bullets.analytics',
+        'landing.pricing.plans.enterprise.bullets.workflows',
+        'landing.pricing.plans.enterprise.bullets.security'
       ]
     }
   ];
 
   readonly selfHostBenefits: string[] = [
-    'Deploy on your infrastructure with Docker containers and infrastructure-as-code scripts.',
-    'Retain full data ownership while leveraging the same features offered in our hosted plans.',
-    'Hybrid mode — sync select properties to our cloud, keep the rest on-premises.',
-    'Open API and webhook ecosystem for bespoke integrations and automations.'
+    'landing.selfHost.benefits.deploy',
+    'landing.selfHost.benefits.ownership',
+    'landing.selfHost.benefits.hybrid',
+    'landing.selfHost.benefits.api'
+  ];
+
+  readonly howItWorksSteps: HowItWorksStep[] = [
+    {
+      stageKey: 'landing.howItWorks.steps.invite.stage',
+      titleKey: 'landing.howItWorks.steps.invite.title',
+      descriptionKey: 'landing.howItWorks.steps.invite.description',
+      icon: 'pi pi-send'
+    },
+    {
+      stageKey: 'landing.howItWorks.steps.capture.stage',
+      titleKey: 'landing.howItWorks.steps.capture.title',
+      descriptionKey: 'landing.howItWorks.steps.capture.description',
+      icon: 'pi pi-id-card'
+    },
+    {
+      stageKey: 'landing.howItWorks.steps.sync.stage',
+      titleKey: 'landing.howItWorks.steps.sync.title',
+      descriptionKey: 'landing.howItWorks.steps.sync.description',
+      icon: 'pi pi-sync'
+    }
   ];
 
   readonly footerColumns: FooterColumn[] = [
     {
-      heading: 'Product',
+      headingKey: 'landing.footer.columns.product.heading',
       links: [
-        { label: 'Roadmap', href: 'mailto:hello@remote-checkin.io?subject=Roadmap%20Request' },
-        { label: 'Security', href: 'mailto:security@remote-checkin.io' },
-        { label: 'Status', href: 'mailto:support@remote-checkin.io?subject=Status%20Inquiry' }
+        { labelKey: 'landing.footer.columns.product.links.roadmap', href: 'mailto:hello@remote-checkin.io?subject=Roadmap%20Request' },
+        { labelKey: 'landing.footer.columns.product.links.security', href: 'mailto:security@remote-checkin.io' },
+        { labelKey: 'landing.footer.columns.product.links.status', href: 'mailto:support@remote-checkin.io?subject=Status%20Inquiry' }
       ]
     },
     {
-      heading: 'Company',
+      headingKey: 'landing.footer.columns.company.heading',
       links: [
-        { label: 'About', href: 'mailto:hello@remote-checkin.io?subject=About%20Remote%20Check-in' },
-        { label: 'Careers', href: 'mailto:talent@remote-checkin.io' },
-        { label: 'Press Kit', href: 'mailto:press@remote-checkin.io' }
+        { labelKey: 'landing.footer.columns.company.links.about', href: 'mailto:hello@remote-checkin.io?subject=About%20Remote%20Check-in' },
+        { labelKey: 'landing.footer.columns.company.links.careers', href: 'mailto:talent@remote-checkin.io' },
+        { labelKey: 'landing.footer.columns.company.links.press', href: 'mailto:press@remote-checkin.io' }
       ]
     },
     {
-      heading: 'Resources',
+      headingKey: 'landing.footer.columns.resources.heading',
       links: [
-        { label: 'Docs', href: 'mailto:hello@remote-checkin.io?subject=Docs%20Access' },
-        { label: 'API', href: 'mailto:hello@remote-checkin.io?subject=API%20Access' },
-        { label: 'Community Slack', href: 'mailto:hello@remote-checkin.io?subject=Community%20Invite' }
+        { labelKey: 'landing.footer.columns.resources.links.docs', href: 'mailto:hello@remote-checkin.io?subject=Docs%20Access' },
+        { labelKey: 'landing.footer.columns.resources.links.api', href: 'mailto:hello@remote-checkin.io?subject=API%20Access' },
+        { labelKey: 'landing.footer.columns.resources.links.slack', href: 'mailto:hello@remote-checkin.io?subject=Community%20Invite' }
       ]
     }
   ];
 
+  readonly heroStats: HeroStat[] = [
+    {
+      target: 48,
+      labelKey: 'landing.hero.stats.properties',
+      displayValue: 0,
+      format: '1.0-0'
+    },
+    {
+      target: 92,
+      valueSuffix: '%',
+      labelKey: 'landing.hero.stats.completion',
+      displayValue: 0,
+      className: 'tile--primary',
+      format: '1.0-0'
+    },
+    {
+      target: 1.8,
+      decimals: 1,
+      valueSuffixKey: 'landing.hero.stats.timeSavedSuffix',
+      labelKey: 'landing.hero.stats.timeSaved',
+      displayValue: 0,
+      className: 'tile--secondary',
+      format: '1.0-1'
+    },
+    {
+      target: 36,
+      valuePrefix: '+',
+      valueSuffix: '%',
+      labelKey: 'landing.hero.stats.upsell',
+      displayValue: 0,
+      className: 'tile--accent',
+      format: '1.0-0'
+    }
+  ];
+
   readonly currentYear = new Date().getFullYear();
+
+  ngAfterViewInit(): void {
+    if (!this.heroStatsSection) {
+      return;
+    }
+
+    this.observer = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting && !this.heroStatsAnimated) {
+            this.heroStatsAnimated = true;
+            this.animateHeroStats();
+            this.observer?.disconnect();
+          }
+        });
+      },
+      { threshold: 0.4 }
+    );
+
+    this.observer.observe(this.heroStatsSection.nativeElement);
+  }
+
+  dismissStickyCta(): void {
+    this.showStickyCta.set(false);
+  }
+
+  ngOnDestroy(): void {
+    this.observer?.disconnect();
+  }
+
+  private animateHeroStats(): void {
+    const duration = 1400;
+    const startTime = performance.now();
+
+    const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+
+    const step = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = easeOutCubic(progress);
+
+      this.heroStats.forEach(stat => {
+        const value = stat.target * eased;
+        const decimals = stat.decimals ?? 0;
+        stat.displayValue = parseFloat(value.toFixed(decimals));
+      });
+
+      this.cdr.markForCheck();
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      }
+    };
+
+    requestAnimationFrame(step);
+  }
 }
 

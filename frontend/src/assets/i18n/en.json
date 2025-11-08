@@ -360,4 +360,219 @@
         "back-header": "Back Image",
         "selfie-header": "Selfie"
     
+},
+    "landing": {
+        "brand": {
+            "title": "Remote Check-in",
+            "tagline": "Guest journeys without guesswork"
+        },
+        "nav": {
+            "howItWorks": "How it works",
+            "features": "Features",
+            "pricing": "Pricing",
+            "selfHost": "Self-host",
+            "faq": "FAQ"
+        },
+        "actions": {
+            "signIn": "Sign in",
+            "claimSpot": "Claim your spot",
+            "previewJourney": "Preview guest journey",
+            "getStarted": "Get started",
+            "contactSales": "Talk to sales",
+            "requestGuide": "Request deployment guide",
+            "scheduleWalkthrough": "Schedule a walkthrough"
+        },
+        "hero": {
+            "eyebrow": "Remote hospitality, real-world trust",
+            "title": "Deliver a frictionless remote check-in experience for every guest.",
+            "description": "Remote Check-in is the hospitality-grade SaaS that captures documents, synchronises with your PMS, and keeps every arrival compliant and on brand—no kiosks, no paperwork, just delighted guests.",
+            "highlights": {
+                "identity": "Secure identity verification",
+                "compliance": "Automated legal declarations",
+                "analytics": "Multi-property analytics"
+            },
+            "stats": {
+                "header": "Live properties",
+                "properties": "Live properties",
+                "completion": "Self check-ins completed",
+                "timeSaved": "Average time saved per guest",
+                "timeSavedSuffix": "hrs",
+                "upsell": "Upsell conversion lift"
+            }
+        },
+        "howItWorks": {
+            "eyebrow": "How it works",
+            "title": "Launch remote guest journeys in three simple steps.",
+            "description": "Seamlessly orchestrate arrivals by connecting your PMS, guiding every guest through verification, and keeping teams and authorities updated.",
+            "steps": {
+                "invite": {
+                    "stage": "Step 1",
+                    "title": "Invite & prepare",
+                    "description": "Sync reservations from your PMS or upload guest lists in bulk. Trigger branded invitations via email or SMS with one click."
+                },
+                "capture": {
+                    "stage": "Step 2",
+                    "title": "Capture & verify",
+                    "description": "Guests upload documents, selfies, and signatures from any device. Automated checks confirm identity and completeness instantly."
+                },
+                "sync": {
+                    "stage": "Step 3",
+                    "title": "Sync & comply",
+                    "description": "Approved profiles flow back into your PMS and authority reports. Teams get alerts, while analytics track readiness across properties."
+                }
+            }
+        },
+        "socialProof": {
+            "gdpr": "GDPR-native",
+            "security": "TLS 1.3 & data encryption",
+            "languages": "12+ languages",
+            "api": "Open API",
+            "quote": "Inspired by modern productivity leaders who combine transparency with community-driven roadmaps to stay ahead.",
+            "attribution": "Remote Check-in Product Team"
+        },
+        "features": {
+            "eyebrow": "Why hospitality teams switch",
+            "title": "Designed for front desk heroes, revenue leaders, and operations pros.",
+            "description": "Everything you need to orchestrate delightful arrivals, reduce manual compliance steps, and empower teams to collaborate.",
+            "cards": {
+                "automated": {
+                    "title": "Automated Guest Experience",
+                    "description": "Remote document capture, identity validation, and digital signatures streamline every arrival."
+                },
+                "compliance": {
+                    "title": "Compliance Ready",
+                    "description": "Generate and dispatch the required hospitality declarations in minutes, compliant with local regulations."
+                },
+                "insights": {
+                    "title": "Real-Time Insights",
+                    "description": "Monitor occupancy, guest progress, and revenue forecasts from a single multi-property dashboard."
+                },
+                "collaboration": {
+                    "title": "Team Collaboration",
+                    "description": "Invite partners, cleaning teams, and front desk staff with role-based permissions that scale with you."
+                }
+            }
+        },
+        "pricing": {
+            "eyebrow": "Pricing",
+            "title": "Plans built for every property portfolio.",
+            "description": "Launch for free with the first 20 subscribers or host it yourself. Scale when you are ready—no hidden fees.",
+            "pricePerMonth": "/month",
+            "plans": {
+                "launch": {
+                    "name": "Launch",
+                    "tagline": "First 20 subscribers — everything you need to get started.",
+                    "bullets": {
+                        "properties": "Unlimited properties & bookings",
+                        "journey": "Digital guest journey with document upload",
+                        "emails": "Automated confirmation emails",
+                        "community": "Community support & product roadmap voting"
+                    }
+                },
+                "growth": {
+                    "name": "Growth",
+                    "tagline": "Ideal for boutique hotels and serviced apartments scaling operations.",
+                    "bullets": {
+                        "allLaunch": "Everything in Launch",
+                        "brandable": "Brandable guest portal & SMS notifications",
+                        "integrations": "Two-way PMS integrations & automation flows",
+                        "support": "Priority in-app and email support"
+                    }
+                },
+                "enterprise": {
+                    "name": "Enterprise",
+                    "priceLabel": "Let’s talk",
+                    "priceNote": "Custom pricing based on your needs.",
+                    "tagline": "Custom implementations for hotel groups and hospitality brands.",
+                    "bullets": {
+                        "onboarding": "Dedicated onboarding and success manager",
+                        "analytics": "Advanced analytics and BI exports",
+                        "workflows": "Custom compliance workflows per region",
+                        "security": "SAML SSO & SOC 2 report upon request"
+                    }
+                }
+            }
+        },
+        "selfHost": {
+            "eyebrow": "Prefer self-hosting?",
+            "title": "Deploy Remote Check-in on your own stack.",
+            "description": "You get the same delightful guest experience paired with complete control over infrastructure and data residency.",
+            "benefits": {
+                "deploy": "Deploy on your infrastructure with Docker containers and infrastructure-as-code scripts.",
+                "ownership": "Retain full data ownership while leveraging the same features offered in our hosted plans.",
+                "hybrid": "Hybrid mode — sync select properties to our cloud, keep the rest on-premises.",
+                "api": "Open API and webhook ecosystem for bespoke integrations and automations."
+            },
+            "terminal": {
+                "comment": "Provision S3-compatible storage"
+            }
+        },
+        "faq": {
+            "eyebrow": "FAQ",
+            "title": "Answers that keep your rollout on track.",
+            "items": {
+                "launch": {
+                    "question": "How fast can we launch?",
+                    "answer": "Most customers go live in under two weeks: connect PMS, add email templates, invite staff. We provide migration templates and proven onboarding playbooks."
+                },
+                "compliance": {
+                    "question": "What compliance coverage is included?",
+                    "answer": "We ship with configurable legal forms for multiple regions. Export reports directly for authorities with the same encryption standards proven across our remote check-in workflows."
+                },
+                "extend": {
+                    "question": "Can we extend the platform?",
+                    "answer": "Yes. Use our REST and webhook APIs to connect marketing automation, housekeeping platforms, or custom guest apps. SDKs ship with authentication helpers and sample bots."
+                },
+                "mobile": {
+                    "question": "Do you support mobile-first experiences?",
+                    "answer": "Absolutely. Guests can complete the journey on any device, with real-time validation optimised for cameras and offline capture queues for limited connectivity."
+                }
+            }
+        },
+        "cta": {
+            "title": "Deliver effortless guest arrivals starting today.",
+            "description": "Join the first 20 teams to unlock the Launch plan for free or explore self-hosting for complete control."
+        },
+        "footer": {
+            "description": "From document capture to compliant reporting—everything hospitality leaders need to delight every arrival.",
+            "badges": {
+                "soc2": "SOC 2-ready",
+                "encrypted": "Data encrypted end-to-end"
+            },
+            "columns": {
+                "product": {
+                    "heading": "Product",
+                    "links": {
+                        "roadmap": "Roadmap",
+                        "security": "Security",
+                        "status": "Status"
+                    }
+                },
+                "company": {
+                    "heading": "Company",
+                    "links": {
+                        "about": "About",
+                        "careers": "Careers",
+                        "press": "Press kit"
+                    }
+                },
+                "resources": {
+                    "heading": "Resources",
+                    "links": {
+                        "docs": "Docs",
+                        "api": "API",
+                        "slack": "Community Slack"
+                    }
+                }
+            },
+            "privacy": "Privacy Policy",
+            "terms": "Terms",
+            "support": "Support",
+            "copyright": "© {{year}} Remote Check-in Labs. All rights reserved."
+        },
+        "stickyCta": {
+            "message": "Launch plan is free for the first 20 hospitality teams.",
+            "close": "Dismiss offer"
+        }
+    }
 }

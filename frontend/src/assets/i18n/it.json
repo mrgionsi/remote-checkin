@@ -358,4 +358,218 @@
         "front-header": "Immagine Fronte",
         "back-header": "Immagine Retro",
         "selfie-header": "Selfie"
+},
+    "landing": {
+        "brand": {
+            "title": "Remote Check-in",
+            "tagline": "Viaggi degli ospiti senza incertezze"
+        },
+        "nav": {
+            "howItWorks": "Come funziona",
+            "features": "Funzionalità",
+            "pricing": "Prezzi",
+            "selfHost": "Self-hosting",
+            "faq": "FAQ"
+        },
+        "actions": {
+            "signIn": "Accedi",
+            "claimSpot": "Prenota il tuo posto",
+            "previewJourney": "Anteprima esperienza ospite",
+            "getStarted": "Inizia ora",
+            "contactSales": "Contatta l'ufficio vendite",
+            "requestGuide": "Richiedi guida al deployment",
+            "scheduleWalkthrough": "Prenota una demo"
+        },
+        "hero": {
+            "eyebrow": "Ospitalità da remoto, fiducia reale",
+            "title": "Offri un'esperienza di check-in da remoto senza attriti per ogni ospite.",
+            "description": "Remote Check-in è il SaaS dedicato all'hospitality che acquisisce documenti, si sincronizza con il tuo PMS e mantiene ogni arrivo conforme e coerente con il tuo brand—niente chioschi, niente scartoffie, solo ospiti soddisfatti.",
+            "highlights": {
+                "identity": "Verifica dell'identità sicura",
+                "compliance": "Dichiarazioni legali automatizzate",
+                "analytics": "Analisi multi-struttura"
+            },
+            "stats": {
+                "header": "Strutture attive",
+                "properties": "Strutture attive",
+                "completion": "Check-in autonomi completati",
+                "timeSaved": "Tempo medio risparmiato per ospite",
+                "timeSavedSuffix": "ore",
+                "upsell": "Incremento conversioni upsell"
+            }
+        },
+        "howItWorks": {
+            "eyebrow": "Come funziona",
+            "title": "Avvia il percorso digitale degli ospiti in tre semplici passaggi.",
+            "description": "Coordina senza sforzo gli arrivi collegando il PMS, guidando ogni ospite attraverso la verifica e mantenendo aggiornati team e autorità.",
+            "steps": {
+                "invite": {
+                    "stage": "Passo 1",
+                    "title": "Invita e prepara",
+                    "description": "Sincronizza le prenotazioni dal PMS o carica liste di ospiti in blocco. Invia inviti brandizzati via email o SMS con un clic."
+                },
+                "capture": {
+                    "stage": "Passo 2",
+                    "title": "Acquisisci e verifica",
+                    "description": "Gli ospiti caricano documenti, selfie e firme da qualsiasi dispositivo. I controlli automatici confermano subito identità e completezza."
+                },
+                "sync": {
+                    "stage": "Passo 3",
+                    "title": "Sincronizza e rispetta le regole",
+                    "description": "I profili approvati tornano nel PMS e nei report per le autorità. I team ricevono avvisi mentre le analytics monitorano la readiness delle strutture."
+                }
+            }
+        },
+        "socialProof": {
+            "gdpr": "Conformità GDPR nativa",
+            "security": "Crittografia TLS 1.3 end-to-end",
+            "languages": "Oltre 12 lingue",
+            "api": "API aperte",
+            "quote": "Ispirato ai leader della produttività moderna che uniscono trasparenza e roadmap guidate dalla community per restare un passo avanti.",
+            "attribution": "Product Team Remote Check-in"
+        },
+        "features": {
+            "eyebrow": "Perché i team dell'hospitality ci scelgono",
+            "title": "Progettato per front office, revenue manager e operation.",
+            "description": "Tutto ciò che serve per orchestrare arrivi memorabili, ridurre le attività manuali di compliance e permettere ai team di collaborare.",
+            "cards": {
+                "automated": {
+                    "title": "Esperienza ospite automatizzata",
+                    "description": "Acquisizione documenti, verifica identità e firme digitali semplificano ogni arrivo."
+                },
+                "compliance": {
+                    "title": "Compliance immediata",
+                    "description": "Genera e invia le dichiarazioni obbligatorie in pochi minuti, conformi alle normative locali."
+                },
+                "insights": {
+                    "title": "Analytics in tempo reale",
+                    "description": "Monitora occupazione, avanzamento degli ospiti e previsioni di ricavo da un'unica dashboard multi-struttura."
+                },
+                "collaboration": {
+                    "title": "Collaborazione tra team",
+                    "description": "Coinvolgi partner, housekeeping e front office con permessi basati sui ruoli che crescono con te."
+                }
+            }
+        },
+        "pricing": {
+            "eyebrow": "Prezzi",
+            "title": "Piani pensati per ogni portafoglio di strutture.",
+            "description": "Lancia gratuitamente con i primi 20 abbonati o ospitalo in autonomia. Scala quando sei pronto—nessun costo nascosto.",
+            "pricePerMonth": "/mese",
+            "plans": {
+                "launch": {
+                    "name": "Launch",
+                    "tagline": "Primi 20 iscritti — tutto ciò che serve per iniziare.",
+                    "bullets": {
+                        "properties": "Strutture e prenotazioni illimitate",
+                        "journey": "Percorso digitale dell'ospite con caricamento documenti",
+                        "emails": "Email di conferma automatizzate",
+                        "community": "Supporto community e voto sulla roadmap"
+                    }
+                },
+                "growth": {
+                    "name": "Growth",
+                    "tagline": "Ideale per boutique hotel e appartamenti serviti in crescita.",
+                    "bullets": {
+                        "allLaunch": "Tutto del piano Launch",
+                        "brandable": "Portale ospite personalizzabile e notifiche SMS",
+                        "integrations": "Integrazioni bidirezionali PMS e flussi di automazione",
+                        "support": "Supporto prioritario in-app ed email"
+                    }
+                },
+                "enterprise": {
+                    "name": "Enterprise",
+                    "priceLabel": "Parliamone",
+                    "priceNote": "Prezzo personalizzato in base alle tue esigenze.",
+                    "tagline": "Implementazioni su misura per gruppi alberghieri e brand dell'ospitalità.",
+                    "bullets": {
+                        "onboarding": "Customer success e onboarding dedicati",
+                        "analytics": "Analytics avanzate ed esportazioni BI",
+                        "workflows": "Workflow di compliance personalizzati per area",
+                        "security": "SSO SAML e report SOC 2 su richiesta"
+                    }
+                }
+            }
+        },
+        "selfHost": {
+            "eyebrow": "Preferisci il self-hosting?",
+            "title": "Distribuisci Remote Check-in sulla tua infrastruttura.",
+            "description": "Ottieni la stessa esperienza premium per gli ospiti mantenendo il pieno controllo su infrastruttura e residenza dei dati.",
+            "benefits": {
+                "deploy": "Distribuisci sulla tua infrastruttura con container Docker e script IaC.",
+                "ownership": "Mantieni la piena proprietà dei dati sfruttando le stesse funzionalità del nostro hosting.",
+                "hybrid": "Modalità ibrida — sincronizza alcune strutture nel cloud, mantieni le altre on-premise.",
+                "api": "API aperte ed ecosistema di webhook per integrazioni personalizzate."
+            },
+            "terminal": {
+                "comment": "Provisiona uno storage compatibile S3"
+            }
+        },
+        "faq": {
+            "eyebrow": "FAQ",
+            "title": "Le risposte che mantengono il progetto nei tempi.",
+            "items": {
+                "launch": {
+                    "question": "Quanto tempo serve per andare live?",
+                    "answer": "La maggior parte dei clienti è operativa in meno di due settimane: collega il PMS, aggiungi i template email, invita lo staff. Forniamo template di migrazione e playbook di onboarding consolidati."
+                },
+                "compliance": {
+                    "question": "Quale copertura normativa è inclusa?",
+                    "answer": "Forniamo moduli legali configurabili per più regioni. Esporta direttamente i report per le autorità con gli stessi standard di crittografia usati nei nostri flussi di check-in remoti."
+                },
+                "extend": {
+                    "question": "Possiamo estendere la piattaforma?",
+                    "answer": "Sì. Usa le nostre API REST e webhook per collegare marketing automation, housekeeping o app personalizzate. Gli SDK includono helper per l'autenticazione e bot di esempio."
+                },
+                "mobile": {
+                    "question": "Supportate esperienze mobile-first?",
+                    "answer": "Assolutamente. Gli ospiti completano il percorso da qualsiasi dispositivo, con validazioni in tempo reale ottimizzate per la fotocamera e code offline per le aree con poca connettività."
+                }
+            }
+        },
+        "cta": {
+            "title": "Garantisci arrivi senza sforzo fin da oggi.",
+            "description": "Unisciti ai primi 20 team per sbloccare gratis il piano Launch oppure esplora il self-hosting per un controllo totale."
+        },
+        "footer": {
+            "description": "Dall'acquisizione documenti ai report conformi—tutto ciò che serve ai leader dell'hospitality per stupire gli ospiti.",
+            "badges": {
+                "soc2": "Pronto per SOC 2",
+                "encrypted": "Dati crittografati end-to-end"
+            },
+            "columns": {
+                "product": {
+                    "heading": "Prodotto",
+                    "links": {
+                        "roadmap": "Roadmap",
+                        "security": "Sicurezza",
+                        "status": "Stato"
+                    }
+                },
+                "company": {
+                    "heading": "Azienda",
+                    "links": {
+                        "about": "Chi siamo",
+                        "careers": "Carriere",
+                        "press": "Kit stampa"
+                    }
+                },
+                "resources": {
+                    "heading": "Risorse",
+                    "links": {
+                        "docs": "Documentazione",
+                        "api": "API",
+                        "slack": "Community Slack"
+                    }
+                }
+            },
+            "privacy": "Privacy",
+            "terms": "Termini",
+            "support": "Supporto",
+            "copyright": "© {{year}} Remote Check-in Labs. Tutti i diritti riservati."
+        },
+        "stickyCta": {
+            "message": "Il piano Launch è gratuito per i primi 20 team dell'hospitality.",
+            "close": "Chiudi offerta"
+        }
 }
