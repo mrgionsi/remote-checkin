@@ -46,6 +46,19 @@ interface HowItWorksStep {
   icon: string;
 }
 
+interface Testimonial {
+  quote: string;
+  author: string;
+  role: string;
+}
+
+interface ResourceHighlight {
+  title: string;
+  description: string;
+  actionLabel: string;
+  actionHref: string;
+}
+
 @Component({
   selector: 'app-landing',
   standalone: true,
@@ -93,6 +106,7 @@ interface HowItWorksStep {
 })
 export class LandingComponent implements AfterViewInit {
   readonly showStickyCta = signal(true);
+  readonly showSocialProof = false;
 
   readonly liveProperties = signal(0);
   readonly selfCheckins = signal(0);
@@ -236,6 +250,56 @@ export class LandingComponent implements AfterViewInit {
   ];
 
   readonly currentYear = new Date().getFullYear();
+
+  readonly trustedBrands: string[] = [
+    'Breeze Hotels',
+    'Summit Stays',
+    'Lakeside Resorts',
+    'Atlas Hospitality',
+    'UrbanNest Co.'
+  ];
+
+  readonly testimonials: Testimonial[] = [
+    {
+      quote:
+        'Remote Check-in trimmed our arrival paperwork by 80% and gave guests a seamless first touchpoint before they even arrived on-site.',
+      author: 'Claudia Marino',
+      role: 'Guest Experience Lead · Breeze Hotels'
+    },
+    {
+      quote:
+        'The compliance automation alone paid for itself within a week — we no longer chase authorities for confirmations.',
+      author: 'David O’Sullivan',
+      role: 'Operations Director · Atlas Hospitality'
+    },
+    {
+      quote:
+        'Our team can review every reservation from a single dashboard. Integrating with our PMS was refreshingly painless.',
+      author: 'Lina Gomez',
+      role: 'Digital Transformation · UrbanNest Co.'
+    }
+  ];
+
+  readonly resourceHighlights: ResourceHighlight[] = [
+    {
+      title: 'Playbook: Automating guest compliance',
+      description: 'Download the step-by-step guide hospitality teams use to cut paperwork while staying audit-ready.',
+      actionLabel: 'Get the playbook',
+      actionHref: '#'
+    },
+    {
+      title: 'On-demand walkthrough',
+      description: 'Watch a 12-minute tour that covers guest flows, admin dashboards, and Portale Alloggi automation.',
+      actionLabel: 'Watch the demo',
+      actionHref: '#'
+    },
+    {
+      title: 'API & integration docs',
+      description: 'Explore our REST API, webhooks, and starter templates to connect Remote Check-in to your stack.',
+      actionLabel: 'Browse docs',
+      actionHref: '#'
+    }
+  ];
 
   dismissStickyCta(): void {
     this.showStickyCta.set(false);

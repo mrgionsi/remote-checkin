@@ -83,17 +83,57 @@
             </div>
         </section>
 
-        <section class="social-proof" id="social-proof" [@staggerReveal]>
-            <div class="badges stagger-item">
-                <span class="badge"><i class="pi pi-shield"></i> {{ 'landing.socialProof.gdpr' | transloco }}</span>
-                <span class="badge"><i class="pi pi-lock"></i> {{ 'landing.socialProof.security' | transloco }}</span>
-                <span class="badge"><i class="pi pi-globe"></i> {{ 'landing.socialProof.languages' | transloco }}</span>
-                <span class="badge"><i class="pi pi-github"></i> {{ 'landing.socialProof.api' | transloco }}</span>
+        <ng-container *ngIf="showSocialProof">
+            <section class="social-proof" id="social-proof" [@staggerReveal]>
+                <div class="badges stagger-item">
+                    <span class="badge"><i class="pi pi-shield"></i> {{ 'landing.socialProof.gdpr' | transloco }}</span>
+                    <span class="badge"><i class="pi.pi-lock"></i> {{ 'landing.socialProof.security' | transloco
+                        }}</span>
+                    <span class="badge"><i class="pi.pi-globe"></i> {{ 'landing.socialProof.languages' | transloco
+                        }}</span>
+                    <span class="badge"><i class="pi.pi-github"></i> {{ 'landing.socialProof.api' | transloco }}</span>
+                </div>
+                <p class="social-proof__text stagger-item">
+                    {{ 'landing.socialProof.quote' | transloco }}<cite> / {{ 'landing.socialProof.attribution' |
+                        transloco }}</cite>
+                </p>
+            </section>
+
+            <section class="trusted" [@staggerReveal]>
+                <header class="trusted__header stagger-item">
+                    <p class="section-eyebrow">Trusted by modern hospitality teams</p>
+                    <h2>From boutique hotels to multi-property groups.</h2>
+                </header>
+                <div class="trusted__logos">
+                    <span class="trusted__logo stagger-item" *ngFor="let brand of trustedBrands">{{ brand }}</span>
+                </div>
+            </section>
+
+            <section class="testimonials" [@staggerReveal]>
+                <div class="testimonials__grid">
+                    <article class="testimonial-card stagger-item" *ngFor="let testimonial of testimonials">
+                        <p class="testimonial-card__quote">“{{ testimonial.quote }}”</p>
+                        <div class="testimonial-card__meta">
+                            <span class="testimonial-card__author">{{ testimonial.author }}</span>
+                            <span class="testimonial-card__role">{{ testimonial.role }}</span>
+                        </div>
+                    </article>
+                </div>
+            </section>
+        </ng-container>
+
+        <section class="resources" [@staggerReveal]>
+            <header class="resources__header stagger-item">
+                <p class="section-eyebrow">Keep exploring</p>
+                <h2>Resources to help your team ship remote check-in.</h2>
+            </header>
+            <div class="resources__grid">
+                <article class="resource-card stagger-item" *ngFor="let resource of resourceHighlights">
+                    <h3>{{ resource.title }}</h3>
+                    <p>{{ resource.description }}</p>
+                    <a class="resource-card__action" [attr.href]="resource.actionHref">{{ resource.actionLabel }}</a>
+                </article>
             </div>
-            <p class="social-proof__text stagger-item">
-                {{ 'landing.socialProof.quote' | transloco }}<cite> / {{ 'landing.socialProof.attribution' | transloco
-                    }}</cite>
-            </p>
         </section>
 
         <section class="features" id="features" [@staggerReveal]>
