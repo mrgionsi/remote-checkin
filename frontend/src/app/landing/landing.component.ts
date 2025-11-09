@@ -5,6 +5,7 @@ import {
   ChangeDetectorRef,
   Component,
   Inject,
+  NgZone,
   signal
 } from '@angular/core';
 import { PLATFORM_ID } from '@angular/core';
@@ -118,6 +119,7 @@ export class LandingComponent implements AfterViewInit {
 
   constructor(
     private readonly cdr: ChangeDetectorRef,
+    private readonly ngZone: NgZone,
     @Inject(PLATFORM_ID) platformId: object
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
@@ -309,25 +311,28 @@ export class LandingComponent implements AfterViewInit {
 
     const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 
-    const step = (currentTime: number) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = easeOutCubic(progress);
+    this.ngZone.runOutsideAngular(() => {
+      const step = (currentTime: number) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = easeOutCubic(progress);
 
-      this.heroStats.forEach(stat => {
-        const value = stat.target * eased;
-        const decimals = stat.decimals ?? 0;
-        stat.displayValue = parseFloat(value.toFixed(decimals));
-      });
+        this.ngZone.run(() => {
+          this.heroStats.forEach(stat => {
+            const value = stat.target * eased;
+            const decimals = stat.decimals ?? 0;
+            stat.displayValue = parseFloat(value.toFixed(decimals));
+          });
+          this.cdr.markForCheck();
+        });
 
-      this.cdr.markForCheck();
+        if (progress < 1) {
+          requestAnimationFrame(step);
+        }
+      };
 
-      if (progress < 1) {
-        requestAnimationFrame(step);
-      }
-    };
-
-    requestAnimationFrame(step);
+      requestAnimationFrame(step);
+    });
   }
 
   private instantlySetHeroStats(): void {
