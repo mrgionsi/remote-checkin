@@ -4,10 +4,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ElementRef,
   Inject,
-  OnDestroy,
-  ViewChild,
   signal
 } from '@angular/core';
 import { PLATFORM_ID } from '@angular/core';
@@ -113,13 +110,10 @@ interface HeroStat {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class LandingComponent implements AfterViewInit, OnDestroy {
-  @ViewChild('heroStatsSection') private heroStatsSection?: ElementRef<HTMLElement>;
-
+export class LandingComponent implements AfterViewInit {
   readonly showStickyCta = signal(true);
 
   private heroStatsAnimated = false;
-  private observer?: IntersectionObserver;
   private readonly isBrowser: boolean;
 
   constructor(
@@ -293,56 +287,20 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   readonly currentYear = new Date().getFullYear();
 
   ngAfterViewInit(): void {
-    if (!this.isBrowser || !this.heroStatsSection) {
+    if (!this.isBrowser) {
       return;
     }
 
-    const nativeElement = this.heroStatsSection.nativeElement;
-
-    if (typeof IntersectionObserver === 'undefined') {
-      this.startHeroStatsAnimation();
-      return;
-    }
-
-    this.observer = new IntersectionObserver(
-      entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            this.startHeroStatsAnimation();
-            this.observer?.disconnect();
-          }
-        });
-      },
-      { threshold: 0.15 }
-    );
-
-    this.observer.observe(nativeElement);
-
-    const rect = nativeElement.getBoundingClientRect();
-    const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
-    const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
-    const isVisible =
-      rect.top < viewportHeight &&
-      rect.bottom > 0 &&
-      rect.left < viewportWidth &&
-      rect.right > 0;
-
-    if (isVisible) {
-      this.startHeroStatsAnimation();
-      this.observer?.disconnect();
-    }
+    this.startHeroStatsAnimation();
   }
 
   dismissStickyCta(): void {
     this.showStickyCta.set(false);
   }
 
-  ngOnDestroy(): void {
-    this.observer?.disconnect();
-  }
-
   private animateHeroStats(): void {
     if (!this.isBrowser || typeof requestAnimationFrame === 'undefined') {
+      this.instantlySetHeroStats();
       return;
     }
 
