@@ -1,5 +1,6 @@
-import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { AfterViewInit, ChangeDetectionStrategy, Component, Inject, signal } from '@angular/core';
+import { PLATFORM_ID } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import {
   animate,
@@ -90,8 +91,23 @@ interface HowItWorksStep {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class LandingComponent {
+export class LandingComponent implements AfterViewInit {
   readonly showStickyCta = signal(true);
+
+  readonly liveProperties = signal(0);
+  readonly selfCheckins = signal(0);
+  readonly timeSaved = signal(0);
+  readonly upsellLift = signal(0);
+
+  private readonly livePropertyTarget = 48;
+  private readonly selfCheckinsTarget = 92;
+  private readonly timeSavedTarget = 1.8;
+  private readonly upsellTarget = 36;
+  private readonly isBrowser: boolean;
+
+  constructor(@Inject(PLATFORM_ID) platformId: object) {
+    this.isBrowser = isPlatformBrowser(platformId);
+  }
 
   readonly navLinks: NavigationLink[] = [
     { labelKey: 'landing.nav.howItWorks', href: '#how-it-works' },
@@ -223,6 +239,46 @@ export class LandingComponent {
 
   dismissStickyCta(): void {
     this.showStickyCta.set(false);
+  }
+
+  ngAfterViewInit(): void {
+    if (!this.isBrowser) {
+      this.liveProperties.set(this.livePropertyTarget);
+      this.selfCheckins.set(this.selfCheckinsTarget);
+      this.timeSaved.set(this.timeSavedTarget);
+      this.upsellLift.set(this.upsellTarget);
+      return;
+    }
+
+    this.animateMetric(this.liveProperties, this.livePropertyTarget, 0);
+    this.animateMetric(this.selfCheckins, this.selfCheckinsTarget, 0);
+    this.animateMetric(this.timeSaved, this.timeSavedTarget, 1);
+    this.animateMetric(this.upsellLift, this.upsellTarget, 0);
+  }
+
+  private animateMetric(signalRef: ReturnType<typeof signal<number>>, target: number, decimals: number): void {
+    if (typeof window === 'undefined' || typeof window.requestAnimationFrame === 'undefined') {
+      signalRef.set(parseFloat(target.toFixed(decimals)));
+      return;
+    }
+
+    const duration = 1200;
+    const startTime = performance.now();
+
+    const step = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const value = parseFloat((progress * target).toFixed(decimals));
+      signalRef.set(value);
+
+      if (progress < 1) {
+        window.requestAnimationFrame(step);
+      } else {
+        signalRef.set(parseFloat(target.toFixed(decimals)));
+      }
+    };
+
+    window.requestAnimationFrame(step);
   }
 }
 

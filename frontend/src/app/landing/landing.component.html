@@ -1,62 +1,66 @@
 <div class="landing" [@pageFade] id="top">
-  <header class="landing__header">
-    <div class="header__brand">
-      <span class="brand__mark">{{ 'landing.brand.title' | transloco }}</span>
-      <span class="brand__tagline">{{ 'landing.brand.tagline' | transloco }}</span>
-    </div>
-    <nav class="header__nav">
-      <a class="nav-link" *ngFor="let link of navLinks" [attr.href]="link.href">
-        {{ link.labelKey | transloco }}
-      </a>
-    </nav>
-    <div class="header__actions">
-      <a class="header__signin" routerLink="/admin/login">{{ 'landing.actions.signIn' | transloco }}</a>
-      <a class="btn btn--primary header__cta" href="#pricing">{{ 'landing.actions.claimSpot' | transloco }}</a>
-    </div>
-  </header>
+    <header class="landing__header">
+        <div class="header__brand">
+            <span class="brand__mark">{{ 'landing.brand.title' | transloco }}</span>
+            <span class="brand__tagline">{{ 'landing.brand.tagline' | transloco }}</span>
+        </div>
+        <nav class="header__nav">
+            <a class="nav-link" *ngFor="let link of navLinks" [attr.href]="link.href">
+                {{ link.labelKey | transloco }}
+            </a>
+        </nav>
+        <div class="header__actions">
+            <a class="header__signin" routerLink="/admin/login">{{ 'landing.actions.signIn' | transloco }}</a>
+            <a class="btn btn--primary header__cta" href="#pricing">{{ 'landing.actions.claimSpot' | transloco }}</a>
+        </div>
+    </header>
 
     <main class="landing__content">
-    <section class="hero" id="hero" [@heroReveal]>
-      <div class="hero__copy">
-        <p class="hero__eyebrow">{{ 'landing.hero.eyebrow' | transloco }}</p>
-        <h1>{{ 'landing.hero.title' | transloco }}</h1>
-        <p class="hero__description">
-          {{ 'landing.hero.description' | transloco }}
-        </p>
-        <div class="hero__cta">
-          <a class="btn btn--primary" href="#pricing">{{ 'landing.actions.claimSpot' | transloco }}</a>
-          <a class="btn btn--ghost" routerLink="/admin/login">{{ 'landing.actions.signIn' | transloco }}</a>
-          <a class="btn btn--outline" routerLink="/">{{ 'landing.actions.previewJourney' | transloco }}</a>
-        </div>
-        <ul class="hero__features" [@staggerReveal]>
-          <li class="stagger-item"><i class="pi pi-check"></i> {{ 'landing.hero.highlights.identity' | transloco }}</li>
-          <li class="stagger-item"><i class="pi pi-check"></i> {{ 'landing.hero.highlights.compliance' | transloco }}</li>
-          <li class="stagger-item"><i class="pi pi-check"></i> {{ 'landing.hero.highlights.analytics' | transloco }}</li>
-        </ul>
-      </div>
-      <div class="hero__visual" [@cardFlip]>
-        <div class="hero__dashboard">
-          <div class="dashboard__header">
-            <span class="status">{{ 'landing.hero.stats.header' | transloco }}</span>
-            <span class="count">48</span>
-          </div>
-          <div class="dashboard__tiles">
-            <article class="tile tile--primary">
-              <div class="tile__value">92%</div>
-              <div class="tile__label">{{ 'landing.hero.stats.completion' | transloco }}</div>
-            </article>
-            <article class="tile tile--secondary">
-              <div class="tile__value">1.8 {{ 'landing.hero.stats.timeSavedSuffix' | transloco }}</div>
-              <div class="tile__label">{{ 'landing.hero.stats.timeSaved' | transloco }}</div>
-            </article>
-            <article class="tile tile--accent">
-              <div class="tile__value">+36%</div>
-              <div class="tile__label">{{ 'landing.hero.stats.upsell' | transloco }}</div>
-            </article>
-          </div>
-        </div>
-      </div>
-    </section>
+        <section class="hero" id="hero" [@heroReveal]>
+            <div class="hero__copy">
+                <p class="hero__eyebrow">{{ 'landing.hero.eyebrow' | transloco }}</p>
+                <h1>{{ 'landing.hero.title' | transloco }}</h1>
+                <p class="hero__description">
+                    {{ 'landing.hero.description' | transloco }}
+                </p>
+                <div class="hero__cta">
+                    <a class="btn btn--primary" href="#pricing">{{ 'landing.actions.claimSpot' | transloco }}</a>
+                    <a class="btn btn--ghost" routerLink="/admin/login">{{ 'landing.actions.signIn' | transloco }}</a>
+                    <a class="btn btn--outline" routerLink="/">{{ 'landing.actions.previewJourney' | transloco }}</a>
+                </div>
+                <ul class="hero__features" [@staggerReveal]>
+                    <li class="stagger-item"><i class="pi pi-check"></i> {{ 'landing.hero.highlights.identity' |
+                        transloco }}</li>
+                    <li class="stagger-item"><i class="pi pi-check"></i> {{ 'landing.hero.highlights.compliance' |
+                        transloco }}</li>
+                    <li class="stagger-item"><i class="pi pi-check"></i> {{ 'landing.hero.highlights.analytics' |
+                        transloco }}</li>
+                </ul>
+            </div>
+            <div class="hero__visual" [@cardFlip]>
+                <div class="hero__dashboard">
+                    <div class="dashboard__header">
+                        <span class="status">{{ 'landing.hero.stats.header' | transloco }}</span>
+                        <span class="count">{{ liveProperties() | number:'1.0-0' }}</span>
+                    </div>
+                    <div class="dashboard__tiles">
+                        <article class="tile tile--primary">
+                            <div class="tile__value">{{ selfCheckins() | number:'1.0-0' }}%</div>
+                            <div class="tile__label">{{ 'landing.hero.stats.completion' | transloco }}</div>
+                        </article>
+                        <article class="tile tile--secondary">
+                            <div class="tile__value">{{ timeSaved() | number:'1.0-1' }} {{
+                                'landing.hero.stats.timeSavedSuffix' | transloco }}</div>
+                            <div class="tile__label">{{ 'landing.hero.stats.timeSaved' | transloco }}</div>
+                        </article>
+                        <article class="tile tile--accent">
+                            <div class="tile__value">+{{ upsellLift() | number:'1.0-0' }}%</div>
+                            <div class="tile__label">{{ 'landing.hero.stats.upsell' | transloco }}</div>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         <section class="how-it-works" id="how-it-works" [@staggerReveal]>
             <header class="section-head stagger-item">
@@ -87,7 +91,8 @@
                 <span class="badge"><i class="pi pi-github"></i> {{ 'landing.socialProof.api' | transloco }}</span>
             </div>
             <p class="social-proof__text stagger-item">
-                {{ 'landing.socialProof.quote' | transloco }}<cite> / {{ 'landing.socialProof.attribution' | transloco }}</cite>
+                {{ 'landing.socialProof.quote' | transloco }}<cite> / {{ 'landing.socialProof.attribution' | transloco
+                    }}</cite>
             </p>
         </section>
 
@@ -133,10 +138,11 @@
                         </li>
                     </ul>
                     <div class="pricing-card__cta">
-                        <a class="btn btn--primary" *ngIf="plan.price; else contactSales"
-                            routerLink="/admin/login">{{ 'landing.actions.getStarted' | transloco }}</a>
+                        <a class="btn btn--primary" *ngIf="plan.price; else contactSales" routerLink="/admin/login">{{
+                            'landing.actions.getStarted' | transloco }}</a>
                         <ng-template #contactSales>
-                            <a class="btn btn--outline" href="mailto:hello@remote-checkin.io">{{ 'landing.actions.contactSales' | transloco }}</a>
+                            <a class="btn btn--outline" href="mailto:hello@remote-checkin.io">{{
+                                'landing.actions.contactSales' | transloco }}</a>
                         </ng-template>
                     </div>
                 </article>
@@ -153,7 +159,8 @@
                 </ul>
                 <div class="self-host__actions">
                     <a class="btn btn--ghost"
-                        href="mailto:hello@remote-checkin.io?subject=Remote%20Check-in%20Self-host%20Request">{{ 'landing.actions.requestGuide' | transloco }}</a>
+                        href="mailto:hello@remote-checkin.io?subject=Remote%20Check-in%20Self-host%20Request">{{
+                        'landing.actions.requestGuide' | transloco }}</a>
                 </div>
             </div>
             <div class="self-host__visual stagger-item" [@cardFlip]>
@@ -203,7 +210,8 @@ remote-checkin ctl storage sync
                 <p>{{ 'landing.cta.description' | transloco }}</p>
                 <div class="cta__actions">
                     <a class="btn btn--primary" href="#pricing">{{ 'landing.actions.claimSpot' | transloco }}</a>
-                    <a class="btn btn--ghost" href="mailto:hello@remote-checkin.io">{{ 'landing.actions.scheduleWalkthrough' | transloco }}</a>
+                    <a class="btn btn--ghost" href="mailto:hello@remote-checkin.io">{{
+                        'landing.actions.scheduleWalkthrough' | transloco }}</a>
                 </div>
             </div>
         </section>
@@ -233,8 +241,10 @@ remote-checkin ctl storage sync
         <div class="landing-footer__secondary">
             <p>{{ 'landing.footer.copyright' | transloco:{ year: currentYear } }}</p>
             <div class="landing-footer__legal">
-                <a href="mailto:legal@remote-checkin.io?subject=Privacy%20Policy">{{ 'landing.footer.privacy' | transloco }}</a>
-                <a href="mailto:legal@remote-checkin.io?subject=Terms%20of%20Use">{{ 'landing.footer.terms' | transloco }}</a>
+                <a href="mailto:legal@remote-checkin.io?subject=Privacy%20Policy">{{ 'landing.footer.privacy' |
+                    transloco }}</a>
+                <a href="mailto:legal@remote-checkin.io?subject=Terms%20of%20Use">{{ 'landing.footer.terms' | transloco
+                    }}</a>
                 <a href="mailto:support@remote-checkin.io">{{ 'landing.footer.support' | transloco }}</a>
             </div>
         </div>
@@ -249,8 +259,8 @@ remote-checkin ctl storage sync
             <p><strong>{{ 'landing.stickyCta.message' | transloco }}</strong></p>
             <div class="sticky-cta__actions">
                 <a class="btn btn--primary" href="#pricing">{{ 'landing.actions.claimSpot' | transloco }}</a>
-                <a class="btn btn--ghost"
-                    href="mailto:hello@remote-checkin.io?subject=Schedule%20a%20walkthrough">{{ 'landing.actions.scheduleWalkthrough' | transloco }}</a>
+                <a class="btn btn--ghost" href="mailto:hello@remote-checkin.io?subject=Schedule%20a%20walkthrough">{{
+                    'landing.actions.scheduleWalkthrough' | transloco }}</a>
             </div>
         </div>
     </div>
