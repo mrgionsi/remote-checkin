@@ -35,22 +35,24 @@
         </ul>
       </div>
       <div class="hero__visual" [@cardFlip]>
-        <div class="hero__dashboard" #heroStatsSection>
+        <div class="hero__dashboard">
           <div class="dashboard__header">
             <span class="status">{{ 'landing.hero.stats.header' | transloco }}</span>
-            <span class="count">
-              {{ heroStats[0].valuePrefix || '' }}{{ heroStats[0].displayValue | number:heroStats[0].format }}{{ heroStats[0].valueSuffix || '' }}
-            </span>
+            <span class="count">48</span>
           </div>
           <div class="dashboard__tiles">
-            <ng-container *ngFor="let stat of heroStats; let index = index">
-              <article *ngIf="index > 0" class="tile" [ngClass]="stat.className">
-                <div class="tile__value">
-                  {{ stat.valuePrefix || '' }}{{ stat.displayValue | number:stat.format }}{{ stat.valueSuffix || '' }}{{ stat.valueSuffixKey ? (' ' + (stat.valueSuffixKey | transloco)) : '' }}
-                </div>
-                <div class="tile__label">{{ stat.labelKey | transloco }}</div>
-              </article>
-            </ng-container>
+            <article class="tile tile--primary">
+              <div class="tile__value">92%</div>
+              <div class="tile__label">{{ 'landing.hero.stats.completion' | transloco }}</div>
+            </article>
+            <article class="tile tile--secondary">
+              <div class="tile__value">1.8 {{ 'landing.hero.stats.timeSavedSuffix' | transloco }}</div>
+              <div class="tile__label">{{ 'landing.hero.stats.timeSaved' | transloco }}</div>
+            </article>
+            <article class="tile tile--accent">
+              <div class="tile__value">+36%</div>
+              <div class="tile__label">{{ 'landing.hero.stats.upsell' | transloco }}</div>
+            </article>
           </div>
         </div>
       </div>

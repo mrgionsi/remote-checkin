@@ -1,14 +1,5 @@
-import { CommonModule, isPlatformBrowser } from '@angular/common';
-import {
-  AfterViewInit,
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  Inject,
-  NgZone,
-  signal
-} from '@angular/core';
-import { PLATFORM_ID } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import {
   animate,
@@ -52,18 +43,6 @@ interface HowItWorksStep {
   titleKey: string;
   descriptionKey: string;
   icon: string;
-}
-
-interface HeroStat {
-  target: number;
-  decimals?: number;
-  valuePrefix?: string;
-  valueSuffix?: string;
-  valueSuffixKey?: string;
-  labelKey: string;
-  displayValue: number;
-  className?: string;
-  format: string;
 }
 
 @Component({
@@ -111,19 +90,8 @@ interface HeroStat {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class LandingComponent implements AfterViewInit {
+export class LandingComponent {
   readonly showStickyCta = signal(true);
-
-  private heroStatsAnimated = false;
-  private readonly isBrowser: boolean;
-
-  constructor(
-    private readonly cdr: ChangeDetectorRef,
-    private readonly ngZone: NgZone,
-    @Inject(PLATFORM_ID) platformId: object
-  ) {
-    this.isBrowser = isPlatformBrowser(platformId);
-  }
 
   readonly navLinks: NavigationLink[] = [
     { labelKey: 'landing.nav.howItWorks', href: '#how-it-works' },
@@ -251,109 +219,10 @@ export class LandingComponent implements AfterViewInit {
     }
   ];
 
-  readonly heroStats: HeroStat[] = [
-    {
-      target: 48,
-      labelKey: 'landing.hero.stats.properties',
-      displayValue: 0,
-      format: '1.0-0'
-    },
-    {
-      target: 92,
-      valueSuffix: '%',
-      labelKey: 'landing.hero.stats.completion',
-      displayValue: 0,
-      className: 'tile--primary',
-      format: '1.0-0'
-    },
-    {
-      target: 1.8,
-      decimals: 1,
-      valueSuffixKey: 'landing.hero.stats.timeSavedSuffix',
-      labelKey: 'landing.hero.stats.timeSaved',
-      displayValue: 0,
-      className: 'tile--secondary',
-      format: '1.0-1'
-    },
-    {
-      target: 36,
-      valuePrefix: '+',
-      valueSuffix: '%',
-      labelKey: 'landing.hero.stats.upsell',
-      displayValue: 0,
-      className: 'tile--accent',
-      format: '1.0-0'
-    }
-  ];
-
   readonly currentYear = new Date().getFullYear();
-
-  ngAfterViewInit(): void {
-    if (!this.isBrowser) {
-      return;
-    }
-
-    this.startHeroStatsAnimation();
-  }
 
   dismissStickyCta(): void {
     this.showStickyCta.set(false);
-  }
-
-  private animateHeroStats(): void {
-    if (!this.isBrowser || typeof requestAnimationFrame === 'undefined') {
-      this.instantlySetHeroStats();
-      return;
-    }
-
-    const duration = 1400;
-    const startTime = performance.now();
-
-    const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
-
-    this.ngZone.runOutsideAngular(() => {
-      const step = (currentTime: number) => {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const eased = easeOutCubic(progress);
-
-        this.ngZone.run(() => {
-          this.heroStats.forEach(stat => {
-            const value = stat.target * eased;
-            const decimals = stat.decimals ?? 0;
-            stat.displayValue = parseFloat(value.toFixed(decimals));
-          });
-          this.cdr.detectChanges();
-        });
-
-        if (progress < 1) {
-          requestAnimationFrame(step);
-        }
-      };
-
-      step(startTime);
-    });
-  }
-
-  private instantlySetHeroStats(): void {
-    this.heroStats.forEach(stat => {
-      stat.displayValue = stat.target;
-    });
-    this.cdr.detectChanges();
-  }
-
-  private startHeroStatsAnimation(animated: boolean = true): void {
-    if (this.heroStatsAnimated) {
-      return;
-    }
-
-    this.heroStatsAnimated = true;
-
-    if (animated && this.isBrowser && typeof requestAnimationFrame !== 'undefined') {
-      this.animateHeroStats();
-    } else {
-      this.instantlySetHeroStats();
-    }
   }
 }
 
