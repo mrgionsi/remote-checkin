@@ -1,14 +1,16 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   ElementRef,
+  Inject,
   OnDestroy,
   ViewChild,
   signal
 } from '@angular/core';
+import { PLATFORM_ID } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import {
   animate,
@@ -118,8 +120,14 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
 
   private heroStatsAnimated = false;
   private observer?: IntersectionObserver;
+  private readonly isBrowser: boolean;
 
-  constructor(private readonly cdr: ChangeDetectorRef) {}
+  constructor(
+    private readonly cdr: ChangeDetectorRef,
+    @Inject(PLATFORM_ID) platformId: object
+  ) {
+    this.isBrowser = isPlatformBrowser(platformId);
+  }
 
   readonly navLinks: NavigationLink[] = [
     { labelKey: 'landing.nav.howItWorks', href: '#how-it-works' },
@@ -285,7 +293,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   readonly currentYear = new Date().getFullYear();
 
   ngAfterViewInit(): void {
-    if (!this.heroStatsSection) {
+    if (!this.heroStatsSection || !this.isBrowser || typeof IntersectionObserver === 'undefined') {
       return;
     }
 
@@ -314,6 +322,10 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   }
 
   private animateHeroStats(): void {
+    if (!this.isBrowser || typeof requestAnimationFrame === 'undefined') {
+      return;
+    }
+
     const duration = 1400;
     const startTime = performance.now();
 
