@@ -323,7 +323,7 @@ export class LandingComponent implements AfterViewInit {
             const decimals = stat.decimals ?? 0;
             stat.displayValue = parseFloat(value.toFixed(decimals));
           });
-          this.cdr.markForCheck();
+          this.cdr.detectChanges();
         });
 
         if (progress < 1) {
@@ -331,7 +331,7 @@ export class LandingComponent implements AfterViewInit {
         }
       };
 
-      requestAnimationFrame(step);
+      step(startTime);
     });
   }
 
@@ -339,7 +339,7 @@ export class LandingComponent implements AfterViewInit {
     this.heroStats.forEach(stat => {
       stat.displayValue = stat.target;
     });
-    this.cdr.markForCheck();
+    this.cdr.detectChanges();
   }
 
   private startHeroStatsAnimation(animated: boolean = true): void {
