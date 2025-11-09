@@ -23,6 +23,10 @@ export const routes: Routes = [
         path: 'landing',
         loadComponent: () => import('./landing/landing.component').then(m => m.LandingComponent)
     },
+    {
+        path: 'pricing',
+        loadComponent: () => import('./pricing-details/pricing-details.component').then(m => m.PricingDetailsComponent)
+    },
     { path: '', component: LanguageComponent },
     { path: ':id', component: LanguageComponent }, // Optional reservation ID in language selection
     { path: 'reservation-check/:code', component: ReservationCheckComponent }, // Check reservation

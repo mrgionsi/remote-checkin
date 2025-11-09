@@ -1,0 +1,120 @@
+<div class="pricing" id="top">
+  <header class="pricing__hero">
+    <p class="pricing__eyebrow">Pricing made for hospitality growth</p>
+    <h1>Choose the remote check-in stack that scales with every property.</h1>
+    <p class="pricing__subtitle">
+      Transparent plans with unlimited guests, flexible onboarding, and the compliance automation your team needs.
+    </p>
+    <div class="pricing__toggle" role="radiogroup" aria-label="Billing cycle">
+      <button
+        type="button"
+        class="toggle__option"
+        [class.toggle__option--active]="billing() === 'monthly'"
+        (click)="toggleBilling('monthly')"
+        aria-pressed="{{ billing() === 'monthly' }}"
+      >
+        Monthly
+      </button>
+      <button
+        type="button"
+        class="toggle__option"
+        [class.toggle__option--active]="billing() === 'annual'"
+        (click)="toggleBilling('annual')"
+        aria-pressed="{{ billing() === 'annual' }}"
+      >
+        Annual <span class="toggle__badge">2 months free</span>
+      </button>
+    </div>
+  </header>
+
+  <section class="plans">
+    <article class="plan-card" *ngFor="let plan of plans" [class.plan-card--highlight]="plan.highlight">
+      <div class="plan-card__header">
+        <h2>{{ plan.name }}</h2>
+        <p>{{ plan.description }}</p>
+        <div class="plan-card__price">
+          <span>{{ getPriceForPlan(plan) }}</span>
+          <small *ngIf="billing() === 'annual' && plan.monthly !== 0">Save {{ plan.monthly * 12 - plan.annual | currency:'USD':'symbol':'1.0-0' }}</small>
+        </div>
+      </div>
+      <ul class="plan-card__features">
+        <li *ngFor="let feature of plan.features"><i class="pi pi-check"></i>{{ feature }}</li>
+      </ul>
+      <a class="plan-card__cta" [attr.href]="plan.ctaHref">{{ plan.ctaLabel }}</a>
+    </article>
+  </section>
+
+  <section class="comparison">
+    <header class="comparison__header">
+      <h2>Compare plans in detail</h2>
+      <p>See exactly what’s included and pick the operational toolkit that fits your portfolio.</p>
+    </header>
+    <div class="comparison__table" role="table">
+      <div class="comparison__row comparison__row--head" role="row">
+        <div class="comparison__cell comparison__cell--feature" role="columnheader">Feature</div>
+        <div class="comparison__cell" role="columnheader">Launch</div>
+        <div class="comparison__cell" role="columnheader">Growth</div>
+        <div class="comparison__cell" role="columnheader">Enterprise</div>
+      </div>
+      <div class="comparison__row" role="row" *ngFor="let row of comparisonRows">
+        <div class="comparison__cell comparison__cell--feature" role="cell">{{ row.feature }}</div>
+        <div class="comparison__cell" role="cell">
+          <ng-container *ngIf="isFeatureIncluded(row.launch); else launchText">
+            <i class="pi pi-check"></i>
+          </ng-container>
+          <ng-template #launchText>{{ displayFeatureValue(row.launch) }}</ng-template>
+        </div>
+        <div class="comparison__cell" role="cell">
+          <ng-container *ngIf="isFeatureIncluded(row.growth); else growthText">
+            <i class="pi pi-check"></i>
+          </ng-container>
+          <ng-template #growthText>{{ displayFeatureValue(row.growth) }}</ng-template>
+        </div>
+        <div class="comparison__cell" role="cell">
+          <ng-container *ngIf="isFeatureIncluded(row.enterprise); else enterpriseText">
+            <i class="pi pi-check"></i>
+          </ng-container>
+          <ng-template #enterpriseText>{{ displayFeatureValue(row.enterprise) }}</ng-template>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="addons">
+    <header class="addons__header">
+      <h2>Need a little extra?</h2>
+      <p>Blend add-ons with any plan so your guest journey fits every property and market.</p>
+    </header>
+    <div class="addons__grid">
+      <article class="addon-card" *ngFor="let addOn of addOns">
+        <h3>{{ addOn.title }}</h3>
+        <p>{{ addOn.description }}</p>
+        <span class="addon-card__price">{{ addOn.price }}</span>
+      </article>
+    </div>
+  </section>
+
+  <section class="faq" [@staggerReveal]>
+    <header class="faq__header">
+      <h2>Pricing FAQs</h2>
+      <p>The answers teams usually need before rolling out Remote Check-in.</p>
+    </header>
+    <div class="faq__list">
+      <details *ngFor="let faq of pricingFaqs" class="faq__item">
+        <summary class="faq__question">{{ faq.question }}</summary>
+        <p class="faq__answer">{{ faq.answer }}</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="cta__content">
+      <h2>Ready to deliver incredible arrivals?</h2>
+      <p>Book a walkthrough with our onboarding team or claim the Launch plan for free.</p>
+      <div class="cta__actions">
+        <a class="btn btn--primary" href="mailto:hello@remote-checkin.io?subject=Schedule%20a%20walkthrough">Speak with us</a>
+        <a class="btn btn--ghost" routerLink="/landing#cta">Claim free Launch plan</a>
+      </div>
+    </div>
+  </section>
+</div>

@@ -291,13 +291,13 @@ export class LandingComponent implements AfterViewInit {
       title: 'On-demand walkthrough',
       description: 'Watch a 12-minute tour that covers guest flows, admin dashboards, and Portale Alloggi automation.',
       actionLabel: 'Watch the demo',
-      actionHref: '#'
+      actionHref: '/pricing#plans'
     },
     {
       title: 'API & integration docs',
       description: 'Explore our REST API, webhooks, and starter templates to connect Remote Check-in to your stack.',
       actionLabel: 'Browse docs',
-      actionHref: '#'
+      actionHref: '/pricing#addons'
     }
   ];
 
