@@ -293,7 +293,12 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   readonly currentYear = new Date().getFullYear();
 
   ngAfterViewInit(): void {
-    if (!this.heroStatsSection || !this.isBrowser || typeof IntersectionObserver === 'undefined') {
+    if (!this.isBrowser) {
+      return;
+    }
+
+    if (!this.heroStatsSection || typeof IntersectionObserver === 'undefined') {
+      this.instantlySetHeroStats();
       return;
     }
 
@@ -323,6 +328,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
 
   private animateHeroStats(): void {
     if (!this.isBrowser || typeof requestAnimationFrame === 'undefined') {
+      this.instantlySetHeroStats();
       return;
     }
 
@@ -350,6 +356,14 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     };
 
     requestAnimationFrame(step);
+  }
+
+  private instantlySetHeroStats(): void {
+    this.heroStats.forEach(stat => {
+      stat.displayValue = stat.target;
+    });
+    this.heroStatsAnimated = true;
+    this.cdr.markForCheck();
   }
 }
 
