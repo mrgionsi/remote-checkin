@@ -293,29 +293,44 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   readonly currentYear = new Date().getFullYear();
 
   ngAfterViewInit(): void {
-    if (!this.isBrowser) {
+    if (!this.isBrowser || !this.heroStatsSection) {
       return;
     }
 
-    if (!this.heroStatsSection || typeof IntersectionObserver === 'undefined') {
-      this.instantlySetHeroStats();
+    const nativeElement = this.heroStatsSection.nativeElement;
+
+    if (typeof IntersectionObserver === 'undefined') {
+      this.startHeroStatsAnimation();
       return;
     }
 
     this.observer = new IntersectionObserver(
       entries => {
         entries.forEach(entry => {
-          if (entry.isIntersecting && !this.heroStatsAnimated) {
-            this.heroStatsAnimated = true;
-            this.animateHeroStats();
+          if (entry.isIntersecting) {
+            this.startHeroStatsAnimation();
             this.observer?.disconnect();
           }
         });
       },
-      { threshold: 0.4 }
+      { threshold: 0.15 }
     );
 
-    this.observer.observe(this.heroStatsSection.nativeElement);
+    this.observer.observe(nativeElement);
+
+    const rect = nativeElement.getBoundingClientRect();
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+    const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+    const isVisible =
+      rect.top < viewportHeight &&
+      rect.bottom > 0 &&
+      rect.left < viewportWidth &&
+      rect.right > 0;
+
+    if (isVisible) {
+      this.startHeroStatsAnimation();
+      this.observer?.disconnect();
+    }
   }
 
   dismissStickyCta(): void {
@@ -328,7 +343,6 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
 
   private animateHeroStats(): void {
     if (!this.isBrowser || typeof requestAnimationFrame === 'undefined') {
-      this.instantlySetHeroStats();
       return;
     }
 
@@ -362,8 +376,21 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     this.heroStats.forEach(stat => {
       stat.displayValue = stat.target;
     });
-    this.heroStatsAnimated = true;
     this.cdr.markForCheck();
+  }
+
+  private startHeroStatsAnimation(animated: boolean = true): void {
+    if (this.heroStatsAnimated) {
+      return;
+    }
+
+    this.heroStatsAnimated = true;
+
+    if (animated && this.isBrowser && typeof requestAnimationFrame !== 'undefined') {
+      this.animateHeroStats();
+    } else {
+      this.instantlySetHeroStats();
+    }
   }
 }
 
