@@ -1,0 +1,128 @@
+<div class="pricing" id="top">
+  <app-header 
+      [navLinks]="navLinks"
+      [showLanguageMenu]="true"
+      [showCta]="true"
+      ctaRouterLink="/landing"
+      ctaLabelKey="landing.actions.scheduleWalkthrough"
+      brandRouterLink="/landing">
+  </app-header>
+  
+  <header class="pricing__hero">
+    <p class="pricing__eyebrow">{{ 'pricingDetails.hero.eyebrow' | transloco }}</p>
+    <h1>{{ 'pricingDetails.hero.title' | transloco }}</h1>
+    <p class="pricing__subtitle">
+      {{ 'pricingDetails.hero.subtitle' | transloco }}
+    </p>
+    <div class="pricing__toggle" role="radiogroup" [attr.aria-label]="'pricingDetails.hero.billingLabel' | transloco">
+      <button type="button" class="toggle__option" [class.toggle__option--active]="billing() === 'monthly'"
+        (click)="toggleBilling('monthly')" [attr.aria-pressed]="billing() === 'monthly'" role="radio">
+        {{ 'pricingDetails.hero.monthly' | transloco }}
+      </button>
+      <button type="button" class="toggle__option" [class.toggle__option--active]="billing() === 'annual'"
+        (click)="toggleBilling('annual')" [attr.aria-pressed]="billing() === 'annual'" role="radio">
+        {{ 'pricingDetails.hero.annual' | transloco }}
+        <span class="toggle__badge">{{ 'pricingDetails.hero.annualBadge' | transloco }}</span>
+      </button>
+    </div>
+  </header>
+
+  <section class="plans" id="plans">
+    <article class="plan-card" *ngFor="let plan of plans" [class.plan-card--highlight]="plan.highlight">
+      <div class="plan-card__header">
+        <h2>{{ plan.nameKey | transloco }}</h2>
+        <p>{{ plan.descriptionKey | transloco }}</p>
+        <div class="plan-card__price">
+          <span>{{ getPriceForPlan(plan) }}</span>
+          <small *ngIf="billing() === 'annual' && plan.monthly !== 0">
+            {{ 'pricingDetails.pricing.save' | transloco:{ amount: (plan.monthly * 12 - plan.annual) |
+            currency:'USD':'symbol':'1.0-0' } }}
+          </small>
+        </div>
+      </div>
+      <ul class="plan-card__features">
+        <li *ngFor="let feature of plan.featureKeys"><i class="pi pi-check"></i>{{ feature | transloco }}</li>
+      </ul>
+      <a class="plan-card__cta" [attr.href]="plan.ctaHref">{{ plan.ctaLabelKey | transloco }}</a>
+    </article>
+  </section>
+
+  <section class="comparison" id="comparison">
+    <header class="comparison__header">
+      <h2>{{ 'pricingDetails.comparison.title' | transloco }}</h2>
+      <p>{{ 'pricingDetails.comparison.subtitle' | transloco }}</p>
+    </header>
+    <div class="comparison__table" role="table">
+      <div class="comparison__row comparison__row--head" role="row">
+        <div class="comparison__cell comparison__cell--feature" role="columnheader">{{
+          'pricingDetails.comparison.header.feature' | transloco }}</div>
+        <div class="comparison__cell" role="columnheader">{{ 'pricingDetails.comparison.header.launch' | transloco }}
+        </div>
+        <div class="comparison__cell" role="columnheader">{{ 'pricingDetails.comparison.header.growth' | transloco }}
+        </div>
+        <div class="comparison__cell" role="columnheader">{{ 'pricingDetails.comparison.header.enterprise' | transloco
+          }}</div>
+      </div>
+      <div class="comparison__row" role="row" *ngFor="let row of comparisonRows">
+        <div class="comparison__cell comparison__cell--feature" role="cell">{{ row.featureKey | transloco }}</div>
+        <div class="comparison__cell" role="cell">
+          <ng-container *ngIf="isFeatureIncluded(row.launch); else launchText">
+            <i class="pi pi-check"></i>
+          </ng-container>
+          <ng-template #launchText>{{ displayFeatureValue(row.launch) }}</ng-template>
+        </div>
+        <div class="comparison__cell" role="cell">
+          <ng-container *ngIf="isFeatureIncluded(row.growth); else growthText">
+            <i class="pi pi-check"></i>
+          </ng-container>
+          <ng-template #growthText>{{ displayFeatureValue(row.growth) }}</ng-template>
+        </div>
+        <div class="comparison__cell" role="cell">
+          <ng-container *ngIf="isFeatureIncluded(row.enterprise); else enterpriseText">
+            <i class="pi pi-check"></i>
+          </ng-container>
+          <ng-template #enterpriseText>{{ displayFeatureValue(row.enterprise) }}</ng-template>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="addons" id="addons">
+    <header class="addons__header">
+      <h2>{{ 'pricingDetails.addons.title' | transloco }}</h2>
+      <p>{{ 'pricingDetails.addons.subtitle' | transloco }}</p>
+    </header>
+    <div class="addons__grid">
+      <article class="addon-card" *ngFor="let addOn of addOns">
+        <h3>{{ addOn.titleKey | transloco }}</h3>
+        <p>{{ addOn.descriptionKey | transloco }}</p>
+        <span class="addon-card__price">{{ addOn.priceKey | transloco }}</span>
+      </article>
+    </div>
+  </section>
+
+  <section class="faq" id="faq">
+    <header class="faq__header">
+      <h2>{{ 'pricingDetails.faq.title' | transloco }}</h2>
+      <p>{{ 'pricingDetails.faq.subtitle' | transloco }}</p>
+    </header>
+    <div class="faq__list">
+      <details *ngFor="let faq of pricingFaqs" class="faq__item">
+        <summary class="faq__question">{{ faq.questionKey | transloco }}</summary>
+        <p class="faq__answer">{{ faq.answerKey | transloco }}</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="cta__content">
+      <h2>{{ 'pricingDetails.cta.title' | transloco }}</h2>
+      <p>{{ 'pricingDetails.cta.subtitle' | transloco }}</p>
+      <div class="cta__actions">
+        <a class="btn btn--primary" href="mailto:hello@remote-checkin.io?subject=Schedule%20a%20walkthrough">{{
+          'pricingDetails.cta.primary' | transloco }}</a>
+        <a class="btn btn--ghost" routerLink="/landing" fragment="cta">{{ 'pricingDetails.cta.secondary' | transloco }}</a>
+      </div>
+    </div>
+  </section>
+</div>

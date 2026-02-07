@@ -1,3 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+:root {
+    --font-body: 'IBM Plex Sans', sans-serif;
+    --font-display: 'Space Grotesk', sans-serif;
+    --ink-900: #0b0f14;
+    --ink-700: #2b3138;
+    --ink-500: #5a6470;
+    --ink-300: #a3adb8;
+    --surface-100: #ffffff;
+    --surface-200: #f4f6f8;
+    --surface-300: #e6e9ee;
+    --accent-600: #111827;
+    --accent-300: #c7ced6;
+}
+
 body {
-    font-family: 'Poppins', sans-serif;
+    font-family: var(--font-body);
+    color: var(--ink-900);
 }

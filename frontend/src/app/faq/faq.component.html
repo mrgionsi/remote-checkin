@@ -1,0 +1,84 @@
+<div class="faq-page" [@pageFade] id="top">
+    <app-header 
+        [navLinks]="navLinks"
+        [showLanguageMenu]="true"
+        [showCta]="true"
+        ctaRouterLink="/pricing"
+        ctaLabelKey="landing.actions.claimSpot"
+        brandRouterLink="/landing">
+    </app-header>
+
+    <main class="faq-page__content">
+        <!-- Hero Section -->
+        <section class="faq-hero">
+            <div class="faq-hero__content">
+                <p class="faq-hero__eyebrow">{{ 'faq.hero.eyebrow' | transloco }}</p>
+                <h1>{{ 'faq.hero.title' | transloco }}</h1>
+                <p class="faq-hero__description">{{ 'faq.hero.description' | transloco }}</p>
+            </div>
+        </section>
+
+        <!-- FAQ Categories -->
+        <section class="faq-categories" *ngFor="let category of categories; let categoryIndex = index">
+            <div class="faq-category">
+                <div class="faq-category__header">
+                    <div class="faq-category__icon">
+                        <i class="{{ category.icon }}"></i>
+                    </div>
+                    <h2>{{ category.titleKey | transloco }}</h2>
+                </div>
+                <div class="faq-category__items">
+                    <article 
+                        class="faq-item" 
+                        *ngFor="let item of category.items; let itemIndex = index"
+                        [class.faq-item--expanded]="item.expanded">
+                        <button 
+                            class="faq-item__question" 
+                            type="button"
+                            (click)="toggleItem(categoryIndex, itemIndex)"
+                            [attr.aria-expanded]="item.expanded">
+                            <span class="faq-item__question-text">{{ item.questionKey | transloco }}</span>
+                            <i class="pi pi-chevron-down faq-item__icon"></i>
+                        </button>
+                        <div 
+                            class="faq-item__answer"
+                            [@itemExpand]
+                            *ngIf="item.expanded">
+                            <div class="faq-item__answer-content">
+                                <p>{{ item.answerKey | transloco }}</p>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="faq-cta">
+            <div class="faq-cta__content">
+                <h2>{{ 'faq.cta.title' | transloco }}</h2>
+                <p>{{ 'faq.cta.description' | transloco }}</p>
+                <div class="faq-cta__actions">
+                    <a class="btn btn--primary" routerLink="/pricing">{{ 'faq.cta.primaryAction' | transloco }}</a>
+                    <a class="btn btn--ghost" href="mailto:support@remote-checkin.io">{{ 'faq.cta.secondaryAction' | transloco }}</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="faq-footer">
+        <div class="faq-footer__content">
+            <div class="faq-footer__brand">
+                <span class="brand__mark">{{ 'landing.brand.title' | transloco }}</span>
+                <p>{{ 'landing.footer.description' | transloco }}</p>
+            </div>
+            <div class="faq-footer__links">
+                <a href="mailto:legal@remote-checkin.io?subject=Privacy%20Policy">{{ 'landing.footer.privacy' | transloco }}</a>
+                <a href="mailto:legal@remote-checkin.io?subject=Terms%20of%20Use">{{ 'landing.footer.terms' | transloco }}</a>
+                <a href="mailto:support@remote-checkin.io">{{ 'landing.footer.support' | transloco }}</a>
+            </div>
+            <p class="faq-footer__copyright">{{ 'landing.footer.copyright' | transloco:{ year: currentYear } }}</p>
+        </div>
+    </footer>
+</div>

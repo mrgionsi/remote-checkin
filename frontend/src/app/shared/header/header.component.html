@@ -1,0 +1,53 @@
+<header class="app-header">
+    <div class="header__brand">
+        <ng-container *ngIf="brandRouterLink; else brandWithoutLink">
+            <a [routerLink]="brandRouterLink" class="brand__link">
+                <img class="brand__logo" src="/assets/brand/logo-256.png" alt="Remote Check-in logo" />
+                <span class="brand__mark">{{ 'landing.brand.title' | transloco }}</span>
+                <span class="brand__tagline">{{ 'landing.brand.tagline' | transloco }}</span>
+            </a>
+        </ng-container>
+        <ng-template #brandWithoutLink>
+            <div class="brand__link brand__link--static">
+                <img class="brand__logo" src="/assets/brand/logo-256.png" alt="Remote Check-in logo" />
+                <span class="brand__mark">{{ 'landing.brand.title' | transloco }}</span>
+                <span class="brand__tagline">{{ 'landing.brand.tagline' | transloco }}</span>
+            </div>
+        </ng-template>
+    </div>
+    <nav class="header__nav" *ngIf="navLinks.length > 0">
+        <ng-container *ngFor="let link of navLinks">
+            <a *ngIf="!link.fragment; else anchorLink" class="nav-link" [attr.href]="link.routerLink ? null : link.href"
+                [routerLink]="link.routerLink || null" [routerLinkActive]="link.routerLink ? 'active' : ''"
+                [routerLinkActiveOptions]="{ exact: true }">
+                {{ link.labelKey | transloco }}
+            </a>
+            <ng-template #anchorLink>
+                <a class="nav-link" [routerLink]="link.routerLink || null" [fragment]="link.fragment">
+                    {{ link.labelKey | transloco }}
+                </a>
+            </ng-template>
+        </ng-container>
+    </nav>
+    <div class="header__actions">
+        <a class="header__signin" routerLink="/admin/login">{{ 'landing.actions.signIn' | transloco }}</a>
+        <ng-container *ngIf="showLanguageMenu">
+            <div class="language-menu">
+                <button class="language-menu__button" type="button">
+                    <i class="pi pi-globe"></i>
+                    <span>{{ activeLang | uppercase }}</span>
+                </button>
+                <ul class="language-menu__list">
+                    <li *ngFor="let option of languageOptions">
+                        <button type="button" (click)="changeLanguage(option.code)">
+                            {{ option.label }}
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </ng-container>
+        <a *ngIf="showCta" class="btn btn--primary header__cta" [routerLink]="ctaRouterLink">
+            {{ ctaLabelKey | transloco }}
+        </a>
+    </div>
+</header>
