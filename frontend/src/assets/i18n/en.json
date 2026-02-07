@@ -267,94 +267,94 @@
     "registration-unavailable": "Registration Unavailable",
     "capacity-verification-failed": "Unable to verify reservation capacity. Registration is temporarily disabled.",
     "capacity-status": "{{registered}}/{{max}} people registered",
-    "presetApplied": "Preset Applied",
-    "presetInstructions": "Instructions: {{instructions}}",
-    "validation": "Validation",
-    "fillRequiredFields": "Please fill required fields.",
-    "saved": "Saved",
-    "emailConfigSaved": "Email configuration saved.",
-    "saveFailed": "Save failed",
-    "testEmail": "Test Email",
-    "setTestRecipientFirst": "Set a test recipient email first.",
-    "testEmailSentSuccessfully": "Test email sent successfully.",
-    "testEmailFailed": "Test email failed.",
-    "testFailed": "Test failed",
-    "gender-header": "Gender",
-    "nationality-header": "Nationality",
-    "email-header": "Email",
-    "birth-municipality-header": "Birth Municipality",
-    "birth-province-header": "Birth Province",
-    "birth-country-header": "Birth Country",
-    "citizenship-header": "Citizenship",
-    "document-issue-place-header": "Issue Place",
-    "document-issue-date-header": "Issue Date",
-    "document-expiry-date-header": "Expiry Date",
-    "issuing-authority-header": "Issuing Authority",
-    "residence-municipality-header": "Residence Municipality",
-    "residence-province-header": "Residence Province",
-    "residence-country-header": "Residence Country",
-    "male": "Male",
-    "female": "Female",
-    "document-expiry-date-error": "Document expiry date must be after the issue date",
-    "send-to-portale-alloggi-btn": "Send to Portale Alloggi",
-    "send-to-portale-alloggi-title": "Send Guest Data to Portale Alloggi",
-    "send-to-portale-alloggi-description": "Review the guest data before sending to the Italian accommodation registry. This action cannot be undone.",
-    "send-to-portale-alloggi-test-btn": "Test portale alloggi (SOAP)",
-    "send-to-portale-alloggi-real-btn": "Send data to portale alloggi",
-    "data-sent-to-portale-alloggi": "Data Sent to Portale Alloggi",
-    "data-sent-success-test": "Data successfully sent to Portale Alloggi (TEST MODE)",
-    "data-sent-success-real": "Data successfully sent to Portale Alloggi (PRODUCTION)",
-    "guest-data-review": "Guest Data Review",
-    "reservation-info": "Reservation Information",
-    "guests-to-send": "Guests to Send",
-    "confirm-send-data": "Confirm Send Data",
-    "cancel-send": "Cancel",
-    "sending-data": "Sending data to Portale Alloggi...",
-    "data-sent-success": "Guest data successfully sent to Portale Alloggi",
-    "data-send-failed": "Failed to send data to Portale Alloggi",
-    "no-guests-to-send": "No guests available to send",
-    "portale-alloggi-not-configured": "Portale Alloggi is not configured. Please configure it in Settings first.",
-    "all-fields-required-error": "All fields and images are required",
-    "complete-all-fields-step1": "Please complete all required fields to continue",
-    "upload-all-images-step2": "Please upload all required images to continue",
-    "complete-all-data-step3": "Please complete all required information to submit",
-    "gender-not-specified": "Not specified",
-    "upload-instructions": "Please upload clear photos of your identity document and a selfie",
-    "front-image-description": "Upload the front side of your ID document",
-    "back-image-description": "Upload the back side of your ID document",
-    "selfie-description": "Take a selfie while holding your ID document",
-    "click-to-upload": "Click to upload",
-    "uploaded": "Uploaded",
-    "remove-image": "Remove image",
-    "front-image-required": "Front image is required",
-    "back-image-required": "Back image is required",
-    "selfie-required": "Selfie is required",
-    "upload-progress": "Upload Progress",
-    "images-uploaded": "images uploaded",
-    "review-summary-description": "Please review all your information before submitting",
-    "personal-information": "Personal Information",
-    "contact-information": "Contact Information",
-    "contact-residence-information": "Contact and Residence Information",
-    "document-information": "Document Information",
-    "birth-information": "Birth Information",
-    "residence-information": "Residence Information",
-    "additional-information": "Additional Information",
-    "search-provinces": "Search provinces...",
-    "search-countries": "Search countries...",
-    "updated": "Updated",
-    "reservation-updated-success": "Reservation has been successfully updated.",
-    "luogo-di-rilascio-documento": "Document issue place",
-    "comune-di-residenza": "Residence Municipality",
-    "tipo-ospite": "Guest type",
-    "numero-ospiti": "Number of guests",
-    "data-inizio-prenotazione": "Reservation start date",
-    "ospite-singolo": "Single Guest",
-    "capo-famiglia": "Family Head",
-    "capo-gruppo": "Group Leader",
-    "familiare": "Family Member",
-    "membro-gruppo": "Group Member",
-    "front-header": "Front Image",
-    "back-header": "Back Image",
+        "presetApplied": "Preset Applied",
+        "presetInstructions": "Instructions: {{instructions}}",
+        "validation": "Validation",
+        "fillRequiredFields": "Please fill required fields.",
+        "saved": "Saved",
+        "emailConfigSaved": "Email configuration saved.",
+        "saveFailed": "Save failed",
+        "testEmail": "Test Email",
+        "setTestRecipientFirst": "Set a test recipient email first.",
+        "testEmailSentSuccessfully": "Test email sent successfully.",
+        "testEmailFailed": "Test email failed.",
+        "testFailed": "Test failed",
+        "gender-header": "Gender",
+        "nationality-header": "Nationality",
+        "email-header": "Email",
+        "birth-municipality-header": "Birth Municipality",
+        "birth-province-header": "Birth Province",
+        "birth-country-header": "Birth Country",
+        "citizenship-header": "Citizenship",
+        "document-issue-place-header": "Issue Place",
+        "document-issue-date-header": "Issue Date",
+        "document-expiry-date-header": "Expiry Date",
+        "issuing-authority-header": "Issuing Authority",
+        "residence-municipality-header": "Residence Municipality",
+        "residence-province-header": "Residence Province",
+        "residence-country-header": "Residence Country",
+        "male": "Male",
+        "female": "Female",
+        "document-expiry-date-error": "Document expiry date must be after the issue date",
+        "send-to-portale-alloggi-btn": "Send to Portale Alloggi",
+        "send-to-portale-alloggi-title": "Send Guest Data to Portale Alloggi",
+        "send-to-portale-alloggi-description": "Review the guest data before sending to the Italian accommodation registry. This action cannot be undone.",
+        "send-to-portale-alloggi-test-btn": "Test portale alloggi (SOAP)",
+        "send-to-portale-alloggi-real-btn": "Send data to portale alloggi",
+        "data-sent-to-portale-alloggi": "Data Sent to Portale Alloggi",
+        "data-sent-success-test": "Data successfully sent to Portale Alloggi (TEST MODE)",
+        "data-sent-success-real": "Data successfully sent to Portale Alloggi (PRODUCTION)",
+        "guest-data-review": "Guest Data Review",
+        "reservation-info": "Reservation Information",
+        "guests-to-send": "Guests to Send",
+        "confirm-send-data": "Confirm Send Data",
+        "cancel-send": "Cancel",
+        "sending-data": "Sending data to Portale Alloggi...",
+        "data-sent-success": "Guest data successfully sent to Portale Alloggi",
+        "data-send-failed": "Failed to send data to Portale Alloggi",
+        "no-guests-to-send": "No guests available to send",
+        "portale-alloggi-not-configured": "Portale Alloggi is not configured. Please configure it in Settings first.",
+        "all-fields-required-error": "All fields and images are required",
+        "complete-all-fields-step1": "Please complete all required fields to continue",
+        "upload-all-images-step2": "Please upload all required images to continue",
+        "complete-all-data-step3": "Please complete all required information to submit",
+        "gender-not-specified": "Not specified",
+        "upload-instructions": "Please upload clear photos of your identity document and a selfie",
+        "front-image-description": "Upload the front side of your ID document",
+        "back-image-description": "Upload the back side of your ID document", 
+        "selfie-description": "Take a selfie while holding your ID document",
+        "click-to-upload": "Click to upload",
+        "uploaded": "Uploaded",
+        "remove-image": "Remove image",
+        "front-image-required": "Front image is required",
+        "back-image-required": "Back image is required",
+        "selfie-required": "Selfie is required",
+        "upload-progress": "Upload Progress",
+        "images-uploaded": "images uploaded",
+        "review-summary-description": "Please review all your information before submitting",
+        "personal-information": "Personal Information",
+        "contact-information": "Contact Information",
+        "contact-residence-information": "Contact and Residence Information",
+        "document-information": "Document Information",
+        "birth-information": "Birth Information",
+        "residence-information": "Residence Information",
+        "additional-information": "Additional Information",
+        "search-provinces": "Search provinces...",
+        "search-countries": "Search countries...",
+        "updated": "Updated",
+        "reservation-updated-success": "Reservation has been successfully updated.",
+        "luogo-di-rilascio-documento": "Document issue place",
+        "comune-di-residenza": "Residence Municipality",
+        "tipo-ospite": "Guest type",
+        "numero-ospiti": "Number of guests",
+        "data-inizio-prenotazione": "Reservation start date",
+        "ospite-singolo": "Single Guest",
+        "capo-famiglia": "Family Head",
+        "capo-gruppo": "Group Leader",
+        "familiare": "Family Member",
+        "membro-gruppo": "Group Member",
+        "front-header": "Front Image",
+        "back-header": "Back Image",
     "selfie-header": "Selfie",
     "landing": {
         "brand": {
@@ -363,6 +363,7 @@
         },
         "nav": {
             "howItWorks": "How it works",
+            "advantages": "Advantages",
             "features": "Features",
             "pricing": "Pricing",
             "selfHost": "Self-host",
@@ -389,10 +390,77 @@
             "stats": {
                 "header": "Live properties",
                 "properties": "Live properties",
+                "propertiesValue": "48",
                 "completion": "Self check-ins completed",
+                "completionValue": "92%",
                 "timeSaved": "Average time saved per guest",
                 "timeSavedSuffix": "hrs",
-                "upsell": "Upsell conversion lift"
+                "timeSavedValue": "1.8 hrs",
+                "upsell": "Upsell conversion lift",
+                "upsellValue": "+36%"
+            }
+        },
+        "persona": {
+            "eyebrow": "Built for teams and guests",
+            "title": "Two experiences, one seamless journey.",
+            "description": "Switch the lens to see how Remote Check-in supports both operators and guests.",
+            "operators": {
+                "label": "For operators",
+                "title": "Run arrivals with confidence.",
+                "description": "Keep every reservation moving while staying compliant and on brand.",
+                "bullets": {
+                    "ops": "Central dashboard for rooms, reservations, and guests.",
+                    "compliance": "Automated reporting to authorities with audit-ready logs.",
+                    "brand": "Customizable guest flows and communication."
+                }
+            },
+            "guests": {
+                "label": "For guests",
+                "title": "A faster arrival, from any device.",
+                "description": "Guests verify identity, submit documents, and complete check-in in minutes.",
+                "bullets": {
+                    "mobile": "Mobile-first forms that work on any phone.",
+                    "speed": "Skip the front desk line with pre-arrival verification.",
+                    "control": "Preview and confirm details before arrival."
+                }
+            }
+        },
+        "journey": {
+            "eyebrow": "Guest journey snapshot",
+            "title": "From invite to confirmation in three steps.",
+            "description": "Show guests exactly what to expect with a simple, guided flow.",
+            "steps": {
+                "invite": {
+                    "title": "Invite",
+                    "description": "Send branded invitations with reservation details."
+                },
+                "verify": {
+                    "title": "Verify",
+                    "description": "Collect ID documents and validate in one flow."
+                },
+                "confirm": {
+                    "title": "Confirm",
+                    "description": "Approve check-in and notify the guest instantly."
+                }
+            }
+        },
+        "compliance": {
+            "eyebrow": "Compliance & data",
+            "title": "Security and compliance built in.",
+            "description": "Handle sensitive guest data with clear policies and secure workflows.",
+            "items": {
+                "gdpr": {
+                    "title": "GDPR-ready workflows",
+                    "description": "Support consent, retention, and audit requirements."
+                },
+                "encryption": {
+                    "title": "Encrypted credentials",
+                    "description": "Protect SMTP and identity data with encryption."
+                },
+                "portale": {
+                    "title": "Portale Alloggi integration",
+                    "description": "Send required guest data to authorities in minutes."
+                }
             }
         },
         "howItWorks": {
@@ -414,6 +482,54 @@
                     "stage": "Step 3",
                     "title": "Sync & comply",
                     "description": "Approved profiles flow back into your PMS and authority reports. Teams get alerts, while analytics track readiness across properties."
+                },
+                "payment": {
+                    "stage": "Step 4",
+                    "title": "Payment & confirmation",
+                    "description": "Process secure payments, send confirmations, and update reservation status automatically."
+                }
+            }
+        },
+        "advantages": {
+            "eyebrow": "Why Remote Check-in",
+            "title": "Transform your hospitality operations with measurable results.",
+            "description": "Our remote check-in solution delivers tangible benefits that impact your bottom line and guest satisfaction.",
+            "cards": {
+                "timeSavings": {
+                    "title": "Dramatic Time Savings",
+                    "description": "Reduce front desk workload by automating guest arrivals and paperwork processing.",
+                    "benefits": {
+                        "checkin": "Automated check-in processing",
+                        "paperwork": "Digital document handling",
+                        "staff": "Free up staff for guest experience"
+                    }
+                },
+                "costReduction": {
+                    "title": "Significant Cost Reduction",
+                    "description": "Lower operational costs while improving service quality through automation.",
+                    "benefits": {
+                        "staffing": "Reduce front desk staffing needs",
+                        "printing": "Eliminate paper and printing costs",
+                        "errors": "Minimize data entry errors"
+                    }
+                },
+                "guestExperience": {
+                    "title": "Enhanced Guest Experience",
+                    "description": "Delight guests with seamless, contactless arrivals and personalized service.",
+                    "benefits": {
+                        "speed": "Skip-the-line arrival experience",
+                        "convenience": "Mobile-first check-in process",
+                        "satisfaction": "Higher guest satisfaction scores"
+                    }
+                },
+                "compliance": {
+                    "title": "Complete Compliance Automation",
+                    "description": "Stay fully compliant with hospitality regulations through automated reporting.",
+                    "benefits": {
+                        "automated": "Automatic legal form generation",
+                        "legal": "Always up-to-date with regulations",
+                        "audit": "Ready-for-audit documentation"
+                    }
                 }
             }
         },
@@ -423,7 +539,8 @@
             "languages": "12+ languages",
             "api": "Open API",
             "quote": "Inspired by modern productivity leaders who combine transparency with community-driven roadmaps to stay ahead.",
-            "attribution": "Remote Check-in Product Team"
+            "attribution": "Remote Check-in Product Team",
+            "note": "Sample metrics shown for illustration."
         },
         "features": {
             "eyebrow": "Why hospitality teams switch",
@@ -445,14 +562,35 @@
                 "collaboration": {
                     "title": "Team Collaboration",
                     "description": "Invite partners, cleaning teams, and front desk staff with role-based permissions that scale with you."
+                },
+                "mobile": {
+                    "title": "Mobile-First Experience",
+                    "description": "Guests complete check-in on any device with optimized mobile interface and real-time validation."
+                },
+                "integration": {
+                    "title": "Powerful Integrations",
+                    "description": "Connect with PMS, CRM and hospitality systems through native APIs and webhooks."
                 }
             }
         },
         "pricing": {
-            "eyebrow": "Pricing",
+            "eyebrow": "Transparent Pricing",
             "title": "Plans built for every property portfolio.",
-            "description": "Launch for free with the first 20 subscribers or host it yourself. Scale when you are ready—no hidden fees.",
+            "description": "Launch for free with first 20 subscribers or host it yourself. Scale when you are ready—no hidden fees.",
+            "selfHostNote": "Prefer self-hosting? We support managed and self-hosted deployments.",
             "pricePerMonth": "/month",
+            "pricePerYear": "/year",
+            "paymentMethods": "Accepted payment methods",
+            "toggle": {
+                "monthly": "Monthly",
+                "annually": "Annually",
+                "discount": "Save 2 months"
+            },
+            "security": {
+                "title": "Secure payment processing",
+                "description": "All transactions are encrypted and processed through PCI-compliant payment providers."
+            },
+            "walkthrough": "See the detailed pricing breakdown",
             "plans": {
                 "launch": {
                     "name": "Launch",
@@ -471,7 +609,8 @@
                         "allLaunch": "Everything in Launch",
                         "brandable": "Brandable guest portal & SMS notifications",
                         "integrations": "Two-way PMS integrations & automation flows",
-                        "support": "Priority in-app and email support"
+                        "support": "Priority in-app and email support",
+                        "analytics": "Advanced analytics dashboard"
                     }
                 },
                 "enterprise": {
@@ -483,7 +622,8 @@
                         "onboarding": "Dedicated onboarding and success manager",
                         "analytics": "Advanced analytics and BI exports",
                         "workflows": "Custom compliance workflows per region",
-                        "security": "SAML SSO & SOC 2 report upon request"
+                        "security": "SAML SSO & SOC 2 report upon request",
+                        "dedicated": "Dedicated infrastructure options"
                     }
                 }
             }
@@ -520,7 +660,15 @@
                 },
                 "mobile": {
                     "question": "Do you support mobile-first experiences?",
-                    "answer": "Absolutely. Guests can complete the journey on any device, with real-time validation optimised for cameras and offline capture queues for limited connectivity."
+                    "answer": "Absolutely. Guests can complete journey on any device, with real-time validation optimised for cameras and offline capture queues for limited connectivity."
+                },
+                "payment": {
+                    "question": "What payment methods do you accept?",
+                    "answer": "We accept all major credit cards, PayPal, Apple Pay, Google Pay, and bank transfers for Enterprise plans. All payments are processed securely through PCI-compliant providers."
+                },
+                "data": {
+                    "question": "How is our guest data protected?",
+                    "answer": "All guest data is encrypted end-to-end, stored in secure data centers, and handled according to GDPR and hospitality privacy regulations. You retain full data ownership and can export it anytime."
                 }
             }
         },
@@ -556,7 +704,9 @@
                     "links": {
                         "docs": "Docs",
                         "api": "API",
-                        "slack": "Community Slack"
+                        "slack": "Community Slack",
+                        "pricing": "Pricing",
+                        "faq": "FAQ"
                     }
                 }
             },
@@ -568,6 +718,415 @@
         "stickyCta": {
             "message": "Launch plan is free for the first 20 hospitality teams.",
             "close": "Dismiss offer"
+        },
+        "mobileNav": {
+            "overview": "Overview",
+            "pricing": "Pricing",
+            "faq": "FAQ"
+        },
+        "trusted": {
+            "eyebrow": "Trusted by modern hospitality teams",
+            "title": "From boutique hotels to multi-property groups."
+        },
+        "testimonials": {
+            "eyebrow": "What our customers say",
+            "title": "Trusted by hospitality leaders worldwide.",
+            "description": "See how Remote Check-in is transforming operations across different property types.",
+            "items": {
+                "claudia": {
+                    "quote": "Remote Check-in trimmed our arrival paperwork by 80% and gave guests a seamless first touchpoint before they even arrived on-site.",
+                    "author": "Claudia Marino",
+                    "role": "Guest Experience Lead · Breeze Hotels"
+                },
+                "david": {
+                    "quote": "The compliance automation alone paid for itself within a week — we no longer chase authorities for confirmations.",
+                    "author": "David O’Sullivan",
+                    "role": "Operations Director · Atlas Hospitality"
+                },
+                "lina": {
+                    "quote": "Our team can review every reservation from a single dashboard. Integrating with our PMS was refreshingly painless.",
+                    "author": "Lina Gomez",
+                    "role": "Digital Transformation · UrbanNest Co."
+                }
+            }
+        },
+        "resources": {
+            "eyebrow": "Keep exploring",
+            "title": "Resources to help your team ship remote check-in.",
+            "cards": {
+                "playbook": {
+                    "title": "Playbook: Automating guest compliance",
+                    "description": "Download step-by-step guide hospitality teams use to cut paperwork while staying audit-ready.",
+                    "action": "Get the playbook"
+                },
+                "walkthrough": {
+                    "title": "On-demand walkthrough",
+                    "description": "Watch a 12-minute tour that covers guest flows, admin dashboards, and Portale Alloggi automation.",
+                    "action": "Watch demo"
+                },
+                "docs": {
+                    "title": "API & integration docs",
+                    "description": "Explore our REST API, webhooks, and starter templates to connect Remote Check-in to your stack.",
+                    "action": "Browse docs"
+                }
+            },
+            "testimonials": {
+                "eyebrow": "What our customers say",
+                "title": "Trusted by hospitality leaders worldwide.",
+                "description": "See how Remote Check-in is transforming operations across different property types.",
+                "items": {
+                    "claudia": {
+                        "quote": "Remote Check-in trimmed our arrival paperwork by 80% and gave guests a seamless first touchpoint before they even arrived on-site.",
+                        "author": "Claudia Marino",
+                        "role": "Guest Experience Lead · Breeze Hotels"
+                    },
+                    "david": {
+                        "quote": "The compliance automation alone paid for itself within a week — we no longer chase authorities for confirmations.",
+                        "author": "David O'Sullivan",
+                        "role": "Operations Director · Atlas Hospitality"
+                    },
+                    "lina": {
+                        "quote": "Our team can review every reservation from a single dashboard. Integrating with our PMS was refreshingly painless.",
+                        "author": "Lina Gomez",
+                        "role": "Digital Transformation · UrbanNest Co."
+                    }
+                }
+            },
+            "pricing": {
+                "eyebrow": "Transparent Pricing",
+                "title": "Plans built for every property portfolio.",
+                "description": "Launch for free with first 20 subscribers or host it yourself. Scale when you are ready—no hidden fees.",
+                "pricePerMonth": "/month",
+                "pricePerYear": "/year",
+                "paymentMethods": "Accepted payment methods",
+                "toggle": {
+                    "monthly": "Monthly",
+                    "annually": "Annually",
+                    "discount": "Save 2 months"
+                },
+                "security": {
+                    "title": "Secure payment processing",
+                    "description": "All transactions are encrypted and processed through PCI-compliant payment providers."
+                },
+                "plans": {
+                    "launch": {
+                        "name": "Launch",
+                        "tagline": "First 20 subscribers — everything you need to get started.",
+                        "bullets": {
+                            "properties": "Unlimited properties & bookings",
+                            "journey": "Digital guest journey with document upload",
+                            "emails": "Automated confirmation emails",
+                            "community": "Community support & product roadmap voting"
+                        }
+                    },
+                    "growth": {
+                        "name": "Growth",
+                        "tagline": "Ideal for boutique hotels and serviced apartments scaling operations.",
+                        "bullets": {
+                            "allLaunch": "Everything in Launch",
+                            "brandable": "Brandable guest portal & SMS notifications",
+                            "integrations": "Two-way PMS integrations & automation flows",
+                            "support": "Priority in-app and email support",
+                            "analytics": "Advanced analytics dashboard"
+                        }
+                    },
+                    "enterprise": {
+                        "name": "Enterprise",
+                        "priceNote": "Custom pricing",
+                        "tagline": "Custom implementations for hotel groups and hospitality brands.",
+                        "bullets": {
+                            "onboarding": "Dedicated onboarding and success manager",
+                            "analytics": "Advanced analytics and BI exports",
+                            "workflows": "Custom compliance workflows per region",
+                            "security": "SAML SSO & SOC 2 report upon request",
+                            "dedicated": "Dedicated infrastructure options"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "pricingDetails": {
+        "hero": {
+            "eyebrow": "Pricing made for hospitality growth",
+            "title": "Choose the remote check-in stack that scales with every property.",
+            "subtitle": "Transparent plans with unlimited guests, flexible onboarding, and the compliance automation your team needs.",
+            "billingLabel": "Billing cycle",
+            "monthly": "Monthly",
+            "annual": "Annual",
+            "annualBadge": "2 months free"
+        },
+        "pricing": {
+            "currencySymbol": "$",
+            "perMonth": "/mo",
+            "perYear": "/yr",
+            "free": "Free",
+            "save": "Save {{ amount }}"
+        },
+        "plans": {
+            "launch": {
+                "name": "Launch",
+                "description": "Perfect for independent properties digitalising arrivals for the first time.",
+                "features": {
+                    "unlimited": "Unlimited reservations and properties",
+                    "journey": "Digital guest journey & identity capture",
+                    "emails": "Email confirmations & reminders",
+                    "community": "Community support and roadmap voting"
+                },
+                "cta": "Start for free"
+            },
+            "growth": {
+                "name": "Growth",
+                "description": "For boutique hotels and serviced apartments scaling remote operations.",
+                "features": {
+                    "everythingLaunch": "Everything in Launch",
+                    "portal": "Brandable guest portal & multi-language templates",
+                    "sms": "SMS reminders & two-way PMS sync",
+                    "support": "Priority in-app and email support"
+                },
+                "cta": "Talk to sales"
+            },
+            "enterprise": {
+                "name": "Enterprise",
+                "description": "Tailored programs for multi-property groups needing governance and integrations.",
+                "features": {
+                    "everythingGrowth": "Everything in Growth",
+                    "success": "Dedicated customer success & launch services",
+                    "analytics": "Advanced analytics & custom dashboards",
+                    "compliance": "Regional compliance workflows & SSO"
+                },
+                "cta": "Book a strategy session"
+            }
+        },
+        "comparison": {
+            "title": "Compare plans in detail",
+            "subtitle": "See exactly what’s included and pick the operational toolkit that fits your portfolio.",
+            "header": {
+                "feature": "Feature",
+                "launch": "Launch",
+                "growth": "Growth",
+                "enterprise": "Enterprise"
+            },
+            "rows": {
+                "properties": "Properties & reservations",
+                "documents": "Guest document capture & signatures",
+                "portale": "Portale Alloggi automation",
+                "sms": "SMS reminders & WhatsApp links",
+                "analytics": "Advanced analytics & data export",
+                "successManager": "Customer success manager"
+            },
+            "value": {
+                "unlimited": "Unlimited",
+                "limited": "Limited",
+                "included": "Included",
+                "notIncluded": "—"
+            }
+        },
+        "addons": {
+            "title": "Need a little extra?",
+            "subtitle": "Blend add-ons with any plan so your guest journey fits every property and market.",
+            "handbook": {
+                "title": "Digital guest handbook",
+                "description": "Curated content micro-site for each reservation, including upsells and local tips.",
+                "price": "$25 / property / month"
+            },
+            "integrations": {
+                "title": "Custom integrations",
+                "description": "We build bespoke workflows for PMS, CRM, and loyalty tools that matter to your operations.",
+                "price": "From $1,200 (one-off)"
+            },
+            "concierge": {
+                "title": "Multilingual concierge team",
+                "description": "A 24/7 distributed concierge desk that handles arrival questions on your behalf.",
+                "price": "$150 / month / property"
+            }
+        },
+        "faq": {
+            "title": "Pricing FAQs",
+            "subtitle": "The answers teams usually need before rolling out Remote Check-in.",
+            "mixPlans": {
+                "question": "Can we mix plans across properties?",
+                "answer": "Yes. You can run different plans per property and consolidate billing monthly. Enterprise gives you rollout governance."
+            },
+            "perGuest": {
+                "question": "Do you charge per guest?",
+                "answer": "No. Every plan includes unlimited guests and reservations. You only pay based on the feature set that matches your operation."
+            },
+            "annualDiscount": {
+                "question": "How does the annual discount work?",
+                "answer": "Annual billing gives you two months off (pay for 10, get 12). You can upgrade or downgrade at any time with a prorated invoice."
+            },
+            "onboarding": {
+                "question": "Is onboarding included?",
+                "answer": "Launch includes a self-serve template library. Growth and Enterprise customers receive dedicated onboarding sessions and migration assistance."
+            }
+        },
+        "cta": {
+            "title": "Ready to deliver incredible arrivals?",
+            "subtitle": "Book a walkthrough with our onboarding team or claim the Launch plan for free.",
+            "primary": "Speak with us",
+            "secondary": "Claim free Launch plan"
+        }
+    },
+    "faq": {
+        "nav": {
+            "home": "Home",
+            "pricing": "Pricing"
+        },
+        "hero": {
+            "eyebrow": "Frequently Asked Questions",
+            "title": "Everything you need to know about Remote Check-in",
+            "description": "Find answers to common questions about setup, features, pricing, technical requirements, compliance, and support."
+        },
+        "categories": {
+            "gettingStarted": {
+                "title": "Getting Started",
+                "items": {
+                    "setup": {
+                        "question": "How do I set up Remote Check-in for my property?",
+                        "answer": "Setting up Remote Check-in is straightforward. After signing up, you'll connect your PMS (Property Management System) or upload guest lists manually. Configure your email templates, invite your team members, and you're ready to start sending check-in invitations to guests. Our onboarding team provides step-by-step guidance and migration templates to make the process seamless."
+                    },
+                    "onboarding": {
+                        "question": "What onboarding support is included?",
+                        "answer": "Launch plan includes access to our self-serve template library and community support. Growth and Enterprise customers receive dedicated onboarding sessions with our team, migration assistance, and priority support. We provide proven playbooks, integration guides, and best practices to ensure a smooth rollout."
+                    },
+                    "timeToLaunch": {
+                        "question": "How fast can we go live?",
+                        "answer": "Most customers go live in under two weeks. The timeline depends on your PMS integration complexity and customization needs. Simple setups can be operational within days, while custom implementations may take 2-4 weeks. Our team works with you to establish a realistic timeline based on your requirements."
+                    },
+                    "training": {
+                        "question": "Is staff training included?",
+                        "answer": "Yes, we provide comprehensive training resources including video tutorials, documentation, and best practice guides. Growth and Enterprise plans include live training sessions for your team. We also offer ongoing support to help your staff become proficient with the platform."
+                    }
+                }
+            },
+            "features": {
+                "title": "Features & Functionality",
+                "items": {
+                    "documents": {
+                        "question": "What types of documents can guests upload?",
+                        "answer": "Guests can upload identity documents including passports, national ID cards, driver's licenses, and other government-issued IDs. The system supports front and back images of documents, plus a selfie with the document for identity verification. All uploads are encrypted and stored securely."
+                    },
+                    "languages": {
+                        "question": "Which languages are supported?",
+                        "answer": "Remote Check-in supports 12+ languages including English, Italian, Spanish, French, German, and more. The guest interface automatically detects the user's browser language or allows manual selection. You can also customize translations for your brand's specific terminology."
+                    },
+                    "mobile": {
+                        "question": "Do guests need a mobile app?",
+                        "answer": "No mobile app is required. Guests complete the check-in process through any web browser on their smartphone, tablet, or computer. The interface is optimized for mobile devices with real-time validation, camera integration for document capture, and offline queue support for areas with limited connectivity."
+                    },
+                    "notifications": {
+                        "question": "How do guests receive check-in invitations?",
+                        "answer": "Guests receive branded invitations via email or SMS (available in Growth and Enterprise plans). Invitations include a secure link to complete their check-in. You can customize email templates with your branding, property information, and local tips. Automated reminders are sent for incomplete check-ins."
+                    },
+                    "customization": {
+                        "question": "Can I customize the guest experience?",
+                        "answer": "Yes, Growth and Enterprise plans include brandable guest portals where you can customize colors, logos, messaging, and add property-specific content. You can also create custom workflows, add upsell opportunities, and integrate with your existing systems for a seamless brand experience."
+                    }
+                }
+            },
+            "pricing": {
+                "title": "Pricing & Billing",
+                "items": {
+                    "plans": {
+                        "question": "What's the difference between Launch, Growth, and Enterprise plans?",
+                        "answer": "Launch is free for the first 20 subscribers and includes core features like document capture, automated emails, and unlimited properties. Growth adds brandable portals, SMS notifications, PMS integrations, and priority support. Enterprise offers custom implementations, dedicated success managers, advanced analytics, regional compliance workflows, and SSO."
+                    },
+                    "billing": {
+                        "question": "How does billing work?",
+                        "answer": "You can choose monthly or annual billing. Annual billing saves you 2 months (pay for 10, get 12). All plans include unlimited guests and reservations—you only pay based on the feature set. Enterprise plans have custom pricing based on your specific needs. You can upgrade or downgrade at any time with prorated billing."
+                    },
+                    "cancellation": {
+                        "question": "Can I cancel my subscription anytime?",
+                        "answer": "Yes, you can cancel your subscription at any time. There are no long-term contracts or cancellation fees. When you cancel, you'll retain access until the end of your current billing period. Your data remains available for export for 30 days after cancellation."
+                    },
+                    "trial": {
+                        "question": "Is there a free trial?",
+                        "answer": "The Launch plan is free for the first 20 hospitality teams, which serves as our free tier. For Growth and Enterprise plans, we offer a 14-day free trial so you can explore all features. No credit card required for the trial period."
+                    },
+                    "refund": {
+                        "question": "What is your refund policy?",
+                        "answer": "We offer a 30-day money-back guarantee for all paid plans. If you're not satisfied within the first 30 days, contact our support team for a full refund. After 30 days, refunds are handled on a case-by-case basis for annual subscriptions."
+                    }
+                }
+            },
+            "technical": {
+                "title": "Technical & Integration",
+                "items": {
+                    "integration": {
+                        "question": "Which PMS systems do you integrate with?",
+                        "answer": "We offer native integrations with major PMS providers and support two-way synchronization via REST APIs and webhooks. Popular integrations include systems like Mews, Cloudbeds, Little Hotelier, and many others. We can also build custom integrations for your specific PMS through our Enterprise plan."
+                    },
+                    "api": {
+                        "question": "Do you provide API access?",
+                        "answer": "Yes, all plans include API access. Our REST API and webhook ecosystem allow you to build custom integrations, automate workflows, and connect Remote Check-in with your existing tools. We provide comprehensive API documentation, authentication helpers, and sample code to get you started."
+                    },
+                    "selfHost": {
+                        "question": "Can I self-host Remote Check-in?",
+                        "answer": "Yes, we offer self-hosting options for complete control over your infrastructure and data residency. You can deploy on your own servers using Docker containers and infrastructure-as-code scripts. We also support hybrid deployments where select properties sync to our cloud while others remain on-premises."
+                    },
+                    "requirements": {
+                        "question": "What are the technical requirements?",
+                        "answer": "Remote Check-in is a cloud-based SaaS that requires no installation on your end. Guests only need a modern web browser and internet connection. For self-hosting, you'll need servers capable of running Docker containers, S3-compatible storage, and standard web infrastructure. We provide detailed infrastructure requirements in our deployment guide."
+                    },
+                    "uptime": {
+                        "question": "What is your uptime guarantee?",
+                        "answer": "We maintain 99.9% uptime SLA for our hosted service. Our infrastructure is built on redundant systems with automatic failover, regular backups, and 24/7 monitoring. Enterprise customers receive additional SLA guarantees and dedicated infrastructure options for mission-critical deployments."
+                    }
+                }
+            },
+            "compliance": {
+                "title": "Security & Compliance",
+                "items": {
+                    "gdpr": {
+                        "question": "Is Remote Check-in GDPR compliant?",
+                        "answer": "Yes, Remote Check-in is fully GDPR compliant. We implement data encryption, access controls, right to deletion, and all required privacy measures. Guest data is encrypted end-to-end, and you retain full data ownership. You can export or delete guest data at any time through the admin dashboard."
+                    },
+                    "portaleAlloggi": {
+                        "question": "Does it integrate with Portale Alloggi?",
+                        "answer": "Yes, Remote Check-in includes automated integration with Italy's Portale Alloggi (accommodation registry). The system automatically submits required guest data in the correct format, ensuring compliance with Italian hospitality regulations. This feature is available in all plans and can be configured in your settings."
+                    },
+                    "dataRetention": {
+                        "question": "How long is guest data stored?",
+                        "answer": "You control data retention policies through your admin settings. By default, data is retained according to local hospitality regulations (typically 5-7 years for compliance purposes). You can configure automatic deletion schedules or manually delete data. All deletions are permanent and irreversible."
+                    },
+                    "audit": {
+                        "question": "Are audit trails available?",
+                        "answer": "Yes, all plans include comprehensive audit logs tracking user actions, data access, system changes, and compliance submissions. Enterprise plans include advanced audit features with detailed reporting, export capabilities, and integration with your existing audit systems. All logs are tamper-proof and retained according to your retention policies."
+                    },
+                    "regions": {
+                        "question": "Which regions and regulations are supported?",
+                        "answer": "We support compliance requirements for multiple regions including Italy (Portale Alloggi), GDPR (European Union), and other major hospitality markets. Our compliance forms are configurable and updated regularly to reflect current regulations. Enterprise customers can request custom compliance workflows for specific regional requirements."
+                    }
+                }
+            },
+            "support": {
+                "title": "Support & Help",
+                "items": {
+                    "contact": {
+                        "question": "How can I contact support?",
+                        "answer": "Launch plan customers can access community support forums and email support. Growth and Enterprise customers receive priority in-app and email support with faster response times. Enterprise customers also get a dedicated success manager. For urgent issues, Enterprise customers have access to phone support during business hours."
+                    },
+                    "responseTime": {
+                        "question": "What are your support response times?",
+                        "answer": "Launch plan: Community support and email responses within 48 hours. Growth plan: Priority email support with responses within 24 hours on business days. Enterprise plan: Dedicated support with responses within 4 hours during business hours, plus a dedicated success manager for proactive assistance."
+                    },
+                    "documentation": {
+                        "question": "Where can I find documentation?",
+                        "answer": "Comprehensive documentation is available in our help center, covering setup guides, API references, integration tutorials, best practices, and troubleshooting. All customers have access to video tutorials, step-by-step guides, and our knowledge base. Enterprise customers receive custom documentation for their specific implementation."
+                    },
+                    "community": {
+                        "question": "Is there a community or forum?",
+                        "answer": "Yes, we have an active community where users share tips, ask questions, and vote on product roadmap features. Launch plan customers have full access to community forums. We also host regular webinars, office hours, and user meetups to help you get the most out of Remote Check-in."
+                    }
+                }
+            }
+        },
+        "cta": {
+            "title": "Still have questions?",
+            "description": "Can't find what you're looking for? Our team is here to help you get started or answer any specific questions about your use case.",
+            "primaryAction": "Get Started",
+            "secondaryAction": "Contact Support"
         }
     }
 }

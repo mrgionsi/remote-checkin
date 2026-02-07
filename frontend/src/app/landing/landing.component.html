@@ -1,21 +1,10 @@
 <div class="landing" [@pageFade] id="top">
-    <header class="landing__header">
-        <div class="header__brand">
-            <span class="brand__mark">{{ 'landing.brand.title' | transloco }}</span>
-            <span class="brand__tagline">{{ 'landing.brand.tagline' | transloco }}</span>
-        </div>
-        <nav class="header__nav">
-            <a class="nav-link" *ngFor="let link of navLinks" [attr.href]="link.href">
-                {{ link.labelKey | transloco }}
-            </a>
-        </nav>
-        <div class="header__actions">
-            <a class="header__signin" routerLink="/admin/login">{{ 'landing.actions.signIn' | transloco }}</a>
-            <a class="btn btn--primary header__cta" href="#pricing">{{ 'landing.actions.claimSpot' | transloco }}</a>
-        </div>
-    </header>
+    <app-header [navLinks]="navLinks" [showLanguageMenu]="true" [showCta]="true" ctaRouterLink="/pricing"
+        ctaLabelKey="landing.actions.claimSpot" brandRouterLink="/landing">
+    </app-header>
 
     <main class="landing__content">
+        <!-- Hero Section -->
         <section class="hero" id="hero" [@heroReveal]>
             <div class="hero__copy">
                 <p class="hero__eyebrow">{{ 'landing.hero.eyebrow' | transloco }}</p>
@@ -24,10 +13,12 @@
                     {{ 'landing.hero.description' | transloco }}
                 </p>
                 <div class="hero__cta">
-                    <a class="btn btn--primary" href="#pricing">{{ 'landing.actions.claimSpot' | transloco }}</a>
+                    <a class="btn btn--primary" routerLink="/pricing">{{ 'landing.actions.claimSpot' | transloco }}</a>
                     <a class="btn btn--ghost" routerLink="/admin/login">{{ 'landing.actions.signIn' | transloco }}</a>
-                    <a class="btn btn--outline" routerLink="/">{{ 'landing.actions.previewJourney' | transloco }}</a>
                 </div>
+                <a class="hero__secondary-link" routerLink="/landing" fragment="how-it-works">
+                    {{ 'landing.actions.previewJourney' | transloco }}
+                </a>
                 <ul class="hero__features" [@staggerReveal]>
                     <li class="stagger-item"><i class="pi pi-check"></i> {{ 'landing.hero.highlights.identity' |
                         transloco }}</li>
@@ -41,20 +32,19 @@
                 <div class="hero__dashboard">
                     <div class="dashboard__header">
                         <span class="status">{{ 'landing.hero.stats.header' | transloco }}</span>
-                        <span class="count">{{ liveProperties() | number:'1.0-0' }}</span>
+                        <span class="count">{{ 'landing.hero.stats.propertiesValue' | transloco }}</span>
                     </div>
                     <div class="dashboard__tiles">
                         <article class="tile tile--primary">
-                            <div class="tile__value">{{ selfCheckins() | number:'1.0-0' }}%</div>
+                            <div class="tile__value">{{ 'landing.hero.stats.completionValue' | transloco }}</div>
                             <div class="tile__label">{{ 'landing.hero.stats.completion' | transloco }}</div>
                         </article>
                         <article class="tile tile--secondary">
-                            <div class="tile__value">{{ timeSaved() | number:'1.0-1' }} {{
-                                'landing.hero.stats.timeSavedSuffix' | transloco }}</div>
+                            <div class="tile__value">{{ 'landing.hero.stats.timeSavedValue' | transloco }}</div>
                             <div class="tile__label">{{ 'landing.hero.stats.timeSaved' | transloco }}</div>
                         </article>
                         <article class="tile tile--accent">
-                            <div class="tile__value">+{{ upsellLift() | number:'1.0-0' }}%</div>
+                            <div class="tile__value">{{ 'landing.hero.stats.upsellValue' | transloco }}</div>
                             <div class="tile__label">{{ 'landing.hero.stats.upsell' | transloco }}</div>
                         </article>
                     </div>
@@ -62,6 +52,164 @@
             </div>
         </section>
 
+        <!-- Persona Split -->
+        <section class="persona" id="persona" [@staggerReveal]>
+            <header class="section-head stagger-item">
+                <p class="section-eyebrow">{{ 'landing.persona.eyebrow' | transloco }}</p>
+                <h2>{{ 'landing.persona.title' | transloco }}</h2>
+                <p>{{ 'landing.persona.description' | transloco }}</p>
+            </header>
+            <div class="persona__toggle stagger-item" role="tablist">
+                <button
+                    *ngFor="let option of personaOptions"
+                    type="button"
+                    class="persona__tab"
+                    [class.persona__tab--active]="persona() === option.id"
+                    (click)="setPersona(option.id)"
+                    [attr.aria-pressed]="persona() === option.id">
+                    {{ option.labelKey | transloco }}
+                </button>
+            </div>
+            <div class="persona__content stagger-item">
+                <h3>{{ personaContent[persona()].titleKey | transloco }}</h3>
+                <p>{{ personaContent[persona()].descriptionKey | transloco }}</p>
+                <ul>
+                    <li *ngFor="let bullet of personaContent[persona()].bulletKeys">
+                        <i class="pi pi-check-circle"></i>
+                        <span>{{ bullet | transloco }}</span>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Journey Strip -->
+        <section class="journey-strip" id="journey" [@staggerReveal]>
+            <header class="section-head stagger-item">
+                <p class="section-eyebrow">{{ 'landing.journey.eyebrow' | transloco }}</p>
+                <h2>{{ 'landing.journey.title' | transloco }}</h2>
+                <p>{{ 'landing.journey.description' | transloco }}</p>
+            </header>
+            <div class="journey-strip__steps">
+                <article class="journey-step stagger-item" *ngFor="let step of journeySteps">
+                    <span class="journey-step__icon"><i class="{{ step.icon }}"></i></span>
+                    <h3>{{ step.titleKey | transloco }}</h3>
+                    <p>{{ step.descriptionKey | transloco }}</p>
+                </article>
+            </div>
+        </section>
+
+        <!-- Social Proof Section -->
+        <ng-container *ngIf="showSocialProof">
+            <section class="social-proof" id="social-proof" [@staggerReveal]>
+                <div class="badges stagger-item">
+                    <span class="badge"><i class="pi pi-shield"></i> {{ 'landing.socialProof.gdpr' | transloco }}</span>
+                    <span class="badge"><i class="pi pi-lock"></i> {{ 'landing.socialProof.security' | transloco
+                        }}</span>
+                    <span class="badge"><i class="pi pi-globe"></i> {{ 'landing.socialProof.languages' | transloco
+                        }}</span>
+                    <span class="badge"><i class="pi pi-github"></i> {{ 'landing.socialProof.api' | transloco }}</span>
+                </div>
+                <p class="social-proof__text stagger-item">
+                    {{ 'landing.socialProof.quote' | transloco }}<cite> / {{ 'landing.socialProof.attribution' |
+                        transloco }}</cite>
+                </p>
+                <p class="social-proof__note stagger-item">{{ 'landing.socialProof.note' | transloco }}</p>
+            </section>
+
+            @defer (on viewport) {
+                <!-- Trusted By Section -->
+                <section class="trusted" [@staggerReveal]>
+                    <header class="trusted__header stagger-item">
+                        <p class="section-eyebrow">{{ 'landing.trusted.eyebrow' | transloco }}</p>
+                        <h2>{{ 'landing.trusted.title' | transloco }}</h2>
+                    </header>
+                    <div class="trusted__logos">
+                        <span class="trusted__logo stagger-item" *ngFor="let brand of trustedBrands">{{ brand }}</span>
+                    </div>
+                </section>
+
+                <!-- Testimonials Section -->
+                <section class="testimonials" [@staggerReveal]>
+                    <header class="section-head stagger-item">
+                        <p class="section-eyebrow">{{ 'landing.testimonials.eyebrow' | transloco }}</p>
+                        <h2>{{ 'landing.testimonials.title' | transloco }}</h2>
+                        <p>{{ 'landing.testimonials.description' | transloco }}</p>
+                    </header>
+                    <div class="testimonials__grid">
+                        <article class="testimonial-card stagger-item" *ngFor="let testimonial of testimonials">
+                            <p class="testimonial-card__quote">"{{ testimonial.quoteKey | transloco }}"</p>
+                            <div class="testimonial-card__meta">
+                                <span class="testimonial-card__author">{{ testimonial.authorKey | transloco }}</span>
+                                <span class="testimonial-card__role">{{ testimonial.roleKey | transloco }}</span>
+                            </div>
+                        </article>
+                    </div>
+                </section>
+            } @placeholder {
+                <div class="defer-placeholder"></div>
+            }
+        </ng-container>
+
+        <!-- Advantages Section -->
+        <section class="advantages" id="advantages" [@staggerReveal]>
+            <header class="section-head stagger-item">
+                <p class="section-eyebrow">{{ 'landing.advantages.eyebrow' | transloco }}</p>
+                <h2>{{ 'landing.advantages.title' | transloco }}</h2>
+                <p>{{ 'landing.advantages.description' | transloco }}</p>
+            </header>
+            <div class="advantages__grid">
+                <article class="advantage-card stagger-item" *ngFor="let advantage of advantageCards">
+                    <div class="advantage-card__visual">
+                        <span class="advantage-card__icon"><i class="{{ advantage.icon }}"></i></span>
+                        <div class="advantage-card__metric">{{ advantage.metric }}</div>
+                    </div>
+                    <div class="advantage-card__content">
+                        <h3>{{ advantage.titleKey | transloco }}</h3>
+                        <p>{{ advantage.descriptionKey | transloco }}</p>
+                        <ul class="advantage-card__benefits">
+                            <li *ngFor="let benefit of advantage.benefitKeys">
+                                <i class="pi pi-check-circle"></i>
+                                <span>{{ benefit | transloco }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features" id="features" [@staggerReveal]>
+            <header class="section-head stagger-item">
+                <p class="section-eyebrow">{{ 'landing.features.eyebrow' | transloco }}</p>
+                <h2>{{ 'landing.features.title' | transloco }}</h2>
+                <p>{{ 'landing.features.description' | transloco }}</p>
+            </header>
+            <div class="features__grid">
+                <article class="feature-card stagger-item" *ngFor="let feature of featureCards">
+                    <span class="feature-card__icon"><i class="{{ feature.icon }}"></i></span>
+                    <h3>{{ feature.titleKey | transloco }}</h3>
+                    <p>{{ feature.descriptionKey | transloco }}</p>
+                </article>
+            </div>
+        </section>
+
+        <!-- Compliance Section -->
+        <section class="compliance" id="compliance" [@staggerReveal]>
+            <header class="section-head stagger-item">
+                <p class="section-eyebrow">{{ 'landing.compliance.eyebrow' | transloco }}</p>
+                <h2>{{ 'landing.compliance.title' | transloco }}</h2>
+                <p>{{ 'landing.compliance.description' | transloco }}</p>
+            </header>
+            <div class="compliance__grid">
+                <article class="compliance-card stagger-item" *ngFor="let item of complianceItems">
+                    <span class="compliance-card__icon"><i class="{{ item.icon }}"></i></span>
+                    <h3>{{ item.titleKey | transloco }}</h3>
+                    <p>{{ item.descriptionKey | transloco }}</p>
+                </article>
+            </div>
+        </section>
+
+        <!-- How It Works Section -->
         <section class="how-it-works" id="how-it-works" [@staggerReveal]>
             <header class="section-head stagger-item">
                 <p class="section-eyebrow">{{ 'landing.howItWorks.eyebrow' | transloco }}</p>
@@ -83,103 +231,62 @@
             </div>
         </section>
 
-        <ng-container *ngIf="showSocialProof">
-            <section class="social-proof" id="social-proof" [@staggerReveal]>
-                <div class="badges stagger-item">
-                    <span class="badge"><i class="pi pi-shield"></i> {{ 'landing.socialProof.gdpr' | transloco }}</span>
-                    <span class="badge"><i class="pi.pi-lock"></i> {{ 'landing.socialProof.security' | transloco
-                        }}</span>
-                    <span class="badge"><i class="pi.pi-globe"></i> {{ 'landing.socialProof.languages' | transloco
-                        }}</span>
-                    <span class="badge"><i class="pi.pi-github"></i> {{ 'landing.socialProof.api' | transloco }}</span>
-                </div>
-                <p class="social-proof__text stagger-item">
-                    {{ 'landing.socialProof.quote' | transloco }}<cite> / {{ 'landing.socialProof.attribution' |
-                        transloco }}</cite>
-                </p>
-            </section>
-
-            <section class="trusted" [@staggerReveal]>
-                <header class="trusted__header stagger-item">
-                    <p class="section-eyebrow">Trusted by modern hospitality teams</p>
-                    <h2>From boutique hotels to multi-property groups.</h2>
-                </header>
-                <div class="trusted__logos">
-                    <span class="trusted__logo stagger-item" *ngFor="let brand of trustedBrands">{{ brand }}</span>
-                </div>
-            </section>
-
-            <section class="testimonials" [@staggerReveal]>
-                <div class="testimonials__grid">
-                    <article class="testimonial-card stagger-item" *ngFor="let testimonial of testimonials">
-                        <p class="testimonial-card__quote">“{{ testimonial.quote }}”</p>
-                        <div class="testimonial-card__meta">
-                            <span class="testimonial-card__author">{{ testimonial.author }}</span>
-                            <span class="testimonial-card__role">{{ testimonial.role }}</span>
-                        </div>
-                    </article>
-                </div>
-            </section>
-        </ng-container>
-
-        <section class="resources" [@staggerReveal]>
-            <header class="resources__header stagger-item">
-                <p class="section-eyebrow">Keep exploring</p>
-                <h2>Resources to help your team ship remote check-in.</h2>
-            </header>
-            <div class="resources__grid">
-                <article class="resource-card stagger-item" *ngFor="let resource of resourceHighlights">
-                    <h3>{{ resource.title }}</h3>
-                    <p>{{ resource.description }}</p>
-                    <a class="resource-card__action" [attr.href]="resource.actionHref">{{ resource.actionLabel }}</a>
-                </article>
-            </div>
-        </section>
-
-        <section class="features" id="features" [@staggerReveal]>
-            <header class="section-head stagger-item">
-                <p class="section-eyebrow">{{ 'landing.features.eyebrow' | transloco }}</p>
-                <h2>{{ 'landing.features.title' | transloco }}</h2>
-                <p>{{ 'landing.features.description' | transloco }}</p>
-            </header>
-            <div class="features__grid">
-                <article class="feature-card stagger-item" *ngFor="let feature of featureCards">
-                    <span class="feature-card__icon"><i class="{{ feature.icon }}"></i></span>
-                    <h3>{{ feature.titleKey | transloco }}</h3>
-                    <p>{{ feature.descriptionKey | transloco }}</p>
-                </article>
-            </div>
-        </section>
-
-        <section class="pricing" id="pricing" [@staggerReveal]>
+        <!-- Enhanced Pricing/Subscription Section -->
+        @defer (on viewport) {
+        <section class="pricing-enhanced" id="pricing" [@staggerReveal]>
             <header class="section-head stagger-item">
                 <p class="section-eyebrow">{{ 'landing.pricing.eyebrow' | transloco }}</p>
                 <h2>{{ 'landing.pricing.title' | transloco }}</h2>
                 <p>{{ 'landing.pricing.description' | transloco }}</p>
+                <p class="section-subnote">{{ 'landing.pricing.selfHostNote' | transloco }}</p>
             </header>
+
+            <!-- Pricing Toggle -->
+            <div class="pricing-toggle stagger-item">
+                <span class="pricing-toggle__label">{{ 'landing.pricing.toggle.monthly' | transloco }}</span>
+                <label class="pricing-toggle__switch">
+                    <input type="checkbox" [ngModel]="isAnnualBilling()" (ngModelChange)="isAnnualBilling.set($event)">
+                    <span class="pricing-toggle__slider"></span>
+                </label>
+                <span class="pricing-toggle__label">{{ 'landing.pricing.toggle.annually' | transloco }}</span>
+                <span class="pricing-toggle__discount">{{ 'landing.pricing.toggle.discount' | transloco }}</span>
+            </div>
+
             <div class="pricing__grid">
                 <article class="pricing-card stagger-item" *ngFor="let plan of pricingPlans"
                     [class.pricing-card--highlight]="plan.highlight">
                     <div class="pricing-card__header">
                         <h3>{{ plan.nameKey | transloco }}</h3>
                         <p class="pricing-card__price">
-                            <ng-container *ngIf="plan.price; else translatedPrice">
-                                {{ plan.price }}
+                            <ng-container *ngIf="!isAnnualBilling()">
+                                {{ plan.priceMonthly || plan.price }}
                             </ng-container>
-                            <ng-template #translatedPrice>
-                                {{ plan.priceLabelKey ? (plan.priceLabelKey | transloco) : '' }}
-                            </ng-template>
+                            <ng-container *ngIf="isAnnualBilling() && plan.priceAnnual">
+                                {{ plan.priceAnnual }}
+                            </ng-container>
+                            <span class="pricing-card__period">
+                                {{ isAnnualBilling() ? ('landing.pricing.pricePerYear' | transloco) : (plan.priceNoteKey
+                                | transloco) }}
+                            </span>
                         </p>
-                        <p class="pricing-card__note">{{ plan.priceNoteKey | transloco }}</p>
                         <p class="pricing-card__tagline">{{ plan.taglineKey | transloco }}</p>
+                        <div class="pricing-card__payment" *ngIf="plan.paymentMethods">
+                            <p class="payment-methods-title">{{ 'landing.pricing.paymentMethods' | transloco }}:</p>
+                            <div class="payment-methods">
+                                <span class="payment-method" *ngFor="let method of plan.paymentMethods">
+                                    <i class="pi pi-{{ method.icon }}"></i>
+                                    {{ method.name }}
+                                </span>
+                            </div>
+                        </div>
                     </div>
                     <ul class="pricing-card__list">
                         <li *ngFor="let bullet of plan.bulletKeys"><i class="pi pi-check"></i>{{ bullet | transloco }}
                         </li>
                     </ul>
                     <div class="pricing-card__cta">
-                        <a class="btn btn--primary" *ngIf="plan.price; else contactSales" routerLink="/admin/login">{{
-                            'landing.actions.getStarted' | transloco }}</a>
+                        <a class="btn btn--primary" *ngIf="plan.price || plan.priceMonthly; else contactSales"
+                            routerLink="/admin/login">{{ 'landing.actions.getStarted' | transloco }}</a>
                         <ng-template #contactSales>
                             <a class="btn btn--outline" href="mailto:hello@remote-checkin.io">{{
                                 'landing.actions.contactSales' | transloco }}</a>
@@ -187,8 +294,57 @@
                     </div>
                 </article>
             </div>
-        </section>
 
+            <!-- Payment Security -->
+            <div class="payment-security stagger-item">
+                <div class="payment-security__content">
+                    <div class="security-icon">
+                        <i class="pi pi-shield"></i>
+                    </div>
+                    <div class="security-text">
+                        <h4>{{ 'landing.pricing.security.title' | transloco }}</h4>
+                        <p>{{ 'landing.pricing.security.description' | transloco }}</p>
+                    </div>
+                </div>
+                <div class="payment-providers">
+                    <i class="pi pi-credit-card" title="Credit Card"></i>
+                    <i class="pi pi-paypal" title="PayPal"></i>
+                    <i class="pi pi-apple" title="Apple Pay"></i>
+                    <i class="pi pi-google" title="Google Pay"></i>
+                </div>
+            </div>
+            <div class="pricing-walkthrough stagger-item">
+                <a class="pricing-walkthrough__link" routerLink="/pricing" fragment="comparison">
+                    {{ 'landing.pricing.walkthrough' | transloco }}
+                </a>
+            </div>
+        </section>
+        } @placeholder {
+            <div class="defer-placeholder"></div>
+        }
+
+        <!-- Resources Section -->
+        @defer (on viewport) {
+        <section class="resources" [@staggerReveal]>
+            <header class="resources__header stagger-item">
+                <p class="section-eyebrow">{{ 'landing.resources.eyebrow' | transloco }}</p>
+                <h2>{{ 'landing.resources.title' | transloco }}</h2>
+            </header>
+            <div class="resources__grid">
+                <article class="resource-card stagger-item" *ngFor="let resource of resourceHighlights">
+                    <h3>{{ resource.titleKey | transloco }}</h3>
+                    <p>{{ resource.descriptionKey | transloco }}</p>
+                    <a class="resource-card__action" [attr.href]="resource.actionHref">{{ resource.actionLabelKey |
+                        transloco }}</a>
+                </article>
+            </div>
+        </section>
+        } @placeholder {
+            <div class="defer-placeholder"></div>
+        }
+
+        <!-- Self-Host Section -->
+        @defer (on viewport) {
         <section class="self-host" id="self-host" [@staggerReveal]>
             <div class="self-host__copy stagger-item">
                 <p class="section-eyebrow">{{ 'landing.selfHost.eyebrow' | transloco }}</p>
@@ -213,12 +369,17 @@ docker compose pull
 docker compose up -d
 
 # {{ 'landing.selfHost.terminal.comment' | transloco }}
-remote-checkin ctl storage sync
+docker compose logs -f
                     </pre>
                 </div>
             </div>
         </section>
+        } @placeholder {
+            <div class="defer-placeholder"></div>
+        }
 
+        <!-- FAQ Section -->
+        @defer (on viewport) {
         <section class="faq" id="faq" [@staggerReveal]>
             <header class="section-head stagger-item">
                 <p class="section-eyebrow">{{ 'landing.faq.eyebrow' | transloco }}</p>
@@ -241,22 +402,39 @@ remote-checkin ctl storage sync
                     <h3>{{ 'landing.faq.items.mobile.question' | transloco }}</h3>
                     <p>{{ 'landing.faq.items.mobile.answer' | transloco }}</p>
                 </article>
+                <article class="faq-card stagger-item">
+                    <h3>{{ 'landing.faq.items.payment.question' | transloco }}</h3>
+                    <p>{{ 'landing.faq.items.payment.answer' | transloco }}</p>
+                </article>
+                <article class="faq-card stagger-item">
+                    <h3>{{ 'landing.faq.items.data.question' | transloco }}</h3>
+                    <p>{{ 'landing.faq.items.data.answer' | transloco }}</p>
+                </article>
             </div>
         </section>
+        } @placeholder {
+            <div class="defer-placeholder"></div>
+        }
 
+        <!-- CTA Section -->
+        @defer (on viewport) {
         <section class="cta" id="cta" [@cardFlip]>
             <div class="cta__content">
                 <h2>{{ 'landing.cta.title' | transloco }}</h2>
                 <p>{{ 'landing.cta.description' | transloco }}</p>
                 <div class="cta__actions">
-                    <a class="btn btn--primary" href="#pricing">{{ 'landing.actions.claimSpot' | transloco }}</a>
+                    <a class="btn btn--primary" routerLink="/pricing">{{ 'landing.actions.claimSpot' | transloco }}</a>
                     <a class="btn btn--ghost" href="mailto:hello@remote-checkin.io">{{
                         'landing.actions.scheduleWalkthrough' | transloco }}</a>
                 </div>
             </div>
         </section>
+        } @placeholder {
+            <div class="defer-placeholder"></div>
+        }
     </main>
 
+    <!-- Footer -->
     <footer class="landing-footer">
         <div class="landing-footer__primary">
             <div class="landing-footer__brand">
@@ -272,7 +450,9 @@ remote-checkin ctl storage sync
                     <h4>{{ column.headingKey | transloco }}</h4>
                     <ul>
                         <li *ngFor="let link of column.links">
-                            <a [attr.href]="link.href">{{ link.labelKey | transloco }}</a>
+                            <a [attr.href]="link.routerLink ? null : link.href" [routerLink]="link.routerLink || null">
+                                {{ link.labelKey | transloco }}
+                            </a>
                         </li>
                     </ul>
                 </div>
@@ -290,6 +470,7 @@ remote-checkin ctl storage sync
         </div>
     </footer>
 
+    <!-- Sticky CTA -->
     <div class="sticky-cta" role="dialog" aria-live="polite" *ngIf="showStickyCta()">
         <button class="sticky-cta__close" type="button" (click)="dismissStickyCta()"
             [attr.aria-label]="'landing.stickyCta.close' | transloco">
@@ -298,10 +479,15 @@ remote-checkin ctl storage sync
         <div class="sticky-cta__content">
             <p><strong>{{ 'landing.stickyCta.message' | transloco }}</strong></p>
             <div class="sticky-cta__actions">
-                <a class="btn btn--primary" href="#pricing">{{ 'landing.actions.claimSpot' | transloco }}</a>
+                <a class="btn btn--primary" routerLink="/pricing">{{ 'landing.actions.claimSpot' | transloco }}</a>
                 <a class="btn btn--ghost" href="mailto:hello@remote-checkin.io?subject=Schedule%20a%20walkthrough">{{
                     'landing.actions.scheduleWalkthrough' | transloco }}</a>
             </div>
         </div>
     </div>
+    <nav class="mobile-quicknav" aria-label="Quick navigation">
+        <a routerLink="/landing" fragment="hero">{{ 'landing.mobileNav.overview' | transloco }}</a>
+        <a routerLink="/landing" fragment="pricing">{{ 'landing.mobileNav.pricing' | transloco }}</a>
+        <a routerLink="/landing" fragment="faq">{{ 'landing.mobileNav.faq' | transloco }}</a>
+    </nav>
 </div>

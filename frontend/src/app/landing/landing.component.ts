@@ -1,6 +1,5 @@
-import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { AfterViewInit, ChangeDetectionStrategy, Component, Inject, signal } from '@angular/core';
-import { PLATFORM_ID } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import {
   animate,
@@ -12,6 +11,9 @@ import {
   trigger
 } from '@angular/animations';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { FormsModule } from '@angular/forms';
+import { HeaderComponent } from '../shared/header/header.component';
+import { LANDING_NAV_LINKS } from '../shared/navigation';
 
 interface FeatureCard {
   titleKey: string;
@@ -19,24 +21,31 @@ interface FeatureCard {
   icon: string;
 }
 
+interface AdvantageCard {
+  titleKey: string;
+  descriptionKey: string;
+  icon: string;
+  metric: string;
+  benefitKeys: string[];
+}
+
 interface PricingPlan {
   nameKey: string;
   price?: string;
+  priceMonthly?: string;
+  priceAnnual?: string;
   priceLabelKey?: string;
   priceNoteKey: string;
   taglineKey: string;
   bulletKeys: string[];
+  paymentMethods?: { name: string; icon: string }[];
   highlight?: boolean;
 }
 
-interface NavigationLink {
-  labelKey: string;
-  href: string;
-}
 
 interface FooterColumn {
   headingKey: string;
-  links: { labelKey: string; href: string }[];
+  links: { labelKey: string; href?: string; routerLink?: string }[];
 }
 
 interface HowItWorksStep {
@@ -47,22 +56,45 @@ interface HowItWorksStep {
 }
 
 interface Testimonial {
-  quote: string;
-  author: string;
-  role: string;
+  quoteKey: string;
+  authorKey: string;
+  roleKey: string;
 }
 
 interface ResourceHighlight {
-  title: string;
-  description: string;
-  actionLabel: string;
+  titleKey: string;
+  descriptionKey: string;
+  actionLabelKey: string;
   actionHref: string;
+}
+
+interface PersonaOption {
+  id: 'operators' | 'guests';
+  labelKey: string;
+}
+
+interface PersonaContent {
+  titleKey: string;
+  descriptionKey: string;
+  bulletKeys: string[];
+}
+
+interface JourneyStep {
+  titleKey: string;
+  descriptionKey: string;
+  icon: string;
+}
+
+interface ComplianceItem {
+  titleKey: string;
+  descriptionKey: string;
+  icon: string;
 }
 
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [CommonModule, RouterModule, TranslocoPipe],
+  imports: [CommonModule, RouterModule, TranslocoPipe, FormsModule, HeaderComponent],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss',
   animations: [
@@ -104,31 +136,123 @@ interface ResourceHighlight {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class LandingComponent implements AfterViewInit {
+export class LandingComponent {
   readonly showStickyCta = signal(true);
-  readonly showSocialProof = false;
+  readonly showSocialProof = true;
+  readonly isAnnualBilling = signal(false);
+  readonly persona = signal<'operators' | 'guests'>('operators');
 
-  readonly liveProperties = signal(0);
-  readonly selfCheckins = signal(0);
-  readonly timeSaved = signal(0);
-  readonly upsellLift = signal(0);
+  constructor() {}
 
-  private readonly livePropertyTarget = 48;
-  private readonly selfCheckinsTarget = 92;
-  private readonly timeSavedTarget = 1.8;
-  private readonly upsellTarget = 36;
-  private readonly isBrowser: boolean;
+  readonly navLinks = LANDING_NAV_LINKS;
 
-  constructor(@Inject(PLATFORM_ID) platformId: object) {
-    this.isBrowser = isPlatformBrowser(platformId);
-  }
+  readonly advantageCards: AdvantageCard[] = [
+    {
+      titleKey: 'landing.advantages.cards.timeSavings.title',
+      descriptionKey: 'landing.advantages.cards.timeSavings.description',
+      icon: 'pi pi-clock',
+      metric: '2h/day',
+      benefitKeys: [
+        'landing.advantages.cards.timeSavings.benefits.checkin',
+        'landing.advantages.cards.timeSavings.benefits.paperwork',
+        'landing.advantages.cards.timeSavings.benefits.staff'
+      ]
+    },
+    {
+      titleKey: 'landing.advantages.cards.costReduction.title',
+      descriptionKey: 'landing.advantages.cards.costReduction.description',
+      icon: 'pi pi-dollar',
+      metric: '-30%',
+      benefitKeys: [
+        'landing.advantages.cards.costReduction.benefits.staffing',
+        'landing.advantages.cards.costReduction.benefits.printing',
+        'landing.advantages.cards.costReduction.benefits.errors'
+      ]
+    },
+    {
+      titleKey: 'landing.advantages.cards.guestExperience.title',
+      descriptionKey: 'landing.advantages.cards.guestExperience.description',
+      icon: 'pi pi-smile',
+      metric: '+45%',
+      benefitKeys: [
+        'landing.advantages.cards.guestExperience.benefits.speed',
+        'landing.advantages.cards.guestExperience.benefits.convenience',
+        'landing.advantages.cards.guestExperience.benefits.satisfaction'
+      ]
+    },
+    {
+      titleKey: 'landing.advantages.cards.compliance.title',
+      descriptionKey: 'landing.advantages.cards.compliance.description',
+      icon: 'pi pi-shield',
+      metric: '100%',
+      benefitKeys: [
+        'landing.advantages.cards.compliance.benefits.automated',
+        'landing.advantages.cards.compliance.benefits.legal',
+        'landing.advantages.cards.compliance.benefits.audit'
+      ]
+    }
+  ];
 
-  readonly navLinks: NavigationLink[] = [
-    { labelKey: 'landing.nav.howItWorks', href: '#how-it-works' },
-    { labelKey: 'landing.nav.features', href: '#features' },
-    { labelKey: 'landing.nav.pricing', href: '#pricing' },
-    { labelKey: 'landing.nav.selfHost', href: '#self-host' },
-    { labelKey: 'landing.nav.faq', href: '#faq' }
+  readonly personaOptions: PersonaOption[] = [
+    { id: 'operators', labelKey: 'landing.persona.operators.label' },
+    { id: 'guests', labelKey: 'landing.persona.guests.label' }
+  ];
+
+  readonly personaContent: Record<'operators' | 'guests', PersonaContent> = {
+    operators: {
+      titleKey: 'landing.persona.operators.title',
+      descriptionKey: 'landing.persona.operators.description',
+      bulletKeys: [
+        'landing.persona.operators.bullets.ops',
+        'landing.persona.operators.bullets.compliance',
+        'landing.persona.operators.bullets.brand'
+      ]
+    },
+    guests: {
+      titleKey: 'landing.persona.guests.title',
+      descriptionKey: 'landing.persona.guests.description',
+      bulletKeys: [
+        'landing.persona.guests.bullets.mobile',
+        'landing.persona.guests.bullets.speed',
+        'landing.persona.guests.bullets.control'
+      ]
+    }
+  };
+
+  readonly journeySteps: JourneyStep[] = [
+    {
+      titleKey: 'landing.journey.steps.invite.title',
+      descriptionKey: 'landing.journey.steps.invite.description',
+      icon: 'pi pi-send'
+    },
+    {
+      titleKey: 'landing.journey.steps.verify.title',
+      descriptionKey: 'landing.journey.steps.verify.description',
+      icon: 'pi pi-id-card'
+    },
+    {
+      titleKey: 'landing.journey.steps.confirm.title',
+      descriptionKey: 'landing.journey.steps.confirm.description',
+      icon: 'pi pi-check-circle'
+    }
+  ];
+
+  readonly complianceItems: ComplianceItem[] = [
+    {
+      titleKey: 'landing.compliance.items.gdpr.title',
+      descriptionKey: 'landing.compliance.items.gdpr.description',
+      icon: 'pi pi-shield'
+    },
+    {
+      titleKey: 'landing.compliance.items.encryption.title',
+      descriptionKey: 'landing.compliance.items.encryption.description',
+      icon: 'pi pi-lock'
+    },
+    {
+      titleKey: 'landing.compliance.items.portale.title',
+      descriptionKey: 'landing.compliance.items.portale.description',
+      icon: 'pi pi-globe'
+    }
   ];
 
   readonly featureCards: FeatureCard[] = [
@@ -151,15 +275,30 @@ export class LandingComponent implements AfterViewInit {
       titleKey: 'landing.features.cards.collaboration.title',
       descriptionKey: 'landing.features.cards.collaboration.description',
       icon: 'pi pi-users'
+    },
+    {
+      titleKey: 'landing.features.cards.mobile.title',
+      descriptionKey: 'landing.features.cards.mobile.description',
+      icon: 'pi pi-mobile'
+    },
+    {
+      titleKey: 'landing.features.cards.integration.title',
+      descriptionKey: 'landing.features.cards.integration.description',
+      icon: 'pi pi-plug'
     }
   ];
 
   readonly pricingPlans: PricingPlan[] = [
     {
       nameKey: 'landing.pricing.plans.launch.name',
-      price: '$0',
+      priceMonthly: '$0',
+      priceAnnual: '$0',
       priceNoteKey: 'landing.pricing.pricePerMonth',
       taglineKey: 'landing.pricing.plans.launch.tagline',
+      paymentMethods: [
+        { name: 'Card', icon: 'credit-card' },
+        { name: 'Bank', icon: 'building' }
+      ],
       bulletKeys: [
         'landing.pricing.plans.launch.bullets.properties',
         'landing.pricing.plans.launch.bullets.journey',
@@ -170,26 +309,39 @@ export class LandingComponent implements AfterViewInit {
     },
     {
       nameKey: 'landing.pricing.plans.growth.name',
-      price: '$79',
+      priceMonthly: '$79',
+      priceAnnual: '$790',
       priceNoteKey: 'landing.pricing.pricePerMonth',
       taglineKey: 'landing.pricing.plans.growth.tagline',
+      paymentMethods: [
+        { name: 'Card', icon: 'credit-card' },
+        { name: 'PayPal', icon: 'paypal' },
+        { name: 'Bank', icon: 'building' }
+      ],
       bulletKeys: [
         'landing.pricing.plans.growth.bullets.allLaunch',
         'landing.pricing.plans.growth.bullets.brandable',
         'landing.pricing.plans.growth.bullets.integrations',
-        'landing.pricing.plans.growth.bullets.support'
+        'landing.pricing.plans.growth.bullets.support',
+        'landing.pricing.plans.growth.bullets.analytics'
       ]
     },
     {
       nameKey: 'landing.pricing.plans.enterprise.name',
-      priceLabelKey: 'landing.pricing.plans.enterprise.priceLabel',
       priceNoteKey: 'landing.pricing.plans.enterprise.priceNote',
       taglineKey: 'landing.pricing.plans.enterprise.tagline',
+      paymentMethods: [
+        { name: 'Card', icon: 'credit-card' },
+        { name: 'PayPal', icon: 'paypal' },
+        { name: 'Bank', icon: 'building' },
+        { name: 'Invoice', icon: 'file' }
+      ],
       bulletKeys: [
         'landing.pricing.plans.enterprise.bullets.onboarding',
         'landing.pricing.plans.enterprise.bullets.analytics',
         'landing.pricing.plans.enterprise.bullets.workflows',
-        'landing.pricing.plans.enterprise.bullets.security'
+        'landing.pricing.plans.enterprise.bullets.security',
+        'landing.pricing.plans.enterprise.bullets.dedicated'
       ]
     }
   ];
@@ -219,6 +371,12 @@ export class LandingComponent implements AfterViewInit {
       titleKey: 'landing.howItWorks.steps.sync.title',
       descriptionKey: 'landing.howItWorks.steps.sync.description',
       icon: 'pi pi-sync'
+    },
+    {
+      stageKey: 'landing.howItWorks.steps.payment.stage',
+      titleKey: 'landing.howItWorks.steps.payment.title',
+      descriptionKey: 'landing.howItWorks.steps.payment.description',
+      icon: 'pi pi-credit-card'
     }
   ];
 
@@ -244,7 +402,9 @@ export class LandingComponent implements AfterViewInit {
       links: [
         { labelKey: 'landing.footer.columns.resources.links.docs', href: 'mailto:hello@remote-checkin.io?subject=Docs%20Access' },
         { labelKey: 'landing.footer.columns.resources.links.api', href: 'mailto:hello@remote-checkin.io?subject=API%20Access' },
-        { labelKey: 'landing.footer.columns.resources.links.slack', href: 'mailto:hello@remote-checkin.io?subject=Community%20Invite' }
+        { labelKey: 'landing.footer.columns.resources.links.slack', href: 'mailto:hello@remote-checkin.io?subject=Community%20Invite' },
+        { labelKey: 'landing.footer.columns.resources.links.pricing', routerLink: '/pricing' },
+        { labelKey: 'landing.footer.columns.resources.links.faq', routerLink: '/faq' }
       ]
     }
   ];
@@ -261,88 +421,50 @@ export class LandingComponent implements AfterViewInit {
 
   readonly testimonials: Testimonial[] = [
     {
-      quote:
-        'Remote Check-in trimmed our arrival paperwork by 80% and gave guests a seamless first touchpoint before they even arrived on-site.',
-      author: 'Claudia Marino',
-      role: 'Guest Experience Lead · Breeze Hotels'
+      quoteKey: 'landing.testimonials.items.claudia.quote',
+      authorKey: 'landing.testimonials.items.claudia.author',
+      roleKey: 'landing.testimonials.items.claudia.role'
     },
     {
-      quote:
-        'The compliance automation alone paid for itself within a week — we no longer chase authorities for confirmations.',
-      author: 'David O’Sullivan',
-      role: 'Operations Director · Atlas Hospitality'
+      quoteKey: 'landing.testimonials.items.david.quote',
+      authorKey: 'landing.testimonials.items.david.author',
+      roleKey: 'landing.testimonials.items.david.role'
     },
     {
-      quote:
-        'Our team can review every reservation from a single dashboard. Integrating with our PMS was refreshingly painless.',
-      author: 'Lina Gomez',
-      role: 'Digital Transformation · UrbanNest Co.'
+      quoteKey: 'landing.testimonials.items.lina.quote',
+      authorKey: 'landing.testimonials.items.lina.author',
+      roleKey: 'landing.testimonials.items.lina.role'
     }
   ];
 
   readonly resourceHighlights: ResourceHighlight[] = [
     {
-      title: 'Playbook: Automating guest compliance',
-      description: 'Download the step-by-step guide hospitality teams use to cut paperwork while staying audit-ready.',
-      actionLabel: 'Get the playbook',
-      actionHref: '#'
+      titleKey: 'landing.resources.cards.playbook.title',
+      descriptionKey: 'landing.resources.cards.playbook.description',
+      actionLabelKey: 'landing.resources.cards.playbook.action',
+      actionHref: '/pricing#faq'
     },
     {
-      title: 'On-demand walkthrough',
-      description: 'Watch a 12-minute tour that covers guest flows, admin dashboards, and Portale Alloggi automation.',
-      actionLabel: 'Watch the demo',
+      titleKey: 'landing.resources.cards.walkthrough.title',
+      descriptionKey: 'landing.resources.cards.walkthrough.description',
+      actionLabelKey: 'landing.resources.cards.walkthrough.action',
       actionHref: '/pricing#plans'
     },
     {
-      title: 'API & integration docs',
-      description: 'Explore our REST API, webhooks, and starter templates to connect Remote Check-in to your stack.',
-      actionLabel: 'Browse docs',
+      titleKey: 'landing.resources.cards.docs.title',
+      descriptionKey: 'landing.resources.cards.docs.description',
+      actionLabelKey: 'landing.resources.cards.docs.action',
       actionHref: '/pricing#addons'
     }
   ];
+
+  setPersona(id: 'operators' | 'guests'): void {
+    this.persona.set(id);
+  }
 
   dismissStickyCta(): void {
     this.showStickyCta.set(false);
   }
 
-  ngAfterViewInit(): void {
-    if (!this.isBrowser) {
-      this.liveProperties.set(this.livePropertyTarget);
-      this.selfCheckins.set(this.selfCheckinsTarget);
-      this.timeSaved.set(this.timeSavedTarget);
-      this.upsellLift.set(this.upsellTarget);
-      return;
-    }
-
-    this.animateMetric(this.liveProperties, this.livePropertyTarget, 0);
-    this.animateMetric(this.selfCheckins, this.selfCheckinsTarget, 0);
-    this.animateMetric(this.timeSaved, this.timeSavedTarget, 1);
-    this.animateMetric(this.upsellLift, this.upsellTarget, 0);
-  }
-
-  private animateMetric(signalRef: ReturnType<typeof signal<number>>, target: number, decimals: number): void {
-    if (typeof window === 'undefined' || typeof window.requestAnimationFrame === 'undefined') {
-      signalRef.set(parseFloat(target.toFixed(decimals)));
-      return;
-    }
-
-    const duration = 1200;
-    const startTime = performance.now();
-
-    const step = (currentTime: number) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const value = parseFloat((progress * target).toFixed(decimals));
-      signalRef.set(value);
-
-      if (progress < 1) {
-        window.requestAnimationFrame(step);
-      } else {
-        signalRef.set(parseFloat(target.toFixed(decimals)));
-      }
-    };
-
-    window.requestAnimationFrame(step);
-  }
+  
 }
-
