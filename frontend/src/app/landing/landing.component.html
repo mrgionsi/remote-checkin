@@ -471,7 +471,7 @@ docker compose logs -f
     </footer>
 
     <!-- Sticky CTA -->
-    <div class="sticky-cta" role="dialog" aria-live="polite" *ngIf="showStickyCta()">
+    <div class="sticky-cta" role="complementary" aria-live="polite" *ngIf="showStickyCta()">
         <button class="sticky-cta__close" type="button" (click)="dismissStickyCta()"
             [attr.aria-label]="'landing.stickyCta.close' | transloco">
             <i class="pi pi-times"></i>
