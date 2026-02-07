@@ -1,7 +1,7 @@
 <div class="card flex justify-center">
     <p-toast></p-toast>
 </div>
-<div class="card justify-center" *ngIf="!showConfirmationDialog">
+<div class="card justify-center">
     <p-stepper [value]="1" class="basis-[80rem]">
         <p-step-list>
             <p-step [value]="1">{{ 'client-information' | transloco }}</p-step>
@@ -707,11 +707,3 @@
         </p-step-panels>
     </p-stepper>
 </div>
-
-<p-dialog [(visible)]="showConfirmationDialog" modal [header]="'confirmation-sent-title' | transloco"
-    [style]="{ width: '400px' }">
-    <p>{{ 'confirmation-sent-message' | transloco }}</p>
-    <ng-template pTemplate="footer">
-        <button pButton [label]="'ok' | transloco" icon="pi pi-check" (click)="closeDialog()"></button>
-    </ng-template>
-</p-dialog>

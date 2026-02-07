@@ -17,6 +17,17 @@
     "go-to-checkin": "Go to Check-in",
     "reservation-code-info": "The reservation code has been sent to your email. If you can't find it, please check your spam box.",
     "need-help-contact-us": "Need help? Contact us",
+    "checkinComplete": {
+        "title": "Check-in complete",
+        "subtitle": "Thanks for submitting your details. You are all set for arrival.",
+        "reservationLabel": "Reservation",
+        "nextTitle": "What happens next",
+        "nextEmail": "You will receive a confirmation email shortly.",
+        "nextCompliance": "Your details are securely stored for compliance.",
+        "nextArrival": "Show up at your scheduled time and enjoy your stay.",
+        "primaryAction": "Back to home",
+        "secondaryAction": "Contact support"
+    },
     "success": "Success",
     "error": "Error",
     "reservation-success": "Reservation validated successfully.",
