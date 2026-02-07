@@ -442,19 +442,19 @@ export class LandingComponent {
       titleKey: 'landing.resources.cards.playbook.title',
       descriptionKey: 'landing.resources.cards.playbook.description',
       actionLabelKey: 'landing.resources.cards.playbook.action',
-      actionHref: '/pricing#faq'
+      actionHref: 'mailto:hello@remote-checkin.io?subject=Playbook%20request'
     },
     {
       titleKey: 'landing.resources.cards.walkthrough.title',
       descriptionKey: 'landing.resources.cards.walkthrough.description',
       actionLabelKey: 'landing.resources.cards.walkthrough.action',
-      actionHref: '/pricing#plans'
+      actionHref: 'mailto:hello@remote-checkin.io?subject=Demo%20walkthrough'
     },
     {
       titleKey: 'landing.resources.cards.docs.title',
       descriptionKey: 'landing.resources.cards.docs.description',
       actionLabelKey: 'landing.resources.cards.docs.action',
-      actionHref: '/pricing#addons'
+      actionHref: 'mailto:hello@remote-checkin.io?subject=API%20Docs%20request'
     }
   ];
 
