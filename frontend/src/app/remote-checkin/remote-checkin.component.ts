@@ -73,7 +73,6 @@ export class RemoteCheckinComponent implements OnInit {
 
   languageCode: string | null = '';
   reservationId: string | null = '';
-  showConfirmationDialog: boolean = false;
   reservationDetails: any = null;
   registeredClientsCount: number = 0;
   canRegister: boolean = true;
@@ -568,7 +567,9 @@ export class RemoteCheckinComponent implements OnInit {
           summary: 'Success',
           detail: response.message || 'Images uploaded successfully'
         });
-        this.showConfirmationDialog = true;
+        if (this.reservationId) {
+          this.router.navigate(['/checkin-complete', this.reservationId]);
+        }
         this.isSubmitting = false;
       },
       error: (error) => {
@@ -596,9 +597,6 @@ export class RemoteCheckinComponent implements OnInit {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
-  }
-
-  closeDialog() {
   }
 
   getImagePreview(type: 'frontimage' | 'backimage' | 'selfie'): string | null {

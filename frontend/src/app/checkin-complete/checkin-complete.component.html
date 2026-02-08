@@ -1,0 +1,28 @@
+<div class="checkin-complete">
+    <div class="checkin-card">
+        <div class="checkin-card__icon">
+            <i class="pi pi-check-circle"></i>
+        </div>
+        <h1>{{ 'checkinComplete.title' | transloco }}</h1>
+        <p class="checkin-card__lead">{{ 'checkinComplete.subtitle' | transloco }}</p>
+
+        <div class="checkin-card__details" *ngIf="reservationId">
+            <span class="label">{{ 'checkinComplete.reservationLabel' | transloco }}</span>
+            <span class="value">{{ reservationId }}</span>
+        </div>
+
+        <div class="checkin-card__next">
+            <h2>{{ 'checkinComplete.nextTitle' | transloco }}</h2>
+            <ul>
+                <li><i class="pi pi-envelope"></i>{{ 'checkinComplete.nextEmail' | transloco }}</li>
+                <li><i class="pi pi-shield"></i>{{ 'checkinComplete.nextCompliance' | transloco }}</li>
+                <li><i class="pi pi-clock"></i>{{ 'checkinComplete.nextArrival' | transloco }}</li>
+            </ul>
+        </div>
+
+        <div class="checkin-card__actions">
+            <a class="btn btn--primary" routerLink="/">{{ 'checkinComplete.primaryAction' | transloco }}</a>
+            <a class="btn btn--ghost" href="mailto:support@remote-checkin.io">{{ 'checkinComplete.secondaryAction' | transloco }}</a>
+        </div>
+    </div>
+</div>

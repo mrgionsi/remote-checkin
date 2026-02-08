@@ -17,6 +17,7 @@ import { SuperadminDashboardComponent } from './admin/superadmin/superadmin-dash
 import { SuperadminStructuresComponent } from './admin/superadmin/structures/structures.component';
 import { SuperadminUsersComponent } from './admin/superadmin/users/users.component';
 import { SuperadminAssociationsComponent } from './admin/superadmin/associations/associations.component';
+import { CheckinCompleteComponent } from './checkin-complete/checkin-complete.component';
 
 export const routes: Routes = [
     {
@@ -35,6 +36,7 @@ export const routes: Routes = [
     { path: ':id', component: LanguageComponent }, // Optional reservation ID in language selection
     { path: 'reservation-check/:code', component: ReservationCheckComponent }, // Check reservation
     { path: ':id/remote-checkin/:code', component: RemoteCheckinComponent }, // Dynamic check-in with reservation ID
+    { path: 'checkin-complete/:id', component: CheckinCompleteComponent },
     { path: 'remote-checkin/:code', redirectTo: 'reservation-check/:code', pathMatch: 'full' }, // Redirect if no ID
     { path: 'admin', redirectTo: 'admin/dashboard', pathMatch: 'full' }, // Add this redirect
 

@@ -17,6 +17,17 @@
     "go-to-checkin": "VAI AL CHECK-IN",
     "reservation-code-info": "Il codice della prenotazione è stato inviato alla tua email. Se non lo trovi, verifica nella cartella Spam.",
     "need-help-contact-us": "Hai bisogno di aiuto? Contattaci.",
+    "checkinComplete": {
+        "title": "Check-in completato",
+        "subtitle": "Grazie per aver inviato i tuoi dati. Sei pronto per l'arrivo.",
+        "reservationLabel": "Prenotazione",
+        "nextTitle": "Cosa succede ora",
+        "nextEmail": "Riceverai presto un'email di conferma.",
+        "nextCompliance": "I tuoi dati sono archiviati in sicurezza per la compliance.",
+        "nextArrival": "Presentati all'orario previsto e goditi il soggiorno.",
+        "primaryAction": "Torna alla home",
+        "secondaryAction": "Contatta supporto"
+    },
     "success": "Completato",
     "error": "Errore",
     "reservation-success": "Prenotazione validata correttamente.",
