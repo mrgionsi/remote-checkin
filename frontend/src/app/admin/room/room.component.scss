@@ -1,38 +1,194 @@
-.mb-2 {
-    margin-bottom: 2em;
+.room-page {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
 }
 
-.mb-4 {
-    margin-bottom: 1rem;
-
-}
-
-.btn-right {
-    text-align: right;
-    margin: auto;
-    display: block;
-}
-
-.gap-4 {
-    gap: 1rem;
+.room-page__header {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
+    gap: 1rem;
+
+    h2 {
+        margin: 0;
+        font-family: var(--font-display);
+        color: var(--ink-900);
+        font-size: 1.6rem;
+    }
+}
+
+.room-page__filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    align-items: end;
+    background: #ffffff;
+    border: 1px solid var(--surface-300);
+    border-radius: 16px;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
+}
+
+.room-filter {
     display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    label {
+        font-weight: 600;
+        color: var(--ink-700);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
 }
 
-.w-24 {
-    width: 8rem;
+:host ::ng-deep .room-page__filters {
+    .p-inputtext,
+    .p-select {
+        border-radius: 10px;
+        border: 1px solid var(--surface-300);
+    }
 }
 
-.mt-2 {
-    margin-top: 2rem;
+.room-page__table {
+    background: #ffffff;
+    border: 1px solid var(--surface-300);
+    border-radius: 16px;
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+    padding: 0.5rem;
 }
 
-.justify-end {
-    justify-content: end;
+:host ::ng-deep .room-table.p-table {
+    border-radius: 12px;
+    overflow: hidden;
+
+    .p-table-header {
+        background: var(--surface-200);
+        border-bottom: 1px solid var(--surface-300);
+    }
+
+    th {
+        font-weight: 600;
+        color: var(--ink-700);
+        padding: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        font-size: 0.8rem;
+    }
+
+    td {
+        padding: 0.9rem 1rem;
+        color: var(--ink-700);
+    }
+
+    .p-table-tbody > tr:hover {
+        background: var(--surface-200);
+    }
 }
 
-.gap-2 {
-    gap: .5rem;
+:host ::ng-deep .p-button {
+    border-radius: 999px;
+}
+
+.status-pill {
+    border: 1px solid var(--surface-300);
+    background: var(--surface-200);
+    color: var(--ink-700);
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.status-pill:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+    box-shadow: none;
+}
+
+.status-pill.is-active {
+    background: #ffffff;
+    color: var(--ink-900);
+    border-color: var(--ink-300);
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
+}
+
+.room-empty {
     display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 2.5rem 1rem;
+    color: var(--ink-500);
 
+    &__title {
+        font-size: 1.2rem;
+        color: var(--ink-900);
+        font-weight: 600;
+        font-family: var(--font-display);
+    }
+
+    &__subtitle {
+        font-size: 0.9rem;
+        text-align: center;
+        max-width: 360px;
+    }
+}
+
+:host ::ng-deep .room-dialog.p-dialog {
+    border-radius: 16px;
+    border: 1px solid var(--surface-300);
+    box-shadow: 0 24px 48px rgba(15, 23, 42, 0.18);
+    overflow: hidden;
+}
+
+:host ::ng-deep .room-dialog {
+    .p-dialog-header {
+        padding: 1.25rem 1.5rem 0.75rem;
+        border-bottom: 1px solid var(--surface-300);
+        background: #ffffff;
+        color: var(--ink-900);
+        font-family: var(--font-display);
+        font-size: 1.1rem;
+    }
+
+    .p-dialog-content {
+        padding: 1.5rem;
+        background: #ffffff;
+    }
+
+    .p-dialog-footer {
+        padding: 0 1.5rem 1.5rem;
+        background: #ffffff;
+    }
+}
+
+:host ::ng-deep .room-dialog input[pInputText] {
+    border-radius: 10px;
+    border: 1px solid var(--surface-300);
+}
+
+:host ::ng-deep .room-dialog label {
+    color: var(--ink-700);
+    font-weight: 600;
+}
+
+.room-dialog__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+}
+
+@media (max-width: 768px) {
+    .room-page__header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 }

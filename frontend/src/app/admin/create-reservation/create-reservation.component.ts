@@ -57,7 +57,8 @@ export class CreateReservationComponent implements OnInit {
   }
   // Method to get rooms from the backend
   getRooms(): void {
-    this.roomService.getRooms().subscribe({
+    const selectedStructureId = Number(localStorage.getItem('selected_structure_id') || 0);
+    this.roomService.getRooms(selectedStructureId || null).subscribe({
       next: (rooms) => {
         console.log('Rooms loaded:', rooms);
         this.rooms = rooms;

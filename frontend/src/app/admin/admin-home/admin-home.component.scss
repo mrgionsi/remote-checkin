@@ -1,32 +1,137 @@
-button {
-    margin: 10px;
-    font-size: 16px;
+.admin-shell {
+    min-height: 100vh;
+    background: var(--surface-200);
+    color: var(--ink-900);
+}
+
+.admin-loading {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    gap: 0.75rem;
+    text-align: center;
+    padding: 2rem;
+    color: var(--ink-500);
+}
+
+.admin-loading__text {
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
+}
+
+.admin-authenticated {
+    min-height: 100vh;
 }
 
 .admin-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: rgba(255, 255, 255, 0.9);
+    border-bottom: 1px solid var(--surface-300);
+    backdrop-filter: blur(12px);
+}
+
+.admin-header__menu {
+    font-size: 0.95rem;
+    border-radius: 999px;
+    padding: 0.35rem 1rem;
+    background: var(--ink-900);
+    border: none;
 }
 
 .user-area {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--ink-700);
 }
 
 .user-btn {
-    border-radius: 50%;
+    border-radius: 999px;
+    border: 1px solid var(--surface-300);
+    background: #fff;
+    color: var(--ink-700);
 }
 
 .structure-select {
-    min-width: 180px;
+    min-width: 200px;
+}
+
+.admin-content {
+    padding: 2rem 1.5rem 3rem;
+}
+
+::ng-deep .admin-shell {
+    .p-sidebar {
+        background: #fff;
+        border-right: 1px solid var(--surface-300);
+        width: 280px;
+    }
+
+    .p-sidebar .p-sidebar-header {
+        padding: 1.25rem 1.5rem 0.5rem;
+    }
+
+    .p-sidebar .p-sidebar-content {
+        padding: 0 1.5rem 1.5rem;
+    }
+
+    .p-menu {
+        border: none;
+        width: 100%;
+    }
+
+    .p-menu .p-menuitem-link {
+        border-radius: 10px;
+        padding: 0.65rem 0.75rem;
+        color: var(--ink-700);
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .p-menu .p-menuitem-link:hover {
+        background: var(--surface-200);
+        color: var(--ink-900);
+    }
+
+    .p-menu .p-menuitem-link.p-highlight {
+        background: var(--ink-900);
+        color: #fff;
+    }
+}
+
+.admin-sidebar__brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+
+    img {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        object-fit: cover;
+        border: 1px solid var(--surface-300);
+    }
+}
+
+.admin-sidebar__title {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    margin: 0;
+    color: var(--ink-900);
+    letter-spacing: 0.01em;
 }
 
 .spinner {
-    border: 6px solid #f3f3f3;
-    border-top: 6px solid #3498db;
+    border: 6px solid var(--surface-300);
+    border-top: 6px solid var(--ink-900);
     border-radius: 50%;
     width: 48px;
     height: 48px;

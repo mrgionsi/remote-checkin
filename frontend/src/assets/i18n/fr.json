@@ -173,5 +173,19 @@
     "search-provinces": "Rechercher des provinces...",
     "search-countries": "Rechercher des pays...",
     "updated": "mis à jour",
-    "reservation-updated-success": "Réservation mise à jour avec succès."
+    "reservation-updated-success": "Réservation mise à jour avec succès.",
+    "rooms-status-label": "Statut",
+    "rooms-active-label": "Actif",
+    "rooms-inactive-label": "Inactif",
+    "rooms-search-placeholder": "Rechercher des chambres",
+    "rooms-empty-title": "Aucune chambre",
+    "rooms-empty-subtitle": "Ajoutez votre premiere chambre pour commencer a recevoir des reservations.",
+    "rooms-capacity-filter-label": "Capacite",
+    "rooms-status-filter-label": "Statut",
+    "rooms-all-statuses": "Tous les statuts",
+    "rooms-all-capacities": "Toutes les capacites",
+    "rooms-capacity-1-2": "1-2 invites",
+    "rooms-capacity-3-4": "3-4 invites",
+    "rooms-capacity-5-6": "5-6 invites",
+    "rooms-capacity-7-plus": "7+ invites"
 }

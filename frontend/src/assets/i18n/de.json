@@ -173,5 +173,19 @@
     "search-provinces": "Provinzen suchen...",
     "search-countries": "Länder suchen...",
     "updated": "Aktualisiert",
-    "reservation-updated-success": "Die Reservierung wurde erfolgreich aktualisiert."
+    "reservation-updated-success": "Die Reservierung wurde erfolgreich aktualisiert.",
+    "rooms-status-label": "Status",
+    "rooms-active-label": "Aktiv",
+    "rooms-inactive-label": "Inaktiv",
+    "rooms-search-placeholder": "Zimmer suchen",
+    "rooms-empty-title": "Noch keine Zimmer",
+    "rooms-empty-subtitle": "Fügen Sie Ihr erstes Zimmer hinzu, um Reservierungen zu erhalten.",
+    "rooms-capacity-filter-label": "Kapazität",
+    "rooms-status-filter-label": "Status",
+    "rooms-all-statuses": "Alle Status",
+    "rooms-all-capacities": "Alle Kapazitäten",
+    "rooms-capacity-1-2": "1-2 Gäste",
+    "rooms-capacity-3-4": "3-4 Gäste",
+    "rooms-capacity-5-6": "5-6 Gäste",
+    "rooms-capacity-7-plus": "7+ Gäste"
 }

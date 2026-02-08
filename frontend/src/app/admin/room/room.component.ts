@@ -10,10 +10,11 @@ import { ToastModule } from 'primeng/toast';
 import { TagModule } from 'primeng/tag';
 import { SelectModule } from 'primeng/select';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { Dialog } from 'primeng/dialog';
+import { DialogModule } from 'primeng/dialog';
 import { isPlatformBrowser } from '@angular/common';
 import { Inject, PLATFORM_ID } from '@angular/core';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-room',
@@ -25,7 +26,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
     CommonModule,
     ToastModule,
     ConfirmDialogModule,
-    Dialog,
+    DialogModule,
     FormsModule, TranslocoPipe],
   templateUrl: './room.component.html',
   styleUrl: './room.component.scss',
@@ -35,8 +36,17 @@ export class RoomComponent implements OnInit {
 
   clonedProducts: { [s: string]: any } = {};
   add_room_visible: boolean = false;
-  new_room: any = { name: '', capacity: '', id_structure: 1 };
-  rooms: any;
+  new_room: any = { name: '', capacity: '', id_structure: null, is_active: true };
+  structures: { id: number; name: string }[] = [];
+  canCreateRoom: boolean = false;
+  rooms: any[] = [];
+  filteredRooms: any[] = [];
+  searchTerm: string = '';
+  capacityFilter: string = 'all';
+  statusFilter: string = 'all';
+  currentStructureId: number | null = null;
+  capacityOptions: { label: string; value: string }[] = [];
+  statusOptions: { label: string; value: string }[] = [];
   editDialogVisible = false;
   selectedRoom: any = {};
 
@@ -46,15 +56,35 @@ export class RoomComponent implements OnInit {
   constructor(private messageService: MessageService,
     public confirmationService: ConfirmationService,
     private roomService: RoomService,
-    @Inject(PLATFORM_ID) private platformId: object) { }
+    @Inject(PLATFORM_ID) private platformId: object,
+    private readonly translocoService: TranslocoService,
+    private readonly authService: AuthService) { }
 
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
-      this.roomService.getRooms().subscribe({
+      this.setFilterOptions();
+      const user = this.authService.getUser();
+      this.structures = user?.structures || [];
+      const selectedStructureId = Number(localStorage.getItem('selected_structure_id') || 0);
+      if (selectedStructureId && this.structures.some((s) => s.id === selectedStructureId)) {
+        this.currentStructureId = selectedStructureId;
+      } else if (this.structures.length > 0) {
+        this.currentStructureId = this.structures[0].id;
+      } else {
+        this.currentStructureId = null;
+      }
+      this.new_room.id_structure = this.currentStructureId;
+      this.canCreateRoom = !!this.currentStructureId;
+      this.roomService.getRooms(this.currentStructureId).subscribe({
         next: (value) => {
           console.log(value)
-          this.rooms = value
+          this.rooms = (value || []).map((room: any) => ({
+            ...room,
+            isActive: room.is_active ?? room.isActive ?? true
+          }));
+          this.setFilterOptions();
+          this.applyFilters();
         },
         error: (msg) => {
           console.error("Failed to fetch rooms")
@@ -83,8 +113,12 @@ export class RoomComponent implements OnInit {
   }
 
   onRowEditCancel(room: any, index: number) {
-    this.rooms[index] = this.clonedProducts[room.id as string];
+    const originalIndex = this.rooms.findIndex((item) => item.id === room.id);
+    if (originalIndex !== -1) {
+      this.rooms[originalIndex] = this.clonedProducts[room.id as string];
+    }
     delete this.clonedProducts[room.id as string];
+    this.applyFilters();
   }
 
   onRowDelete(room: any, index: number, event: Event) {
@@ -110,7 +144,11 @@ export class RoomComponent implements OnInit {
         this.roomService.deleteRoom(room.id).subscribe({
           next: (value) => {
             console.log(value);
-            this.rooms.splice(index, 1);
+            const originalIndex = this.rooms.findIndex((item) => item.id === room.id);
+            if (originalIndex !== -1) {
+              this.rooms.splice(originalIndex, 1);
+            }
+            this.applyFilters();
 
             this.messageService.add({ severity: 'info', summary: 'Confirmed', detail: value.message });
 
@@ -127,18 +165,40 @@ export class RoomComponent implements OnInit {
     });
   }
   showDialogCreateRoom() {
+    if (!this.canCreateRoom) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Missing structure',
+        detail: 'Select a structure before creating a room.'
+      });
+      return;
+    }
     this.add_room_visible = true;
 
   }
 
   addRoom() {
+    if (!this.new_room.id_structure) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Missing structure',
+        detail: 'Select a structure before creating a room.'
+      });
+      return;
+    }
     this.add_room_visible = false;
     var _ = this;
     this.roomService.addRoom(this.new_room).subscribe({
       next: (val) => {
         _.messageService.add({ severity: 'info', summary: 'Confirmed', detail: 'New Room ' + this.new_room.name + ' added.' });
-        _.rooms.push(val);
-        _.new_room = { name: '', capacity: '' };
+        _.rooms.push({ ...val, isActive: val?.is_active ?? true });
+        _.applyFilters();
+        _.new_room = {
+          name: '',
+          capacity: '',
+          id_structure: _.currentStructureId,
+          is_active: true
+        };
       },
       error: (error) => {
         console.error('Error adding reservations:', error);
@@ -146,6 +206,94 @@ export class RoomComponent implements OnInit {
       },
     })
 
+  }
+
+  onSearchChange(event: Event) {
+    const target = event.target as HTMLInputElement;
+    this.searchTerm = target.value;
+    this.applyFilters();
+  }
+
+  private setFilterOptions() {
+    this.capacityOptions = [
+      { label: this.translocoService.translate('rooms-all-capacities'), value: 'all' },
+      { label: this.translocoService.translate('rooms-capacity-1-2'), value: '1-2' },
+      { label: this.translocoService.translate('rooms-capacity-3-4'), value: '3-4' },
+      { label: this.translocoService.translate('rooms-capacity-5-6'), value: '5-6' },
+      { label: this.translocoService.translate('rooms-capacity-7-plus'), value: '7+' }
+    ];
+    this.statusOptions = [
+      { label: this.translocoService.translate('rooms-all-statuses'), value: 'all' },
+      { label: this.translocoService.translate('rooms-active-label'), value: 'active' },
+      { label: this.translocoService.translate('rooms-inactive-label'), value: 'inactive' }
+    ];
+  }
+
+  onCapacityChange(event: any) {
+    this.capacityFilter = event.value;
+    this.applyFilters();
+  }
+
+  onStatusChange(event: any) {
+    this.statusFilter = event.value;
+    this.applyFilters();
+  }
+
+  toggleRoomStatus(room: any) {
+    room.isActive = !room.isActive;
+    room.is_active = room.isActive;
+    this.roomService.editRoom(room).subscribe({
+      next: () => {
+        this.applyFilters();
+      },
+      error: () => {
+        room.isActive = !room.isActive;
+        room.is_active = room.isActive;
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Failed',
+          detail: 'Could not update room status. Please try again.'
+        });
+      }
+    });
+  }
+
+  private applyFilters() {
+    const term = this.searchTerm.trim().toLowerCase();
+    this.filteredRooms = (this.rooms || []).filter((room) => {
+      const matchesSearch =
+        !term ||
+        String(room.id).toLowerCase().includes(term) ||
+        String(room.name || '').toLowerCase().includes(term);
+
+      const capacity = Number(room.capacity || 0);
+      let matchesCapacity = true;
+      switch (this.capacityFilter) {
+        case '1-2':
+          matchesCapacity = capacity >= 1 && capacity <= 2;
+          break;
+        case '3-4':
+          matchesCapacity = capacity >= 3 && capacity <= 4;
+          break;
+        case '5-6':
+          matchesCapacity = capacity >= 5 && capacity <= 6;
+          break;
+        case '7+':
+          matchesCapacity = capacity >= 7;
+          break;
+        default:
+          matchesCapacity = true;
+      }
+
+      let matchesStatus = true;
+      if (this.statusFilter === 'active') {
+        matchesStatus = !!room.isActive;
+      } else if (this.statusFilter === 'inactive') {
+        matchesStatus = !room.isActive;
+      }
+
+      return matchesSearch && matchesCapacity && matchesStatus;
+    });
   }
 
 }

@@ -198,7 +198,8 @@ export class DetailReservationComponent implements OnInit {
         }
       })
 
-      this.roomService.getRooms().subscribe({
+      const selectedStructureId = Number(localStorage.getItem('selected_structure_id') || 0);
+      this.roomService.getRooms(selectedStructureId || null).subscribe({
         next: (value) => {
           console.log(value)
           this.roomList = value;
