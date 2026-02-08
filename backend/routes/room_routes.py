@@ -51,6 +51,8 @@ def _validate_room_update_data(data, db):
         except SQLAlchemyError as e:
             logger.error("Database error validating structure ID %s: %s", data["id_structure"], str(e))
             return "Failed to validate structure ID due to database error"
+    if "is_active" in data and not isinstance(data["is_active"], bool):
+        return "Invalid active status value"
     return None
 
 
@@ -88,6 +90,7 @@ def add_room():
             name=data["name"],
             capacity=data["capacity"],
             id_structure=data["id_structure"],
+            is_active=data.get("is_active", True),
         )
 
         # Add to DB and commit
@@ -297,6 +300,9 @@ def update_room(room_id):
             if "id_structure" in data:
                 updated_fields['id_structure'] = {'old': room.id_structure, 'new': data["id_structure"]}
                 room.id_structure = data["id_structure"]
+            if "is_active" in data:
+                updated_fields['is_active'] = {'old': room.is_active, 'new': data["is_active"]}
+                room.is_active = data["is_active"]
 
             db.commit()
             logger.info("Room updated successfully", extra=safe_extra_fields({

@@ -1,7 +1,8 @@
-<div class="p-fluid">
-    <h2 class="text-center mb-4">{{ 'add-reservation-title' | transloco }}</h2>
+<div class="admin-form">
+    <div class="admin-form__card p-fluid">
+        <h2 class="admin-form__title">{{ 'add-reservation-title' | transloco }}</h2>
 
-    <form [formGroup]="reservationForm" (ngSubmit)="onSubmit()">
+        <form [formGroup]="reservationForm" (ngSubmit)="onSubmit()">
         <!-- Reservation Number Field -->
         <div class="p-field p-grid align-items-center p-mb-3">
             <label for="reservationNumber" class="p-col-12 p-md-2 text-right">
@@ -170,9 +171,10 @@
 
 
         <!-- Submit Button -->
-        <div class="text-center">
-            <button pButton [label]="'create-reservation-btn' | transloco" type="submit"
-                [disabled]="reservationForm.invalid || saving" [loading]="saving" class="p-mt-3"></button>
-        </div>
-    </form>
+            <div class="admin-form__actions">
+                <button pButton [label]="'create-reservation-btn' | transloco" type="submit"
+                    [disabled]="reservationForm.invalid || saving" [loading]="saving"></button>
+            </div>
+        </form>
+    </div>
 </div>

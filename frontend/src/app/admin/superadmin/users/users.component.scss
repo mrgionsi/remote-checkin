@@ -11,7 +11,7 @@
 
 .users-header h2 {
   margin: 0;
-  color: #333;
+  color: var(--ink-900);
 }
 
 .filters {
@@ -23,8 +23,8 @@
 .search-input,
 .role-filter {
   padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid var(--surface-300);
+  border-radius: 10px;
   font-size: 14px;
 }
 
@@ -51,21 +51,21 @@
 ::ng-deep .user-card {
   .p-card {
     border-radius: 12px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-    border: 1px solid #e9ecef;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+    border: 1px solid var(--surface-300);
     transition: all 0.3s ease;
     overflow: hidden;
 
     &:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-      border-color: #667eea;
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+      border-color: var(--ink-300);
     }
   }
 
   .p-card-header {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border-bottom: 1px solid #e9ecef;
+    background: var(--surface-200);
+    border-bottom: 1px solid var(--surface-300);
     padding: 16px 20px;
   }
 
@@ -74,8 +74,8 @@
   }
 
   .p-card-footer {
-    background: #f8f9fa;
-    border-top: 1px solid #e9ecef;
+    background: var(--surface-200);
+    border-top: 1px solid var(--surface-300);
     padding: 12px 20px;
   }
 }
@@ -89,11 +89,11 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--surface-200);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: var(--ink-900);
     font-size: 1.2rem;
     flex-shrink: 0;
   }
@@ -104,14 +104,14 @@
 
     h3 {
       margin: 0 0 2px 0;
-      color: #2c3e50;
+      color: var(--ink-900);
       font-size: 1.1rem;
       font-weight: 600;
       line-height: 1.2;
     }
 
     .user-username {
-      color: #6c757d;
+      color: var(--ink-500);
       font-size: 0.8rem;
       font-weight: 500;
     }
@@ -143,26 +143,26 @@
       .info-icon {
         width: 16px;
         height: 16px;
-        color: #667eea;
+        color: var(--ink-500);
         font-size: 0.8rem;
         flex-shrink: 0;
       }
 
       .info-label {
         font-weight: 600;
-        color: #495057;
+        color: var(--ink-700);
         min-width: 50px;
         font-size: 0.8rem;
       }
 
       .info-value {
-        color: #6c757d;
+        color: var(--ink-500);
         font-size: 0.8rem;
         flex: 1;
 
         &.no-contact {
           font-style: italic;
-          color: #adb5bd;
+          color: var(--ink-300);
         }
       }
     }
@@ -180,13 +180,13 @@
       margin-bottom: 12px;
 
       .section-icon {
-        color: #667eea;
+        color: var(--ink-500);
         font-size: 1rem;
       }
 
       .section-title {
         font-weight: 600;
-        color: #495057;
+        color: var(--ink-700);
         font-size: 0.9rem;
         text-transform: uppercase;
         letter-spacing: 0.5px;
@@ -202,9 +202,9 @@
         font-size: 0.75rem;
         padding: 4px 10px;
         border-radius: 12px;
-        background: #e3f2fd;
-        color: #1976d2;
-        border: 1px solid #bbdefb;
+        background: var(--surface-200);
+        color: var(--ink-700);
+        border: 1px solid var(--surface-300);
       }
     }
   }
@@ -220,19 +220,18 @@
       align-items: center;
       gap: 8px;
       padding: 20px;
-      background: #f8f9fa;
+      background: var(--surface-200);
       border-radius: 12px;
-      border: 2px dashed #dee2e6;
+      border: 1px dashed var(--surface-300);
 
       .empty-icon {
         font-size: 1.5rem;
-        color: #adb5bd;
+        color: var(--ink-300);
       }
 
       .empty-text {
-        color: #6c757d;
+        color: var(--ink-500);
         font-size: 0.9rem;
-        font-style: italic;
       }
     }
   }
@@ -266,14 +265,14 @@
     text-align: center;
 
     &.edit-btn {
-      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-      color: white;
-      box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+      background: var(--ink-900);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.18);
 
       &:hover:not(:disabled) {
-        background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+        background: #000000;
         transform: translateY(-1px);
-        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+        box-shadow: 0 4px 15px rgba(15, 23, 42, 0.24);
       }
 
       &:active {
@@ -282,14 +281,15 @@
     }
 
     &.password-btn {
-      background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
-      color: white;
-      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+      background: #ffffff;
+      color: var(--ink-900);
+      border: 1px solid var(--surface-300);
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
 
       &:hover:not(:disabled) {
-        background: linear-gradient(135deg, #d97706 0%, #ea580c 100%);
+        background: var(--surface-200);
         transform: translateY(-1px);
-        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+        box-shadow: 0 4px 15px rgba(15, 23, 42, 0.12);
       }
 
       &:active {
@@ -298,14 +298,15 @@
     }
 
     &.structures-btn {
-      background: linear-gradient(135deg, #059669 0%, #0d9488 100%);
-      color: white;
-      box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
+      background: #ffffff;
+      color: var(--ink-900);
+      border: 1px solid var(--surface-300);
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
 
       &:hover:not(:disabled) {
-        background: linear-gradient(135deg, #047857 0%, #0f766e 100%);
+        background: var(--surface-200);
         transform: translateY(-1px);
-        box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4);
+        box-shadow: 0 4px 15px rgba(15, 23, 42, 0.12);
       }
 
       &:active {
@@ -336,8 +337,8 @@
 ::ng-deep .role-dialog {
   .p-dialog {
     border-radius: 12px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-    border: none;
+    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.2);
+    border: 1px solid var(--surface-300);
     overflow: visible;
     background: #ffffff;
     width: 100%;
@@ -345,12 +346,12 @@
   }
 
   .p-dialog-mask {
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgba(15, 23, 42, 0.35);
     backdrop-filter: blur(4px);
   }
 
   .p-dialog-header {
-    color: white;
+    color: var(--ink-900);
     padding: 0;
     border: none;
     width: 100%;
@@ -405,18 +406,18 @@
       gap: 10px;
       margin-bottom: 16px;
       padding-bottom: 12px;
-      border-bottom: 2px solid #e9ecef;
+      border-bottom: 1px solid var(--surface-300);
 
       .section-icon {
         font-size: 1.1rem;
-        color: #667eea;
+        color: var(--ink-700);
       }
 
       h4 {
         margin: 0;
         font-size: 1rem;
         font-weight: 600;
-        color: #495057;
+        color: var(--ink-700);
         text-transform: uppercase;
         letter-spacing: 0.5px;
       }
@@ -433,14 +434,14 @@
       align-items: center;
       justify-content: space-between;
       padding: 12px 16px;
-      background: #f8f9fa;
+      background: var(--surface-200);
       border-radius: 8px;
-      border: 1px solid #e9ecef;
+      border: 1px solid var(--surface-300);
       transition: all 0.3s ease;
 
       &:hover {
-        background: #e9ecef;
-        border-color: #667eea;
+        background: var(--surface-200);
+        border-color: var(--ink-300);
       }
 
       .structure-info {
@@ -450,26 +451,26 @@
         flex: 1;
 
         .structure-icon {
-          color: #667eea;
+          color: var(--ink-500);
           font-size: 1rem;
         }
 
         .structure-name {
           font-weight: 600;
-          color: #2c3e50;
+          color: var(--ink-900);
           font-size: 0.9rem;
         }
 
         .structure-city {
-          color: #6c757d;
+          color: var(--ink-500);
           font-size: 0.8rem;
         }
       }
 
       .remove-btn {
-        background: #dc3545;
-        color: white;
-        border: none;
+        background: #fff;
+        color: #b91c1c;
+        border: 1px solid var(--surface-300);
         border-radius: 50%;
         width: 28px;
         height: 28px;
@@ -480,7 +481,7 @@
         transition: all 0.3s ease;
 
         &:hover {
-          background: #c82333;
+          background: #fee2e2;
           transform: scale(1.1);
         }
 
@@ -504,13 +505,13 @@
         align-items: center;
         gap: 8px;
         font-weight: 600;
-        color: #495057;
+        color: var(--ink-700);
         margin-bottom: 8px;
         font-size: 0.9rem;
 
         i {
           font-size: 0.85rem;
-          color: #667eea;
+          color: var(--ink-500);
         }
       }
     }
@@ -545,21 +546,21 @@
   max-height: 200px !important;
   overflow-y: auto !important;
   background: white !important;
-  border: 1px solid #dee2e6 !important;
+  border: 1px solid var(--surface-300) !important;
   border-radius: 6px !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
   margin-top: 4px !important;
 
   .p-select-item {
     padding: 12px 16px !important;
-    border-bottom: 1px solid #e9ecef !important;
+    border-bottom: 1px solid var(--surface-300) !important;
 
     &:last-child {
       border-bottom: none !important;
     }
 
     &:hover {
-      background-color: #f8f9fa !important;
+      background-color: var(--surface-200) !important;
     }
   }
 }
@@ -572,9 +573,9 @@
   .new-role-section {
     margin-bottom: 24px;
     padding: 20px;
-    background: #f8f9fa;
+    background: var(--surface-200);
     border-radius: 12px;
-    border: 1px solid #e9ecef;
+    border: 1px solid var(--surface-300);
 
     &:last-child {
       margin-bottom: 0;
@@ -588,12 +589,12 @@
 
       .section-icon {
         font-size: 1.2rem;
-        color: #667eea;
+        color: var(--ink-700);
       }
 
       h4 {
         margin: 0;
-        color: #495057;
+        color: var(--ink-700);
         font-size: 1.1rem;
         font-weight: 600;
       }
@@ -617,13 +618,13 @@
           align-items: center;
           gap: 8px;
           font-weight: 600;
-          color: #495057;
+          color: var(--ink-700);
           margin-bottom: 8px;
           font-size: 0.9rem;
 
           i {
             font-size: 0.85rem;
-            color: #667eea;
+            color: var(--ink-500);
           }
         }
       }
@@ -638,22 +639,22 @@
 
   .role-name {
     font-weight: 600;
-    color: #495057;
+    color: var(--ink-700);
     text-transform: capitalize;
   }
 
   .role-description {
     font-size: 0.85rem;
-    color: #6c757d;
+    color: var(--ink-500);
   }
 }
 
 // Role Button Styling
 .role-btn {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-  color: white;
+  background: var(--ink-900);
+  color: #ffffff;
   border: none;
-  border-radius: 8px;
+  border-radius: 999px;
   padding: 12px 16px;
   font-size: 0.85rem;
   font-weight: 600;
@@ -666,9 +667,9 @@
   justify-content: center;
 
   &:hover:not(:disabled) {
-    background: linear-gradient(135deg, #218838 0%, #1aa179 100%);
+    background: #000000;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
   }
 
   &:active {
@@ -689,11 +690,11 @@
 
   .structure-name {
     font-weight: 600;
-    color: #2c3e50;
+    color: var(--ink-900);
   }
 
   .structure-city {
-    color: #6c757d;
+    color: var(--ink-500);
     font-size: 0.85rem;
   }
 }
@@ -703,12 +704,13 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: #ffffff;
+  color: var(--ink-900);
   width: 100%;
   box-sizing: border-box;
   margin: 0;
   border-radius: 12px 12px 0 0;
+  border-bottom: 1px solid var(--surface-300);
 
   .header-content {
     display: flex;
@@ -719,7 +721,7 @@
 
   .header-icon {
     font-size: 1.5rem;
-    opacity: 0.9;
+    color: var(--ink-700);
   }
 
   .header-title {
@@ -729,9 +731,9 @@
   }
 
   .header-close-btn {
-    background: rgba(255, 255, 255, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: white;
+    background: #ffffff;
+    border: 1px solid var(--surface-300);
+    color: var(--ink-700);
     width: 32px;
     height: 32px;
     border-radius: 50%;
@@ -743,8 +745,8 @@
     font-size: 0.9rem;
 
     &:hover {
-      background: rgba(255, 255, 255, 0.3);
-      border-color: rgba(255, 255, 255, 0.5);
+      background: var(--surface-200);
+      border-color: var(--ink-300);
       transform: scale(1.05);
     }
 

@@ -85,15 +85,16 @@ CREATE TABLE "public"."room" (
     "name" character varying NOT NULL,
     "capacity" integer NOT NULL,
     "id_structure" bigint NOT NULL,
+    "is_active" boolean DEFAULT true NOT NULL,
     CONSTRAINT "room_pkey" PRIMARY KEY ("id")
 ) WITH (oids = false);
 
 CREATE INDEX "ix_room_id" ON "public"."room" USING btree ("id");
 
-INSERT INTO "room" ("id", "name", "capacity", "id_structure") VALUES
-(2,	'Giungla',	4,	1),
-(3,	'Savana',	2,	1),
-(1,	'SPA',	2,	1);
+INSERT INTO "room" ("id", "name", "capacity", "id_structure", "is_active") VALUES
+(2,	'Giungla',	4,	1,	true),
+(3,	'Savana',	2,	1,	true),
+(1,	'SPA',	2,	1,	true);
 
 DROP TABLE IF EXISTS "structure";
 CREATE TABLE "public"."structure" (

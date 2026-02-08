@@ -20,10 +20,20 @@ export class RoomService {
   }
 
   addRoom(room: any): Observable<any> {
-    return this.http.post<any[]>(this.apiUrl, room, { headers: this.authService.getAuthHeaders() });
+    const payload = {
+      ...room,
+      is_active: room.is_active ?? room.isActive ?? true
+    };
+    delete payload.isActive;
+    return this.http.post<any[]>(this.apiUrl, payload, { headers: this.authService.getAuthHeaders() });
   }
   editRoom(room: any): Observable<any> {
-    return this.http.put<any[]>(this.apiUrl + '/' + room.id, room, { headers: this.authService.getAuthHeaders() });
+    const payload = {
+      ...room,
+      is_active: room.is_active ?? room.isActive ?? true
+    };
+    delete payload.isActive;
+    return this.http.put<any[]>(this.apiUrl + '/' + room.id, payload, { headers: this.authService.getAuthHeaders() });
   }
   deleteRoom(idRoom: number): Observable<any> {
     return this.http.delete(this.apiUrl + '/' + idRoom, { headers: this.authService.getAuthHeaders() });

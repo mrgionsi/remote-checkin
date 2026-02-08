@@ -35,8 +35,24 @@ export class RoomComponent implements OnInit {
 
   clonedProducts: { [s: string]: any } = {};
   add_room_visible: boolean = false;
-  new_room: any = { name: '', capacity: '', id_structure: 1 };
-  rooms: any;
+  new_room: any = { name: '', capacity: '', id_structure: 1, is_active: true };
+  rooms: any[] = [];
+  filteredRooms: any[] = [];
+  searchTerm: string = '';
+  capacityFilter: string = 'all';
+  statusFilter: string = 'all';
+  capacityOptions = [
+    { label: 'All capacities', value: 'all' },
+    { label: '1-2 guests', value: '1-2' },
+    { label: '3-4 guests', value: '3-4' },
+    { label: '5-6 guests', value: '5-6' },
+    { label: '7+ guests', value: '7+' }
+  ];
+  statusOptions = [
+    { label: 'All statuses', value: 'all' },
+    { label: 'Active', value: 'active' },
+    { label: 'Inactive', value: 'inactive' }
+  ];
   editDialogVisible = false;
   selectedRoom: any = {};
 
@@ -54,7 +70,11 @@ export class RoomComponent implements OnInit {
       this.roomService.getRooms().subscribe({
         next: (value) => {
           console.log(value)
-          this.rooms = value
+          this.rooms = (value || []).map((room: any) => ({
+            ...room,
+            isActive: room.is_active ?? room.isActive ?? true
+          }))
+          this.applyFilters();
         },
         error: (msg) => {
           console.error("Failed to fetch rooms")
@@ -83,8 +103,12 @@ export class RoomComponent implements OnInit {
   }
 
   onRowEditCancel(room: any, index: number) {
-    this.rooms[index] = this.clonedProducts[room.id as string];
+    const originalIndex = this.rooms.findIndex((item) => item.id === room.id);
+    if (originalIndex !== -1) {
+      this.rooms[originalIndex] = this.clonedProducts[room.id as string];
+    }
     delete this.clonedProducts[room.id as string];
+    this.applyFilters();
   }
 
   onRowDelete(room: any, index: number, event: Event) {
@@ -110,7 +134,11 @@ export class RoomComponent implements OnInit {
         this.roomService.deleteRoom(room.id).subscribe({
           next: (value) => {
             console.log(value);
-            this.rooms.splice(index, 1);
+            const originalIndex = this.rooms.findIndex((item) => item.id === room.id);
+            if (originalIndex !== -1) {
+              this.rooms.splice(originalIndex, 1);
+            }
+            this.applyFilters();
 
             this.messageService.add({ severity: 'info', summary: 'Confirmed', detail: value.message });
 
@@ -137,8 +165,9 @@ export class RoomComponent implements OnInit {
     this.roomService.addRoom(this.new_room).subscribe({
       next: (val) => {
         _.messageService.add({ severity: 'info', summary: 'Confirmed', detail: 'New Room ' + this.new_room.name + ' added.' });
-        _.rooms.push(val);
-        _.new_room = { name: '', capacity: '' };
+        _.rooms.push({ ...val, isActive: val?.is_active ?? true });
+        _.applyFilters();
+        _.new_room = { name: '', capacity: '', id_structure: 1, is_active: true };
       },
       error: (error) => {
         console.error('Error adding reservations:', error);
@@ -146,6 +175,79 @@ export class RoomComponent implements OnInit {
       },
     })
 
+  }
+
+  onSearchChange(event: Event) {
+    const target = event.target as HTMLInputElement;
+    this.searchTerm = target.value;
+    this.applyFilters();
+  }
+
+  onCapacityChange(event: any) {
+    this.capacityFilter = event.value;
+    this.applyFilters();
+  }
+
+  onStatusChange(event: any) {
+    this.statusFilter = event.value;
+    this.applyFilters();
+  }
+
+  toggleRoomStatus(room: any) {
+    room.isActive = !room.isActive;
+    room.is_active = room.isActive;
+    this.roomService.editRoom(room).subscribe({
+      next: () => {
+        this.applyFilters();
+      },
+      error: () => {
+        room.isActive = !room.isActive;
+        room.is_active = room.isActive;
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Failed',
+          detail: 'Could not update room status. Please try again.'
+        });
+      }
+    });
+  }
+
+  private applyFilters() {
+    const term = this.searchTerm.trim().toLowerCase();
+    this.filteredRooms = (this.rooms || []).filter((room) => {
+      const matchesSearch =
+        !term ||
+        String(room.id).toLowerCase().includes(term) ||
+        String(room.name || '').toLowerCase().includes(term);
+
+      const capacity = Number(room.capacity || 0);
+      let matchesCapacity = true;
+      switch (this.capacityFilter) {
+        case '1-2':
+          matchesCapacity = capacity >= 1 && capacity <= 2;
+          break;
+        case '3-4':
+          matchesCapacity = capacity >= 3 && capacity <= 4;
+          break;
+        case '5-6':
+          matchesCapacity = capacity >= 5 && capacity <= 6;
+          break;
+        case '7+':
+          matchesCapacity = capacity >= 7;
+          break;
+        default:
+          matchesCapacity = true;
+      }
+
+      let matchesStatus = true;
+      if (this.statusFilter === 'active') {
+        matchesStatus = !!room.isActive;
+      } else if (this.statusFilter === 'inactive') {
+        matchesStatus = !room.isActive;
+      }
+
+      return matchesSearch && matchesCapacity && matchesStatus;
+    });
   }
 
 }

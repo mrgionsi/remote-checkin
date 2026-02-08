@@ -7,17 +7,18 @@
 .superadmin-header {
   margin-bottom: 30px;
   padding-bottom: 20px;
-  border-bottom: 2px solid #e0e0e0;
+  border-bottom: 1px solid var(--surface-300);
 }
 
 .superadmin-header h1 {
-  color: #333;
+  color: var(--ink-900);
   margin: 0 0 10px 0;
   font-size: 2rem;
+  font-family: var(--font-display);
 }
 
 .superadmin-header p {
-  color: #666;
+  color: var(--ink-500);
   margin: 0;
   font-size: 1.1rem;
 }
@@ -27,7 +28,7 @@
   gap: 10px;
   margin-bottom: 30px;
   padding: 0 0 20px 0;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--surface-300);
 }
 
 .nav-link {
@@ -36,19 +37,19 @@
   gap: 8px;
   padding: 10px 16px;
   text-decoration: none;
-  color: #666;
-  border-radius: 6px;
+  color: var(--ink-700);
+  border-radius: 999px;
   transition: all 0.2s ease;
   font-weight: 500;
 
   &:hover {
-    background: #f5f5f5;
-    color: #333;
+    background: var(--surface-200);
+    color: var(--ink-900);
   }
 
   &.active {
-    background: #007bff;
-    color: white;
+    background: var(--ink-900);
+    color: #ffffff;
   }
 
   i {
