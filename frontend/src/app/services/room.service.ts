@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environments';
@@ -11,8 +11,9 @@ import { AuthService } from './auth.service';
 export class RoomService {
 
   private apiUrl = `${environment.apiBaseUrl}/api/v1/rooms`;  // API endpoint URL
+  private readonly authService = inject(AuthService);
 
-  constructor(private http: HttpClient, private authService: AuthService) { }
+  constructor(private http: HttpClient) { }
 
   // Fetch all rooms
   getRooms(structureId?: number | null): Observable<any[]> {
