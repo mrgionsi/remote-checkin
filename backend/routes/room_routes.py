@@ -34,24 +34,27 @@ room_bp = Blueprint("room", __name__, url_prefix="/api/v1")
 @log_function(include_args=True, include_result=True, max_arg_length=200)
 def _validate_room_update_data(data, db):
     """Validate room update data and return error message if invalid."""
+    error = None
     if "name" in data and not data["name"].strip():
-        return "Room name cannot be empty"
-    if "capacity" in data:
+        error = "Room name cannot be empty"
+    if error is None and "capacity" in data:
         try:
             capacity = int(data["capacity"])
             if capacity <= 0:
-                return "Capacity must be a positive number"
+                error = "Capacity must be a positive number"
         except ValueError:
-            return "Invalid capacity value"
-    if "id_structure" in data:
+            error = "Invalid capacity value"
+    if error is None and "id_structure" in data:
         try:
             structure = db.query(Structure).filter(Structure.id == data["id_structure"]).first()
             if not structure:
-                return "Invalid structure ID"
+                error = "Invalid structure ID"
         except SQLAlchemyError as e:
             logger.error("Database error validating structure ID %s: %s", data["id_structure"], str(e))
-            return "Failed to validate structure ID due to database error"
-    return None
+            error = "Failed to validate structure ID due to database error"
+    if error is None and "is_active" in data and not isinstance(data["is_active"], bool):
+        error = "Invalid active status value"
+    return error
 
 
 # Add a new room
@@ -88,6 +91,7 @@ def add_room():
             name=data["name"],
             capacity=data["capacity"],
             id_structure=data["id_structure"],
+            is_active=data.get("is_active", True),
         )
 
         # Add to DB and commit
@@ -145,22 +149,26 @@ def add_room():
 @log_database_operation("READ")
 def get_rooms():
     """
-    Return a JSON array of rooms for a fixed structure.
+    Return a JSON array of rooms, optionally filtered by structure_id.
 
-    Queries the database for Room records with id_structure currently hard-coded to 1, serializes each Room using its to_dict() method, and returns the list as a JSON response. The function does not accept parameters; behavior will need updating when structure selection is implemented via request parameters.
+    Queries the database for Room records, optionally filtering by the provided
+    ?structure_id query parameter, serializes each Room using its to_dict() method,
+    and returns the list as a JSON response.
     """
     with get_db() as db:  # Using 'with' to properly manage the db session
         try:
-            id_structure = (
-                1  # Get structure ID from query params. For now, this value is fixed.
-            )
+            raw_structure_id = request.args.get("structure_id")
+            id_structure = None
+            if raw_structure_id is not None:
+                try:
+                    id_structure = int(raw_structure_id)
+                except (TypeError, ValueError):
+                    return jsonify({"error": "Invalid structure_id. Must be an integer."}), 400
 
             if id_structure:
-                rooms = db.query(Room).filter(Room.id_structure == id_structure).all()
+                rooms = db.query(Room).filter(Room.id_structure == id_structure).order_by(Room.id).all()
             else:
-                rooms = db.query(
-                    Room
-                ).all()  # Return all rooms if no structure is specified
+                rooms = db.query(Room).order_by(Room.id).all()  # Return all rooms if no structure is specified
 
             room_data = [room.to_dict() for room in rooms]
             logger.info("Rooms retrieved successfully", extra={
@@ -297,6 +305,9 @@ def update_room(room_id):
             if "id_structure" in data:
                 updated_fields['id_structure'] = {'old': room.id_structure, 'new': data["id_structure"]}
                 room.id_structure = data["id_structure"]
+            if "is_active" in data:
+                updated_fields['is_active'] = {'old': room.is_active, 'new': data["is_active"]}
+                room.is_active = data["is_active"]
 
             db.commit()
             logger.info("Room updated successfully", extra=safe_extra_fields({

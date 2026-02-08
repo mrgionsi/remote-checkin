@@ -111,6 +111,11 @@ export class SuperadminStructuresComponent implements OnInit {
         }, 300);
     }
 
+    setStatusFilter(value: string): void {
+        this.statusFilter = value;
+        this.loadStructures();
+    }
+
     changePage(page: number): void {
         this.pagination.page = page;
         this.loadStructures();

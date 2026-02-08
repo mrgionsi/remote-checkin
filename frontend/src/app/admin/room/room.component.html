@@ -1,84 +1,145 @@
-<div class="card">
-    <div class="btn-right mb-2">
-        <p-button class="" [label]="'create-room-btn' | transloco" icon="pi pi-plus" severity="info"
-            (click)="showDialogCreateRoom()"></p-button>
+<div class="room-page">
+    <div class="room-page__header">
+        <div>
+            <h2>{{ 'rooms-label' | transloco }}</h2>
+            <p class="room-page__subtitle">{{ 'rooms-subtitle' | transloco }}</p>
+        </div>
+        <div class="room-page__actions">
+            <input #csvInput type="file" accept=".csv" (change)="onCsvImport($event)" hidden />
+            <p-button [label]="'rooms-import-csv' | transloco" icon="pi pi-upload" severity="secondary"
+                [outlined]="true" (onClick)="csvInput.click()" [disabled]="importing || !canCreateRoom">
+            </p-button>
+            <p-button [label]="'create-room-btn' | transloco" icon="pi pi-plus" severity="info"
+                (click)="showDialogCreateRoom()" [disabled]="!canCreateRoom"></p-button>
+        </div>
     </div>
-    <p-table [value]="rooms" dataKey="id" editMode="row" [tableStyle]="{ 'min-width': '50rem' }">
-        <ng-template #header>
-            <tr>
-                <th scope="col" pSortableColumn="id">{{ 'room-id-header' | transloco }} <p-sortIcon field="id" /></th>
-                <th scope="col" pSortableColumn="name">{{ 'room-name-header' | transloco }} <p-sortIcon field="name" />
-                </th>
-                <!--                 <th>{{ 'structure-header' | transloco }}</th>
- -->
-                <th scope="col" pSortableColumn="capacity">{{ 'capacity-header' | transloco }} <p-sortIcon
-                        field="capacity" /></th>
-                <th scope="col">{{ 'actions-header' | transloco }}</th>
-            </tr>
-        </ng-template>
-        <ng-template #body let-room let-editing="editing" let-ri="rowIndex">
-            <tr [pEditableRow]="room">
-                <td>{{ room.id }}</td>
-                <td>
-                    <p-cellEditor>
-                        <ng-template #input>
-                            <input pInputText type="text" [(ngModel)]="room.name" />
-                        </ng-template>
-                        <ng-template #output>
-                            {{room.name}}
-                        </ng-template>
-                    </p-cellEditor>
-                </td>
-                <!--                 <td>{{pleace structure name here}}</td> -->
-                <td>
-                    <p-cellEditor>
-                        <ng-template #input>
-                            <input pInputText type="number" [(ngModel)]="room.capacity" />
-                        </ng-template>
-                        <ng-template #output>
-                            {{room.capacity}}
-                        </ng-template>
-                    </p-cellEditor>
-                </td>
-                <td>
-                    <div class="flex items-center justify-center gap-2">
-                        <button *ngIf="!editing" pButton pRipple type="button" pInitEditableRow icon="pi pi-pencil"
-                            (click)="onRowEditInit(room)" text rounded severity="secondary"
-                            [label]="'edit-btn' | transloco"></button>
-                        <button *ngIf="!editing" pButton type="button" icon="pi pi-trash"
-                            (click)="onRowDelete(room,ri,$event)" text rounded severity="secondary"
-                            [label]="'delete-btn' | transloco"></button>
-                        <button *ngIf="editing" pButton pRipple type="button" pSaveEditableRow icon="pi pi-check"
-                            (click)="onRowEditSave(room)" text rounded severity="secondary"
-                            [label]="'save-btn' | transloco"></button>
-                        <button *ngIf="editing" pButton pRipple type="button" pCancelEditableRow icon="pi pi-times"
-                            (click)="onRowEditCancel(room, ri)" text rounded severity="secondary"
-                            [label]="'cancel-btn' | transloco"></button>
-                    </div>
-                </td>
-            </tr>
-        </ng-template>
-    </p-table>
+
+    <div class="room-page__filters">
+        <div class="room-filter">
+            <label for="roomSearch">{{ 'rooms-search-placeholder' | transloco }}</label>
+            <input id="roomSearch" pInputText type="text" [value]="searchTerm" (input)="onSearchChange($event)"
+                [placeholder]="'rooms-search-placeholder' | transloco" />
+        </div>
+        <div class="room-filter">
+            <label for="capacityFilter">{{ 'rooms-capacity-filter-label' | transloco }}</label>
+            <p-select id="capacityFilter" [options]="capacityOptions" optionLabel="label" optionValue="value"
+                [ngModel]="capacityFilter" (onChange)="onCapacityChange($event)"
+                [placeholder]="'rooms-all-capacities' | transloco">
+            </p-select>
+        </div>
+        <div class="room-filter">
+            <label for="statusFilter">{{ 'rooms-status-filter-label' | transloco }}</label>
+            <p-select id="statusFilter" [options]="statusOptions" optionLabel="label" optionValue="value"
+                [ngModel]="statusFilter" (onChange)="onStatusChange($event)"
+                [placeholder]="'rooms-all-statuses' | transloco">
+            </p-select>
+        </div>
+    </div>
+
+    <div class="room-page__table">
+        <p-table [value]="filteredRooms" dataKey="id" editMode="row" styleClass="room-table"
+            [tableStyle]="{ 'min-width': '50rem' }">
+            <ng-template #header>
+                <tr>
+                    <th scope="col" pSortableColumn="id">{{ 'room-id-header' | transloco }} <p-sortIcon field="id" />
+                    </th>
+                    <th scope="col" pSortableColumn="name">{{ 'room-name-header' | transloco }} <p-sortIcon
+                            field="name" />
+                    </th>
+                    <th scope="col" pSortableColumn="capacity">{{ 'capacity-header' | transloco }} <p-sortIcon
+                            field="capacity" /></th>
+                    <th scope="col">{{ 'rooms-status-label' | transloco }}</th>
+                    <th scope="col">{{ 'actions-header' | transloco }}</th>
+                </tr>
+            </ng-template>
+            <ng-template #body let-room let-editing="editing" let-ri="rowIndex">
+                <tr [pEditableRow]="room">
+                    <td>{{ room.id }}</td>
+                    <td>
+                        <p-cellEditor>
+                            <ng-template #input>
+                                <input pInputText type="text" [(ngModel)]="room.name" />
+                            </ng-template>
+                            <ng-template #output>
+                                <div class="room-name-cell">
+                                    <span>{{ room.name }}</span>
+                                    <span class="capacity-badge">{{ room.capacity }} {{ 'rooms-guests-label' | transloco
+                                        }}</span>
+                                </div>
+                            </ng-template>
+                        </p-cellEditor>
+                    </td>
+                    <td>
+                        <p-cellEditor>
+                            <ng-template #input>
+                                <input pInputText type="number" [(ngModel)]="room.capacity" />
+                            </ng-template>
+                            <ng-template #output>
+                                {{ room.capacity }}
+                            </ng-template>
+                        </p-cellEditor>
+                    </td>
+                    <td>
+                        <button type="button" class="status-pill" [class.is-active]="room.isActive"
+                            [disabled]="!editing" (click)="toggleRoomStatus(room)">
+                            {{ room.isActive ? ('rooms-active-label' | transloco) : ('rooms-inactive-label' | transloco)
+                            }}
+                        </button>
+                    </td>
+                    <td>
+                        <div class="flex items-center justify-center gap-2">
+                            <button *ngIf="!editing" pButton pRipple type="button" pInitEditableRow icon="pi pi-pencil"
+                                (click)="onRowEditInit(room)" text rounded severity="secondary"
+                                [label]="'edit-btn' | transloco"></button>
+                            <button *ngIf="!editing" pButton type="button" icon="pi pi-trash"
+                                (click)="onRowDelete(room,ri,$event)" text rounded severity="secondary"
+                                [label]="'delete-btn' | transloco"></button>
+                            <button *ngIf="editing" pButton pRipple type="button" pSaveEditableRow icon="pi pi-check"
+                                (click)="onRowEditSave(room)" text rounded severity="secondary"
+                                [label]="'save-btn' | transloco"></button>
+                            <button *ngIf="editing" pButton pRipple type="button" pCancelEditableRow icon="pi pi-times"
+                                (click)="onRowEditCancel(room, ri)" text rounded severity="secondary"
+                                [label]="'cancel-btn' | transloco"></button>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+            <ng-template #emptymessage>
+                <tr>
+                    <td colspan="5">
+                        <div class="room-empty">
+                            <div class="room-empty__title">{{ 'rooms-empty-title' | transloco }}</div>
+                            <div class="room-empty__subtitle">{{ 'rooms-empty-subtitle' | transloco }}</div>
+                            <p-button [label]="'create-room-btn' | transloco" icon="pi pi-plus" severity="info"
+                                (click)="showDialogCreateRoom()"></p-button>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
 </div>
 
 <p-toast />
 <p-confirmdialog />
 
 <p-dialog [header]="'add-room-title' | transloco" [modal]="true" [(visible)]="add_room_visible"
-    [style]="{ width: '25rem' }">
-    <div class="flex items-center gap-4 mb-4">
-        <label for="name" class="font-semibold w-24">{{ 'room-name-label' | transloco }}</label>
-        <input pInputText id="name" class="flex-auto" autocomplete="off" [(ngModel)]="new_room.name" required
-            minlength="1" maxlength="100" [placeholder]="'room-name-placeholder-insert' | transloco" />
+    styleClass="room-dialog" [style]="{ width: '25rem' }">
+    <div class="room-dialog__field">
+        <label for="name">{{ 'room-name-label' | transloco }}</label>
+        <input pInputText id="name" autocomplete="off" [(ngModel)]="new_room.name" required minlength="1"
+            maxlength="100" [placeholder]="'room-name-placeholder-insert' | transloco" />
     </div>
-    <div class="flex items-center gap-4 mb-8">
-        <label for="capacity" class="font-semibold w-24">{{ 'capacity-label' | transloco }}</label>
-        <input pInputText id="capacity" class="flex-auto" type="number" autocomplete="off"
-            [(ngModel)]="new_room.capacity" required min="1" max="999"
-            [placeholder]="'capacity-placeholder' | transloco" />
+    <div class="room-dialog__field">
+        <label for="capacity">{{ 'capacity-label' | transloco }}</label>
+        <input pInputText id="capacity" type="number" autocomplete="off" [(ngModel)]="new_room.capacity" required
+            min="1" max="999" [placeholder]="'capacity-placeholder' | transloco" />
+    </div>
+    <div class="room-dialog__notice" *ngIf="!canCreateRoom">
+        {{ 'rooms-select-structure-notice' | transloco }}
     </div>
     <div class="flex justify-end gap-2 mt-2">
         <p-button [label]="'cancel-btn' | transloco" severity="secondary" (click)="add_room_visible = false" />
-        <p-button [label]="'save-btn' | transloco" (click)="addRoom()" />
+        <p-button [label]="'save-btn' | transloco" (click)="addRoom()" [disabled]="!canCreateRoom" />
     </div>
 </p-dialog>

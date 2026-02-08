@@ -28,6 +28,7 @@ class Room(Base):
     name = Column(String, nullable=False)
     capacity = Column(Integer, nullable=False)
     id_structure = Column(BigInteger, ForeignKey("structure.id"), nullable=False)
+    is_active = Column(Boolean, nullable=False, default=True)
 
     structure = relationship("Structure", back_populates="rooms")
 
@@ -38,6 +39,7 @@ class Room(Base):
             "name": self.name,
             "capacity": self.capacity,
             "id_structure": self.id_structure,
+            "is_active": self.is_active,
         }
 
     def __repr__(self):

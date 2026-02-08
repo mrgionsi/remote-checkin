@@ -16,6 +16,11 @@
             </p-select>
         </div>
     </div>
+    <div class="filter-chips">
+        <button class="chip" (click)="setStatusFilter('')">All</button>
+        <button class="chip" (click)="setStatusFilter('true')">Active</button>
+        <button class="chip" (click)="setStatusFilter('false')">Archived</button>
+    </div>
 
     <div class="structures-list" *ngIf="!loading">
         <p-card *ngFor="let structure of structures" styleClass="structure-card">
@@ -49,9 +54,8 @@
         </p-card>
     </div>
 
-    <div class="loading" *ngIf="loading">
-        <p-progressSpinner></p-progressSpinner>
-        <p>Loading structures...</p>
+    <div class="loading-skeleton" *ngIf="loading">
+        <div class="skeleton-card" *ngFor="let n of [1,2,3]"></div>
     </div>
 
 

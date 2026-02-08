@@ -1,178 +1,181 @@
-<div class="p-fluid">
-    <h2 class="text-center mb-4">{{ 'add-reservation-title' | transloco }}</h2>
+<div class="admin-form">
+    <div class="admin-form__card p-fluid">
+        <h2 class="admin-form__title">{{ 'add-reservation-title' | transloco }}</h2>
 
-    <form [formGroup]="reservationForm" (ngSubmit)="onSubmit()">
-        <!-- Reservation Number Field -->
-        <div class="p-field p-grid align-items-center p-mb-3">
-            <label for="reservationNumber" class="p-col-12 p-md-2 text-right">
-                {{ 'reservation-number-label' | transloco }}
-            </label>
-            <div class="p-col-12 p-md-10">
-                <input id="reservationNumber" pInputText formControlName="reservationNumber" type="text"
-                    [placeholder]="'reservation-number-placeholder' | transloco"
-                    [class.p-invalid]="reservationForm.get('reservationNumber')?.invalid && reservationForm.get('reservationNumber')?.touched"
-                    class="wide-input" />
-                <p *ngIf="reservationForm.get('reservationNumber')?.invalid && reservationForm.get('reservationNumber')?.touched"
-                    class="p-error mt-2">
-                    {{ 'reservation-number-required' | transloco }}
-                </p>
-            </div>
-        </div>
-
-        <!-- Start Date Field -->
-        <div class="p-field p-grid align-items-center p-mb-3">
-            <label for="startDate" class="p-col-12 p-md-2 text-right">
-                {{ 'start-date-label' | transloco }}
-            </label>
-            <div class="p-col-12 p-md-10">
-                <p-datepicker id="startDate" formControlName="startDate" [showTime]="true" dateFormat="yy-mm-dd"
-                    [placeholder]="'start-date-placeholder' | transloco"
-                    [class.p-invalid]="reservationForm.get('startDate')?.invalid && reservationForm.get('startDate')?.touched"
-                    styleClass="wide-input"></p-datepicker>
-                <p *ngIf="reservationForm.get('startDate')?.invalid && reservationForm.get('startDate')?.touched"
-                    class="p-error mt-2">
-                    {{ 'start-date-required' | transloco }}
-                </p>
-            </div>
-        </div>
-
-        <!-- End Date Field -->
-        <div class="p-field p-grid align-items-center p-mb-3">
-            <label for="endDate" class="p-col-12 p-md-2 text-right">
-                {{ 'end-date-label' | transloco }}
-            </label>
-            <div class="p-col-12 p-md-10">
-                <p-datepicker id="endDate" formControlName="endDate" [showTime]="true" dateFormat="yy-mm-dd"
-                    [placeholder]="'end-date-placeholder' | transloco"
-                    [class.p-invalid]="reservationForm.get('endDate')?.invalid && reservationForm.get('endDate')?.touched"
-                    styleClass="wide-input"></p-datepicker>
-                <p *ngIf="reservationForm.get('endDate')?.invalid && reservationForm.get('endDate')?.touched"
-                    class="p-error mt-2">
-                    {{ 'end-date-required' | transloco }}
-                </p>
-                <div *ngIf="reservationForm.errors?.['dateRangeInvalid']">
-                    <p style="color: red;">
-                        {{ 'date-range-invalid' | transloco }}
-                    </p>
+        <form [formGroup]="reservationForm" (ngSubmit)="onSubmit()">
+            <div class="form-section">
+                <div class="form-section__title">{{ 'reservation-section-title' | transloco }}</div>
+                <div class="p-field p-grid align-items-center p-mb-3">
+                    <label for="reservationNumber" class="p-col-12 p-md-2 text-right">
+                        {{ 'reservation-number-label' | transloco }}
+                    </label>
+                    <div class="p-col-12 p-md-10">
+                        <input id="reservationNumber" pInputText formControlName="reservationNumber" type="text"
+                            [placeholder]="'reservation-number-placeholder' | transloco"
+                            [class.p-invalid]="reservationForm.get('reservationNumber')?.invalid && reservationForm.get('reservationNumber')?.touched"
+                            class="wide-input" />
+                        <p *ngIf="reservationForm.get('reservationNumber')?.invalid && reservationForm.get('reservationNumber')?.touched"
+                            class="p-error mt-2">
+                            {{ 'reservation-number-required' | transloco }}
+                        </p>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Name Reference Field (New Field) -->
-        <div class="p-field p-grid align-items-center p-mb-3">
-            <label for="nameReference" class="p-col-12 p-md-2 text-right">
-                {{ 'reference-name-label' | transloco }}
-            </label>
-            <div class="p-col-12 p-md-10">
-                <input id="nameReference" pInputText formControlName="nameReference" type="text"
-                    [placeholder]="'reference-name-placeholder' | transloco"
-                    [class.p-invalid]="reservationForm.get('nameReference')?.invalid && reservationForm.get('nameReference')?.touched"
-                    class="wide-input" />
-                <p *ngIf="reservationForm.get('nameReference')?.invalid && reservationForm.get('nameReference')?.touched"
-                    class="p-error mt-2">
-                    {{ 'reference-name-required' | transloco }}
-                </p>
+            <div class="form-section">
+                <div class="form-section__title">{{ 'dates-section-title' | transloco }}</div>
+                <div class="p-field p-grid align-items-center p-mb-3">
+                    <label for="startDate" class="p-col-12 p-md-2 text-right">
+                        {{ 'start-date-label' | transloco }}
+                    </label>
+                    <div class="p-col-12 p-md-10">
+                        <p-datepicker id="startDate" formControlName="startDate" [showTime]="true"
+                            dateFormat="yy-mm-dd" [placeholder]="'start-date-placeholder' | transloco"
+                            [class.p-invalid]="reservationForm.get('startDate')?.invalid && reservationForm.get('startDate')?.touched"
+                            styleClass="wide-input"></p-datepicker>
+                        <p *ngIf="reservationForm.get('startDate')?.invalid && reservationForm.get('startDate')?.touched"
+                            class="p-error mt-2">
+                            {{ 'start-date-required' | transloco }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="p-field p-grid align-items-center p-mb-3">
+                    <label for="endDate" class="p-col-12 p-md-2 text-right">
+                        {{ 'end-date-label' | transloco }}
+                    </label>
+                    <div class="p-col-12 p-md-10">
+                        <p-datepicker id="endDate" formControlName="endDate" [showTime]="true" dateFormat="yy-mm-dd"
+                            [placeholder]="'end-date-placeholder' | transloco"
+                            [class.p-invalid]="reservationForm.get('endDate')?.invalid && reservationForm.get('endDate')?.touched"
+                            styleClass="wide-input"></p-datepicker>
+                        <p *ngIf="reservationForm.get('endDate')?.invalid && reservationForm.get('endDate')?.touched"
+                            class="p-error mt-2">
+                            {{ 'end-date-required' | transloco }}
+                        </p>
+                        <div *ngIf="reservationForm.errors?.['dateRangeInvalid']">
+                            <p style="color: red;">
+                                {{ 'date-range-invalid' | transloco }}
+                            </p>
+                        </div>
+                        <small class="date-helper">{{ 'date-helper' | transloco }}</small>
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <!-- Email Field -->
-        <div class="p-field p-grid align-items-center p-mb-3">
-            <label for="email" class="p-col-12 p-md-2 text-right">
-                {{ 'email-label' | transloco }}
-            </label>
-            <div class="p-col-12 p-md-10">
-                <input id="email" pInputText formControlName="email" type="email"
-                    [placeholder]="'email-placeholder' | transloco"
-                    [class.p-invalid]="reservationForm.get('email')?.invalid && reservationForm.get('email')?.touched"
-                    class="wide-input" />
-                <p *ngIf="reservationForm.get('email')?.invalid && reservationForm.get('email')?.touched"
-                    class="p-error mt-2">
-                    <span *ngIf="reservationForm.get('email')?.errors?.['required']">
-                        {{ 'email-required' | transloco }}
-                    </span>
-                    <span *ngIf="reservationForm.get('email')?.errors?.['email']">
-                        {{ 'email-invalid' | transloco }}
-                    </span>
-                </p>
+            <div class="form-section">
+                <div class="form-section__title">{{ 'guest-section-title' | transloco }}</div>
+                <div class="p-field p-grid align-items-center p-mb-3">
+                    <label for="nameReference" class="p-col-12 p-md-2 text-right">
+                        {{ 'reference-name-label' | transloco }}
+                    </label>
+                    <div class="p-col-12 p-md-10">
+                        <input id="nameReference" pInputText formControlName="nameReference" type="text"
+                            [placeholder]="'reference-name-placeholder' | transloco"
+                            [class.p-invalid]="reservationForm.get('nameReference')?.invalid && reservationForm.get('nameReference')?.touched"
+                            class="wide-input" />
+                        <p *ngIf="reservationForm.get('nameReference')?.invalid && reservationForm.get('nameReference')?.touched"
+                            class="p-error mt-2">
+                            {{ 'reference-name-required' | transloco }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="p-field p-grid align-items-center p-mb-3">
+                    <label for="email" class="p-col-12 p-md-2 text-right">
+                        {{ 'email-label' | transloco }}
+                    </label>
+                    <div class="p-col-12 p-md-10">
+                        <input id="email" pInputText formControlName="email" type="email"
+                            [placeholder]="'email-placeholder' | transloco"
+                            [class.p-invalid]="reservationForm.get('email')?.invalid && reservationForm.get('email')?.touched"
+                            class="wide-input" />
+                        <p *ngIf="reservationForm.get('email')?.invalid && reservationForm.get('email')?.touched"
+                            class="p-error mt-2">
+                            <span *ngIf="reservationForm.get('email')?.errors?.['required']">
+                                {{ 'email-required' | transloco }}
+                            </span>
+                            <span *ngIf="reservationForm.get('email')?.errors?.['email']">
+                                {{ 'email-invalid' | transloco }}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="p-field p-grid align-items-center p-mb-3">
+                    <label for="telephone" class="p-col-12 p-md-2 text-right">
+                        {{ 'telephone-label' | transloco }}
+                    </label>
+                    <div class="p-col-12 p-md-10">
+                        <input id="telephone" pInputText formControlName="telephone" type="tel"
+                            [placeholder]="'telephone-placeholder' | transloco"
+                            [class.p-invalid]="reservationForm.get('telephone')?.invalid && reservationForm.get('telephone')?.touched"
+                            class="wide-input" />
+                        <p *ngIf="reservationForm.get('telephone')?.invalid && reservationForm.get('telephone')?.touched"
+                            class="p-error mt-2">
+                            {{ 'telephone-invalid' | transloco }}
+                        </p>
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <!-- Telephone Field -->
-        <div class="p-field p-grid align-items-center p-mb-3">
-            <label for="telephone" class="p-col-12 p-md-2 text-right">
-                {{ 'telephone-label' | transloco }}
-            </label>
-            <div class="p-col-12 p-md-10">
-                <input id="telephone" pInputText formControlName="telephone" type="tel"
-                    [placeholder]="'telephone-placeholder' | transloco"
-                    [class.p-invalid]="reservationForm.get('telephone')?.invalid && reservationForm.get('telephone')?.touched"
-                    class="wide-input" />
-                <p *ngIf="reservationForm.get('telephone')?.invalid && reservationForm.get('telephone')?.touched"
-                    class="p-error mt-2">
-                    {{ 'telephone-invalid' | transloco }}
-                </p>
+            <div class="form-section">
+                <div class="form-section__title">{{ 'room-section-title' | transloco }}</div>
+                <div class="p-field p-grid align-items-center p-mb-3">
+                    <label for="roomName" class="p-col-12 p-md-2 text-right">
+                        {{ 'room-name-label' | transloco }}
+                    </label>
+                    <div class="p-col-12 p-md-10">
+                        <p-select id="roomSelect" formControlName="roomName" [options]="rooms" optionLabel="name"
+                            [placeholder]="'room-name-placeholder' | transloco"
+                            [class.p-invalid]="reservationForm.get('roomName')?.invalid && reservationForm.get('roomName')?.touched"
+                            styleClass="wide-input"></p-select>
+                        <p *ngIf="reservationForm.get('roomName')?.invalid && reservationForm.get('roomName')?.touched"
+                            class="p-error">
+                            {{ 'room-name-required' | transloco }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="p-field p-grid align-items-center p-mb-3">
+                    <label for="numberOfPeople" class="p-col-12 p-md-2 text-right">
+                        {{ 'number-of-people-label' | transloco }}
+                    </label>
+                    <div class="p-col-12 p-md-10">
+                        <input id="numberOfPeople" pInputText formControlName="numberOfPeople" type="number" min="1"
+                            [max]="getSelectedRoomCapacity() > 0 ? getSelectedRoomCapacity() : null"
+                            [disabled]="!reservationForm.get('roomName')?.value"
+                            [placeholder]="'number-of-people-placeholder' | transloco"
+                            [class.p-invalid]="reservationForm.get('numberOfPeople')?.invalid && reservationForm.get('numberOfPeople')?.touched"
+                            step="1" inputmode="numeric" class="wide-input" />
+                        <p *ngIf="reservationForm.get('numberOfPeople')?.invalid && reservationForm.get('numberOfPeople')?.touched"
+                            class="p-error mt-2">
+                            <span *ngIf="reservationForm.get('numberOfPeople')?.errors?.['required']">
+                                {{ 'number-of-people-required' | transloco }}
+                            </span>
+                            <span *ngIf="reservationForm.get('numberOfPeople')?.errors?.['min']">
+                                {{ 'number-of-people-min' | transloco }}
+                            </span>
+                            <span *ngIf="reservationForm.get('numberOfPeople')?.errors?.['invalidNumber']">
+                                {{ 'number-of-people-invalid' | transloco }}
+                            </span>
+                            <span *ngIf="reservationForm.get('numberOfPeople')?.errors?.['exceedsCapacity']">
+                                {{ 'number-of-people-exceeds-capacity' | transloco }} ({
+                                reservationForm.get('numberOfPeople')?.errors?.['maxCapacity'] })
+                            </span>
+                        </p>
+                        <small *ngIf="reservationForm.get('roomName')?.value && getSelectedRoomCapacity() > 0"
+                            class="p-text-secondary">
+                            {{ 'room-capacity-info' | transloco }}: {{ getSelectedRoomCapacity() }}
+                        </small>
+                    </div>
+                </div>
             </div>
-        </div>
-        <!-- Room Name Field -->
-        <div class="p-field p-grid align-items-center p-mb-3">
-            <label for="roomName" class="p-col-12 p-md-2 text-right">
-                {{ 'room-name-label' | transloco }}
-            </label>
-            <div class="p-col-12 p-md-10">
-                <p-select id="roomSelect" formControlName="roomName" [options]="rooms" optionLabel="name"
-                    [placeholder]="'room-name-placeholder' | transloco"
-                    [class.p-invalid]="reservationForm.get('roomName')?.invalid && reservationForm.get('roomName')?.touched"
-                    styleClass="wide-input">
-                </p-select>
-                <p *ngIf="reservationForm.get('roomName')?.invalid && reservationForm.get('roomName')?.touched"
-                    class="p-error">
-                    {{ 'room-name-required' | transloco }}
-                </p>
-                <!-- Error Message -->
 
+            <div class="admin-form__actions">
+                <button pButton [label]="'create-reservation-btn' | transloco" type="submit"
+                    [disabled]="reservationForm.invalid || saving" [loading]="saving"></button>
             </div>
-        </div>
-        <!-- Number of People Field -->
-        <div class="p-field p-grid align-items-center p-mb-3">
-            <label for="numberOfPeople" class="p-col-12 p-md-2 text-right">
-                {{ 'number-of-people-label' | transloco }}
-            </label>
-            <div class="p-col-12 p-md-10">
-                <input id="numberOfPeople" pInputText formControlName="numberOfPeople" type="number" min="1"
-                    [max]="getSelectedRoomCapacity() > 0 ? getSelectedRoomCapacity() : null"
-                    [disabled]="!reservationForm.get('roomName')?.value"
-                    [placeholder]="'number-of-people-placeholder' | transloco"
-                    [class.p-invalid]="reservationForm.get('numberOfPeople')?.invalid && reservationForm.get('numberOfPeople')?.touched"
-                    step="1" inputmode="numeric" class="wide-input" />
-                <p *ngIf="reservationForm.get('numberOfPeople')?.invalid && reservationForm.get('numberOfPeople')?.touched"
-                    class="p-error mt-2">
-                    <span *ngIf="reservationForm.get('numberOfPeople')?.errors?.['required']">
-                        {{ 'number-of-people-required' | transloco }}
-                    </span>
-                    <span *ngIf="reservationForm.get('numberOfPeople')?.errors?.['min']">
-                        {{ 'number-of-people-min' | transloco }}
-                    </span>
-                    <span *ngIf="reservationForm.get('numberOfPeople')?.errors?.['invalidNumber']">
-                        {{ 'number-of-people-invalid' | transloco }}
-                    </span>
-                    <span *ngIf="reservationForm.get('numberOfPeople')?.errors?.['exceedsCapacity']">
-                        {{ 'number-of-people-exceeds-capacity' | transloco }} ({{
-                        reservationForm.get('numberOfPeople')?.errors?.['maxCapacity'] }})
-                    </span>
-                </p>
-                <small *ngIf="reservationForm.get('roomName')?.value && getSelectedRoomCapacity() > 0"
-                    class="p-text-secondary">
-                    {{ 'room-capacity-info' | transloco }}: {{ getSelectedRoomCapacity() }}
-                </small>
-            </div>
-        </div>
-
-
-
-        <!-- Submit Button -->
-        <div class="text-center">
-            <button pButton [label]="'create-reservation-btn' | transloco" type="submit"
-                [disabled]="reservationForm.invalid || saving" [loading]="saving" class="p-mt-3"></button>
-        </div>
-    </form>
+        </form>
+    </div>
 </div>

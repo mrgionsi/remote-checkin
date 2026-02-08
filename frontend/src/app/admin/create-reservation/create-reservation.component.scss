@@ -1,52 +1,105 @@
-.p-field {
-    margin-bottom: 1.5rem;
-    /* Adjust the value as needed */
+.admin-form {
+    display: flex;
+    justify-content: center;
+    padding: 1rem 0 2rem;
 }
 
-/* Add specific margin for error messages globally */
+.admin-form__card {
+    width: min(920px, 100%);
+    background: #ffffff;
+    border: 1px solid var(--surface-300);
+    border-radius: 16px;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+    padding: 2rem;
+}
+
+.admin-form__title {
+    margin: 0 0 2rem;
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    color: var(--ink-900);
+    text-align: left;
+}
+
+.form-section {
+    padding: 1.25rem 1.5rem;
+    border: 1px solid var(--surface-300);
+    border-radius: 14px;
+    background: var(--surface-100);
+    margin-bottom: 1.5rem;
+}
+
+.form-section__title {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    color: var(--ink-900);
+    margin-bottom: 1rem;
+}
+
+.p-field {
+    margin-bottom: 1.5rem;
+}
+
+label {
+    font-weight: 600;
+    color: var(--ink-700);
+}
+
 .p-error {
     margin-top: 0.5rem;
     margin-bottom: 0.5rem;
-    font-size: small;
-    color: red;
+    font-size: 0.8rem;
+    color: #b91c1c;
 }
 
-/* Custom wide input for reservation number */
+.date-helper {
+    display: inline-block;
+    margin-top: 0.5rem;
+    color: var(--ink-500);
+    font-size: 0.8rem;
+}
+
 .wide-input {
     width: 100% !important;
-    min-width: 400px !important;
-    max-width: 600px !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
 }
 
-/* Custom wide input for PrimeNG datepicker */
-.wide-input .p-inputtext {
-    width: 100% !important;
-    min-width: 400px !important;
-    max-width: 600px !important;
-}
-
-/* Alternative approach for datepicker */
-.p-datepicker.wide-input {
-    width: 100% !important;
-    min-width: 400px !important;
-    max-width: 600px !important;
-}
-
-.p-datepicker.wide-input .p-inputtext {
-    width: 100% !important;
-    min-width: 400px !important;
-    max-width: 600px !important;
-}
-
-/* More specific targeting for datepicker */
 :host ::ng-deep .wide-input.p-datepicker {
     width: 100% !important;
-    min-width: 400px !important;
-    max-width: 600px !important;
 }
 
 :host ::ng-deep .wide-input.p-datepicker .p-inputtext {
     width: 100% !important;
-    min-width: 400px !important;
-    max-width: 600px !important;
+}
+
+:host ::ng-deep .p-inputtext,
+:host ::ng-deep .p-select,
+:host ::ng-deep .p-datepicker {
+    border-radius: 10px;
+    border: 1px solid var(--surface-300);
+}
+
+.admin-form__actions {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 1rem;
+}
+
+@media (max-width: 768px) {
+    .admin-form__card {
+        padding: 1.5rem;
+    }
+
+    .admin-form__title {
+        font-size: 1.4rem;
+    }
+
+    .admin-form__actions {
+        flex-direction: column;
+
+        ::ng-deep .p-button {
+            width: 100%;
+        }
+    }
 }

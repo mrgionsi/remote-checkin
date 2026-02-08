@@ -45,6 +45,7 @@ export class CreateReservationComponent implements OnInit {
   // Inizializzazione nel metodo ngOnInit
   ngOnInit(): void {
     this.getRooms();
+    this.setDefaultDates();
 
     // Add validation for number of people against room capacity
     this.reservationForm.get('roomName')?.valueChanges.subscribe(() => {
@@ -55,9 +56,24 @@ export class CreateReservationComponent implements OnInit {
       this.validateNumberOfPeople();
     });
   }
+
+  private setDefaultDates(): void {
+    const start = this.reservationForm.get('startDate')?.value;
+    const end = this.reservationForm.get('endDate')?.value;
+    if (!start && !end) {
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(now.getDate() + 1);
+      this.reservationForm.patchValue({
+        startDate: now,
+        endDate: tomorrow
+      });
+    }
+  }
   // Method to get rooms from the backend
   getRooms(): void {
-    this.roomService.getRooms().subscribe({
+    const selectedStructureId = Number(localStorage.getItem('selected_structure_id') || 0);
+    this.roomService.getRooms(selectedStructureId || null).subscribe({
       next: (rooms) => {
         console.log('Rooms loaded:', rooms);
         this.rooms = rooms;

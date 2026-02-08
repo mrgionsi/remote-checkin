@@ -164,6 +164,11 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
         this.subscriptions.push(subscription);
     }
 
+    setRoleFilter(role: string): void {
+        this.roleFilter = role;
+        this.loadUsers();
+    }
+
     onSearch(): void {
         // Debounce search
         setTimeout(() => {

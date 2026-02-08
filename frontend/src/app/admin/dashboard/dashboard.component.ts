@@ -19,12 +19,11 @@ import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
 import { DialogModule } from 'primeng/dialog';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 
 @Component({
   selector: 'app-dashboard',
-  imports: [ToastModule, IconFieldModule, InputIconModule, Toast, ChartModule, TableModule, InputTextModule, TagModule, CommonModule, TranslocoPipe, ButtonModule, SelectModule, FormsModule, CardModule, DialogModule, ProgressSpinnerModule],
+  imports: [ToastModule, IconFieldModule, InputIconModule, Toast, ChartModule, TableModule, InputTextModule, TagModule, CommonModule, TranslocoPipe, ButtonModule, SelectModule, FormsModule, CardModule, DialogModule],
   providers: [MessageService],
   host: { ngSkipHydration: 'true' },
   templateUrl: './dashboard.component.html',
@@ -61,6 +60,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   dateRangeFilter: string = '';
   roomFilter: string = '';
   globalSearchTerm: string = '';
+  recentReservations: any[] = [];
+  healthItems: Array<{ label: string; value: number; tone: 'neutral' | 'warning' | 'success' }> = [];
 
   // Filter options
   statusOptions = [
@@ -146,6 +147,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this.filteredReservations = [...this.reservations];
             this.calculateSummaryStats();
             this.extractRoomOptions();
+            this.updateInsights();
             this.loadingReservations = false;
           },
           error: (error) => {
@@ -412,6 +414,52 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     this.filteredReservations = filtered;
+    this.updateInsights();
+  }
+
+  applyQuickFilter(type: string): void {
+    switch (type) {
+      case 'pending':
+        this.statusFilter = 'Pending';
+        this.dateRangeFilter = '';
+        break;
+      case 'approved':
+        this.statusFilter = 'Approved';
+        this.dateRangeFilter = '';
+        break;
+      case 'today':
+        this.dateRangeFilter = 'today';
+        break;
+      case 'week':
+        this.dateRangeFilter = 'week';
+        break;
+      default:
+        break;
+    }
+    this.applyFilters();
+  }
+
+  clearQuickFilters(): void {
+    this.statusFilter = '';
+    this.dateRangeFilter = '';
+    this.roomFilter = '';
+    this.globalSearchTerm = '';
+    this.applyFilters();
+  }
+
+  private updateInsights(): void {
+    const source = this.filteredReservations.length ? this.filteredReservations : this.reservations;
+    const sorted = [...source].sort((a: any, b: any) => {
+      const aDate = new Date(a.start_date || a.end_date || 0).getTime();
+      const bDate = new Date(b.start_date || b.end_date || 0).getTime();
+      return bDate - aDate;
+    });
+    this.recentReservations = sorted.slice(0, 5);
+    this.healthItems = [
+      { label: 'dashboard-health-pending', value: this.summaryStats.pendingApprovals, tone: 'warning' },
+      { label: 'dashboard-health-checkins', value: this.summaryStats.checkinsToday, tone: 'success' },
+      { label: 'dashboard-health-checkouts', value: this.summaryStats.checkoutsToday, tone: 'neutral' }
+    ];
   }
 
   onFilterChange(): void {
@@ -553,4 +601,3 @@ export class DashboardComponent implements OnInit, OnDestroy {
     console.log('DashboardComponent destroyed with ID:', this.componentId, '- subscriptions cleaned up');
   }
 }
-

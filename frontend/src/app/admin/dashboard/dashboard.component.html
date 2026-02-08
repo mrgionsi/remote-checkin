@@ -54,6 +54,49 @@
         </p-card>
     </div>
 
+    <div class="insights-grid">
+        <div class="insight-card">
+            <div class="insight-card__header">
+                <h3>{{ 'dashboard-health-title' | transloco }}</h3>
+                <span class="insight-card__hint">{{ 'dashboard-health-subtitle' | transloco }}</span>
+            </div>
+            <div class="health-list" *ngIf="!loadingReservations">
+                <div class="health-item" *ngFor="let item of healthItems">
+                    <span class="health-label">{{ item.label | transloco }}</span>
+                    <span class="health-value" [class.is-warning]="item.tone === 'warning'"
+                        [class.is-success]="item.tone === 'success'">
+                        {{ item.value }}
+                    </span>
+                </div>
+            </div>
+            <div class="health-skeleton" *ngIf="loadingReservations">
+                <div class="skeleton-line" *ngFor="let n of [1,2,3]"></div>
+            </div>
+        </div>
+
+        <div class="insight-card">
+            <div class="insight-card__header">
+                <h3>{{ 'dashboard-recent-title' | transloco }}</h3>
+                <span class="insight-card__hint">{{ 'dashboard-recent-subtitle' | transloco }}</span>
+            </div>
+            <div class="recent-list" *ngIf="recentReservations.length > 0">
+                <div class="recent-item" *ngFor="let item of recentReservations">
+                    <div>
+                        <div class="recent-name">{{ item.name_reference }}</div>
+                        <div class="recent-meta">{{ item.room_name }} · {{ item.start_date }}</div>
+                    </div>
+                    <span class="recent-status">{{ item.status }}</span>
+                </div>
+            </div>
+            <div class="recent-empty" *ngIf="!loadingReservations && recentReservations.length === 0">
+                {{ 'dashboard-recent-empty' | transloco }}
+            </div>
+            <div class="health-skeleton" *ngIf="loadingReservations">
+                <div class="skeleton-line" *ngFor="let n of [1,2,3]"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- Chart Section -->
     <div class="chart-section">
         <div class="chart-header">
@@ -67,8 +110,8 @@
         <div class="chart-container">
             <!-- Loading State -->
             <div *ngIf="loadingChart" class="loading-container">
-                <p-progressSpinner [style]="{width: '50px', height: '50px'}"></p-progressSpinner>
-                <p class="loading-text">Loading chart data...</p>
+                <div class="skeleton-chart"></div>
+                <p class="loading-text">{{ 'dashboard-chart-loading' | transloco }}</p>
             </div>
 
             <!-- Error State -->
@@ -103,6 +146,23 @@
                     <p-button label="Clear Filters" icon="pi pi-filter-slash" severity="secondary" size="small"
                         [outlined]="true" (onClick)="clearFilters()">
                     </p-button>
+                </div>
+                <div class="quick-filters">
+                    <button class="filter-chip" (click)="applyQuickFilter('pending')">
+                        {{ 'dashboard-filter-pending' | transloco }}
+                    </button>
+                    <button class="filter-chip" (click)="applyQuickFilter('approved')">
+                        {{ 'dashboard-filter-approved' | transloco }}
+                    </button>
+                    <button class="filter-chip" (click)="applyQuickFilter('today')">
+                        {{ 'dashboard-filter-today' | transloco }}
+                    </button>
+                    <button class="filter-chip" (click)="applyQuickFilter('week')">
+                        {{ 'dashboard-filter-week' | transloco }}
+                    </button>
+                    <button class="filter-chip is-muted" (click)="clearQuickFilters()">
+                        {{ 'dashboard-filter-clear' | transloco }}
+                    </button>
                 </div>
 
                 <!-- Filter Controls -->

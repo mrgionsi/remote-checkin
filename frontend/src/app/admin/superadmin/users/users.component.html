@@ -13,6 +13,11 @@
       name="roleFilter" styleClass="w-full" optionLabel="label" optionValue="value" aria-label="Filter users by role">
     </p-select>
   </div>
+  <div class="filter-chips">
+    <button class="chip" (click)="setRoleFilter('')">All</button>
+    <button class="chip" (click)="setRoleFilter('administrator')">Administrator</button>
+    <button class="chip" (click)="setRoleFilter('superadmin')">Superadmin</button>
+  </div>
 
   <ul class="users-list" *ngIf="!loading && users.length > 0" aria-labelledby="users-title">
     <li *ngFor="let user of users; trackBy: trackByUserId">
@@ -107,9 +112,8 @@
     </div>
   </div>
 
-  <div class="loading" *ngIf="loading">
-    <p-progressSpinner></p-progressSpinner>
-    <p>Loading users...</p>
+  <div class="loading-skeleton" *ngIf="loading">
+    <div class="skeleton-card" *ngFor="let n of [1,2,3]"></div>
   </div>
 
   <p-message *ngIf="error" severity="error" [text]="'Error: ' + error" styleClass="w-full">
