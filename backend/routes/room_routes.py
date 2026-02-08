@@ -34,26 +34,27 @@ room_bp = Blueprint("room", __name__, url_prefix="/api/v1")
 @log_function(include_args=True, include_result=True, max_arg_length=200)
 def _validate_room_update_data(data, db):
     """Validate room update data and return error message if invalid."""
+    error = None
     if "name" in data and not data["name"].strip():
-        return "Room name cannot be empty"
-    if "capacity" in data:
+        error = "Room name cannot be empty"
+    if error is None and "capacity" in data:
         try:
             capacity = int(data["capacity"])
             if capacity <= 0:
-                return "Capacity must be a positive number"
+                error = "Capacity must be a positive number"
         except ValueError:
-            return "Invalid capacity value"
-    if "id_structure" in data:
+            error = "Invalid capacity value"
+    if error is None and "id_structure" in data:
         try:
             structure = db.query(Structure).filter(Structure.id == data["id_structure"]).first()
             if not structure:
-                return "Invalid structure ID"
+                error = "Invalid structure ID"
         except SQLAlchemyError as e:
             logger.error("Database error validating structure ID %s: %s", data["id_structure"], str(e))
-            return "Failed to validate structure ID due to database error"
-    if "is_active" in data and not isinstance(data["is_active"], bool):
-        return "Invalid active status value"
-    return None
+            error = "Failed to validate structure ID due to database error"
+    if error is None and "is_active" in data and not isinstance(data["is_active"], bool):
+        error = "Invalid active status value"
+    return error
 
 
 # Add a new room
