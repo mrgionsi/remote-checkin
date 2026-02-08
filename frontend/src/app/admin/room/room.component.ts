@@ -10,10 +10,11 @@ import { ToastModule } from 'primeng/toast';
 import { TagModule } from 'primeng/tag';
 import { SelectModule } from 'primeng/select';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { Dialog } from 'primeng/dialog';
+import { DialogModule } from 'primeng/dialog';
 import { isPlatformBrowser } from '@angular/common';
 import { Inject, PLATFORM_ID } from '@angular/core';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-room',
@@ -25,7 +26,7 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
     CommonModule,
     ToastModule,
     ConfirmDialogModule,
-    Dialog,
+    DialogModule,
     FormsModule, TranslocoPipe],
   templateUrl: './room.component.html',
   styleUrl: './room.component.scss',
@@ -35,7 +36,9 @@ export class RoomComponent implements OnInit {
 
   clonedProducts: { [s: string]: any } = {};
   add_room_visible: boolean = false;
-  new_room: any = { name: '', capacity: '', id_structure: 1, is_active: true };
+  new_room: any = { name: '', capacity: '', id_structure: null, is_active: true };
+  structures: { id: number; name: string }[] = [];
+  canCreateRoom: boolean = false;
   rooms: any[] = [];
   filteredRooms: any[] = [];
   searchTerm: string = '';
@@ -54,18 +57,26 @@ export class RoomComponent implements OnInit {
     public confirmationService: ConfirmationService,
     private roomService: RoomService,
     @Inject(PLATFORM_ID) private platformId: object,
-    private readonly translocoService: TranslocoService) { }
+    private readonly translocoService: TranslocoService,
+    private readonly authService: AuthService) { }
 
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
       this.setFilterOptions();
+      const user = this.authService.getUser();
+      this.structures = user?.structures || [];
       const selectedStructureId = Number(localStorage.getItem('selected_structure_id') || 0);
-      if (selectedStructureId) {
+      if (selectedStructureId && this.structures.some((s) => s.id === selectedStructureId)) {
         this.currentStructureId = selectedStructureId;
-        this.new_room.id_structure = selectedStructureId;
+      } else if (this.structures.length > 0) {
+        this.currentStructureId = this.structures[0].id;
+      } else {
+        this.currentStructureId = null;
       }
-      this.roomService.getRooms(selectedStructureId || null).subscribe({
+      this.new_room.id_structure = this.currentStructureId;
+      this.canCreateRoom = !!this.currentStructureId;
+      this.roomService.getRooms(this.currentStructureId).subscribe({
         next: (value) => {
           console.log(value)
           this.rooms = (value || []).map((room: any) => ({
@@ -154,11 +165,27 @@ export class RoomComponent implements OnInit {
     });
   }
   showDialogCreateRoom() {
+    if (!this.canCreateRoom) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Missing structure',
+        detail: 'Select a structure before creating a room.'
+      });
+      return;
+    }
     this.add_room_visible = true;
 
   }
 
   addRoom() {
+    if (!this.new_room.id_structure) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Missing structure',
+        detail: 'Select a structure before creating a room.'
+      });
+      return;
+    }
     this.add_room_visible = false;
     var _ = this;
     this.roomService.addRoom(this.new_room).subscribe({
@@ -169,7 +196,7 @@ export class RoomComponent implements OnInit {
         _.new_room = {
           name: '',
           capacity: '',
-          id_structure: _.currentStructureId ?? 1,
+          id_structure: _.currentStructureId,
           is_active: true
         };
       },

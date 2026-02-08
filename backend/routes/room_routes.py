@@ -157,7 +157,13 @@ def get_rooms():
     """
     with get_db() as db:  # Using 'with' to properly manage the db session
         try:
-            id_structure = request.args.get("structure_id", type=int)
+            raw_structure_id = request.args.get("structure_id")
+            id_structure = None
+            if raw_structure_id is not None:
+                try:
+                    id_structure = int(raw_structure_id)
+                except (TypeError, ValueError):
+                    return jsonify({"error": "Invalid structure_id. Must be an integer."}), 400
 
             if id_structure:
                 rooms = db.query(Room).filter(Room.id_structure == id_structure).order_by(Room.id).all()

@@ -74,7 +74,7 @@ label {
     }
 
     .admin-form__actions {
-        justify-content: stretch;
+        flex-direction: column;
 
         ::ng-deep .p-button {
             width: 100%;
