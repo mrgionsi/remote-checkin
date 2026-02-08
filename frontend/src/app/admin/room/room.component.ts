@@ -73,7 +73,7 @@ export class RoomComponent implements OnInit {
           this.rooms = (value || []).map((room: any) => ({
             ...room,
             isActive: room.is_active ?? room.isActive ?? true
-          }))
+          }));
           this.applyFilters();
         },
         error: (msg) => {

@@ -159,11 +159,9 @@ def get_rooms():
             )
 
             if id_structure:
-                rooms = db.query(Room).filter(Room.id_structure == id_structure).all()
+                rooms = db.query(Room).filter(Room.id_structure == id_structure).order_by(Room.id).all()
             else:
-                rooms = db.query(
-                    Room
-                ).all()  # Return all rooms if no structure is specified
+                rooms = db.query(Room).order_by(Room.id).all()  # Return all rooms if no structure is specified
 
             room_data = [room.to_dict() for room in rooms]
             logger.info("Rooms retrieved successfully", extra={

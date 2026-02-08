@@ -65,7 +65,7 @@
                 </td>
                 <td>
                     <button type="button" class="status-pill" [class.is-active]="room.isActive"
-                        [disabled]="editing" (click)="toggleRoomStatus(room)">
+                        [disabled]="!editing" (click)="toggleRoomStatus(room)">
                         {{ room.isActive ? 'Active' : 'Inactive' }}
                     </button>
                 </td>
