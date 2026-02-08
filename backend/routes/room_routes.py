@@ -148,15 +148,15 @@ def add_room():
 @log_database_operation("READ")
 def get_rooms():
     """
-    Return a JSON array of rooms for a fixed structure.
+    Return a JSON array of rooms, optionally filtered by structure_id.
 
-    Queries the database for Room records with id_structure currently hard-coded to 1, serializes each Room using its to_dict() method, and returns the list as a JSON response. The function does not accept parameters; behavior will need updating when structure selection is implemented via request parameters.
+    Queries the database for Room records, optionally filtering by the provided
+    ?structure_id query parameter, serializes each Room using its to_dict() method,
+    and returns the list as a JSON response.
     """
     with get_db() as db:  # Using 'with' to properly manage the db session
         try:
-            id_structure = (
-                1  # Get structure ID from query params. For now, this value is fixed.
-            )
+            id_structure = request.args.get("structure_id", type=int)
 
             if id_structure:
                 rooms = db.query(Room).filter(Room.id_structure == id_structure).order_by(Room.id).all()

@@ -6,20 +6,22 @@
     </div>
     <div class="room-page__filters">
         <div class="room-filter">
-            <label for="roomSearch">Search</label>
+            <label for="roomSearch">{{ 'rooms-search-placeholder' | transloco }}</label>
             <input id="roomSearch" pInputText type="text" [value]="searchTerm" (input)="onSearchChange($event)"
-                placeholder="Search rooms" />
+                [placeholder]="'rooms-search-placeholder' | transloco" />
         </div>
         <div class="room-filter">
-            <label for="capacityFilter">Capacity</label>
+            <label for="capacityFilter">{{ 'rooms-capacity-filter-label' | transloco }}</label>
             <p-select id="capacityFilter" [options]="capacityOptions" optionLabel="label" optionValue="value"
-                [ngModel]="capacityFilter" (onChange)="onCapacityChange($event)" placeholder="All capacities">
+                [ngModel]="capacityFilter" (onChange)="onCapacityChange($event)"
+                [placeholder]="'rooms-all-capacities' | transloco">
             </p-select>
         </div>
         <div class="room-filter">
-            <label for="statusFilter">Status</label>
+            <label for="statusFilter">{{ 'rooms-status-filter-label' | transloco }}</label>
             <p-select id="statusFilter" [options]="statusOptions" optionLabel="label" optionValue="value"
-                [ngModel]="statusFilter" (onChange)="onStatusChange($event)" placeholder="All statuses">
+                [ngModel]="statusFilter" (onChange)="onStatusChange($event)"
+                [placeholder]="'rooms-all-statuses' | transloco">
             </p-select>
         </div>
     </div>
@@ -35,7 +37,7 @@
  -->
                 <th scope="col" pSortableColumn="capacity">{{ 'capacity-header' | transloco }} <p-sortIcon
                         field="capacity" /></th>
-                <th scope="col">Status</th>
+                <th scope="col">{{ 'rooms-status-label' | transloco }}</th>
                 <th scope="col">{{ 'actions-header' | transloco }}</th>
             </tr>
         </ng-template>
@@ -66,7 +68,7 @@
                 <td>
                     <button type="button" class="status-pill" [class.is-active]="room.isActive"
                         [disabled]="!editing" (click)="toggleRoomStatus(room)">
-                        {{ room.isActive ? 'Active' : 'Inactive' }}
+                        {{ room.isActive ? ('rooms-active-label' | transloco) : ('rooms-inactive-label' | transloco) }}
                     </button>
                 </td>
                 <td>
@@ -91,11 +93,11 @@
             <tr>
                 <td colspan="5">
                     <div class="room-empty">
-                        <div class="room-empty__title">No rooms yet</div>
-                        <div class="room-empty__subtitle">Add your first room to start receiving reservations.</div>
-                        <p-button [label]="'create-room-btn' | transloco" icon="pi pi-plus" severity="info"
-                            (click)="showDialogCreateRoom()"></p-button>
-                    </div>
+                    <div class="room-empty__title">{{ 'rooms-empty-title' | transloco }}</div>
+                    <div class="room-empty__subtitle">{{ 'rooms-empty-subtitle' | transloco }}</div>
+                    <p-button [label]="'create-room-btn' | transloco" icon="pi pi-plus" severity="info"
+                        (click)="showDialogCreateRoom()"></p-button>
+                </div>
                 </td>
             </tr>
         </ng-template>

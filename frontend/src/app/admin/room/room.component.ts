@@ -13,7 +13,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { Dialog } from 'primeng/dialog';
 import { isPlatformBrowser } from '@angular/common';
 import { Inject, PLATFORM_ID } from '@angular/core';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-room',
@@ -41,18 +41,9 @@ export class RoomComponent implements OnInit {
   searchTerm: string = '';
   capacityFilter: string = 'all';
   statusFilter: string = 'all';
-  capacityOptions = [
-    { label: 'All capacities', value: 'all' },
-    { label: '1-2 guests', value: '1-2' },
-    { label: '3-4 guests', value: '3-4' },
-    { label: '5-6 guests', value: '5-6' },
-    { label: '7+ guests', value: '7+' }
-  ];
-  statusOptions = [
-    { label: 'All statuses', value: 'all' },
-    { label: 'Active', value: 'active' },
-    { label: 'Inactive', value: 'inactive' }
-  ];
+  currentStructureId: number | null = null;
+  capacityOptions: { label: string; value: string }[] = [];
+  statusOptions: { label: string; value: string }[] = [];
   editDialogVisible = false;
   selectedRoom: any = {};
 
@@ -62,18 +53,26 @@ export class RoomComponent implements OnInit {
   constructor(private messageService: MessageService,
     public confirmationService: ConfirmationService,
     private roomService: RoomService,
-    @Inject(PLATFORM_ID) private platformId: object) { }
+    @Inject(PLATFORM_ID) private platformId: object,
+    private readonly translocoService: TranslocoService) { }
 
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
-      this.roomService.getRooms().subscribe({
+      this.setFilterOptions();
+      const selectedStructureId = Number(localStorage.getItem('selected_structure_id') || 0);
+      if (selectedStructureId) {
+        this.currentStructureId = selectedStructureId;
+        this.new_room.id_structure = selectedStructureId;
+      }
+      this.roomService.getRooms(selectedStructureId || null).subscribe({
         next: (value) => {
           console.log(value)
           this.rooms = (value || []).map((room: any) => ({
             ...room,
             isActive: room.is_active ?? room.isActive ?? true
           }));
+          this.setFilterOptions();
           this.applyFilters();
         },
         error: (msg) => {
@@ -167,7 +166,12 @@ export class RoomComponent implements OnInit {
         _.messageService.add({ severity: 'info', summary: 'Confirmed', detail: 'New Room ' + this.new_room.name + ' added.' });
         _.rooms.push({ ...val, isActive: val?.is_active ?? true });
         _.applyFilters();
-        _.new_room = { name: '', capacity: '', id_structure: 1, is_active: true };
+        _.new_room = {
+          name: '',
+          capacity: '',
+          id_structure: _.currentStructureId ?? 1,
+          is_active: true
+        };
       },
       error: (error) => {
         console.error('Error adding reservations:', error);
@@ -181,6 +185,21 @@ export class RoomComponent implements OnInit {
     const target = event.target as HTMLInputElement;
     this.searchTerm = target.value;
     this.applyFilters();
+  }
+
+  private setFilterOptions() {
+    this.capacityOptions = [
+      { label: this.translocoService.translate('rooms-all-capacities'), value: 'all' },
+      { label: this.translocoService.translate('rooms-capacity-1-2'), value: '1-2' },
+      { label: this.translocoService.translate('rooms-capacity-3-4'), value: '3-4' },
+      { label: this.translocoService.translate('rooms-capacity-5-6'), value: '5-6' },
+      { label: this.translocoService.translate('rooms-capacity-7-plus'), value: '7+' }
+    ];
+    this.statusOptions = [
+      { label: this.translocoService.translate('rooms-all-statuses'), value: 'all' },
+      { label: this.translocoService.translate('rooms-active-label'), value: 'active' },
+      { label: this.translocoService.translate('rooms-inactive-label'), value: 'inactive' }
+    ];
   }
 
   onCapacityChange(event: any) {

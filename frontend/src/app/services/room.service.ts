@@ -15,8 +15,12 @@ export class RoomService {
   constructor(private http: HttpClient, private authService: AuthService) { }
 
   // Fetch all rooms
-  getRooms(): Observable<any[]> {
-    return this.http.get<any[]>(this.apiUrl, { headers: this.authService.getAuthHeaders() });
+  getRooms(structureId?: number | null): Observable<any[]> {
+    const params: any = {};
+    if (structureId) {
+      params.structure_id = structureId;
+    }
+    return this.http.get<any[]>(this.apiUrl, { headers: this.authService.getAuthHeaders(), params });
   }
 
   addRoom(room: any): Observable<any> {

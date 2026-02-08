@@ -173,5 +173,19 @@
     "search-provinces": "Buscar provincias...",
     "search-countries": "Buscar países...",
     "updated": "Actualizado",
-    "reservation-updated-success": "La reserva ha sido actualizada exitosamente."
+    "reservation-updated-success": "La reserva ha sido actualizada exitosamente.",
+    "rooms-status-label": "Estado",
+    "rooms-active-label": "Activo",
+    "rooms-inactive-label": "Inactivo",
+    "rooms-search-placeholder": "Buscar habitaciones",
+    "rooms-empty-title": "Aun no hay habitaciones",
+    "rooms-empty-subtitle": "Agrega tu primera habitacion para empezar a recibir reservas.",
+    "rooms-capacity-filter-label": "Capacidad",
+    "rooms-status-filter-label": "Estado",
+    "rooms-all-statuses": "Todos los estados",
+    "rooms-all-capacities": "Todas las capacidades",
+    "rooms-capacity-1-2": "1-2 huespedes",
+    "rooms-capacity-3-4": "3-4 huespedes",
+    "rooms-capacity-5-6": "5-6 huespedes",
+    "rooms-capacity-7-plus": "7+ huespedes"
 }
