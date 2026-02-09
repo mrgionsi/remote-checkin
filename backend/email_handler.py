@@ -215,6 +215,42 @@ class EmailService:
 
         return validated_emails
 
+    def _get_sender_name(self) -> str:
+        """
+        Resolve a display name for outgoing emails.
+
+        Priority:
+        1) Configured mail_default_sender_name
+        2) Local-part of mail_default_sender_email
+        3) "Remote Check-in"
+        """
+        configured_name = (self.config.mail_default_sender_name or "").strip()
+        if configured_name:
+            return configured_name
+
+        email = (self.config.mail_default_sender_email or "").strip()
+        if email and "@" in email:
+            return email.split("@", 1)[0]
+
+        return "Remote Check-in"
+
+    def _get_signature_name(self) -> str:
+        """
+        Return a friendly signature name for email footers.
+        """
+        sender_name = self._get_sender_name()
+        lower_name = sender_name.lower()
+        if lower_name.endswith("team") or lower_name.endswith("staff") or lower_name.endswith("management"):
+            return sender_name
+        return f"{sender_name} Team"
+
+    def _get_guest_name(self, reservation_data: Dict[str, Any]) -> str:
+        """
+        Return a safe guest display name.
+        """
+        guest_name = str(reservation_data.get("guest_name", "")).strip()
+        return guest_name if guest_name else "Guest"
+
     def send_email(self, email_data: EmailData) -> Dict[str, Any]:
         """
         Send an email using the configured provider (SMTP, Mailgun, or SendGrid).
@@ -270,11 +306,8 @@ class EmailService:
             # Create message
             msg = MIMEMultipart('alternative')
             msg['Subject'] = email_data.subject
-            # Format sender name as "Remote Check-in System ('B&B Chapeau')"
-            sender_name = self.config.mail_default_sender_name if self.config.mail_default_sender_name and self.config.mail_default_sender_name.strip() else 'Remote Check-in'
-            formatted_sender_name = f"Remote Check-in System ('{sender_name}')"
-
-            msg['From'] = formataddr((formatted_sender_name, self.config.mail_default_sender_email))
+            sender_name = self._get_sender_name()
+            msg['From'] = formataddr((sender_name, self.config.mail_default_sender_email))
             msg['To'] = email_data.to_email
 
             # Add CC and BCC if provided
@@ -360,7 +393,7 @@ class EmailService:
         url = f"https://api.mailgun.net/v3/{domain}/messages"
 
         sender_name = self.config.mail_default_sender_name if self.config.mail_default_sender_name and self.config.mail_default_sender_name.strip() else "Remote Check-in"
-        formatted_sender_name = f"Remote Check-in System ('{sender_name}')"
+        formatted_sender_name = sender_name
         data = {
             "from": f"{formatted_sender_name} <{self.config.mail_default_sender_email}>",
             "to": email_data.to_email,
@@ -416,7 +449,7 @@ class EmailService:
             ],
             "from": {
                 "email": self.config.mail_default_sender_email,
-                "name": f"Remote Check-in System ('{self.config.mail_default_sender_name if self.config.mail_default_sender_name and self.config.mail_default_sender_name.strip() else 'Remote Check-in'}')"  # pylint: disable=line-too-long
+                "name": self._get_sender_name()
             },
             "content": [
                 {
@@ -597,15 +630,16 @@ class EmailService:
         """Create plain text body for reservation confirmation."""
         # Safely get values and convert to strings
         reservation_number = str(reservation_data.get('reservation_number', 'N/A'))
-        guest_name = str(reservation_data.get('guest_name', 'N/A'))
+        guest_name = self._get_guest_name(reservation_data)
         start_date = str(reservation_data.get('start_date', 'N/A'))
         end_date = str(reservation_data.get('end_date', 'N/A'))
         room_name = str(reservation_data.get('room_name', 'N/A'))
+        signature_name = self._get_signature_name()
 
         return f"""
-Dear Guest,
+Hello {guest_name},
 
-Your reservation has been confirmed successfully!
+Thank you for your reservation. Your booking is confirmed.
 
 Reservation Details:
 - Reservation Number: {reservation_number}
@@ -614,10 +648,12 @@ Reservation Details:
 - Check-out Date: {end_date}
 - Room: {room_name}
 
-We look forward to welcoming you!
+If any of these details are incorrect, please reply to this email and we will help.
+
+We look forward to welcoming you.
 
 Best regards,
-The Remote Check-in Team
+{signature_name}
         """.strip()
 
     def _create_reservation_confirmation_html(self, reservation_data: Dict[str, Any]) -> str:
@@ -641,10 +677,11 @@ The Remote Check-in Team
         """
         # Safely get values and convert to strings
         reservation_number = str(reservation_data.get('reservation_number', 'N/A'))
-        guest_name = str(reservation_data.get('guest_name', 'N/A'))
+        guest_name = self._get_guest_name(reservation_data)
         start_date = str(reservation_data.get('start_date', 'N/A'))
         end_date = str(reservation_data.get('end_date', 'N/A'))
         room_name = str(reservation_data.get('room_name', 'N/A'))
+        signature_name = self._get_signature_name()
 
         return f"""
 <!DOCTYPE html>
@@ -664,11 +701,11 @@ The Remote Check-in Team
 <body>
     <div class="container">
         <div class="header">
-            <h1>Reservation Confirmed!</h1>
+            <h1>Reservation Confirmed</h1>
         </div>
         <div class="content">
-            <p>Dear Guest,</p>
-            <p>Your reservation has been confirmed successfully!</p>
+            <p>Hello <strong>{guest_name}</strong>,</p>
+            <p>Thank you for your reservation. Your booking is confirmed.</p>
 
             <div class="details">
                 <h3>Reservation Details:</h3>
@@ -679,10 +716,11 @@ The Remote Check-in Team
                 <p><strong>Room:</strong> {room_name}</p>
             </div>
 
-            <p>We look forward to welcoming you!</p>
+            <p>If any of these details are incorrect, please reply to this email and we will help.</p>
+            <p>We look forward to welcoming you.</p>
         </div>
         <div class="footer">
-            <p>Best regards,<br>The Remote Check-in Team</p>
+            <p>Best regards,<br>{signature_name}</p>
         </div>
     </div>
 </body>
@@ -703,22 +741,25 @@ The Remote Check-in Team
         Returns:
             A formatted plain-text string suitable for the body of an update notification email.
         """
-        return f"""
-Dear Guest,
+        guest_name = self._get_guest_name(reservation_data)
+        signature_name = self._get_signature_name()
 
-Your reservation has been updated successfully!
+        return f"""
+Hello {guest_name},
+
+Your reservation details were updated. Please review the updated information below.
 
 Updated Reservation Details:
 - Reservation Number: {reservation_data.get('reservation_number', 'N/A')}
-- Guest Name: {reservation_data.get('guest_name', 'N/A')}
+- Guest Name: {guest_name}
 - Check-in Date: {reservation_data.get('start_date', 'N/A')}
 - Check-out Date: {reservation_data.get('end_date', 'N/A')}
 - Room: {reservation_data.get('room_name', 'N/A')}
 
-If you have any questions, please don't hesitate to contact us.
+If you did not request this change or notice any errors, please reply to this email.
 
 Best regards,
-The Remote Check-in Team
+{signature_name}
         """.strip()
 
     def _create_reservation_update_html(self, reservation_data: Dict[str, Any]) -> str:
@@ -738,6 +779,9 @@ The Remote Check-in Team
         Returns:
             str: The rendered HTML string for the reservation update email.
         """
+        guest_name = self._get_guest_name(reservation_data)
+        signature_name = self._get_signature_name()
+
         return f"""
 <!DOCTYPE html>
 <html>
@@ -759,22 +803,22 @@ The Remote Check-in Team
             <h1>Reservation Updated</h1>
         </div>
         <div class="content">
-            <p>Dear Guest,</p>
-            <p>Your reservation has been updated successfully!</p>
+            <p>Hello <strong>{guest_name}</strong>,</p>
+            <p>Your reservation details were updated. Please review the updated information below.</p>
 
             <div class="details">
                 <h3>Updated Reservation Details:</h3>
                 <p><strong>Reservation Number:</strong> {reservation_data.get('reservation_number', 'N/A')}</p>
-                <p><strong>Guest Name:</strong> {reservation_data.get('guest_name', 'N/A')}</p>
+                <p><strong>Guest Name:</strong> {guest_name}</p>
                 <p><strong>Check-in Date:</strong> {reservation_data.get('start_date', 'N/A')}</p>
                 <p><strong>Check-out Date:</strong> {reservation_data.get('end_date', 'N/A')}</p>
                 <p><strong>Room:</strong> {reservation_data.get('room_name', 'N/A')}</p>
             </div>
 
-            <p>If you have any questions, please don't hesitate to contact us.</p>
+            <p>If you did not request this change or notice any errors, please reply to this email.</p>
         </div>
         <div class="footer">
-            <p>Best regards,<br>The Remote Check-in Team</p>
+            <p>Best regards,<br>{signature_name}</p>
         </div>
     </div>
 </body>
@@ -797,22 +841,25 @@ The Remote Check-in Team
         Returns:
             str: Formatted plain-text cancellation message.
         """
-        return f"""
-Dear Guest,
+        guest_name = self._get_guest_name(reservation_data)
+        signature_name = self._get_signature_name()
 
-Your reservation has been cancelled.
+        return f"""
+Hello {guest_name},
+
+Your reservation has been cancelled. Below is a summary for your records.
 
 Cancelled Reservation Details:
 - Reservation Number: {reservation_data.get('reservation_number', 'N/A')}
-- Guest Name: {reservation_data.get('guest_name', 'N/A')}
+- Guest Name: {guest_name}
 - Check-in Date: {reservation_data.get('start_date', 'N/A')}
 - Check-out Date: {reservation_data.get('end_date', 'N/A')}
 - Room: {reservation_data.get('room_name', 'N/A')}
 
-If you have any questions or if this cancellation was made in error, please contact us immediately.
+If this was a mistake or you need help, please reply to this email.
 
 Best regards,
-The Remote Check-in Team
+{signature_name}
         """.strip()
 
     def _create_reservation_cancellation_html(self, reservation_data: Dict[str, Any]) -> str:
@@ -828,6 +875,9 @@ The Remote Check-in Team
             str: Complete HTML string for the cancellation email body (UTF-8, safe to embed
             in a multipart message as the HTML part).
         """
+        guest_name = self._get_guest_name(reservation_data)
+        signature_name = self._get_signature_name()
+
         return f"""
 <!DOCTYPE html>
 <html>
@@ -849,22 +899,22 @@ The Remote Check-in Team
             <h1>Reservation Cancelled</h1>
         </div>
         <div class="content">
-            <p>Dear Guest,</p>
-            <p>Your reservation has been cancelled.</p>
+            <p>Hello <strong>{guest_name}</strong>,</p>
+            <p>Your reservation has been cancelled. Below is a summary for your records.</p>
 
             <div class="details">
                 <h3>Cancelled Reservation Details:</h3>
                 <p><strong>Reservation Number:</strong> {reservation_data.get('reservation_number', 'N/A')}</p>
-                <p><strong>Guest Name:</strong> {reservation_data.get('guest_name', 'N/A')}</p>
+                <p><strong>Guest Name:</strong> {guest_name}</p>
                 <p><strong>Check-in Date:</strong> {reservation_data.get('start_date', 'N/A')}</p>
                 <p><strong>Check-out Date:</strong> {reservation_data.get('end_date', 'N/A')}</p>
                 <p><strong>Room:</strong> {reservation_data.get('room_name', 'N/A')}</p>
             </div>
 
-            <p>If you have any questions or if this cancellation was made in error, please contact us immediately.</p>
+            <p>If this was a mistake or you need help, please reply to this email.</p>
         </div>
         <div class="footer">
-            <p>Best regards,<br>The Remote Check-in Team</p>
+            <p>Best regards,<br>{signature_name}</p>
         </div>
     </div>
 </body>
