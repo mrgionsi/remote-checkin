@@ -256,6 +256,16 @@ class EmailService:
         guest_name = str(raw_value).strip()
         return guest_name if guest_name else "Guest"
 
+    def _get_language(self, payload: Dict[str, Any]) -> str:
+        """
+        Return a normalized language code for email templates.
+        """
+        raw_lang = payload.get("language") or payload.get("lang") or "en"
+        if not isinstance(raw_lang, str):
+            return "en"
+        lang = raw_lang.strip().lower()
+        return lang if lang else "en"
+
     def send_email(self, email_data: EmailData) -> Dict[str, Any]:
         """
         Send an email using the configured provider (SMTP, Mailgun, or SendGrid).
@@ -522,7 +532,9 @@ class EmailService:
                     }
 
             # Create email content
-            subject = f"Reservation Confirmation - {reservation_data.get('reservation_number', 'N/A')}"
+            language = self._get_language(reservation_data)
+            subject_prefix = "Conferma prenotazione" if language == "it" else "Reservation Confirmation"
+            subject = f"{subject_prefix} - {reservation_data.get('reservation_number', 'N/A')}"
 
             # Plain text body
             body = self._create_reservation_confirmation_text(reservation_data)
@@ -568,7 +580,9 @@ class EmailService:
             Dict[str, Any]: Result dictionary from send_email on success, or an error dictionary with keys "status", "message", and "error_type" on failure.
         """
         try:
-            subject = f"Reservation Update - {reservation_data.get('reservation_number', 'N/A')}"
+            language = self._get_language(reservation_data)
+            subject_prefix = "Aggiornamento prenotazione" if language == "it" else "Reservation Update"
+            subject = f"{subject_prefix} - {reservation_data.get('reservation_number', 'N/A')}"
 
             body = self._create_reservation_update_text(reservation_data)
             html_body = self._create_reservation_update_html(reservation_data)
@@ -608,7 +622,9 @@ class EmailService:
             Dict[str, Any]: Result from send_email on success, or an error dictionary with keys "status", "message", and "error_type" if email creation fails.
         """
         try:
-            subject = f"Reservation Cancellation - {reservation_data.get('reservation_number', 'N/A')}"
+            language = self._get_language(reservation_data)
+            subject_prefix = "Cancellazione prenotazione" if language == "it" else "Reservation Cancellation"
+            subject = f"{subject_prefix} - {reservation_data.get('reservation_number', 'N/A')}"
 
             body = self._create_reservation_cancellation_text(reservation_data)
             html_body = self._create_reservation_cancellation_html(reservation_data)
@@ -639,6 +655,28 @@ class EmailService:
         end_date = html_mod.escape(str(reservation_data.get('end_date', 'N/A')))
         room_name = html_mod.escape(str(reservation_data.get('room_name', 'N/A')))
         signature_name = html_mod.escape(self._get_signature_name())
+
+        language = self._get_language(reservation_data)
+        if language == "it":
+            return f"""
+Ciao {guest_name},
+
+Grazie per la tua prenotazione. La tua richiesta e stata confermata.
+
+Dettagli prenotazione:
+- Numero prenotazione: {reservation_number}
+- Ospite: {guest_name}
+- Check-in: {start_date}
+- Check-out: {end_date}
+- Camera: {room_name}
+
+Se qualche dettaglio non e corretto, rispondi a questa email e ti aiuteremo.
+
+Non vediamo l'ora di darti il benvenuto.
+
+Cordiali saluti,
+{signature_name}
+        """.strip()
 
         return f"""
 Hello {guest_name},
@@ -685,6 +723,269 @@ Best regards,
         end_date = html_mod.escape(str(reservation_data.get('end_date', 'N/A')))
         room_name = html_mod.escape(str(reservation_data.get('room_name', 'N/A')))
         signature_name = html_mod.escape(self._get_signature_name())
+
+        language = self._get_language(reservation_data)
+        if language == "it":
+            return f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Conferma prenotazione</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background-color: #4CAF50; color: white; padding: 20px; text-align: center; }}
+        .content {{ padding: 20px; background-color: #f9f9f9; }}
+        .details {{ background-color: white; padding: 15px; margin: 20px 0; border-left: 4px solid #4CAF50; }}
+        .footer {{ text-align: center; padding: 20px; color: #666; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Conferma prenotazione</h1>
+        </div>
+        <div class="content">
+            <p>Ciao <strong>{guest_name}</strong>,</p>
+            <p>Grazie per la tua prenotazione. La tua richiesta e stata confermata.</p>
+
+            <div class="details">
+                <h3>Dettagli prenotazione:</h3>
+                <p><strong>Numero prenotazione:</strong> {reservation_number}</p>
+                <p><strong>Ospite:</strong> {guest_name}</p>
+                <p><strong>Check-in:</strong> {start_date}</p>
+                <p><strong>Check-out:</strong> {end_date}</p>
+                <p><strong>Camera:</strong> {room_name}</p>
+            </div>
+
+            <p>Se qualche dettaglio non e corretto, rispondi a questa email e ti aiuteremo.</p>
+            <p>Non vediamo l'ora di darti il benvenuto.</p>
+        </div>
+        <div class="footer">
+            <p>Cordiali saluti,<br>{signature_name}</p>
+        </div>
+    </div>
+</body>
+</html>
+            """.strip()
+
+        language = self._get_language(reservation_data)
+        if language == "it":
+            return f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Aggiornamento prenotazione</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background-color: #2196F3; color: white; padding: 20px; text-align: center; }}
+        .content {{ padding: 20px; background-color: #f9f9f9; }}
+        .details {{ background-color: white; padding: 15px; margin: 20px 0; border-left: 4px solid #2196F3; }}
+        .footer {{ text-align: center; padding: 20px; color: #666; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Prenotazione aggiornata</h1>
+        </div>
+        <div class="content">
+            <p>Ciao <strong>{guest_name}</strong>,</p>
+            <p>I dettagli della tua prenotazione sono stati aggiornati. Controlla le informazioni qui sotto.</p>
+
+            <div class="details">
+                <h3>Dettagli aggiornati:</h3>
+                <p><strong>Numero prenotazione:</strong> {reservation_number}</p>
+                <p><strong>Ospite:</strong> {guest_name}</p>
+                <p><strong>Check-in:</strong> {start_date}</p>
+                <p><strong>Check-out:</strong> {end_date}</p>
+                <p><strong>Camera:</strong> {room_name}</p>
+            </div>
+
+            <p>Se non hai richiesto questa modifica o noti errori, rispondi a questa email.</p>
+        </div>
+        <div class="footer">
+            <p>Cordiali saluti,<br>{signature_name}</p>
+        </div>
+    </div>
+</body>
+</html>
+            """.strip()
+
+        language = self._get_language(reservation_data)
+        if language == "it":
+            return f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Cancellazione prenotazione</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background-color: #f44336; color: white; padding: 20px; text-align: center; }}
+        .content {{ padding: 20px; background-color: #f9f9f9; }}
+        .details {{ background-color: white; padding: 15px; margin: 20px 0; border-left: 4px solid #f44336; }}
+        .footer {{ text-align: center; padding: 20px; color: #666; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Prenotazione cancellata</h1>
+        </div>
+        <div class="content">
+            <p>Ciao <strong>{guest_name}</strong>,</p>
+            <p>La tua prenotazione e stata cancellata. Di seguito trovi il riepilogo.</p>
+
+            <div class="details">
+                <h3>Dettagli prenotazione cancellata:</h3>
+                <p><strong>Numero prenotazione:</strong> {reservation_number}</p>
+                <p><strong>Ospite:</strong> {guest_name}</p>
+                <p><strong>Check-in:</strong> {start_date}</p>
+                <p><strong>Check-out:</strong> {end_date}</p>
+                <p><strong>Camera:</strong> {room_name}</p>
+            </div>
+
+            <p>Se si tratta di un errore o hai bisogno di aiuto, rispondi a questa email.</p>
+        </div>
+        <div class="footer">
+            <p>Cordiali saluti,<br>{signature_name}</p>
+        </div>
+    </div>
+</body>
+</html>
+            """.strip()
+
+        language = self._get_language(reservation_data)
+        if language == "it":
+            return f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Prenotazione approvata</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background-color: #28a745; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }}
+        .content {{ background-color: #f8f9fa; padding: 20px; border-radius: 0 0 5px 5px; }}
+        .reservation-details {{ background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0; }}
+        .info-row {{ display: flex; justify-content: space-between; margin: 10px 0; padding: 5px 0; border-bottom: 1px solid #eee; }}
+        .label {{ font-weight: bold; color: #555; }}
+        .value {{ color: #333; }}
+        .footer {{ margin-top: 20px; padding-top: 15px; border-top: 1px solid #ddd; color: #666; }}
+        .success {{ color: #28a745; font-weight: bold; }}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Prenotazione approvata</h1>
+    </div>
+
+    <div class="content">
+        <p>Ciao <strong>{guest_name}</strong>,</p>
+
+        <p class="success">Ottime notizie! La tua prenotazione e stata approvata ed e ora confermata.</p>
+
+        <div class="reservation-details">
+            <h3>Dettagli prenotazione</h3>
+            <div class="info-row">
+                <span class="label">Numero prenotazione:</span>
+                <span class="value">{reservation_number}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Check-in:</span>
+                <span class="value">{start_date}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Check-out:</span>
+                <span class="value">{end_date}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Camera:</span>
+                <span class="value">{room_name}</span>
+            </div>
+        </div>
+
+        <p>Conserva questa email per i tuoi riferimenti.</p>
+        <p>Per qualsiasi domanda o modifica, contattaci appena possibile.</p>
+        <p>Non vediamo l'ora di darti il benvenuto!</p>
+
+        <div class="footer">
+            <p>Cordiali saluti,<br>Lo staff</p>
+        </div>
+    </div>
+</body>
+</html>
+            """.strip()
+
+        language = self._get_language(reservation_data)
+        if language == "it":
+            return f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Prenotazione da revisionare</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background-color: #ffc107; color: #333; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }}
+        .content {{ background-color: #f8f9fa; padding: 20px; border-radius: 0 0 5px 5px; }}
+        .reservation-details {{ background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0; }}
+        .info-row {{ display: flex; justify-content: space-between; margin: 10px 0; padding: 5px 0; border-bottom: 1px solid #eee; }}
+        .label {{ font-weight: bold; color: #555; }}
+        .value {{ color: #333; }}
+        .footer {{ margin-top: 20px; padding-top: 15px; border-top: 1px solid #ddd; color: #666; }}
+        .warning {{ color: #ffc107; font-weight: bold; }}
+        .action {{ background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 15px 0; }}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Prenotazione da revisionare</h1>
+    </div>
+
+    <div class="content">
+        <p>Ciao <strong>{guest_name}</strong>,</p>
+
+        <p class="warning">Dobbiamo discutere la tua prenotazione e potremmo aver bisogno di alcune modifiche.</p>
+
+        <div class="reservation-details">
+            <h3>Dettagli prenotazione</h3>
+            <div class="info-row">
+                <span class="label">Numero prenotazione:</span>
+                <span class="value">{reservation_number}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Check-in:</span>
+                <span class="value">{start_date}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Check-out:</span>
+                <span class="value">{end_date}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Camera:</span>
+                <span class="value">{room_name}</span>
+            </div>
+        </div>
+
+        <div class="action">
+            <p><strong>Azione richiesta:</strong> contattaci appena possibile per discutere i dettagli della tua prenotazione.</p>
+        </div>
+
+        <p>Grazie per la comprensione e restiamo a disposizione.</p>
+
+        <div class="footer">
+            <p>Cordiali saluti,<br>Lo staff</p>
+        </div>
+    </div>
+</body>
+</html>
+            """.strip()
 
         return f"""
 <!DOCTYPE html>
@@ -750,6 +1051,26 @@ Best regards,
         end_date = html_mod.escape(str(reservation_data.get('end_date', 'N/A')))
         room_name = html_mod.escape(str(reservation_data.get('room_name', 'N/A')))
         signature_name = html_mod.escape(self._get_signature_name())
+
+        language = self._get_language(reservation_data)
+        if language == "it":
+            return f"""
+Ciao {guest_name},
+
+I dettagli della tua prenotazione sono stati aggiornati. Controlla le informazioni qui sotto.
+
+Dettagli aggiornati:
+- Numero prenotazione: {reservation_number}
+- Ospite: {guest_name}
+- Check-in: {start_date}
+- Check-out: {end_date}
+- Camera: {room_name}
+
+Se non hai richiesto questa modifica o noti errori, rispondi a questa email.
+
+Cordiali saluti,
+{signature_name}
+        """.strip()
 
         return f"""
 Hello {guest_name},
@@ -852,8 +1173,32 @@ Best regards,
         Returns:
             str: Formatted plain-text cancellation message.
         """
+        reservation_number = html_mod.escape(str(reservation_data.get('reservation_number', 'N/A')))
         guest_name = html_mod.escape(self._get_guest_name(reservation_data))
+        start_date = html_mod.escape(str(reservation_data.get('start_date', 'N/A')))
+        end_date = html_mod.escape(str(reservation_data.get('end_date', 'N/A')))
+        room_name = html_mod.escape(str(reservation_data.get('room_name', 'N/A')))
         signature_name = html_mod.escape(self._get_signature_name())
+
+        language = self._get_language(reservation_data)
+        if language == "it":
+            return f"""
+Ciao {guest_name},
+
+La tua prenotazione e stata cancellata. Di seguito trovi il riepilogo.
+
+Dettagli prenotazione cancellata:
+- Numero prenotazione: {reservation_number}
+- Ospite: {guest_name}
+- Check-in: {start_date}
+- Check-out: {end_date}
+- Camera: {room_name}
+
+Se si tratta di un errore o hai bisogno di aiuto, rispondi a questa email.
+
+Cordiali saluti,
+{signature_name}
+        """.strip()
 
         return f"""
 Hello {guest_name},
@@ -861,11 +1206,11 @@ Hello {guest_name},
 Your reservation has been cancelled. Below is a summary for your records.
 
 Cancelled Reservation Details:
-- Reservation Number: {reservation_data.get('reservation_number', 'N/A')}
+- Reservation Number: {reservation_number}
 - Guest Name: {guest_name}
-- Check-in Date: {reservation_data.get('start_date', 'N/A')}
-- Check-out Date: {reservation_data.get('end_date', 'N/A')}
-- Room: {reservation_data.get('room_name', 'N/A')}
+- Check-in Date: {start_date}
+- Check-out Date: {end_date}
+- Room: {room_name}
 
 If this was a mistake or you need help, please reply to this email.
 
@@ -1274,7 +1619,9 @@ Remote Check-in System
             validated_email = self.validate_email_address(client_email)
 
             # Create email subject and body
-            subject = f"Reservation Approved - {reservation_data.get('reservation_number', 'N/A')}"
+            language = self._get_language(reservation_data)
+            subject_prefix = "Prenotazione approvata" if language == "it" else "Reservation Approved"
+            subject = f"{subject_prefix} - {reservation_data.get('reservation_number', 'N/A')}"
             body = self._create_reservation_approval_text(reservation_data)
             html_body = self._create_reservation_approval_html(reservation_data)
 
@@ -1311,7 +1658,9 @@ Remote Check-in System
             validated_email = self.validate_email_address(client_email)
 
             # Create email subject and body
-            subject = f"Reservation Requires Revision - {reservation_data.get('reservation_number', 'N/A')}"
+            language = self._get_language(reservation_data)
+            subject_prefix = "Prenotazione da revisionare" if language == "it" else "Reservation Requires Revision"
+            subject = f"{subject_prefix} - {reservation_data.get('reservation_number', 'N/A')}"
             body = self._create_reservation_revision_text(reservation_data)
             html_body = self._create_reservation_revision_html(reservation_data)
 
@@ -1345,16 +1694,45 @@ Remote Check-in System
         Returns:
             str: Formatted plain-text approval notification suitable for sending as the email body.
         """
+        reservation_number = html_mod.escape(str(reservation_data.get('reservation_number', 'N/A')))
+        guest_name = html_mod.escape(self._get_guest_name(reservation_data))
+        start_date = html_mod.escape(str(reservation_data.get('start_date', 'N/A')))
+        end_date = html_mod.escape(str(reservation_data.get('end_date', 'N/A')))
+        room_name = html_mod.escape(str(reservation_data.get('room_name', 'N/A')))
+
+        language = self._get_language(reservation_data)
+        if language == "it":
+            return f"""
+Ciao {guest_name},
+
+Ottime notizie! La tua prenotazione e stata approvata.
+
+Dettagli prenotazione:
+- Numero prenotazione: {reservation_number}
+- Check-in: {start_date}
+- Check-out: {end_date}
+- Camera: {room_name}
+
+La tua prenotazione e confermata. Conserva questa email per i tuoi riferimenti.
+
+Per qualsiasi domanda o modifica, contattaci appena possibile.
+
+Non vediamo l'ora di darti il benvenuto!
+
+Cordiali saluti,
+Lo staff
+        """.strip()
+
         return f"""
-Dear {reservation_data.get('guest_name', 'Guest')},
+Dear {guest_name},
 
 Great news! Your reservation has been approved.
 
 Reservation Details:
-- Reservation Number: {reservation_data.get('reservation_number', 'N/A')}
-- Check-in Date: {reservation_data.get('start_date', 'N/A')}
-- Check-out Date: {reservation_data.get('end_date', 'N/A')}
-- Room: {reservation_data.get('room_name', 'N/A')}
+- Reservation Number: {reservation_number}
+- Check-in Date: {start_date}
+- Check-out Date: {end_date}
+- Room: {room_name}
 
 Your reservation is now confirmed and ready for your stay. Please keep this email for your records.
 
@@ -1463,16 +1841,43 @@ The Management Team
         Returns:
             str: Formatted plain-text message ready to send to the guest.
         """
+        reservation_number = html_mod.escape(str(reservation_data.get('reservation_number', 'N/A')))
+        guest_name = html_mod.escape(self._get_guest_name(reservation_data))
+        start_date = html_mod.escape(str(reservation_data.get('start_date', 'N/A')))
+        end_date = html_mod.escape(str(reservation_data.get('end_date', 'N/A')))
+        room_name = html_mod.escape(str(reservation_data.get('room_name', 'N/A')))
+
+        language = self._get_language(reservation_data)
+        if language == "it":
+            return f"""
+Ciao {guest_name},
+
+Dobbiamo discutere la tua prenotazione e potremmo aver bisogno di alcune modifiche.
+
+Dettagli prenotazione:
+- Numero prenotazione: {reservation_number}
+- Check-in: {start_date}
+- Check-out: {end_date}
+- Camera: {room_name}
+
+Per favore contattaci appena possibile per discutere i dettagli della tua prenotazione. Vogliamo assicurarci che tutto sia perfetto per il tuo soggiorno.
+
+Grazie per la comprensione e restiamo a disposizione.
+
+Cordiali saluti,
+Lo staff
+        """.strip()
+
         return f"""
-Dear {reservation_data.get('guest_name', 'Guest')},
+Dear {guest_name},
 
 We need to discuss your reservation and may require some revisions.
 
 Reservation Details:
-- Reservation Number: {reservation_data.get('reservation_number', 'N/A')}
-- Check-in Date: {reservation_data.get('start_date', 'N/A')}
-- Check-out Date: {reservation_data.get('end_date', 'N/A')}
-- Room: {reservation_data.get('room_name', 'N/A')}
+- Reservation Number: {reservation_number}
+- Check-in Date: {start_date}
+- Check-out Date: {end_date}
+- Room: {room_name}
 
 Please contact us as soon as possible to discuss the details of your reservation. We want to ensure everything is perfect for your stay.
 
