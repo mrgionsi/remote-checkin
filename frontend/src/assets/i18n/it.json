@@ -1311,5 +1311,15 @@
     "rooms-import-coming-soon": "Disponibile presto!",
     "superadmin-associations-pagination": "Mostrando da {first} a {last} di {totalRecords} associazioni",
     "superadmin-users-role-unknown": "Sconosciuto",
-    "superadmin-structures-na": "N/D"
+    "superadmin-structures-na": "N/D",
+    "dashboard-error-no-reservations": "Nessuna prenotazione trovata per questa struttura",
+    "dashboard-error-load-reservations": "Impossibile caricare le prenotazioni. Riprova.",
+    "dashboard-error-load-chart": "Impossibile caricare il grafico delle prenotazioni mensili. Riprova.",
+    "dashboard-toast-no-reservations-title": "Nessuna prenotazione",
+    "dashboard-toast-no-reservations-detail": "Nessuna prenotazione trovata per questa struttura",
+    "dashboard-toast-load-failed-title": "Caricamento prenotazioni non riuscito",
+    "dashboard-toast-shortcut-title": "Scorciatoia da tastiera",
+    "dashboard-toast-shortcut-pending": "Filtrate le approvazioni in sospeso",
+    "dashboard-toast-shortcut-clear": "Filtri cancellati",
+    "dashboard-toast-shortcut-retry": "Ricaricamento dati in corso"
 }

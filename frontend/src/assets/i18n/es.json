@@ -421,5 +421,15 @@
     "rooms-import-coming-soon": "¡Disponible pronto!",
     "superadmin-associations-pagination": "Mostrando {first} a {last} de {totalRecords} asociaciones",
     "superadmin-users-role-unknown": "Desconocido",
-    "superadmin-structures-na": "N/D"
+    "superadmin-structures-na": "N/D",
+    "dashboard-error-no-reservations": "No se encontraron reservas para esta estructura",
+    "dashboard-error-load-reservations": "No se pudieron cargar las reservas. Inténtalo de nuevo.",
+    "dashboard-error-load-chart": "No se pudo cargar el gráfico de reservas mensuales. Inténtalo de nuevo.",
+    "dashboard-toast-no-reservations-title": "Sin reservas",
+    "dashboard-toast-no-reservations-detail": "No se encontraron reservas para esta estructura",
+    "dashboard-toast-load-failed-title": "Error al cargar reservas",
+    "dashboard-toast-shortcut-title": "Atajo de teclado",
+    "dashboard-toast-shortcut-pending": "Filtrado a aprobaciones pendientes",
+    "dashboard-toast-shortcut-clear": "Filtros borrados",
+    "dashboard-toast-shortcut-retry": "Reintentando carga de datos"
 }

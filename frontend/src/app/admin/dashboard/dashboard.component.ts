@@ -181,11 +181,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
             if (error.status === 404) {
               console.log('No reservations found for structure:', structureId);
-              this.errorReservations = 'No reservations found for this structure';
+              this.errorReservations = this.translocoService.translate('dashboard-error-no-reservations');
               this.messageService.add({
                 severity: 'info',
-                summary: 'No Reservations',
-                detail: 'No reservations found for this structure',
+                summary: this.translocoService.translate('dashboard-toast-no-reservations-title'),
+                detail: this.translocoService.translate('dashboard-toast-no-reservations-detail'),
                 life: 4000
               });
             } else {
@@ -193,7 +193,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
               this.errorReservations = errorMessage;
               this.messageService.add({
                 severity: 'error',
-                summary: 'Reservations load failed',
+                summary: this.translocoService.translate('dashboard-toast-load-failed-title'),
                 detail: errorMessage,
                 life: 6000
               });
@@ -531,7 +531,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.reservations = [];
           this.filteredReservations = [];
           this.loadingReservations = false;
-          const errorMessage = error?.error?.message || error?.message || 'Failed to load reservations. Please try again.';
+          const errorMessage = error?.error?.message || error?.message || this.translocoService.translate('dashboard-error-load-reservations');
           this.errorReservations = errorMessage;
         }
       });
@@ -548,7 +548,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.loadingChart = false;
         },
         error: (error) => {
-          const errorMessage = error?.error?.message || error?.message || 'Failed to load monthly reservations chart. Please try again.';
+          const errorMessage = error?.error?.message || error?.message || this.translocoService.translate('dashboard-error-load-chart');
           this.errorChart = errorMessage;
           this.loadingChart = false;
         }
@@ -573,8 +573,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.filterPendingApprovals();
           this.messageService.add({
             severity: 'info',
-            summary: 'Keyboard Shortcut',
-            detail: 'Filtered to pending approvals',
+            summary: this.translocoService.translate('dashboard-toast-shortcut-title'),
+            detail: this.translocoService.translate('dashboard-toast-shortcut-pending'),
             life: 2000
           });
           break;
@@ -583,8 +583,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.clearFilters();
           this.messageService.add({
             severity: 'info',
-            summary: 'Keyboard Shortcut',
-            detail: 'Cleared all filters',
+            summary: this.translocoService.translate('dashboard-toast-shortcut-title'),
+            detail: this.translocoService.translate('dashboard-toast-shortcut-clear'),
             life: 2000
           });
           break;
@@ -593,8 +593,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.retryLoadData();
           this.messageService.add({
             severity: 'info',
-            summary: 'Keyboard Shortcut',
-            detail: 'Retrying data load',
+            summary: this.translocoService.translate('dashboard-toast-shortcut-title'),
+            detail: this.translocoService.translate('dashboard-toast-shortcut-retry'),
             life: 2000
           });
           break;

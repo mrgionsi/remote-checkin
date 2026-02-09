@@ -1387,5 +1387,15 @@
     "rooms-import-coming-soon": "Coming soon!",
     "superadmin-associations-pagination": "Showing {first} to {last} of {totalRecords} associations",
     "superadmin-users-role-unknown": "Unknown",
-    "superadmin-structures-na": "N/A"
+    "superadmin-structures-na": "N/A",
+    "dashboard-error-no-reservations": "No reservations found for this structure",
+    "dashboard-error-load-reservations": "Failed to load reservations. Please try again.",
+    "dashboard-error-load-chart": "Failed to load monthly reservations chart. Please try again.",
+    "dashboard-toast-no-reservations-title": "No reservations",
+    "dashboard-toast-no-reservations-detail": "No reservations found for this structure",
+    "dashboard-toast-load-failed-title": "Reservations load failed",
+    "dashboard-toast-shortcut-title": "Keyboard shortcut",
+    "dashboard-toast-shortcut-pending": "Filtered to pending approvals",
+    "dashboard-toast-shortcut-clear": "Cleared all filters",
+    "dashboard-toast-shortcut-retry": "Retrying data load"
 }

@@ -421,5 +421,15 @@
     "rooms-import-coming-soon": "Kommt bald!",
     "superadmin-associations-pagination": "Zeige {first} bis {last} von {totalRecords} Zuordnungen",
     "superadmin-users-role-unknown": "Unbekannt",
-    "superadmin-structures-na": "k. A."
+    "superadmin-structures-na": "k. A.",
+    "dashboard-error-no-reservations": "Keine Reservierungen für diese Struktur gefunden",
+    "dashboard-error-load-reservations": "Reservierungen konnten nicht geladen werden. Bitte erneut versuchen.",
+    "dashboard-error-load-chart": "Diagramm der monatlichen Reservierungen konnte nicht geladen werden. Bitte erneut versuchen.",
+    "dashboard-toast-no-reservations-title": "Keine Reservierungen",
+    "dashboard-toast-no-reservations-detail": "Keine Reservierungen für diese Struktur gefunden",
+    "dashboard-toast-load-failed-title": "Reservierungen konnten nicht geladen werden",
+    "dashboard-toast-shortcut-title": "Tastenkürzel",
+    "dashboard-toast-shortcut-pending": "Auf ausstehende Genehmigungen gefiltert",
+    "dashboard-toast-shortcut-clear": "Alle Filter gelöscht",
+    "dashboard-toast-shortcut-retry": "Daten werden erneut geladen"
 }
