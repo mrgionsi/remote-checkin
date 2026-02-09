@@ -28,9 +28,6 @@
                     <div class="admin-sidebar__quick-title">{{ 'admin-menu-quick-actions' | transloco }}</div>
                     <p-button [label]="'admin-quick-create-reservation' | transloco" icon="pi pi-plus"
                         routerLink="/admin/create-reservation" styleClass="admin-quick-btn"></p-button>
-                    <p-button [label]="'admin-quick-add-room' | transloco" icon="pi pi-warehouse"
-                        routerLink="/admin/rooms" styleClass="admin-quick-btn" severity="secondary"
-                        [outlined]="true"></p-button>
                 </div>
                 <p-menu [model]="menuItems"></p-menu>
             </p-sidebar>

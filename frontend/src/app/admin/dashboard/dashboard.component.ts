@@ -95,20 +95,36 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private setFilterOptions(): void {
-    this.statusOptions = [
-      { label: this.translocoService.translate('dashboard-filter-status-all'), value: '' },
-      { label: this.translocoService.translate('dashboard-status-pending'), value: 'Pending' },
-      { label: this.translocoService.translate('dashboard-status-approved'), value: 'Approved' },
-      { label: this.translocoService.translate('dashboard-status-declined'), value: 'Declined' },
-      { label: this.translocoService.translate('dashboard-status-sent-back'), value: 'Sent back to customer' }
+    const keys = [
+      'dashboard-filter-status-all',
+      'dashboard-status-pending',
+      'dashboard-status-approved',
+      'dashboard-status-declined',
+      'dashboard-status-sent-back',
+      'dashboard-filter-date-all',
+      'dashboard-date-today',
+      'dashboard-date-week',
+      'dashboard-date-month'
     ];
 
-    this.dateRangeOptions = [
-      { label: this.translocoService.translate('dashboard-filter-date-all'), value: '' },
-      { label: this.translocoService.translate('dashboard-date-today'), value: 'today' },
-      { label: this.translocoService.translate('dashboard-date-week'), value: 'week' },
-      { label: this.translocoService.translate('dashboard-date-month'), value: 'month' }
-    ];
+    const sub = this.translocoService.selectTranslateObject(keys).subscribe((translations: any) => {
+      this.statusOptions = [
+        { label: translations[0], value: '' },
+        { label: translations[1], value: 'Pending' },
+        { label: translations[2], value: 'Approved' },
+        { label: translations[3], value: 'Declined' },
+        { label: translations[4], value: 'Sent back to customer' }
+      ];
+
+      this.dateRangeOptions = [
+        { label: translations[5], value: '' },
+        { label: translations[6], value: 'today' },
+        { label: translations[7], value: 'week' },
+        { label: translations[8], value: 'month' }
+      ];
+    });
+
+    this.subscriptions.push(sub);
   }
 
   getStatusSeverity(status: string) {
