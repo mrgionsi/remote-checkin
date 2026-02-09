@@ -11,6 +11,7 @@ import json
 import re
 import smtplib
 import traceback
+import html as html_mod
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 from email import encoders
@@ -628,12 +629,24 @@ class EmailService:
     def _create_reservation_confirmation_text(self, reservation_data: Dict[str, Any]) -> str:
         """Create plain text body for reservation confirmation."""
         # Safely get values and convert to strings
-        reservation_number = str(reservation_data.get('reservation_number', 'N/A'))
-        guest_name = self._get_guest_name(reservation_data)
-        start_date = str(reservation_data.get('start_date', 'N/A'))
-        end_date = str(reservation_data.get('end_date', 'N/A'))
-        room_name = str(reservation_data.get('room_name', 'N/A'))
-        signature_name = self._get_signature_name()
+        reservation_number = html_mod.escape(str(reservation_data.get('reservation_number', 'N/A')))
+        guest_name = html_mod.escape(self._get_guest_name(reservation_data))
+        start_date = html_mod.escape(str(reservation_data.get('start_date', 'N/A')))
+        end_date = html_mod.escape(str(reservation_data.get('end_date', 'N/A')))
+        room_name = html_mod.escape(str(reservation_data.get('room_name', 'N/A')))
+        signature_name = html_mod.escape(self._get_signature_name())
+
+        reservation_number = html_mod.escape(str(checkin_data.get('reservation_number', 'N/A')))
+        guest_name = html_mod.escape(str(checkin_data.get('guest_name', 'N/A')))
+        start_date = html_mod.escape(str(checkin_data.get('start_date', 'N/A')))
+        end_date = html_mod.escape(str(checkin_data.get('end_date', 'N/A')))
+        room_name = html_mod.escape(str(checkin_data.get('room_name', 'N/A')))
+        client_name = html_mod.escape(str(checkin_data.get('client_name', 'N/A')))
+        client_surname = html_mod.escape(str(checkin_data.get('client_surname', 'N/A')))
+        client_email = html_mod.escape(str(checkin_data.get('client_email', 'N/A')))
+        client_phone = html_mod.escape(str(checkin_data.get('client_phone', 'N/A')))
+        document_type = html_mod.escape(str(checkin_data.get('document_type', 'N/A')))
+        document_number = html_mod.escape(str(checkin_data.get('document_number', 'N/A')))
 
         return f"""
 Hello {guest_name},
@@ -681,6 +694,18 @@ Best regards,
         end_date = str(reservation_data.get('end_date', 'N/A'))
         room_name = str(reservation_data.get('room_name', 'N/A'))
         signature_name = self._get_signature_name()
+
+        reservation_number = html_mod.escape(str(reservation_data.get('reservation_number', 'N/A')))
+        guest_name = html_mod.escape(str(reservation_data.get('guest_name', 'Guest')))
+        start_date = html_mod.escape(str(reservation_data.get('start_date', 'N/A')))
+        end_date = html_mod.escape(str(reservation_data.get('end_date', 'N/A')))
+        room_name = html_mod.escape(str(reservation_data.get('room_name', 'N/A')))
+
+        reservation_number = html_mod.escape(str(reservation_data.get('reservation_number', 'N/A')))
+        guest_name = html_mod.escape(str(reservation_data.get('guest_name', 'Guest')))
+        start_date = html_mod.escape(str(reservation_data.get('start_date', 'N/A')))
+        end_date = html_mod.escape(str(reservation_data.get('end_date', 'N/A')))
+        room_name = html_mod.escape(str(reservation_data.get('room_name', 'N/A')))
 
         return f"""
 <!DOCTYPE html>
@@ -740,8 +765,12 @@ Best regards,
         Returns:
             A formatted plain-text string suitable for the body of an update notification email.
         """
-        guest_name = self._get_guest_name(reservation_data)
-        signature_name = self._get_signature_name()
+        reservation_number = html_mod.escape(str(reservation_data.get('reservation_number', 'N/A')))
+        guest_name = html_mod.escape(self._get_guest_name(reservation_data))
+        start_date = html_mod.escape(str(reservation_data.get('start_date', 'N/A')))
+        end_date = html_mod.escape(str(reservation_data.get('end_date', 'N/A')))
+        room_name = html_mod.escape(str(reservation_data.get('room_name', 'N/A')))
+        signature_name = html_mod.escape(self._get_signature_name())
 
         return f"""
 Hello {guest_name},
@@ -778,8 +807,12 @@ Best regards,
         Returns:
             str: The rendered HTML string for the reservation update email.
         """
-        guest_name = self._get_guest_name(reservation_data)
-        signature_name = self._get_signature_name()
+        reservation_number = html_mod.escape(str(reservation_data.get('reservation_number', 'N/A')))
+        guest_name = html_mod.escape(self._get_guest_name(reservation_data))
+        start_date = html_mod.escape(str(reservation_data.get('start_date', 'N/A')))
+        end_date = html_mod.escape(str(reservation_data.get('end_date', 'N/A')))
+        room_name = html_mod.escape(str(reservation_data.get('room_name', 'N/A')))
+        signature_name = html_mod.escape(self._get_signature_name())
 
         return f"""
 <!DOCTYPE html>
@@ -807,11 +840,11 @@ Best regards,
 
             <div class="details">
                 <h3>Updated Reservation Details:</h3>
-                <p><strong>Reservation Number:</strong> {reservation_data.get('reservation_number', 'N/A')}</p>
+                <p><strong>Reservation Number:</strong> {reservation_number}</p>
                 <p><strong>Guest Name:</strong> {guest_name}</p>
-                <p><strong>Check-in Date:</strong> {reservation_data.get('start_date', 'N/A')}</p>
-                <p><strong>Check-out Date:</strong> {reservation_data.get('end_date', 'N/A')}</p>
-                <p><strong>Room:</strong> {reservation_data.get('room_name', 'N/A')}</p>
+                <p><strong>Check-in Date:</strong> {start_date}</p>
+                <p><strong>Check-out Date:</strong> {end_date}</p>
+                <p><strong>Room:</strong> {room_name}</p>
             </div>
 
             <p>If you did not request this change or notice any errors, please reply to this email.</p>
@@ -840,8 +873,8 @@ Best regards,
         Returns:
             str: Formatted plain-text cancellation message.
         """
-        guest_name = self._get_guest_name(reservation_data)
-        signature_name = self._get_signature_name()
+        guest_name = html_mod.escape(self._get_guest_name(reservation_data))
+        signature_name = html_mod.escape(self._get_signature_name())
 
         return f"""
 Hello {guest_name},
@@ -874,8 +907,8 @@ Best regards,
             str: Complete HTML string for the cancellation email body (UTF-8, safe to embed
             in a multipart message as the HTML part).
         """
-        guest_name = self._get_guest_name(reservation_data)
-        signature_name = self._get_signature_name()
+        guest_name = html_mod.escape(self._get_guest_name(reservation_data))
+        signature_name = html_mod.escape(self._get_signature_name())
 
         return f"""
 <!DOCTYPE html>
@@ -903,11 +936,11 @@ Best regards,
 
             <div class="details">
                 <h3>Cancelled Reservation Details:</h3>
-                <p><strong>Reservation Number:</strong> {reservation_data.get('reservation_number', 'N/A')}</p>
+                <p><strong>Reservation Number:</strong> {reservation_number}</p>
                 <p><strong>Guest Name:</strong> {guest_name}</p>
-                <p><strong>Check-in Date:</strong> {reservation_data.get('start_date', 'N/A')}</p>
-                <p><strong>Check-out Date:</strong> {reservation_data.get('end_date', 'N/A')}</p>
-                <p><strong>Room:</strong> {reservation_data.get('room_name', 'N/A')}</p>
+                <p><strong>Check-in Date:</strong> {start_date}</p>
+                <p><strong>Check-out Date:</strong> {end_date}</p>
+                <p><strong>Room:</strong> {room_name}</p>
             </div>
 
             <p>If this was a mistake or you need help, please reply to this email.</p>
@@ -1136,23 +1169,23 @@ Remote Check-in System
             <h3>📋 Reservation Details</h3>
             <div class="info-row">
                 <span class="label">Reservation Number:</span>
-                <span class="value">{checkin_data.get('reservation_number', 'N/A')}</span>
+                <span class="value">{reservation_number}</span>
             </div>
             <div class="info-row">
                 <span class="label">Guest Name:</span>
-                <span class="value">{checkin_data.get('guest_name', 'N/A')}</span>
+                <span class="value">{guest_name}</span>
             </div>
             <div class="info-row">
                 <span class="label">Check-in Date:</span>
-                <span class="value">{checkin_data.get('start_date', 'N/A')}</span>
+                <span class="value">{start_date}</span>
             </div>
             <div class="info-row">
                 <span class="label">Check-out Date:</span>
-                <span class="value">{checkin_data.get('end_date', 'N/A')}</span>
+                <span class="value">{end_date}</span>
             </div>
             <div class="info-row">
                 <span class="label">Room:</span>
-                <span class="value">{checkin_data.get('room_name', 'N/A')}</span>
+                <span class="value">{room_name}</span>
             </div>
         </div>
 
@@ -1160,27 +1193,27 @@ Remote Check-in System
             <h3>👤 Client Information</h3>
             <div class="info-row">
                 <span class="label">Name:</span>
-                <span class="value">{checkin_data.get('client_name', 'N/A')}</span>
+                <span class="value">{client_name}</span>
             </div>
             <div class="info-row">
                 <span class="label">Surname:</span>
-                <span class="value">{checkin_data.get('client_surname', 'N/A')}</span>
+                <span class="value">{client_surname}</span>
             </div>
             <div class="info-row">
                 <span class="label">Email:</span>
-                <span class="value">{checkin_data.get('client_email', 'N/A')}</span>
+                <span class="value">{client_email}</span>
             </div>
             <div class="info-row">
                 <span class="label">Phone:</span>
-                <span class="value">{checkin_data.get('client_phone', 'N/A')}</span>
+                <span class="value">{client_phone}</span>
             </div>
             <div class="info-row">
                 <span class="label">Document Type:</span>
-                <span class="value">{checkin_data.get('document_type', 'N/A')}</span>
+                <span class="value">{document_type}</span>
             </div>
             <div class="info-row">
                 <span class="label">Document Number:</span>
-                <span class="value">{checkin_data.get('document_number', 'N/A')}</span>
+                <span class="value">{document_number}</span>
             </div>
         </div>
 
@@ -1377,7 +1410,7 @@ The Management Team
     </div>
 
     <div class="content">
-        <p>Dear <strong>{reservation_data.get('guest_name', 'Guest')}</strong>,</p>
+        <p>Dear <strong>{guest_name}</strong>,</p>
 
         <p class="success">Great news! Your reservation has been approved and is now confirmed.</p>
 
@@ -1385,19 +1418,19 @@ The Management Team
             <h3>Reservation Details</h3>
             <div class="info-row">
                 <span class="label">Reservation Number:</span>
-                <span class="value">{reservation_data.get('reservation_number', 'N/A')}</span>
+                <span class="value">{reservation_number}</span>
             </div>
             <div class="info-row">
                 <span class="label">Check-in Date:</span>
-                <span class="value">{reservation_data.get('start_date', 'N/A')}</span>
+                <span class="value">{start_date}</span>
             </div>
             <div class="info-row">
                 <span class="label">Check-out Date:</span>
-                <span class="value">{reservation_data.get('end_date', 'N/A')}</span>
+                <span class="value">{end_date}</span>
             </div>
             <div class="info-row">
                 <span class="label">Room:</span>
-                <span class="value">{reservation_data.get('room_name', 'N/A')}</span>
+                <span class="value">{room_name}</span>
             </div>
         </div>
 
@@ -1487,7 +1520,7 @@ The Management Team
     </div>
 
     <div class="content">
-        <p>Dear <strong>{reservation_data.get('guest_name', 'Guest')}</strong>,</p>
+        <p>Dear <strong>{guest_name}</strong>,</p>
 
         <p class="warning">We need to discuss your reservation and may require some revisions.</p>
 
@@ -1495,19 +1528,19 @@ The Management Team
             <h3>Reservation Details</h3>
             <div class="info-row">
                 <span class="label">Reservation Number:</span>
-                <span class="value">{reservation_data.get('reservation_number', 'N/A')}</span>
+                <span class="value">{reservation_number}</span>
             </div>
             <div class="info-row">
                 <span class="label">Check-in Date:</span>
-                <span class="value">{reservation_data.get('start_date', 'N/A')}</span>
+                <span class="value">{start_date}</span>
             </div>
             <div class="info-row">
                 <span class="label">Check-out Date:</span>
-                <span class="value">{reservation_data.get('end_date', 'N/A')}</span>
+                <span class="value">{end_date}</span>
             </div>
             <div class="info-row">
                 <span class="label">Room:</span>
-                <span class="value">{reservation_data.get('room_name', 'N/A')}</span>
+                <span class="value">{room_name}</span>
             </div>
         </div>
 
