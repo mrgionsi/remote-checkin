@@ -160,8 +160,7 @@
                                 {{ 'number-of-people-invalid' | transloco }}
                             </span>
                             <span *ngIf="reservationForm.get('numberOfPeople')?.errors?.['exceedsCapacity']">
-                                {{ 'number-of-people-exceeds-capacity' | transloco }} ({
-                                reservationForm.get('numberOfPeople')?.errors?.['maxCapacity'] })
+                                {{ 'number-of-people-exceeds-capacity' | transloco }} ({{ reservationForm.get('numberOfPeople')?.errors?.['maxCapacity'] }})
                             </span>
                         </p>
                         <small *ngIf="reservationForm.get('roomName')?.value && getSelectedRoomCapacity() > 0"

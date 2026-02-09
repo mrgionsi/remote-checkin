@@ -213,7 +213,8 @@
               Select User *
             </label>
             <p-select id="userId" name="userId" [(ngModel)]="associationFormData.user_id" [options]="userOptions"
-              placeholder="Choose a user" required styleClass="w-full" [panelStyleClass]="'association-dropdown-panel'">
+              placeholder="Choose a user" required styleClass="w-full" [panelStyleClass]="'association-dropdown-panel'"
+              [appendTo]="'body'">
             </p-select>
             <small *ngIf="associationForm.controls['userId']?.invalid && associationForm.controls['userId']?.touched"
               class="error-message">
@@ -239,7 +240,7 @@
             </label>
             <p-select id="structureId" name="structureId" [(ngModel)]="associationFormData.structure_id"
               [options]="structureOptions" placeholder="Choose a structure" required styleClass="w-full"
-              [panelStyleClass]="'association-dropdown-panel'">
+              [panelStyleClass]="'association-dropdown-panel'" [appendTo]="'body'">
             </p-select>
             <small
               *ngIf="associationForm.controls['structureId']?.invalid && associationForm.controls['structureId']?.touched"

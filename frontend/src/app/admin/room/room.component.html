@@ -7,7 +7,8 @@
         <div class="room-page__actions">
             <input #csvInput type="file" accept=".csv" (change)="onCsvImport($event)" hidden />
             <p-button [label]="'rooms-import-csv' | transloco" icon="pi pi-upload" severity="secondary"
-                [outlined]="true" (onClick)="csvInput.click()" [disabled]="importing || !canCreateRoom">
+                [outlined]="true" (onClick)="csvInput.click()" [disabled]="true"
+                [title]="'Coming soon!'">
             </p-button>
             <p-button [label]="'create-room-btn' | transloco" icon="pi pi-plus" severity="info"
                 (click)="showDialogCreateRoom()" [disabled]="!canCreateRoom"></p-button>

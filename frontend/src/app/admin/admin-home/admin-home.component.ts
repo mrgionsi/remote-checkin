@@ -121,8 +121,9 @@ export class AdminHomeComponent implements OnInit, OnDestroy {
           if (this.authService.isSuperAdmin()) {
             this.menuItems.push({
               label: translations[2],
-              icon: 'pi pi-shield',
-              routerLink: '/admin/superadmin'
+              items: [
+                { label: translations[2], icon: 'pi pi-shield', routerLink: '/admin/superadmin' }
+              ]
             });
           }
           this.userMenuItems = [
