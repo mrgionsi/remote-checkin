@@ -269,7 +269,7 @@
       </p-button>
       <p-button [label]="'superadmin-associations-modal-submit' | transloco" icon="pi pi-check" severity="primary"
         type="submit" [disabled]="!associationForm.form.valid || submitting" [loading]="submitting"
-        class="submit-btn">
+        class="submit-btn" (onClick)="createAssociation()">
       </p-button>
     </div>
   </ng-template>
