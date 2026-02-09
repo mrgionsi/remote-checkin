@@ -1420,4 +1420,3 @@
     "rooms-csv-skip-detail": "Failed to import room {{name}}.",
     "rooms-csv-read-error": "Could not read CSV file."
 }
->>>>>>> e54b413 (admin ui fixes and room translations)

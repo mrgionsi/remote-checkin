@@ -80,7 +80,7 @@ mail = Mail(app)
 # Ensure mail is properly registered with app extensions
 app.extensions['mail'] = mail
 
-allowed_origins = os.getenv("ALLOWED_CORS", "http://localhost:4200,http://127.0.0.1:4200").split(",")
+allowed_origins = os.getenv("ALLOWED_CORS", "http://localhost:4200,http://127.0.0.1:4200,http://192.168.178.137:4200").split(",")
 
 CORS(
     app,
