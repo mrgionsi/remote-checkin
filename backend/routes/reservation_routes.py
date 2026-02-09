@@ -19,6 +19,8 @@ from models import Reservation, Room, Structure, StructureReservationsView, Emai
 from email_handler import EmailService
 from routes.email_config_routes import get_encryption_key
 from utils.email_utils import get_admin_email_config
+from utils.authz import is_superadmin
+from utils.route_helpers import user_has_structure
 from app_logging.config import get_logger
 from app_logging.decorators import log_route, log_database_operation, log_performance
 from app_logging.utils import safe_extra_fields, log_notification_error
@@ -81,6 +83,7 @@ def create_reservation():
     session = SessionLocal()
 
     try:
+        current_user_id = int(get_jwt_identity())
         # Log the received reservation data
         logger.info("Processing reservation creation", extra=safe_extra_fields({
             'reservation_number': data.get('reservationNumber'),
@@ -112,6 +115,8 @@ def create_reservation():
         room = session.query(Room).filter(Room.name == data["roomName"]).first()
         if not room:
             return jsonify({"error": "Room not found"}), 404
+        if not is_superadmin() and not user_has_structure(session, current_user_id, room.id_structure):
+            return jsonify({"error": "Access denied for this structure"}), 403
 
         # Validate number_of_people if provided - safely coerce to int
         raw_number_of_people = data.get("numberOfPeople", 1)
@@ -300,10 +305,16 @@ def update_reservation(reservation_id):
 
     db = SessionLocal()
     try:
+        current_user_id = int(get_jwt_identity())
         reservation = db.query(Reservation).filter(Reservation.id == reservation_id).first()
 
         if not reservation:
             return jsonify({"error": f"Reservation with ID {reservation_id} not found"}), 404
+        current_room = db.query(Room).filter(Room.id == reservation.id_room).first()
+        if not current_room:
+            return jsonify({"error": "Current room not found"}), 404
+        if not is_superadmin() and not user_has_structure(db, current_user_id, current_room.id_structure):
+            return jsonify({"error": "Access denied for this reservation"}), 403
 
         # Optional updates
         if "start_date" in data:
@@ -344,17 +355,16 @@ def update_reservation(reservation_id):
             if new_number_of_people < 1:
                 return jsonify({"error": "Number of people must be at least 1"}), 400
 
-# Determine target room atomically
+        # Determine target room atomically
         if "room" in data and isinstance(data["room"], dict) and "id" in data["room"]:
             # Use new room if provided
             target_room = db.query(Room).filter(Room.id == data["room"]["id"]).first()
             if not target_room:
                 return jsonify({"error": "Target room not found"}), 404
+            if not is_superadmin() and not user_has_structure(db, current_user_id, target_room.id_structure):
+                return jsonify({"error": "Access denied for target room"}), 403
         else:
-            # Use current room if no room change
-            target_room = db.query(Room).filter(Room.id == reservation.id_room).first()
-            if not target_room:
-                return jsonify({"error": "Current room not found"}), 404
+            target_room = current_room
 
         # Validate number_of_people against target room capacity
         if new_number_of_people is not None:
@@ -408,10 +418,16 @@ def delete_reservation(reservation_id):
     """
     db = SessionLocal()
     try:
+        current_user_id = int(get_jwt_identity())
         reservation = db.query(Reservation).filter(Reservation.id == reservation_id).first()
 
         if not reservation:
             return jsonify({"error": f"Reservation with ID {reservation_id} not found"}), 404
+        room = db.query(Room).filter(Room.id == reservation.id_room).first()
+        if not room:
+            return jsonify({"error": "Room not found"}), 404
+        if not is_superadmin() and not user_has_structure(db, current_user_id, room.id_structure):
+            return jsonify({"error": "Access denied for this reservation"}), 403
 
         db.delete(reservation)
         db.commit()
@@ -459,11 +475,23 @@ def get_reservations_by_structure(structure_id):
     """
     db = SessionLocal()
     reservations = (
-        db.query(StructureReservationsView)
-        .filter(StructureReservationsView.structure_id == structure_id)
-        .all()
+        []
     )
-    db.close()
+    try:
+        current_user_id = int(get_jwt_identity())
+        try:
+            structure_id_int = int(structure_id)
+        except (TypeError, ValueError):
+            return jsonify({"error": "Invalid structure_id. Must be an integer."}), 400
+        if not is_superadmin() and not user_has_structure(db, current_user_id, structure_id_int):
+            return jsonify({"error": "Access denied for this structure"}), 403
+        reservations = (
+            db.query(StructureReservationsView)
+            .filter(StructureReservationsView.structure_id == structure_id_int)
+            .all()
+        )
+    finally:
+        db.close()
     return jsonify([{
         "structure_id": r.structure_id,
         "structure_name": r.structure_name,
@@ -495,6 +523,7 @@ def get_admin_reservations_by_id(reservation_id):
     """
     db = SessionLocal()
     try:
+        current_user_id = int(get_jwt_identity())
         reservation = (
             db.query(Reservation)
             .filter(Reservation.id == str(reservation_id))
@@ -503,6 +532,11 @@ def get_admin_reservations_by_id(reservation_id):
 
         if not reservation:
             return jsonify({"error": f"Reservation with ID {reservation_id} not found"}), 404
+        room = db.query(Room).filter(Room.id == reservation.id_room).first()
+        if not room:
+            return jsonify({"error": "Room not found"}), 404
+        if not is_superadmin() and not user_has_structure(db, current_user_id, room.id_structure):
+            return jsonify({"error": "Access denied for this reservation"}), 403
 
         return jsonify(reservation.to_dict())
     except Exception as e:
@@ -578,6 +612,9 @@ def get_reservations_per_month(structure_id):
     """
     db = SessionLocal()
     try:
+        current_user_id = int(get_jwt_identity())
+        if not is_superadmin() and not user_has_structure(db, current_user_id, structure_id):
+            return jsonify({"error": "Access denied for this structure"}), 403
         # Check if the structure exists
         structure = db.query(Structure).filter(Structure.id == structure_id).first()
         if not structure:
@@ -647,6 +684,7 @@ def update_reservation_status(reservation_id):
 
     db = SessionLocal()
     try:
+        current_user_id = int(get_jwt_identity())
         reservation = db.query(Reservation).filter(Reservation.id == str(reservation_id)).first()
 
         if not reservation:
@@ -654,6 +692,10 @@ def update_reservation_status(reservation_id):
 
         # Fetch room separately to avoid lazy loading issues
         room = db.query(Room).filter(Room.id == reservation.id_room).first()
+        if not room:
+            return jsonify({"error": "Room not found"}), 404
+        if not is_superadmin() and not user_has_structure(db, current_user_id, room.id_structure):
+            return jsonify({"error": "Access denied for this reservation"}), 403
 
         old_status = reservation.status
         reservation.status = new_status

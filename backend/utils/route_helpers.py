@@ -146,6 +146,33 @@ def get_user_structures_query(db_session, user_id):
     )
 
 
+def get_user_structure_ids(db_session, user_id):
+    """
+    Return a list of structure IDs associated with the given user.
+    """
+    rows = (
+        db_session.query(AdminStructure.id_structure)
+        .filter(AdminStructure.id_user == user_id)
+        .all()
+    )
+    return [row.id_structure for row in rows]
+
+
+def user_has_structure(db_session, user_id, structure_id):
+    """
+    Return True if the user is associated with the given structure ID.
+    """
+    return (
+        db_session.query(AdminStructure)
+        .filter(
+            AdminStructure.id_user == user_id,
+            AdminStructure.id_structure == structure_id
+        )
+        .first()
+        is not None
+    )
+
+
 def create_user_response_data(new_user, role):
     """
     Create standardized user response data.

@@ -15,7 +15,7 @@ Each route interacts with the database to perform the necessary actions related 
 """
 
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 #pylint: disable=E0611,E0401
@@ -23,6 +23,8 @@ from models import Room, Structure
 from app_logging.config import get_logger
 from app_logging.decorators import log_route, log_database_operation, log_function
 from app_logging.utils import safe_extra_fields
+from utils.authz import is_superadmin
+from utils.route_helpers import get_user_structure_ids, user_has_structure
 from database import get_db  # Use absolute import
 
 # Configure logging
@@ -73,6 +75,7 @@ def add_room():
     """
     with get_db() as db:  # Using the 'with' statement to manage the database session
         data = request.get_json()
+        current_user_id = int(get_jwt_identity())
 
         # Validate the input data
         if (
@@ -85,6 +88,8 @@ def add_room():
                     "error": "Missing required fields: 'name', 'capacity', or 'id_structure'"
                 }
             ), 400
+        if not is_superadmin() and not user_has_structure(db, current_user_id, data["id_structure"]):
+            return jsonify({"error": "Access denied for this structure"}), 403
 
         # Create a new room
         new_room = Room(
@@ -157,6 +162,7 @@ def get_rooms():
     """
     with get_db() as db:  # Using 'with' to properly manage the db session
         try:
+            current_user_id = int(get_jwt_identity())
             raw_structure_id = request.args.get("structure_id")
             id_structure = None
             if raw_structure_id is not None:
@@ -166,9 +172,22 @@ def get_rooms():
                     return jsonify({"error": "Invalid structure_id. Must be an integer."}), 400
 
             if id_structure is not None:
+                if not is_superadmin() and not user_has_structure(db, current_user_id, id_structure):
+                    return jsonify({"error": "Access denied for this structure"}), 403
                 rooms = db.query(Room).filter(Room.id_structure == id_structure).order_by(Room.id).all()
             else:
-                rooms = db.query(Room).order_by(Room.id).all()  # Return all rooms if no structure is specified
+                if is_superadmin():
+                    rooms = db.query(Room).order_by(Room.id).all()
+                else:
+                    allowed_structure_ids = get_user_structure_ids(db, current_user_id)
+                    if not allowed_structure_ids:
+                        return jsonify([])
+                    rooms = (
+                        db.query(Room)
+                        .filter(Room.id_structure.in_(allowed_structure_ids))
+                        .order_by(Room.id)
+                        .all()
+                    )
 
             room_data = [room.to_dict() for room in rooms]
             logger.info("Rooms retrieved successfully", extra={
@@ -213,8 +232,11 @@ def get_room(room_id):
     """
     with get_db() as db:  # Using 'with' statement here as well
         try:
+            current_user_id = int(get_jwt_identity())
             room = db.query(Room).filter(Room.id == room_id).first()
             if room:
+                if not is_superadmin() and not user_has_structure(db, current_user_id, room.id_structure):
+                    return jsonify({"error": "Access denied for this room"}), 403
                 logger.info("Room retrieved successfully", extra={
                     'room_id': room_id,
                     'room_name': room.name,
@@ -265,6 +287,7 @@ def update_room(room_id):
     """
     with get_db() as db:
         try:
+            current_user_id = int(get_jwt_identity())
             room = db.query(Room).filter(Room.id == room_id).first()
             if not room:
                 logger.warning("Room not found for update", extra={
@@ -272,6 +295,8 @@ def update_room(room_id):
                     'operation_result': 'not_found'
                 })
                 return jsonify({"error": "Room not found"}), 404
+            if not is_superadmin() and not user_has_structure(db, current_user_id, room.id_structure):
+                return jsonify({"error": "Access denied for this room"}), 403
 
             data = request.get_json()
 
@@ -293,6 +318,9 @@ def update_room(room_id):
                     'operation_result': 'validation_failed'
                 })
                 return jsonify({"error": validation_error}), 400
+            if "id_structure" in data and not is_superadmin():
+                if not user_has_structure(db, current_user_id, data["id_structure"]):
+                    return jsonify({"error": "Access denied for this structure"}), 403
 
             # Track what fields are being updated
             updated_fields = {}
@@ -364,9 +392,12 @@ def delete_room(room_id):
         tuple: JSON response and HTTP status code.
     """
     with get_db() as db:  # Again, using 'with' for context management
+        current_user_id = int(get_jwt_identity())
         room = db.query(Room).filter(Room.id == room_id).first()
 
         if room:
+            if not is_superadmin() and not user_has_structure(db, current_user_id, room.id_structure):
+                return jsonify({"error": "Access denied for this room"}), 403
             # Log deletion attempt with room details
             room_details = {
                 'room_id': room_id,
