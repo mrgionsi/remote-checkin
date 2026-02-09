@@ -4,6 +4,7 @@ Email utilities for the remote check-in system.
 This module provides common email-related functions used across different routes.
 """
 
+# pylint: disable=import-error,no-name-in-module
 from models import EmailConfig, User, AdminStructure
 from database import SessionLocal
 

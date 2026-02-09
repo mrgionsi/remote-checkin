@@ -1416,8 +1416,9 @@
     "rooms-status-error": "Could not update room status. Please try again.",
     "rooms-csv-empty-title": "No rows",
     "rooms-csv-empty-detail": "No valid rooms found in CSV.",
-    "rooms-csv-skip-title": "Skipped",
-    "rooms-csv-skip-detail": "Failed to import room {{name}}.",
-    "rooms-csv-read-error": "Could not read CSV file."
+  "rooms-csv-skip-title": "Skipped",
+  "rooms-csv-skip-detail": "Failed to import room {{name}}.",
+  "rooms-csv-read-error": "Could not read CSV file.",
+  "access-restricted": "Access restricted",
+  "reservation-structure-mismatch": "Selected structure does not match this reservation."
 }
->>>>>>> e54b413 (admin ui fixes and room translations)

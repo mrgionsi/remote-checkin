@@ -127,6 +127,9 @@ export class DetailReservationComponent implements OnInit {
         next: (resp) => {
           this.reservation_details = resp;
           console.log("Resp", resp);
+          if (!this.isReservationInSelectedStructure(resp)) {
+            return;
+          }
           this.reservation_status = this.statusOptions.find(option => option.value === resp.status);
           this.loading = false;
 
@@ -224,6 +227,27 @@ export class DetailReservationComponent implements OnInit {
       this.validateNumberOfPeople();
     });
 
+  }
+
+  private isReservationInSelectedStructure(reservation: any): boolean {
+    const selectedStructureId = Number(localStorage.getItem('selected_structure_id') || 0);
+    const reservationStructureId = reservation?.room?.id_structure;
+
+    if (!selectedStructureId || !reservationStructureId) {
+      return true;
+    }
+
+    if (selectedStructureId !== reservationStructureId) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: this.translocoService.translate('access-restricted'),
+        detail: this.translocoService.translate('reservation-structure-mismatch')
+      });
+      this.router.navigate(['/admin/dashboard']);
+      return false;
+    }
+
+    return true;
   }
 
   // Method to validate number of people against room capacity
