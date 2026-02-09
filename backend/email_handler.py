@@ -392,10 +392,9 @@ class EmailService:
 
         url = f"https://api.mailgun.net/v3/{domain}/messages"
 
-        sender_name = self.config.mail_default_sender_name if self.config.mail_default_sender_name and self.config.mail_default_sender_name.strip() else "Remote Check-in"
-        formatted_sender_name = sender_name
+        sender_name = self._get_sender_name()
         data = {
-            "from": f"{formatted_sender_name} <{self.config.mail_default_sender_email}>",
+            "from": f"{sender_name} <{self.config.mail_default_sender_email}>",
             "to": email_data.to_email,
             "subject": email_data.subject,
             "text": email_data.body,
