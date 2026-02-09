@@ -488,7 +488,10 @@ def get_reservations_by_structure(structure_id):
     db = SessionLocal()
     reservations = []
     try:
-        current_user_id = int(get_jwt_identity())
+        try:
+            current_user_id = int(get_jwt_identity())
+        except (TypeError, ValueError):
+            return jsonify({"error": "Invalid user identity"}), 400
         try:
             structure_id_int = int(structure_id)
         except (TypeError, ValueError):
