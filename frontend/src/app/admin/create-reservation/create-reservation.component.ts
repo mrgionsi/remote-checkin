@@ -183,9 +183,17 @@ export class CreateReservationComponent implements OnInit {
       const reservation = this.reservationForm.value;
       console.log(reservation)
 
-      // Handle room name extraction safely
+      // Handle room name extraction safely and include room/structure identifiers
       if (reservation.roomName && reservation.roomName['name']) {
+        reservation.roomId = reservation.roomName['id'];
+        reservation.structureId = reservation.roomName['id_structure'] ?? Number(localStorage.getItem('selected_structure_id') || 0);
         reservation.roomName = reservation.roomName['name'];
+      } else if (typeof reservation.roomName === 'string') {
+        const roomMatch = this.rooms.find(room => room.name === reservation.roomName);
+        if (roomMatch) {
+          reservation.roomId = roomMatch.id;
+          reservation.structureId = roomMatch.id_structure ?? Number(localStorage.getItem('selected_structure_id') || 0);
+        }
       } else {
         console.error('Room name is not selected or invalid:', reservation.roomName);
         this.saving = false; // Reset loading state on error

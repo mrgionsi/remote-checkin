@@ -128,6 +128,13 @@ def handle_integrity_error(e, operation_name, user_id=None, **extra_fields):
     return jsonify({"error": f"{operation_name} failed due to data constraint violation"}), 400
 
 
+def error_response(message, status_code=400):
+    """
+    Return a standardized JSON error response.
+    """
+    return jsonify({"error": message}), status_code
+
+
 def get_user_structures_query(db_session, user_id):
     """
     Get the query for user-structure associations.
