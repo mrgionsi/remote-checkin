@@ -640,18 +640,6 @@ class EmailService:
         room_name = html_mod.escape(str(reservation_data.get('room_name', 'N/A')))
         signature_name = html_mod.escape(self._get_signature_name())
 
-        reservation_number = html_mod.escape(str(checkin_data.get('reservation_number', 'N/A')))
-        guest_name = html_mod.escape(str(checkin_data.get('guest_name', 'N/A')))
-        start_date = html_mod.escape(str(checkin_data.get('start_date', 'N/A')))
-        end_date = html_mod.escape(str(checkin_data.get('end_date', 'N/A')))
-        room_name = html_mod.escape(str(checkin_data.get('room_name', 'N/A')))
-        client_name = html_mod.escape(str(checkin_data.get('client_name', 'N/A')))
-        client_surname = html_mod.escape(str(checkin_data.get('client_surname', 'N/A')))
-        client_email = html_mod.escape(str(checkin_data.get('client_email', 'N/A')))
-        client_phone = html_mod.escape(str(checkin_data.get('client_phone', 'N/A')))
-        document_type = html_mod.escape(str(checkin_data.get('document_type', 'N/A')))
-        document_number = html_mod.escape(str(checkin_data.get('document_number', 'N/A')))
-
         return f"""
 Hello {guest_name},
 
@@ -691,25 +679,12 @@ Best regards,
         Returns:
             str: Complete HTML document as a string suitable for use as an email HTML body.
         """
-        # Safely get values and convert to strings
-        reservation_number = str(reservation_data.get('reservation_number', 'N/A'))
-        guest_name = self._get_guest_name(reservation_data)
-        start_date = str(reservation_data.get('start_date', 'N/A'))
-        end_date = str(reservation_data.get('end_date', 'N/A'))
-        room_name = str(reservation_data.get('room_name', 'N/A'))
-        signature_name = self._get_signature_name()
-
         reservation_number = html_mod.escape(str(reservation_data.get('reservation_number', 'N/A')))
-        guest_name = html_mod.escape(str(reservation_data.get('guest_name', 'Guest')))
+        guest_name = html_mod.escape(self._get_guest_name(reservation_data))
         start_date = html_mod.escape(str(reservation_data.get('start_date', 'N/A')))
         end_date = html_mod.escape(str(reservation_data.get('end_date', 'N/A')))
         room_name = html_mod.escape(str(reservation_data.get('room_name', 'N/A')))
-
-        reservation_number = html_mod.escape(str(reservation_data.get('reservation_number', 'N/A')))
-        guest_name = html_mod.escape(str(reservation_data.get('guest_name', 'Guest')))
-        start_date = html_mod.escape(str(reservation_data.get('start_date', 'N/A')))
-        end_date = html_mod.escape(str(reservation_data.get('end_date', 'N/A')))
-        room_name = html_mod.escape(str(reservation_data.get('room_name', 'N/A')))
+        signature_name = html_mod.escape(self._get_signature_name())
 
         return f"""
 <!DOCTYPE html>
@@ -782,11 +757,11 @@ Hello {guest_name},
 Your reservation details were updated. Please review the updated information below.
 
 Updated Reservation Details:
-- Reservation Number: {reservation_data.get('reservation_number', 'N/A')}
+- Reservation Number: {reservation_number}
 - Guest Name: {guest_name}
-- Check-in Date: {reservation_data.get('start_date', 'N/A')}
-- Check-out Date: {reservation_data.get('end_date', 'N/A')}
-- Room: {reservation_data.get('room_name', 'N/A')}
+- Check-in Date: {start_date}
+- Check-out Date: {end_date}
+- Room: {room_name}
 
 If you did not request this change or notice any errors, please reply to this email.
 
@@ -911,7 +886,11 @@ Best regards,
             str: Complete HTML string for the cancellation email body (UTF-8, safe to embed
             in a multipart message as the HTML part).
         """
+        reservation_number = html_mod.escape(str(reservation_data.get('reservation_number', 'N/A')))
         guest_name = html_mod.escape(self._get_guest_name(reservation_data))
+        start_date = html_mod.escape(str(reservation_data.get('start_date', 'N/A')))
+        end_date = html_mod.escape(str(reservation_data.get('end_date', 'N/A')))
+        room_name = html_mod.escape(str(reservation_data.get('room_name', 'N/A')))
         signature_name = html_mod.escape(self._get_signature_name())
 
         return f"""
@@ -1080,6 +1059,18 @@ Remote Check-in System
         Returns:
             str: Complete HTML document as a string suitable for use as an email body (includes inline styles and status indicators for uploaded/missing documents).
         """
+        reservation_number = html_mod.escape(str(checkin_data.get('reservation_number', 'N/A')))
+        guest_name = html_mod.escape(str(checkin_data.get('guest_name', 'N/A')))
+        start_date = html_mod.escape(str(checkin_data.get('start_date', 'N/A')))
+        end_date = html_mod.escape(str(checkin_data.get('end_date', 'N/A')))
+        room_name = html_mod.escape(str(checkin_data.get('room_name', 'N/A')))
+        client_name = html_mod.escape(str(checkin_data.get('client_name', 'N/A')))
+        client_surname = html_mod.escape(str(checkin_data.get('client_surname', 'N/A')))
+        client_email = html_mod.escape(str(checkin_data.get('client_email', 'N/A')))
+        client_phone = html_mod.escape(str(checkin_data.get('client_phone', 'N/A')))
+        document_type = html_mod.escape(str(checkin_data.get('document_type', 'N/A')))
+        document_number = html_mod.escape(str(checkin_data.get('document_number', 'N/A')))
+
         return f"""
 <!DOCTYPE html>
 <html>
@@ -1390,6 +1381,12 @@ The Management Team
         Returns:
             str: Complete HTML string suitable for use as an email body.
         """
+        reservation_number = html_mod.escape(str(reservation_data.get('reservation_number', 'N/A')))
+        guest_name = html_mod.escape(self._get_guest_name(reservation_data))
+        start_date = html_mod.escape(str(reservation_data.get('start_date', 'N/A')))
+        end_date = html_mod.escape(str(reservation_data.get('end_date', 'N/A')))
+        room_name = html_mod.escape(str(reservation_data.get('room_name', 'N/A')))
+
         return f"""
 <!DOCTYPE html>
 <html>
@@ -1499,6 +1496,12 @@ The Management Team
         Returns:
             str: Complete HTML document as a string.
         """
+        reservation_number = html_mod.escape(str(reservation_data.get('reservation_number', 'N/A')))
+        guest_name = html_mod.escape(self._get_guest_name(reservation_data))
+        start_date = html_mod.escape(str(reservation_data.get('start_date', 'N/A')))
+        end_date = html_mod.escape(str(reservation_data.get('end_date', 'N/A')))
+        room_name = html_mod.escape(str(reservation_data.get('room_name', 'N/A')))
+
         return f"""
 <!DOCTYPE html>
 <html>
