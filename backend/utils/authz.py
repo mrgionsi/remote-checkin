@@ -79,3 +79,14 @@ def verify_superadmin_access():
         return jsonify({"error": PERMISSION_ERROR}), 403
 
     return None, None
+
+
+def is_superadmin() -> bool:
+    """
+    Return True if the current JWT has the superadmin role.
+    """
+    try:
+        claims = get_jwt()
+        return claims.get("role", "").lower() == "superadmin"
+    except Exception:
+        return False
