@@ -165,7 +165,7 @@ def get_rooms():
                 except (TypeError, ValueError):
                     return jsonify({"error": "Invalid structure_id. Must be an integer."}), 400
 
-            if id_structure:
+            if id_structure is not None:
                 rooms = db.query(Room).filter(Room.id_structure == id_structure).order_by(Room.id).all()
             else:
                 rooms = db.query(Room).order_by(Room.id).all()  # Return all rooms if no structure is specified
