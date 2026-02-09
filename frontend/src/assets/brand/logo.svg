@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" fill="none">
+  <rect x="0" y="0" width="1200" height="360" fill="white"/>
+
+  <!-- Icon -->
+  <rect x="80" y="60" width="200" height="200" rx="28" fill="#6DA9D8"/>
+  <!-- User head -->
+  <circle cx="160" cy="130" r="34" fill="white"/>
+  <!-- User body -->
+  <path d="M110 220c0-28 22-50 50-50s50 22 50 50v12H110v-12z" fill="white"/>
+  <!-- Plus badge -->
+  <circle cx="225" cy="200" r="22" fill="#6FAE7C"/>
+  <rect x="222" y="188" width="6" height="24" fill="white"/>
+  <rect x="213" y="197" width="24" height="6" fill="white"/>
+
+  <!-- Text -->
+  <text x="320" y="155" font-family="Manrope, 'Helvetica Neue', Arial, sans-serif" font-size="90" font-weight="600" fill="#6FAE7C">Remote</text>
+  <text x="320" y="255" font-family="Manrope, 'Helvetica Neue', Arial, sans-serif" font-size="90" font-weight="600" fill="#6FAE7C">Check-in</text>
+</svg>
