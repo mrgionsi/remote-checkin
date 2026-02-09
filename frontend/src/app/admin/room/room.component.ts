@@ -90,8 +90,8 @@ export class RoomComponent implements OnInit {
         error: () => {
           this.messageService.add({
             severity: 'warn',
-            summary: 'Failed',
-            detail: 'Getting rooms. Please try again or contact your administrator.'
+            summary: this.translocoService.translate('rooms-toast-failed'),
+            detail: this.translocoService.translate('rooms-fetch-error')
           });
         }
       });
@@ -105,11 +105,19 @@ export class RoomComponent implements OnInit {
   onRowEditSave(room: any) {
     this.roomService.editRoom(room).subscribe({
       next: () => {
-        this.messageService.add({ severity: 'info', summary: 'Confirmed', detail: 'Room updated.' });
+        this.messageService.add({
+          severity: 'info',
+          summary: this.translocoService.translate('rooms-toast-confirmed'),
+          detail: this.translocoService.translate('rooms-update-success')
+        });
         this.applyFilters();
       },
       error: () => {
-        this.messageService.add({ severity: 'warn', summary: 'Failed', detail: 'Error editing room. Please try again.' });
+        this.messageService.add({
+          severity: 'warn',
+          summary: this.translocoService.translate('rooms-toast-failed'),
+          detail: this.translocoService.translate('rooms-update-error')
+        });
       }
     });
   }
@@ -126,17 +134,17 @@ export class RoomComponent implements OnInit {
   onRowDelete(room: any, index: number, event: Event) {
     this.confirmationService.confirm({
       target: event.target as EventTarget,
-      message: 'Do you want to delete this record?',
-      header: 'Danger Zone',
+      message: this.translocoService.translate('rooms-delete-confirm-message'),
+      header: this.translocoService.translate('rooms-delete-confirm-header'),
       icon: 'pi pi-info-circle',
-      rejectLabel: 'Cancel',
+      rejectLabel: this.translocoService.translate('rooms-delete-confirm-reject'),
       rejectButtonProps: {
-        label: 'Cancel',
+        label: this.translocoService.translate('rooms-delete-confirm-reject'),
         severity: 'secondary',
         outlined: true,
       },
       acceptButtonProps: {
-        label: 'Delete',
+        label: this.translocoService.translate('rooms-delete-confirm-accept'),
         severity: 'danger',
       },
       accept: () => {
@@ -147,10 +155,18 @@ export class RoomComponent implements OnInit {
               this.rooms.splice(originalIndex, 1);
             }
             this.applyFilters();
-            this.messageService.add({ severity: 'info', summary: 'Confirmed', detail: value.message });
+            this.messageService.add({
+              severity: 'info',
+              summary: this.translocoService.translate('rooms-toast-confirmed'),
+              detail: value.message
+            });
           },
           error: () => {
-            this.messageService.add({ severity: 'warn', summary: 'Failed', detail: 'Error deleting room.' });
+            this.messageService.add({
+              severity: 'warn',
+              summary: this.translocoService.translate('rooms-toast-failed'),
+              detail: this.translocoService.translate('rooms-delete-error')
+            });
           }
         });
       }
@@ -161,8 +177,8 @@ export class RoomComponent implements OnInit {
     if (!this.canCreateRoom) {
       this.messageService.add({
         severity: 'warn',
-        summary: 'Missing structure',
-        detail: 'Select a structure before creating a room.'
+        summary: this.translocoService.translate('rooms-missing-structure-title'),
+        detail: this.translocoService.translate('rooms-missing-structure-detail')
       });
       return;
     }
@@ -173,15 +189,19 @@ export class RoomComponent implements OnInit {
     if (!this.new_room.id_structure) {
       this.messageService.add({
         severity: 'warn',
-        summary: 'Missing structure',
-        detail: 'Select a structure before creating a room.'
+        summary: this.translocoService.translate('rooms-missing-structure-title'),
+        detail: this.translocoService.translate('rooms-missing-structure-detail')
       });
       return;
     }
     this.add_room_visible = false;
     this.roomService.addRoom(this.new_room).subscribe({
       next: (val) => {
-        this.messageService.add({ severity: 'info', summary: 'Confirmed', detail: 'New room added.' });
+        this.messageService.add({
+          severity: 'info',
+          summary: this.translocoService.translate('rooms-toast-confirmed'),
+          detail: this.translocoService.translate('rooms-create-success')
+        });
         this.rooms.push({ ...val, isActive: val?.is_active ?? true });
         this.applyFilters();
         this.new_room = {
@@ -192,7 +212,11 @@ export class RoomComponent implements OnInit {
         };
       },
       error: () => {
-        this.messageService.add({ severity: 'warn', summary: 'Failed', detail: 'Error adding new room.' });
+        this.messageService.add({
+          severity: 'warn',
+          summary: this.translocoService.translate('rooms-toast-failed'),
+          detail: this.translocoService.translate('rooms-create-error')
+        });
       }
     });
   }
@@ -223,8 +247,8 @@ export class RoomComponent implements OnInit {
         room.is_active = room.isActive;
         this.messageService.add({
           severity: 'warn',
-          summary: 'Failed',
-          detail: 'Could not update room status. Please try again.'
+          summary: this.translocoService.translate('rooms-toast-failed'),
+          detail: this.translocoService.translate('rooms-status-error')
         });
       }
     });
@@ -243,7 +267,11 @@ export class RoomComponent implements OnInit {
       const rows = this.parseCsv(text);
       if (!rows.length) {
         this.importing = false;
-        this.messageService.add({ severity: 'warn', summary: 'No rows', detail: 'No valid rooms found in CSV.' });
+        this.messageService.add({
+          severity: 'warn',
+          summary: this.translocoService.translate('rooms-csv-empty-title'),
+          detail: this.translocoService.translate('rooms-csv-empty-detail')
+        });
         input.value = '';
         return;
       }
@@ -257,8 +285,8 @@ export class RoomComponent implements OnInit {
             catchError(() => {
               this.messageService.add({
                 severity: 'warn',
-                summary: 'Skipped',
-                detail: `Failed to import room ${row.name}.`
+                summary: this.translocoService.translate('rooms-csv-skip-title'),
+                detail: this.translocoService.translate('rooms-csv-skip-detail', { name: row.name })
               });
               return of(null);
             })
@@ -277,7 +305,11 @@ export class RoomComponent implements OnInit {
     };
     reader.onerror = () => {
       this.importing = false;
-      this.messageService.add({ severity: 'warn', summary: 'Failed', detail: 'Could not read CSV file.' });
+      this.messageService.add({
+        severity: 'warn',
+        summary: this.translocoService.translate('rooms-toast-failed'),
+        detail: this.translocoService.translate('rooms-csv-read-error')
+      });
     };
     reader.readAsText(file);
   }

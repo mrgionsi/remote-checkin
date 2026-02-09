@@ -56,6 +56,13 @@
   color: var(--ink-900);
 }
 
+.chip--active {
+  border-color: #111827;
+  background: #111827;
+  color: #fff;
+  box-shadow: 0 8px 16px rgba(17, 24, 39, 0.2);
+}
+
 .structures-list {
   display: grid;
   gap: 15px;

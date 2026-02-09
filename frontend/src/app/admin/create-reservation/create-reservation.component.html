@@ -144,7 +144,6 @@
                     <div class="p-col-12 p-md-10">
                         <input id="numberOfPeople" pInputText formControlName="numberOfPeople" type="number" min="1"
                             [max]="getSelectedRoomCapacity() > 0 ? getSelectedRoomCapacity() : null"
-                            [disabled]="!reservationForm.get('roomName')?.value"
                             [placeholder]="'number-of-people-placeholder' | transloco"
                             [class.p-invalid]="reservationForm.get('numberOfPeople')?.invalid && reservationForm.get('numberOfPeople')?.touched"
                             step="1" inputmode="numeric" class="wide-input" />

@@ -18,11 +18,15 @@
         </div>
     </div>
     <div class="filter-chips">
-        <button class="chip" (click)="setStatusFilter('')">{{ 'superadmin-structures-filter-all' | transloco }}</button>
-        <button class="chip" (click)="setStatusFilter('true')">{{ 'superadmin-structures-filter-active' | transloco
-            }}</button>
-        <button class="chip" (click)="setStatusFilter('false')">{{ 'superadmin-structures-filter-archived' | transloco
-            }}</button>
+        <button class="chip" (click)="setStatusFilter('')" [class.chip--active]="statusFilter === ''">
+            {{ 'superadmin-structures-filter-all' | transloco }}
+        </button>
+        <button class="chip" (click)="setStatusFilter('true')" [class.chip--active]="statusFilter === 'true'">
+            {{ 'superadmin-structures-filter-active' | transloco }}
+        </button>
+        <button class="chip" (click)="setStatusFilter('false')" [class.chip--active]="statusFilter === 'false'">
+            {{ 'superadmin-structures-filter-archived' | transloco }}
+        </button>
     </div>
 
     <div class="structures-list" *ngIf="!loading">

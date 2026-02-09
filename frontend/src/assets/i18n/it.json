@@ -1321,5 +1321,27 @@
     "dashboard-toast-shortcut-title": "Scorciatoia da tastiera",
     "dashboard-toast-shortcut-pending": "Filtrate le approvazioni in sospeso",
     "dashboard-toast-shortcut-clear": "Filtri cancellati",
-    "dashboard-toast-shortcut-retry": "Ricaricamento dati in corso"
+    "dashboard-toast-shortcut-retry": "Ricaricamento dati in corso",
+    "admin-menu-label": "Menu",
+    "rooms-toast-failed": "Operazione non riuscita",
+    "rooms-toast-confirmed": "Confermato",
+    "rooms-fetch-error": "Impossibile caricare le camere. Riprova o contatta l'amministratore.",
+    "rooms-update-success": "Camera aggiornata.",
+    "rooms-update-error": "Errore durante la modifica della camera. Riprova.",
+    "rooms-delete-confirm-message": "Vuoi eliminare questo record?",
+    "rooms-delete-confirm-header": "Zona pericolosa",
+    "rooms-delete-confirm-reject": "Annulla",
+    "rooms-delete-confirm-accept": "Elimina",
+    "rooms-delete-error": "Errore durante l'eliminazione della camera.",
+    "rooms-missing-structure-title": "Struttura mancante",
+    "rooms-missing-structure-detail": "Seleziona una struttura prima di creare una camera.",
+    "rooms-create-success": "Nuova camera aggiunta.",
+    "rooms-create-error": "Errore durante l'aggiunta della camera.",
+    "rooms-status-error": "Impossibile aggiornare lo stato della camera. Riprova.",
+    "rooms-csv-empty-title": "Nessuna riga",
+    "rooms-csv-empty-detail": "Nessuna camera valida trovata nel CSV.",
+    "rooms-csv-skip-title": "Saltato",
+    "rooms-csv-skip-detail": "Impossibile importare la camera {{name}}.",
+    "rooms-csv-read-error": "Impossibile leggere il file CSV."
 }
+>>>>>>> e54b413 (admin ui fixes and room translations)

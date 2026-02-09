@@ -2,7 +2,7 @@
     <!-- Show loading until component is initialized -->
     <div *ngIf="!isInitialized" class="admin-loading">
         <div class="spinner"></div>
-        <div class="admin-loading__text">Loading...</div>
+        <div class="admin-loading__text">{{ 'loading-label' | transloco }}</div>
     </div>
 
     <!-- Show content only when initialized -->
@@ -10,7 +10,8 @@
         <!-- Admin interface for authenticated users -->
         <div *ngIf="isAuthenticated" class="admin-authenticated">
             <div class="admin-header" *ngIf="!isLoginPage()">
-                <button pButton label="Menu" (click)="toggleSidebar()" class="admin-header__menu">☰</button>
+                <button pButton [label]="'admin-menu-label' | transloco" (click)="toggleSidebar()"
+                    class="admin-header__menu">☰</button>
                 <p-select [options]="structures" optionLabel="name" optionValue="id" [(ngModel)]="selectedStructureId"
                     (onChange)="onStructureChange($event)" [placeholder]="'select-structure-placeholder' | transloco"
                     styleClass="structure-select" *ngIf="structures.length > 0">

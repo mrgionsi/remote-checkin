@@ -48,13 +48,31 @@ export class CreateReservationComponent implements OnInit {
     this.setDefaultDates();
 
     // Add validation for number of people against room capacity
-    this.reservationForm.get('roomName')?.valueChanges.subscribe(() => {
+    this.reservationForm.get('roomName')?.valueChanges.subscribe((value) => {
+      const numberOfPeopleControl = this.reservationForm.get('numberOfPeople');
+      if (numberOfPeopleControl) {
+        if (value) {
+          numberOfPeopleControl.enable({ emitEvent: false });
+        } else {
+          numberOfPeopleControl.disable({ emitEvent: false });
+        }
+      }
       this.validateNumberOfPeople();
     });
 
     this.reservationForm.get('numberOfPeople')?.valueChanges.subscribe(() => {
       this.validateNumberOfPeople();
     });
+
+    const initialRoom = this.reservationForm.get('roomName')?.value;
+    const numberOfPeopleControl = this.reservationForm.get('numberOfPeople');
+    if (numberOfPeopleControl) {
+      if (initialRoom) {
+        numberOfPeopleControl.enable({ emitEvent: false });
+      } else {
+        numberOfPeopleControl.disable({ emitEvent: false });
+      }
+    }
   }
 
   private setDefaultDates(): void {

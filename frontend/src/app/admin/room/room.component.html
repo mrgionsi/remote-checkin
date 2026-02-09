@@ -112,7 +112,7 @@
                             <div class="room-empty__title">{{ 'rooms-empty-title' | transloco }}</div>
                             <div class="room-empty__subtitle">{{ 'rooms-empty-subtitle' | transloco }}</div>
                             <p-button [label]="'create-room-btn' | transloco" icon="pi pi-plus" severity="info"
-                                (click)="showDialogCreateRoom()"></p-button>
+                                (click)="showDialogCreateRoom()" [disabled]="!canCreateRoom"></p-button>
                         </div>
                     </td>
                 </tr>

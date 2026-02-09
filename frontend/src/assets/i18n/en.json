@@ -1397,5 +1397,27 @@
     "dashboard-toast-shortcut-title": "Keyboard shortcut",
     "dashboard-toast-shortcut-pending": "Filtered to pending approvals",
     "dashboard-toast-shortcut-clear": "Cleared all filters",
-    "dashboard-toast-shortcut-retry": "Retrying data load"
+    "dashboard-toast-shortcut-retry": "Retrying data load",
+    "admin-menu-label": "Menu",
+    "rooms-toast-failed": "Failed",
+    "rooms-toast-confirmed": "Confirmed",
+    "rooms-fetch-error": "Getting rooms. Please try again or contact your administrator.",
+    "rooms-update-success": "Room updated.",
+    "rooms-update-error": "Error editing room. Please try again.",
+    "rooms-delete-confirm-message": "Do you want to delete this record?",
+    "rooms-delete-confirm-header": "Danger zone",
+    "rooms-delete-confirm-reject": "Cancel",
+    "rooms-delete-confirm-accept": "Delete",
+    "rooms-delete-error": "Error deleting room.",
+    "rooms-missing-structure-title": "Missing structure",
+    "rooms-missing-structure-detail": "Select a structure before creating a room.",
+    "rooms-create-success": "New room added.",
+    "rooms-create-error": "Error adding new room.",
+    "rooms-status-error": "Could not update room status. Please try again.",
+    "rooms-csv-empty-title": "No rows",
+    "rooms-csv-empty-detail": "No valid rooms found in CSV.",
+    "rooms-csv-skip-title": "Skipped",
+    "rooms-csv-skip-detail": "Failed to import room {{name}}.",
+    "rooms-csv-read-error": "Could not read CSV file."
 }
+>>>>>>> e54b413 (admin ui fixes and room translations)

@@ -487,7 +487,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private updateInsights(): void {
-    const source = this.filteredReservations.length ? this.filteredReservations : this.reservations;
+    const source = this.filteredReservations;
     const sorted = [...source].sort((a: any, b: any) => {
       const aDate = new Date(a.start_date || a.end_date || 0).getTime();
       const bDate = new Date(b.start_date || b.end_date || 0).getTime();
