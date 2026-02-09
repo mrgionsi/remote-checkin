@@ -12,6 +12,7 @@ from datetime import datetime
 
 from flask import Blueprint, request, jsonify
 from sqlalchemy import  func
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql import extract
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
@@ -20,7 +21,7 @@ from email_handler import EmailService
 from routes.email_config_routes import get_encryption_key
 from utils.email_utils import get_admin_email_config
 from utils.authz import is_superadmin
-from utils.route_helpers import user_has_structure
+from utils.route_helpers import user_has_structure, get_user_structure_ids
 from app_logging.config import get_logger
 from app_logging.decorators import log_route, log_database_operation, log_performance
 from app_logging.utils import safe_extra_fields, log_notification_error
@@ -112,11 +113,22 @@ def create_reservation():
         if end_date < start_date:
             return jsonify({"error": "endDate must be on or after startDate"}), 400
         # Find room ID by name
-        room = session.query(Room).filter(Room.name == data["roomName"]).first()
+        if is_superadmin():
+            room = session.query(Room).filter(Room.name == data["roomName"]).first()
+        else:
+            allowed_structure_ids = get_user_structure_ids(session, current_user_id)
+            if not allowed_structure_ids:
+                return jsonify({"error": "Access denied for this structure"}), 403
+            room = (
+                session.query(Room)
+                .filter(
+                    Room.name == data["roomName"],
+                    Room.id_structure.in_(allowed_structure_ids)
+                )
+                .first()
+            )
         if not room:
             return jsonify({"error": "Room not found"}), 404
-        if not is_superadmin() and not user_has_structure(session, current_user_id, room.id_structure):
-            return jsonify({"error": "Access denied for this structure"}), 403
 
         # Validate number_of_people if provided - safely coerce to int
         raw_number_of_people = data.get("numberOfPeople", 1)
@@ -474,9 +486,7 @@ def get_reservations_by_structure(structure_id):
         flask.Response: JSON array of reservation objects. If no reservations exist for the structure, an empty list is returned.
     """
     db = SessionLocal()
-    reservations = (
-        []
-    )
+    reservations = []
     try:
         current_user_id = int(get_jwt_identity())
         try:
@@ -490,6 +500,8 @@ def get_reservations_by_structure(structure_id):
             .filter(StructureReservationsView.structure_id == structure_id_int)
             .all()
         )
+    except SQLAlchemyError:
+        return jsonify({"error": "Database error"}), 500
     finally:
         db.close()
     return jsonify([{

@@ -273,6 +273,7 @@ def get_room(room_id):
 @jwt_required()
 @log_route(include_request_data=True, include_response_data=True)
 @log_database_operation("UPDATE")
+# pylint: disable=R0911
 def update_room(room_id):
     """
     Update the details of an existing room by its ID.
@@ -392,12 +393,20 @@ def delete_room(room_id):
         tuple: JSON response and HTTP status code.
     """
     with get_db() as db:  # Again, using 'with' for context management
-        current_user_id = int(get_jwt_identity())
-        room = db.query(Room).filter(Room.id == room_id).first()
+        try:
+            current_user_id = int(get_jwt_identity())
+            room = db.query(Room).filter(Room.id == room_id).first()
 
-        if room:
+            if not room:
+                logger.warning("Room not found for deletion", extra={
+                    'room_id': room_id,
+                    'operation_result': 'not_found'
+                })
+                return jsonify({"error": "Room not found"}), 404
+
             if not is_superadmin() and not user_has_structure(db, current_user_id, room.id_structure):
                 return jsonify({"error": "Access denied for this room"}), 403
+
             # Log deletion attempt with room details
             room_details = {
                 'room_id': room_id,
@@ -408,44 +417,37 @@ def delete_room(room_id):
             }
             logger.info("Attempting room deletion", extra=room_details)
 
-            try:
-                db.delete(room)
-                db.commit()
-                logger.info("Room deleted successfully", extra={
-                    **room_details,
-                    'operation_result': 'success'
-                })
-                return jsonify({"message": "Room deleted successfully"}), 200
-            except IntegrityError as e:
-                db.rollback()
-                logger.error("Room deletion failed due to integrity constraints", extra={
-                    **room_details,
-                    'error_type': 'integrity_constraint',
-                    'error_details': str(e),
-                    'operation_result': 'failed'
-                })
-                return jsonify({"error": f"Failed to delete room due to foreign key constraints: {str(e)}"}), 400
-            except SQLAlchemyError as e:
-                db.rollback()
-                logger.error("Database error during room deletion", extra={
-                    **room_details,
-                    'error_type': 'database_error',
-                    'error_details': str(e),
-                    'operation_result': 'failed'
-                })
-                return jsonify({"error": f"Failed to delete room: {str(e)}"}), 500
-            except (ValueError, TypeError) as e:
-                db.rollback()
-                logger.exception("Unexpected error during room deletion", extra={
-                    **room_details,
-                    'error_type': 'unexpected_error',
-                    'error_details': str(e),
-                    'operation_result': 'failed'
-                }, exc_info=True)
-                return jsonify({"error": "An unexpected error occurred while deleting the room"}), 500
-
-        logger.warning("Room not found for deletion", extra={
-            'room_id': room_id,
-            'operation_result': 'not_found'
-        })
-        return jsonify({"error": "Room not found"}), 404
+            db.delete(room)
+            db.commit()
+            logger.info("Room deleted successfully", extra={
+                **room_details,
+                'operation_result': 'success'
+            })
+            return jsonify({"message": "Room deleted successfully"}), 200
+        except IntegrityError as e:
+            db.rollback()
+            logger.error("Room deletion failed due to integrity constraints", extra={
+                'room_id': room_id,
+                'error_type': 'integrity_constraint',
+                'error_details': str(e),
+                'operation_result': 'failed'
+            })
+            return jsonify({"error": f"Failed to delete room due to foreign key constraints: {str(e)}"}), 400
+        except SQLAlchemyError as e:
+            db.rollback()
+            logger.error("Database error during room deletion", extra={
+                'room_id': room_id,
+                'error_type': 'database_error',
+                'error_details': str(e),
+                'operation_result': 'failed'
+            })
+            return jsonify({"error": f"Failed to delete room: {str(e)}"}), 500
+        except (ValueError, TypeError) as e:
+            db.rollback()
+            logger.exception("Unexpected error during room deletion", extra={
+                'room_id': room_id,
+                'error_type': 'unexpected_error',
+                'error_details': str(e),
+                'operation_result': 'failed'
+            }, exc_info=True)
+            return jsonify({"error": "An unexpected error occurred while deleting the room"}), 500
