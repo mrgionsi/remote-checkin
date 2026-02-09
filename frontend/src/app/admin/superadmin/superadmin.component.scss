@@ -45,6 +45,12 @@
   flex-direction: column;
   gap: 10px;
 
+  .superadmin-logo {
+    width: 220px;
+    max-width: 70%;
+    height: auto;
+  }
+
   .hero-eyebrow {
     font-size: 0.75rem;
     letter-spacing: 0.12em;
