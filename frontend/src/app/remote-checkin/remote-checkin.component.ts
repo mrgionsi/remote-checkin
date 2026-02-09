@@ -181,6 +181,15 @@ export class RemoteCheckinComponent implements OnInit {
   }
 
   ngOnInit() {
+    const cfControl = this.clientForm.get('cf');
+    cfControl?.valueChanges.subscribe(value => {
+      if (typeof value !== 'string') return;
+      const upper = value.toUpperCase();
+      if (value !== upper) {
+        cfControl.setValue(upper, { emitEvent: false });
+      }
+    });
+
     // Initialize gender options with translations
     this.genderOptions = [
       { label: this.translocoService.translate('gender-male'), value: '1' },
@@ -206,6 +215,14 @@ export class RemoteCheckinComponent implements OnInit {
         this.loadReservationDetails();
       }
     });
+  }
+
+  goToStep(step: number, activateCallback: (value: number) => void) {
+    activateCallback(step);
+    // Ensure the next panel is visible at the top, especially on mobile.
+    setTimeout(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    }, 0);
   }
 
   // Method to load reservation details and check capacity

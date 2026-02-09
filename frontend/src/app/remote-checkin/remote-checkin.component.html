@@ -403,7 +403,8 @@
                     </div>
                     <div class="flex  pt-6 justify-content-end">
                         <p-button [label]="'next' | transloco" icon="pi pi-arrow-right" iconPos="right"
-                            [disabled]="clientForm.invalid || !canRegister" (onClick)="activateCallback(2)" />
+                            [disabled]="clientForm.invalid || !canRegister"
+                            (onClick)="goToStep(2, activateCallback)" />
                     </div>
                 </ng-template>
             </p-step-panel>
@@ -415,10 +416,11 @@
                     </div>
                     <div class="flex justify-space-between w-full pt-6">
                         <p-button [label]="'back' | transloco" severity="secondary" icon="pi pi-arrow-left"
-                            (onClick)="activateCallback(1)" />
+                            (onClick)="goToStep(1, activateCallback)" />
 
                         <p-button [label]="'next' | transloco" icon="pi pi-arrow-right" iconPos="right"
-                            [disabled]="uploadForm.invalid || !canRegister" (onClick)="activateCallback(3)" />
+                            [disabled]="uploadForm.invalid || !canRegister"
+                            (onClick)="goToStep(3, activateCallback)" />
                     </div>
                 </ng-template>
             </p-step-panel>
@@ -700,7 +702,7 @@
 
                     <div class="flex pt-6 justify-start">
                         <p-button [label]="'back' | transloco" icon="pi pi-arrow-left" iconPos="right"
-                            (onClick)="activateCallback(2)" />
+                            (onClick)="goToStep(2, activateCallback)" />
                     </div>
                 </ng-template>
             </p-step-panel>
