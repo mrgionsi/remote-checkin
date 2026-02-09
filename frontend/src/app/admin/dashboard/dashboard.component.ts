@@ -14,17 +14,17 @@ import { InputIconModule } from 'primeng/inputicon';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoService } from '@jsverse/transloco';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
 import { DialogModule } from 'primeng/dialog';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 
 @Component({
   selector: 'app-dashboard',
-  imports: [ToastModule, IconFieldModule, InputIconModule, Toast, ChartModule, TableModule, InputTextModule, TagModule, CommonModule, TranslocoPipe, ButtonModule, SelectModule, FormsModule, CardModule, DialogModule, ProgressSpinnerModule],
+  imports: [ToastModule, IconFieldModule, InputIconModule, Toast, ChartModule, TableModule, InputTextModule, TagModule, CommonModule, TranslocoPipe, ButtonModule, SelectModule, FormsModule, CardModule, DialogModule],
   providers: [MessageService],
   host: { ngSkipHydration: 'true' },
   templateUrl: './dashboard.component.html',
@@ -61,22 +61,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
   dateRangeFilter: string = '';
   roomFilter: string = '';
   globalSearchTerm: string = '';
+  recentReservations: any[] = [];
+  healthItems: Array<{ label: string; value: number; tone: 'neutral' | 'warning' | 'success' }> = [];
 
   // Filter options
-  statusOptions = [
-    { label: 'All Status', value: '' },
-    { label: 'Pending', value: 'Pending' },
-    { label: 'Approved', value: 'Approved' },
-    { label: 'Declined', value: 'Declined' },
-    { label: 'Sent back to customer', value: 'Sent back to customer' }
-  ];
-
-  dateRangeOptions = [
-    { label: 'All Dates', value: '' },
-    { label: 'Today', value: 'today' },
-    { label: 'This Week', value: 'week' },
-    { label: 'This Month', value: 'month' }
-  ];
+  statusOptions: Array<{ label: string; value: string }> = [];
+  dateRangeOptions: Array<{ label: string; value: string }> = [];
 
   roomOptions: any[] = [];
   filteredReservations: any[] = [];
@@ -98,9 +88,43 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private router: Router,
     private authService: AuthService,
     @Inject(PLATFORM_ID) private platformId: object,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private translocoService: TranslocoService
   ) {
 
+  }
+
+  private setFilterOptions(): void {
+    const keys = [
+      'dashboard-filter-status-all',
+      'dashboard-status-pending',
+      'dashboard-status-approved',
+      'dashboard-status-declined',
+      'dashboard-status-sent-back',
+      'dashboard-filter-date-all',
+      'dashboard-date-today',
+      'dashboard-date-week',
+      'dashboard-date-month'
+    ];
+
+    const sub = this.translocoService.selectTranslateObject(keys).subscribe((translations: any) => {
+      this.statusOptions = [
+        { label: translations[0], value: '' },
+        { label: translations[1], value: 'Pending' },
+        { label: translations[2], value: 'Approved' },
+        { label: translations[3], value: 'Declined' },
+        { label: translations[4], value: 'Sent back to customer' }
+      ];
+
+      this.dateRangeOptions = [
+        { label: translations[5], value: '' },
+        { label: translations[6], value: 'today' },
+        { label: translations[7], value: 'week' },
+        { label: translations[8], value: 'month' }
+      ];
+    });
+
+    this.subscriptions.push(sub);
   }
 
   getStatusSeverity(status: string) {
@@ -118,6 +142,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
+  getStatusLabelKey(status: string): string {
+    switch (status) {
+      case 'Pending':
+        return 'dashboard-status-pending';
+      case 'Approved':
+        return 'dashboard-status-approved';
+      case 'Declined':
+        return 'dashboard-status-declined';
+      case 'Sent back to customer':
+        return 'dashboard-status-sent-back';
+      default:
+        return status;
+    }
+  }
+
 
 
   navigateToDetails(event: any): void {
@@ -130,6 +169,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     console.log('DashboardComponent initialized with ID:', this.componentId);
+    this.setFilterOptions();
     if (isPlatformBrowser(this.platformId)) {
       const structureIdStr = localStorage.getItem('selected_structure_id');
       const structureId = structureIdStr ? +structureIdStr : null;
@@ -146,6 +186,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this.filteredReservations = [...this.reservations];
             this.calculateSummaryStats();
             this.extractRoomOptions();
+            this.updateInsights();
             this.loadingReservations = false;
           },
           error: (error) => {
@@ -156,11 +197,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
             if (error.status === 404) {
               console.log('No reservations found for structure:', structureId);
-              this.errorReservations = 'No reservations found for this structure';
+              this.errorReservations = this.translocoService.translate('dashboard-error-no-reservations');
               this.messageService.add({
                 severity: 'info',
-                summary: 'No Reservations',
-                detail: 'No reservations found for this structure',
+                summary: this.translocoService.translate('dashboard-toast-no-reservations-title'),
+                detail: this.translocoService.translate('dashboard-toast-no-reservations-detail'),
                 life: 4000
               });
             } else {
@@ -168,7 +209,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
               this.errorReservations = errorMessage;
               this.messageService.add({
                 severity: 'error',
-                summary: 'Reservations load failed',
+                summary: this.translocoService.translate('dashboard-toast-load-failed-title'),
                 detail: errorMessage,
                 life: 6000
               });
@@ -412,6 +453,52 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     this.filteredReservations = filtered;
+    this.updateInsights();
+  }
+
+  applyQuickFilter(type: string): void {
+    switch (type) {
+      case 'pending':
+        this.statusFilter = 'Pending';
+        this.dateRangeFilter = '';
+        break;
+      case 'approved':
+        this.statusFilter = 'Approved';
+        this.dateRangeFilter = '';
+        break;
+      case 'today':
+        this.dateRangeFilter = 'today';
+        break;
+      case 'week':
+        this.dateRangeFilter = 'week';
+        break;
+      default:
+        break;
+    }
+    this.applyFilters();
+  }
+
+  clearQuickFilters(): void {
+    this.statusFilter = '';
+    this.dateRangeFilter = '';
+    this.roomFilter = '';
+    this.globalSearchTerm = '';
+    this.applyFilters();
+  }
+
+  private updateInsights(): void {
+    const source = this.filteredReservations;
+    const sorted = [...source].sort((a: any, b: any) => {
+      const aDate = new Date(a.start_date || a.end_date || 0).getTime();
+      const bDate = new Date(b.start_date || b.end_date || 0).getTime();
+      return bDate - aDate;
+    });
+    this.recentReservations = sorted.slice(0, 5);
+    this.healthItems = [
+      { label: 'dashboard-health-pending', value: this.summaryStats.pendingApprovals, tone: 'warning' },
+      { label: 'dashboard-health-checkins', value: this.summaryStats.checkinsToday, tone: 'success' },
+      { label: 'dashboard-health-checkouts', value: this.summaryStats.checkoutsToday, tone: 'neutral' }
+    ];
   }
 
   onFilterChange(): void {
@@ -460,7 +547,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.reservations = [];
           this.filteredReservations = [];
           this.loadingReservations = false;
-          const errorMessage = error?.error?.message || error?.message || 'Failed to load reservations. Please try again.';
+          const errorMessage = error?.error?.message || error?.message || this.translocoService.translate('dashboard-error-load-reservations');
           this.errorReservations = errorMessage;
         }
       });
@@ -477,7 +564,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.loadingChart = false;
         },
         error: (error) => {
-          const errorMessage = error?.error?.message || error?.message || 'Failed to load monthly reservations chart. Please try again.';
+          const errorMessage = error?.error?.message || error?.message || this.translocoService.translate('dashboard-error-load-chart');
           this.errorChart = errorMessage;
           this.loadingChart = false;
         }
@@ -502,8 +589,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.filterPendingApprovals();
           this.messageService.add({
             severity: 'info',
-            summary: 'Keyboard Shortcut',
-            detail: 'Filtered to pending approvals',
+            summary: this.translocoService.translate('dashboard-toast-shortcut-title'),
+            detail: this.translocoService.translate('dashboard-toast-shortcut-pending'),
             life: 2000
           });
           break;
@@ -512,8 +599,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.clearFilters();
           this.messageService.add({
             severity: 'info',
-            summary: 'Keyboard Shortcut',
-            detail: 'Cleared all filters',
+            summary: this.translocoService.translate('dashboard-toast-shortcut-title'),
+            detail: this.translocoService.translate('dashboard-toast-shortcut-clear'),
             life: 2000
           });
           break;
@@ -522,8 +609,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.retryLoadData();
           this.messageService.add({
             severity: 'info',
-            summary: 'Keyboard Shortcut',
-            detail: 'Retrying data load',
+            summary: this.translocoService.translate('dashboard-toast-shortcut-title'),
+            detail: this.translocoService.translate('dashboard-toast-shortcut-retry'),
             life: 2000
           });
           break;
@@ -553,4 +640,3 @@ export class DashboardComponent implements OnInit, OnDestroy {
     console.log('DashboardComponent destroyed with ID:', this.componentId, '- subscriptions cleaned up');
   }
 }
-

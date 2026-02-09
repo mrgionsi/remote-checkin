@@ -2,7 +2,7 @@
     <!-- Show loading until component is initialized -->
     <div *ngIf="!isInitialized" class="admin-loading">
         <div class="spinner"></div>
-        <div class="admin-loading__text">Loading...</div>
+        <div class="admin-loading__text">{{ 'loading-label' | transloco }}</div>
     </div>
 
     <!-- Show content only when initialized -->
@@ -10,7 +10,8 @@
         <!-- Admin interface for authenticated users -->
         <div *ngIf="isAuthenticated" class="admin-authenticated">
             <div class="admin-header" *ngIf="!isLoginPage()">
-                <button pButton label="Menu" (click)="toggleSidebar()" class="admin-header__menu">☰</button>
+                <button pButton [label]="'admin-menu-label' | transloco" (click)="toggleSidebar()"
+                    class="admin-header__menu">☰</button>
                 <p-select [options]="structures" optionLabel="name" optionValue="id" [(ngModel)]="selectedStructureId"
                     (onChange)="onStructureChange($event)" [placeholder]="'select-structure-placeholder' | transloco"
                     styleClass="structure-select" *ngIf="structures.length > 0">
@@ -27,6 +28,11 @@
                     <img src="assets/brand/logo-256.png" alt="Remote Check-in" />
                     <div class="admin-sidebar__title">{{ 'admin-panel-title' | transloco }}</div>
                 </div>
+                <div class="admin-sidebar__quick">
+                    <div class="admin-sidebar__quick-title">{{ 'admin-menu-quick-actions' | transloco }}</div>
+                    <p-button [label]="'admin-quick-create-reservation' | transloco" icon="pi pi-plus"
+                        routerLink="/admin/create-reservation" styleClass="admin-quick-btn"></p-button>
+                </div>
                 <p-menu [model]="menuItems"></p-menu>
             </p-sidebar>
 
@@ -35,7 +41,6 @@
             </div>
         </div>
 
-        <!-- Login page for unauthenticated users -->
         <div *ngIf="!isAuthenticated" class="admin-unauthenticated">
             <router-outlet></router-outlet>
         </div>

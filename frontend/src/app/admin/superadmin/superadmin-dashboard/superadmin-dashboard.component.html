@@ -1,61 +1,115 @@
 <div class="dashboard">
-  <h2>Dashboard Overview</h2>
-  
+  <div class="dashboard-header">
+    <div>
+      <span class="eyebrow">{{ 'superadmin-dashboard-eyebrow' | transloco }}</span>
+      <h2>{{ 'superadmin-dashboard-title' | transloco }}</h2>
+      <p>{{ 'superadmin-dashboard-subtitle' | transloco }}</p>
+    </div>
+  </div>
+
   <div class="stats-grid" *ngIf="dashboardData">
-    <div class="stat-card">
-      <div class="stat-icon">🏢</div>
+    <div class="stat-card is-clickable" routerLink="/admin/superadmin/structures">
+      <div class="stat-icon">
+        <i class="pi pi-building"></i>
+      </div>
       <div class="stat-content">
+        <span class="stat-label">{{ 'superadmin-dashboard-stat-total-structures' | transloco }}</span>
         <h3>{{ dashboardData.total_structures }}</h3>
-        <p>Total Structures</p>
       </div>
     </div>
-    
-    <div class="stat-card">
-      <div class="stat-icon">✅</div>
+
+    <div class="stat-card is-clickable" routerLink="/admin/superadmin/structures">
+      <div class="stat-icon accent">
+        <i class="pi pi-check-circle"></i>
+      </div>
       <div class="stat-content">
+        <span class="stat-label">{{ 'superadmin-dashboard-stat-active-structures' | transloco }}</span>
         <h3>{{ dashboardData.active_structures }}</h3>
-        <p>Active Structures</p>
       </div>
     </div>
-    
-    <div class="stat-card">
-      <div class="stat-icon">📦</div>
+
+    <div class="stat-card is-clickable" routerLink="/admin/superadmin/structures">
+      <div class="stat-icon muted">
+        <i class="pi pi-archive"></i>
+      </div>
       <div class="stat-content">
+        <span class="stat-label">{{ 'superadmin-dashboard-stat-archived-structures' | transloco }}</span>
         <h3>{{ dashboardData.archived_structures }}</h3>
-        <p>Archived Structures</p>
       </div>
     </div>
-    
-    <div class="stat-card">
-      <div class="stat-icon">👥</div>
+
+    <div class="stat-card is-clickable" routerLink="/admin/superadmin/users">
+      <div class="stat-icon">
+        <i class="pi pi-users"></i>
+      </div>
       <div class="stat-content">
+        <span class="stat-label">{{ 'superadmin-dashboard-stat-total-users' | transloco }}</span>
         <h3>{{ dashboardData.total_users }}</h3>
-        <p>Total Users</p>
       </div>
     </div>
-    
-    <div class="stat-card">
-      <div class="stat-icon">⚠️</div>
+
+    <div class="stat-card is-clickable" routerLink="/admin/superadmin/users">
+      <div class="stat-icon warning">
+        <i class="pi pi-exclamation-triangle"></i>
+      </div>
       <div class="stat-content">
+        <span class="stat-label">{{ 'superadmin-dashboard-stat-unassigned-admins' | transloco }}</span>
         <h3>{{ dashboardData.unassigned_admins }}</h3>
-        <p>Unassigned Admins</p>
       </div>
     </div>
-    
-    <div class="stat-card">
-      <div class="stat-icon">📋</div>
+
+    <div class="stat-card is-clickable" routerLink="/admin/dashboard">
+      <div class="stat-icon">
+        <i class="pi pi-calendar"></i>
+      </div>
       <div class="stat-content">
+        <span class="stat-label">{{ 'superadmin-dashboard-stat-total-reservations' | transloco }}</span>
         <h3>{{ dashboardData.total_reservations }}</h3>
-        <p>Total Reservations</p>
       </div>
     </div>
   </div>
-  
-  <div class="loading" *ngIf="loading">
-    <p>Loading dashboard data...</p>
+
+  <div class="dashboard-panels">
+    <section class="panel-card">
+      <div class="panel-header">
+        <h3>{{ 'superadmin-dashboard-fast-actions-title' | transloco }}</h3>
+        <span class="panel-caption">{{ 'superadmin-dashboard-fast-actions-subtitle' | transloco }}</span>
+      </div>
+      <div class="panel-actions">
+        <a routerLink="/admin/superadmin/structures" class="panel-action">
+          <i class="pi pi-building"></i>
+          {{ 'superadmin-dashboard-action-structures' | transloco }}
+        </a>
+        <a routerLink="/admin/superadmin/users" class="panel-action">
+          <i class="pi pi-users"></i>
+          {{ 'superadmin-dashboard-action-users' | transloco }}
+        </a>
+        <a routerLink="/admin/superadmin/associations" class="panel-action">
+          <i class="pi pi-sitemap"></i>
+          {{ 'superadmin-dashboard-action-associations' | transloco }}
+        </a>
+      </div>
+    </section>
+
+    <section class="panel-card subtle">
+      <div class="panel-header">
+        <h3>{{ 'superadmin-dashboard-checklist-title' | transloco }}</h3>
+        <span class="panel-caption">{{ 'superadmin-dashboard-checklist-subtitle' | transloco }}</span>
+      </div>
+      <ul class="panel-list">
+        <li>{{ 'superadmin-dashboard-checklist-item-1' | transloco }}</li>
+        <li>{{ 'superadmin-dashboard-checklist-item-2' | transloco }}</li>
+        <li>{{ 'superadmin-dashboard-checklist-item-3' | transloco }}</li>
+      </ul>
+    </section>
   </div>
-  
+
+  <div class="loading" *ngIf="loading">
+    <div class="skeleton-row" *ngFor="let n of [1,2,3]"></div>
+    <p>{{ 'superadmin-dashboard-loading' | transloco }}</p>
+  </div>
+
   <div class="error" *ngIf="error">
-    <p>Error loading dashboard: {{ error }}</p>
+    <p>{{ 'superadmin-dashboard-error' | transloco }} {{ error }}</p>
   </div>
 </div>

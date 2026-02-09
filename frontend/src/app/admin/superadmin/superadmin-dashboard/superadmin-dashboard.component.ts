@@ -1,11 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { SuperadminService, DashboardData } from '../../../services/superadmin.service';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-superadmin-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink, TranslocoPipe],
   templateUrl: './superadmin-dashboard.component.html',
   styleUrls: ['./superadmin-dashboard.component.scss']
 })

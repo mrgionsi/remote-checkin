@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, HttpClientTestingModule } from '@angular/common/http/testing';
 import { RoomService } from './room.service';  // Adjust the import as needed
 import { environment } from '../../environments/environments';
+import { AuthService } from './auth.service';
 
 describe('RoomService', () => {
   let service: RoomService;
@@ -11,7 +12,10 @@ describe('RoomService', () => {
     TestBed.configureTestingModule({
       declarations: [],
       imports: [HttpClientTestingModule],  // Provide the HttpClientTestingModule
-      providers: [RoomService]  // Provide the RoomService
+      providers: [
+        RoomService,
+        { provide: AuthService, useValue: { getAuthHeaders: () => ({}) } }
+      ]
     });
 
     service = TestBed.inject(RoomService);  // Inject the RoomService

@@ -191,6 +191,10 @@ WITH (oids = false);
 
 CREATE INDEX ix_room_id ON public.room USING btree (id);
 
+INSERT INTO "room" ("id", "name", "capacity", "id_structure", "is_active") VALUES
+(2,	'Giungla',	4,	1,	true),
+(3,	'Savana',	2,	1,	true),
+(1,	'SPA',	2,	1,	true);
 
 DROP TABLE IF EXISTS "structure";
 DROP SEQUENCE IF EXISTS structure_id_seq;
@@ -284,4 +288,4 @@ CREATE VIEW "structure_reservations" AS SELECT s.id AS structure_id,
      JOIN room rm ON ((r.id_room = rm.id)))
      JOIN structure s ON ((rm.id_structure = s.id)));
 
--- 2026-02-08 19:24:28 UTC
+-- 2025-03-02 12:41:05.596171+00

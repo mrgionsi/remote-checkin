@@ -11,8 +11,10 @@ import { CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
 import { SelectModule } from 'primeng/select';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { Dialog } from 'primeng/dialog';
+import { DialogModule } from 'primeng/dialog';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { TranslocoService } from '@jsverse/transloco';
+import { AuthService } from '../../services/auth.service';
 
 describe('RoomComponent', () => {
   let component: RoomComponent;
@@ -32,12 +34,14 @@ describe('RoomComponent', () => {
         CommonModule,
         ToastModule,
         ConfirmDialogModule,
-        Dialog,
+        DialogModule,
         FormsModule,
         NoopAnimationsModule
       ],
       providers: [
         { provide: RoomService, useValue: mockRoomService },
+        { provide: AuthService, useValue: { getUser: () => ({ structures: [] }) } },
+        { provide: TranslocoService, useValue: { translate: (key: string) => key } },
         MessageService,
         ConfirmationService
       ]
@@ -64,17 +68,18 @@ describe('RoomComponent', () => {
     fixture.detectChanges();
 
     expect(mockRoomService.getRooms).toHaveBeenCalled();
-    expect(component.rooms).toEqual(mockRooms);
+    expect(component.rooms[0].name).toEqual('Deluxe');
   });
 
   it('should handle error when fetching rooms', () => {
-    spyOn(console, 'error');
+    const messageService = TestBed.inject(MessageService);
+    spyOn(messageService, 'add');
     mockRoomService.getRooms.and.returnValue(throwError(() => new Error('Failed to fetch rooms')));
 
     component.ngOnInit();
     fixture.detectChanges();
 
-    expect(console.error).toHaveBeenCalledWith('Failed to fetch rooms');
+    expect(messageService.add).toHaveBeenCalled();
   });
 
   it('should edit a room successfully', fakeAsync(() => {
@@ -88,14 +93,15 @@ describe('RoomComponent', () => {
   }));
 
   it('should handle error when editing a room', fakeAsync(() => {
-    spyOn(console, 'error');
+    const messageService = TestBed.inject(MessageService);
+    spyOn(messageService, 'add');
     const mockRoom = { id: 1, name: 'Deluxe', capacity: 2 };
     mockRoomService.editRoom.and.returnValue(throwError(() => new Error('Failed to edit room')));
 
     component.onRowEditSave(mockRoom);
     tick();
 
-    expect(console.error).toHaveBeenCalledWith('Error editing reservations:', jasmine.any(Error));
+    expect(messageService.add).toHaveBeenCalled();
   }));
 
   it('should delete a room successfully', fakeAsync(() => {

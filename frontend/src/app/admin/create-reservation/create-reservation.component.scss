@@ -21,6 +21,21 @@
     text-align: left;
 }
 
+.form-section {
+    padding: 1.25rem 1.5rem;
+    border: 1px solid var(--surface-300);
+    border-radius: 14px;
+    background: var(--surface-100);
+    margin-bottom: 1.5rem;
+}
+
+.form-section__title {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    color: var(--ink-900);
+    margin-bottom: 1rem;
+}
+
 .p-field {
     margin-bottom: 1.5rem;
 }
@@ -35,6 +50,13 @@ label {
     margin-bottom: 0.5rem;
     font-size: 0.8rem;
     color: #b91c1c;
+}
+
+.date-helper {
+    display: inline-block;
+    margin-top: 0.5rem;
+    color: var(--ink-500);
+    font-size: 0.8rem;
 }
 
 .wide-input {

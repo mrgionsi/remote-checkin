@@ -5,7 +5,7 @@ import { BadgeModule } from 'primeng/badge';
 import { RippleModule } from 'primeng/ripple';
 import { AvatarModule } from 'primeng/avatar';
 import { CommonModule } from '@angular/common';
-import { Router, RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet, RouterLink } from '@angular/router';
 import { SidebarModule } from 'primeng/sidebar';
 import { ButtonModule } from 'primeng/button';
 import { AuthService } from '../../services/auth.service';
@@ -18,7 +18,7 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 @Component({
   selector: 'app-admin-home',
   imports: [MenuModule, BadgeModule, RippleModule, AvatarModule, CommonModule, SelectModule, FormsModule,
-    RouterOutlet, SidebarModule, ButtonModule, TranslocoPipe],
+    RouterOutlet, RouterLink, SidebarModule, ButtonModule, TranslocoPipe],
   templateUrl: './admin-home.component.html',
   styleUrl: './admin-home.component.scss'
 })
@@ -89,6 +89,11 @@ export class AdminHomeComponent implements OnInit, OnDestroy {
           localStorage.setItem('selected_structure_id', String(this.selectedStructureId));
         }
         this.translocoService.selectTranslateObject([
+          'admin-menu-operations',
+          'admin-menu-settings',
+          'admin-menu-superadmin',
+          'admin-menu-quick-actions',
+          'admin-quick-create-reservation',
           'dashboard-label',
           'add-reservation-label',
           'rooms-label',
@@ -97,26 +102,37 @@ export class AdminHomeComponent implements OnInit, OnDestroy {
           'change-password-label'
         ]).subscribe((translations: any) => {
           this.menuItems = [
-            { label: translations[0], icon: 'pi pi-chart-line', routerLink: '/admin/dashboard' },
-            { label: translations[1], icon: 'pi pi-plus', routerLink: '/admin/create-reservation' },
-            { label: translations[2], icon: 'pi pi-warehouse', routerLink: '/admin/rooms' },
-            { label: translations[3], icon: 'pi pi-cog', routerLink: '/admin/settings' }
+            {
+              label: translations[0],
+              items: [
+                { label: translations[5], icon: 'pi pi-chart-line', routerLink: '/admin/dashboard' },
+                { label: translations[6], icon: 'pi pi-plus', routerLink: '/admin/create-reservation' },
+                { label: translations[7], icon: 'pi pi-warehouse', routerLink: '/admin/rooms' }
+              ]
+            },
+            {
+              label: translations[1],
+              items: [
+                { label: translations[8], icon: 'pi pi-cog', routerLink: '/admin/settings' }
+              ]
+            }
           ];
           if (this.authService.isSuperAdmin()) {
             this.menuItems.push({
-              label: 'Superadmin Panel',
-              icon: 'pi pi-shield',
-              routerLink: '/admin/superadmin'
+              label: translations[2],
+              items: [
+                { label: translations[2], icon: 'pi pi-shield', routerLink: '/admin/superadmin' }
+              ]
             });
           }
           this.userMenuItems = [
             {
-              label: translations[4],
+              label: translations[9],
               icon: 'pi pi-user',
               command: () => this.showUserInfo()
             },
             {
-              label: translations[5],
+              label: translations[10],
               icon: 'pi pi-key',
               routerLink: '/admin/change-password'
             },

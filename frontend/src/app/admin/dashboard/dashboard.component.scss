@@ -1,4 +1,3 @@
-/* dashboard-remote-checkin.component.css */
 .p-fluid {
     max-width: 1200px;
     margin: auto;
@@ -10,22 +9,6 @@ h2 {
     font-family: var(--font-display);
     color: var(--ink-900);
     margin-bottom: 1.5rem;
-}
-
-.p-field {
-    margin-bottom: 1rem;
-}
-
-.p-table {
-    margin-top: 2rem;
-}
-
-.p-tag {
-    font-weight: bold;
-}
-
-#search {
-    width: 25em;
 }
 
 /* Summary Statistics Cards */
@@ -100,36 +83,260 @@ h2 {
     letter-spacing: 0.5px;
 }
 
-/* Card color themes */
-::ng-deep .stat-card-primary {
-    .stat-icon {
-        background: rgba(17, 24, 39, 0.08);
-        color: #111827;
+::ng-deep .stat-card-primary .stat-icon {
+    background: rgba(17, 24, 39, 0.08);
+    color: #111827;
+}
+
+::ng-deep .stat-card-warning .stat-icon {
+    background: rgba(180, 83, 9, 0.12);
+    color: #92400e;
+}
+
+::ng-deep .stat-card-success .stat-icon {
+    background: rgba(22, 101, 52, 0.12);
+    color: #166534;
+}
+
+::ng-deep .stat-card-info .stat-icon {
+    background: rgba(30, 58, 138, 0.12);
+    color: #1e3a8a;
+}
+
+.insights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.insight-card {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid var(--surface-300);
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+    padding: 1.5rem;
+}
+
+.insight-card__header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-bottom: 1rem;
+
+    h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        color: var(--ink-900);
     }
 }
 
-::ng-deep .stat-card-warning {
-    .stat-icon {
-        background: rgba(180, 83, 9, 0.12);
-        color: #92400e;
+.insight-card__hint {
+    font-size: 0.85rem;
+    color: var(--ink-500);
+}
+
+.health-list,
+.recent-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.health-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.health-label {
+    color: var(--ink-500);
+    font-size: 0.85rem;
+}
+
+.health-value {
+    font-weight: 600;
+    color: var(--ink-900);
+}
+
+.health-value.is-warning {
+    color: #b45309;
+}
+
+.health-value.is-success {
+    color: #166534;
+}
+
+.recent-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    border-radius: 12px;
+    background: var(--surface-200);
+}
+
+.recent-name {
+    font-weight: 600;
+    color: var(--ink-900);
+}
+
+.recent-meta {
+    font-size: 0.8rem;
+    color: var(--ink-500);
+}
+
+.recent-status {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-700);
+}
+
+.recent-empty {
+    color: var(--ink-500);
+    font-size: 0.9rem;
+}
+
+.chart-section {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+    border: 1px solid var(--surface-300);
+    position: relative;
+    overflow: hidden;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--surface-300);
+
+    h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--ink-900);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+
+        i {
+            color: var(--ink-900);
+            font-size: 1.75rem;
+        }
     }
 }
 
-::ng-deep .stat-card-success {
-    .stat-icon {
-        background: rgba(22, 101, 52, 0.12);
-        color: #166534;
+.chart-controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+
+    ::ng-deep .chart-type-selector {
+        min-width: 160px;
+        border-radius: 8px;
+
+        .p-select {
+            border-radius: 8px;
+            border: 1px solid var(--surface-300);
+            transition: all 0.2s ease;
+
+            &:hover {
+                border-color: var(--ink-300);
+            }
+
+            &.p-focus {
+                border-color: var(--ink-900);
+                box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.12);
+            }
+        }
     }
 }
 
-::ng-deep .stat-card-info {
-    .stat-icon {
-        background: rgba(30, 58, 138, 0.12);
-        color: #1e3a8a;
+.chart-container {
+    min-height: 300px;
+    padding: 1.5rem;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid var(--surface-300);
+    position: relative;
+
+    .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 200px;
+        gap: 1rem;
+
+        .loading-text {
+            color: var(--ink-500);
+            font-size: 0.875rem;
+            margin: 0;
+        }
+    }
+
+    .error-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 200px;
+        gap: 1rem;
+        padding: 2rem;
+
+        .error-icon {
+            font-size: 3rem;
+            color: #b91c1c;
+        }
+
+        .error-text {
+            color: var(--ink-500);
+            font-size: 0.875rem;
+            text-align: center;
+            margin: 0;
+            max-width: 300px;
+        }
     }
 }
 
-/* Table Filters Styles */
+.skeleton-chart {
+    height: 200px;
+    border-radius: 12px;
+    background: linear-gradient(90deg, #f2f4f7 25%, #e9edf2 37%, #f2f4f7 63%);
+    background-size: 400% 100%;
+    animation: shimmer 1.4s ease infinite;
+}
+
+.health-skeleton .skeleton-line {
+    height: 14px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #f2f4f7 25%, #e9edf2 37%, #f2f4f7 63%);
+    background-size: 400% 100%;
+    animation: shimmer 1.4s ease infinite;
+    margin-bottom: 10px;
+}
+
+.health-skeleton .skeleton-line:last-child {
+    margin-bottom: 0;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 100% 0;
+    }
+    100% {
+        background-position: -100% 0;
+    }
+}
+
 .table-filters {
     display: flex;
     flex-direction: column;
@@ -141,6 +348,34 @@ h2 {
     display: flex;
     gap: 1rem;
     align-items: center;
+}
+
+.quick-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.filter-chip {
+    border: 1px solid var(--surface-300);
+    background: #ffffff;
+    color: var(--ink-700);
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.filter-chip:hover {
+    border-color: var(--ink-300);
+    color: var(--ink-900);
+}
+
+.filter-chip.is-muted {
+    background: var(--surface-200);
 }
 
 .filter-controls {
@@ -241,7 +476,6 @@ h2 {
     }
 }
 
-/* Table Styles */
 ::ng-deep .p-table {
     border-radius: 12px;
     overflow: hidden;
@@ -272,7 +506,7 @@ h2 {
     .p-table-tbody {
         tr {
             transition: all 0.2s ease;
-            border-bottom: 1px solid #f1f5f9;
+            border-bottom: 1px solid var(--surface-300);
 
             &:hover {
                 background: var(--surface-200);
@@ -323,18 +557,10 @@ h2 {
         }
     }
 
-    // Empty state styling
-    .p-table-tbody>tr.p-datatable-emptymessage-row {
-        td {
-            text-align: center;
-            padding: 3rem 1.5rem;
-            color: var(--ink-500);
-        }
-    }
-
-    // Selection styling
-    .p-selectable-row {
-        cursor: pointer;
+    .p-table-tbody > tr.p-datatable-emptymessage-row td {
+        text-align: center;
+        padding: 3rem 1.5rem;
+        color: var(--ink-500);
     }
 
     .p-selectable-row:focus {
@@ -342,7 +568,6 @@ h2 {
         outline-offset: -2px;
     }
 
-    // Error message styling
     .error-message {
         display: flex;
         flex-direction: column;
@@ -363,146 +588,10 @@ h2 {
     }
 }
 
-/* Chart Section Styles */
-.chart-section {
-    background: #ffffff;
-    border-radius: 16px;
-    padding: 2rem;
-    margin-bottom: 2rem;
-    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
-    border: 1px solid var(--surface-300);
-    position: relative;
-    overflow: hidden;
-}
-
-.chart-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 1px solid var(--surface-300);
-
-    h3 {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--ink-900);
-        margin: 0;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-
-        i {
-            color: var(--ink-900);
-            font-size: 1.75rem;
-        }
-    }
-}
-
-.chart-controls {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-
-    ::ng-deep .chart-type-selector {
-        min-width: 160px;
-        border-radius: 8px;
-
-        .p-select {
-            border-radius: 8px;
-            border: 1px solid var(--surface-300);
-            transition: all 0.2s ease;
-
-            &:hover {
-                border-color: var(--ink-300);
-            }
-
-            &.p-focus {
-                border-color: var(--ink-900);
-                box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.12);
-            }
-        }
-    }
-}
-
-.chart-container {
-    min-height: 300px;
-    padding: 1.5rem;
-    background: #ffffff;
-    border-radius: 12px;
-    border: 1px solid var(--surface-300);
-    position: relative;
-
-    ::ng-deep canvas {
-        border-radius: 8px;
-    }
-
-    .loading-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-height: 200px;
-        gap: 1rem;
-
-        .loading-text {
-            color: var(--ink-500);
-            font-size: 0.875rem;
-            margin: 0;
-        }
-    }
-
-    .error-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-height: 200px;
-        gap: 1rem;
-        padding: 2rem;
-
-        .error-icon {
-            font-size: 3rem;
-            color: #b91c1c;
-        }
-
-        .error-text {
-            color: var(--ink-500);
-            font-size: 0.875rem;
-            text-align: center;
-            margin: 0;
-            max-width: 300px;
-        }
-    }
-}
-
-/* Responsive adjustments */
 @media (max-width: 768px) {
     .stats-grid {
         grid-template-columns: 1fr;
         gap: 1rem;
-    }
-
-    .stat-content {
-        padding: 1.25rem;
-    }
-
-    .stat-icon {
-        width: 50px;
-        height: 50px;
-        font-size: 1.5rem;
-    }
-
-    .stat-value {
-        font-size: 1.75rem;
-    }
-
-    .stat-label {
-        font-size: 0.8rem;
-    }
-
-    .chart-section {
-        padding: 1.5rem;
     }
 
     .chart-header {
@@ -510,10 +599,6 @@ h2 {
         align-items: flex-start;
         gap: 1rem;
         margin-bottom: 1.5rem;
-
-        h3 {
-            font-size: 1.25rem;
-        }
     }
 
     .chart-controls {
@@ -528,10 +613,6 @@ h2 {
     .chart-container {
         min-height: 250px;
         padding: 1rem;
-    }
-
-    .table-filters {
-        gap: 1rem;
     }
 
     .quick-actions {
@@ -558,7 +639,6 @@ h2 {
     }
 }
 
-/* Keyboard Shortcuts Dialog */
 ::ng-deep .shortcuts-dialog {
     .p-dialog-content {
         padding: 0;
@@ -623,10 +703,4 @@ h2 {
     font-size: 0.875rem;
     flex: 1;
     margin-left: 1rem;
-}
-
-@media (min-width: 769px) and (max-width: 1024px) {
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
 }
