@@ -1,25 +1,28 @@
 <div class="structures">
     <div class="structures-header">
-        <h2>Structures Management</h2>
-        <p-button label="Create Structure" icon="pi pi-plus" (onClick)="openCreateModal()" severity="primary">
+        <h2>{{ 'superadmin-structures-title' | transloco }}</h2>
+        <p-button [label]="'superadmin-structures-create' | transloco" icon="pi pi-plus" (onClick)="openCreateModal()"
+            severity="primary">
         </p-button>
     </div>
 
     <div class="filters">
         <div style="flex: 1;">
-            <input pInputText placeholder="Search structures..." [(ngModel)]="searchTerm" (ngModelChange)="onSearch()"
-                name="searchTerm" class="w-full">
+            <input pInputText [placeholder]="'superadmin-structures-search' | transloco" [(ngModel)]="searchTerm"
+                (ngModelChange)="onSearch()" name="searchTerm" class="w-full">
         </div>
         <div style="flex: 1;">
             <p-select [(ngModel)]="statusFilter" (ngModelChange)="loadStructures()" [options]="statusOptions"
-                placeholder="All Status" name="statusFilter" styleClass="w-full">
+                [placeholder]="'superadmin-structures-status-all' | transloco" name="statusFilter" styleClass="w-full">
             </p-select>
         </div>
     </div>
     <div class="filter-chips">
-        <button class="chip" (click)="setStatusFilter('')">All</button>
-        <button class="chip" (click)="setStatusFilter('true')">Active</button>
-        <button class="chip" (click)="setStatusFilter('false')">Archived</button>
+        <button class="chip" (click)="setStatusFilter('')">{{ 'superadmin-structures-filter-all' | transloco }}</button>
+        <button class="chip" (click)="setStatusFilter('true')">{{ 'superadmin-structures-filter-active' | transloco
+            }}</button>
+        <button class="chip" (click)="setStatusFilter('false')">{{ 'superadmin-structures-filter-archived' | transloco
+            }}</button>
     </div>
 
     <div class="structures-list" *ngIf="!loading">
@@ -27,24 +30,27 @@
             <ng-template pTemplate="header">
                 <div class="structure-header">
                     <h3>{{ structure.name }}</h3>
-                    <p-tag [value]="structure.is_active ? 'Active' : 'Archived'"
+                    <p-tag [value]="structure.is_active ? ('superadmin-structures-status-active' | transloco) :
+                        ('superadmin-structures-status-archived' | transloco)"
                         [severity]="structure.is_active ? 'success' : 'warn'">
                     </p-tag>
                 </div>
             </ng-template>
 
             <div class="structure-info">
-                <p><strong>City:</strong> {{ structure.city }}</p>
-                <p><strong>Address:</strong> {{ structure.street }}</p>
-                <p><strong>CIN:</strong> {{ structure.cin || 'N/A' }}</p>
+                <p><strong>{{ 'superadmin-structures-city' | transloco }}</strong> {{ structure.city }}</p>
+                <p><strong>{{ 'superadmin-structures-address' | transloco }}</strong> {{ structure.street }}</p>
+                <p><strong>{{ 'superadmin-structures-cin' | transloco }}</strong> {{ structure.cin || ('superadmin-structures-na' | transloco) }}</p>
             </div>
 
             <ng-template pTemplate="footer">
                 <div class="structure-actions">
-                    <p-button label="Edit" icon="pi pi-pencil" severity="secondary" size="small"
+                    <p-button [label]="'superadmin-structures-edit' | transloco" icon="pi pi-pencil"
+                        severity="secondary" size="small"
                         (onClick)="editStructure(structure)">
                     </p-button>
-                    <p-button [label]="structure.is_active ? 'Archive' : 'Restore'"
+                    <p-button
+                        [label]="structure.is_active ? ('superadmin-structures-archive' | transloco) : ('superadmin-structures-restore' | transloco)"
                         [icon]="structure.is_active ? 'pi pi-file-export' : 'pi pi-refresh'"
                         [severity]="structure.is_active ? 'warn' : 'success'" size="small"
                         (onClick)="toggleStructureStatus(structure)">
@@ -62,20 +68,21 @@
     <p-paginator *ngIf="pagination && pagination.pages > 1" [rows]="pagination.per_page"
         [totalRecords]="pagination.total" [first]="(pagination.page - 1) * pagination.per_page"
         (onPageChange)="onPageChange($event)" [showCurrentPageReport]="true"
-        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} structures">
+        [currentPageReportTemplate]="'superadmin-structures-pagination' | transloco">
     </p-paginator>
 </div>
 
 <!-- Create/Edit Modal -->
 <p-dialog [(visible)]="showModal" [modal]="true" [closable]="true"
-    [header]="editingStructure ? 'Edit Structure' : 'Create New Structure'"
+    [header]="editingStructure ? ('superadmin-structures-edit-title' | transloco) : ('superadmin-structures-create-title' | transloco)"
     [style]="{ width: '600px', maxWidth: '90vw' }" [draggable]="false" [resizable]="false" (onHide)="closeModal()"
     styleClass="structure-dialog">
 
     <ng-template pTemplate="header">
         <div class="dialog-header">
             <i class="header-icon" [ngClass]="editingStructure ? 'pi pi-pencil' : 'pi pi-plus'"></i>
-            <span class="header-title">{{ editingStructure ? 'Edit Structure' : 'Create New Structure' }}</span>
+            <span class="header-title">{{ editingStructure ? ('superadmin-structures-edit-title' | transloco) :
+                ('superadmin-structures-create-title' | transloco) }}</span>
         </div>
     </ng-template>
 
@@ -86,21 +93,21 @@
             <div class="form-section">
                 <div class="section-header">
                     <i class="pi pi-info-circle section-icon"></i>
-                    <h4>Basic Information</h4>
+                    <h4>{{ 'superadmin-structures-section-basic' | transloco }}</h4>
                 </div>
 
                 <div class="form-row">
                     <div class="form-field">
                         <label for="name" class="field-label">
                             <i class="pi pi-building"></i>
-                            Structure Name *
+                            {{ 'superadmin-structures-name' | transloco }}
                         </label>
-                        <input pInputText id="name" formControlName="name" placeholder="Enter structure name"
-                            class="form-input">
+                        <input pInputText id="name" formControlName="name"
+                            [placeholder]="'superadmin-structures-name-placeholder' | transloco" class="form-input">
                         <small *ngIf="structureForm.get('name')?.invalid && structureForm.get('name')?.touched"
                             class="error-message">
                             <i class="pi pi-exclamation-triangle"></i>
-                            Structure name is required
+                            {{ 'superadmin-structures-name-required' | transloco }}
                         </small>
                     </div>
                 </div>
@@ -109,14 +116,14 @@
                     <div class="form-field">
                         <label for="city" class="field-label">
                             <i class="pi pi-map-marker"></i>
-                            City *
+                            {{ 'superadmin-structures-city-label' | transloco }}
                         </label>
-                        <input pInputText id="city" formControlName="city" placeholder="Enter city name"
-                            class="form-input">
+                        <input pInputText id="city" formControlName="city"
+                            [placeholder]="'superadmin-structures-city-placeholder' | transloco" class="form-input">
                         <small *ngIf="structureForm.get('city')?.invalid && structureForm.get('city')?.touched"
                             class="error-message">
                             <i class="pi pi-exclamation-triangle"></i>
-                            City is required
+                            {{ 'superadmin-structures-city-required' | transloco }}
                         </small>
                     </div>
                 </div>
@@ -126,17 +133,17 @@
             <div class="form-section">
                 <div class="section-header">
                     <i class="pi pi-home section-icon"></i>
-                    <h4>Address Information</h4>
+                    <h4>{{ 'superadmin-structures-section-address' | transloco }}</h4>
                 </div>
 
                 <div class="form-row">
                     <div class="form-field">
                         <label for="street" class="field-label">
                             <i class="pi pi-map"></i>
-                            Street Address
+                            {{ 'superadmin-structures-street' | transloco }}
                         </label>
-                        <input pInputText id="street" formControlName="street" placeholder="Enter street address"
-                            class="form-input">
+                        <input pInputText id="street" formControlName="street"
+                            [placeholder]="'superadmin-structures-street-placeholder' | transloco" class="form-input">
                     </div>
                 </div>
 
@@ -144,9 +151,10 @@
                     <div class="form-field">
                         <label for="cin" class="field-label">
                             <i class="pi pi-id-card"></i>
-                            CIN (Company Identification Number)
+                            {{ 'superadmin-structures-cin-label' | transloco }}
                         </label>
-                        <input pInputText id="cin" formControlName="cin" placeholder="Enter CIN" class="form-input">
+                        <input pInputText id="cin" formControlName="cin"
+                            [placeholder]="'superadmin-structures-cin-placeholder' | transloco" class="form-input">
                     </div>
                 </div>
             </div>
@@ -155,7 +163,7 @@
             <div class="form-section" *ngIf="editingStructure">
                 <div class="section-header">
                     <i class="pi pi-cog section-icon"></i>
-                    <h4>Status</h4>
+                    <h4>{{ 'superadmin-structures-section-status' | transloco }}</h4>
                 </div>
 
                 <div class="form-row">
@@ -166,10 +174,10 @@
                             </p-checkbox>
                             <label for="is_active" class="checkbox-label">
                                 <i class="pi pi-check-circle"></i>
-                                Structure is active
+                                {{ 'superadmin-structures-active-label' | transloco }}
                             </label>
                         </div>
-                        <small class="field-hint">Uncheck to archive this structure</small>
+                        <small class="field-hint">{{ 'superadmin-structures-active-hint' | transloco }}</small>
                     </div>
                 </div>
             </div>
@@ -178,10 +186,11 @@
 
     <ng-template pTemplate="footer">
         <div class="dialog-footer">
-            <p-button label="Cancel" icon="pi pi-times" severity="secondary" (onClick)="closeModal()" [outlined]="true"
-                class="cancel-btn">
+            <p-button [label]="'superadmin-structures-cancel' | transloco" icon="pi pi-times" severity="secondary"
+                (onClick)="closeModal()" [outlined]="true" class="cancel-btn">
             </p-button>
-            <p-button [label]="editingStructure ? 'Update Structure' : 'Create Structure'"
+            <p-button
+                [label]="editingStructure ? ('superadmin-structures-update' | transloco) : ('superadmin-structures-create' | transloco)"
                 [icon]="editingStructure ? 'pi pi-check' : 'pi pi-plus'" severity="primary" (onClick)="saveStructure()"
                 [disabled]="!structureForm.valid || submitting" [loading]="submitting" class="submit-btn">
             </p-button>

@@ -1,22 +1,26 @@
 <div class="users">
   <div class="users-header">
-    <h2 id="users-title">Users Management</h2>
-    <p-button label="Create User" icon="pi pi-user-plus" (onClick)="openCreateModal()" severity="primary"
-      aria-label="Create new user account">
+    <h2 id="users-title">{{ 'superadmin-users-title' | transloco }}</h2>
+    <p-button [label]="'superadmin-users-create' | transloco" icon="pi pi-user-plus" (onClick)="openCreateModal()"
+      severity="primary" [attr.aria-label]="'superadmin-users-create-aria' | transloco">
     </p-button>
   </div>
 
   <div class="filters">
-    <input pInputText placeholder="Search users..." [(ngModel)]="searchTerm" (ngModelChange)="onSearch()"
-      name="searchTerm" class="w-full" aria-label="Search users by name, username, or email">
-    <p-select [(ngModel)]="roleFilter" (ngModelChange)="loadUsers()" [options]="roleOptions" placeholder="All Roles"
-      name="roleFilter" styleClass="w-full" optionLabel="label" optionValue="value" aria-label="Filter users by role">
+    <input pInputText [placeholder]="'superadmin-users-search' | transloco" [(ngModel)]="searchTerm"
+      (ngModelChange)="onSearch()" name="searchTerm" class="w-full"
+      [attr.aria-label]="'superadmin-users-search-aria' | transloco">
+    <p-select [(ngModel)]="roleFilter" (ngModelChange)="loadUsers()" [options]="roleOptions"
+      [placeholder]="'superadmin-users-filter-all-roles' | transloco" name="roleFilter" styleClass="w-full"
+      optionLabel="label" optionValue="value" [attr.aria-label]="'superadmin-users-filter-aria' | transloco">
     </p-select>
   </div>
   <div class="filter-chips">
-    <button class="chip" (click)="setRoleFilter('')">All</button>
-    <button class="chip" (click)="setRoleFilter('administrator')">Administrator</button>
-    <button class="chip" (click)="setRoleFilter('superadmin')">Superadmin</button>
+    <button class="chip" (click)="setRoleFilter('')">{{ 'superadmin-users-filter-all' | transloco }}</button>
+    <button class="chip" (click)="setRoleFilter('administrator')">{{ 'superadmin-users-filter-admin' | transloco
+      }}</button>
+    <button class="chip" (click)="setRoleFilter('superadmin')">{{ 'superadmin-users-filter-superadmin' | transloco
+      }}</button>
   </div>
 
   <ul class="users-list" *ngIf="!loading && users.length > 0" aria-labelledby="users-title">
@@ -41,24 +45,24 @@
           <div class="info-section">
             <div class="info-item" *ngIf="user.email">
               <i class="pi pi-envelope info-icon"></i>
-              <span class="info-label">Email:</span>
+              <span class="info-label">{{ 'superadmin-users-email' | transloco }}</span>
               <span class="info-value">{{ user.email }}</span>
             </div>
             <div class="info-item" *ngIf="user.telephone">
               <i class="pi pi-phone info-icon"></i>
-              <span class="info-label">Phone:</span>
+              <span class="info-label">{{ 'superadmin-users-phone' | transloco }}</span>
               <span class="info-value">{{ user.telephone }}</span>
             </div>
             <div class="info-item" *ngIf="!user.email && !user.telephone">
               <i class="pi pi-info-circle info-icon"></i>
-              <span class="info-value no-contact">No contact information provided</span>
+              <span class="info-value no-contact">{{ 'superadmin-users-no-contact' | transloco }}</span>
             </div>
           </div>
 
           <div class="structures-section" *ngIf="user.structures && user.structures.length > 0">
             <div class="section-header">
               <i class="pi pi-sitemap section-icon"></i>
-              <span class="section-title">Assigned Structures</span>
+              <span class="section-title">{{ 'superadmin-users-assigned-structures' | transloco }}</span>
             </div>
             <div class="structures-tags">
               <p-tag *ngFor="let structure of user.structures" [value]="structure.name" severity="secondary"
@@ -69,7 +73,7 @@
           <div class="no-structures" *ngIf="!user.structures || user.structures.length === 0">
             <div class="empty-state">
               <i class="pi pi-sitemap empty-icon"></i>
-              <span class="empty-text">No structures assigned</span>
+              <span class="empty-text">{{ 'superadmin-users-no-structures' | transloco }}</span>
             </div>
           </div>
         </div>
@@ -77,24 +81,24 @@
         <ng-template pTemplate="footer">
           <div class="user-actions">
             <button type="button" (click)="editUser(user)" class="action-btn edit-btn"
-              [attr.aria-label]="'Edit user ' + user.name + ' ' + user.surname">
+              [attr.aria-label]="'superadmin-users-edit-aria' | transloco : { name: user.name, surname: user.surname }">
               <i class="pi pi-pencil" aria-hidden="true"></i>
-              Edit
+              {{ 'superadmin-users-edit' | transloco }}
             </button>
             <button type="button" (click)="resetPassword(user)" class="action-btn password-btn"
-              [attr.aria-label]="'Reset password for user ' + user.name + ' ' + user.surname">
+              [attr.aria-label]="'superadmin-users-reset-aria' | transloco : { name: user.name, surname: user.surname }">
               <i class="pi pi-key" aria-hidden="true"></i>
-              Reset Password
+              {{ 'superadmin-users-reset' | transloco }}
             </button>
             <button type="button" (click)="manageAssociations(user)" class="action-btn structures-btn"
-              [attr.aria-label]="'Manage structures for user ' + user.name + ' ' + user.surname">
+              [attr.aria-label]="'superadmin-users-structures-aria' | transloco : { name: user.name, surname: user.surname }">
               <i class="pi pi-sitemap" aria-hidden="true"></i>
-              Manage Structures
+              {{ 'superadmin-users-structures' | transloco }}
             </button>
             <button type="button" (click)="openRoleChangeModal(user)" class="action-btn role-btn"
-              [attr.aria-label]="'Change role for user ' + user.name + ' ' + user.surname">
+              [attr.aria-label]="'superadmin-users-role-aria' | transloco : { name: user.name, surname: user.surname }">
               <i class="pi pi-users" aria-hidden="true"></i>
-              Change Role
+              {{ 'superadmin-users-role' | transloco }}
             </button>
           </div>
         </ng-template>
@@ -105,9 +109,10 @@
   <div class="no-users" *ngIf="!loading && users.length === 0">
     <div class="empty-state">
       <i class="pi pi-users empty-icon"></i>
-      <h3>No users found</h3>
-      <p>No users match your current search criteria.</p>
-      <button pButton label="Create First User" icon="pi pi-user-plus" (onClick)="openCreateModal()" severity="primary">
+      <h3>{{ 'superadmin-users-empty-title' | transloco }}</h3>
+      <p>{{ 'superadmin-users-empty-subtitle' | transloco }}</p>
+      <button pButton [label]="'superadmin-users-empty-cta' | transloco" icon="pi pi-user-plus"
+        (onClick)="openCreateModal()" severity="primary">
       </button>
     </div>
   </div>
@@ -116,18 +121,20 @@
     <div class="skeleton-card" *ngFor="let n of [1,2,3]"></div>
   </div>
 
-  <p-message *ngIf="error" severity="error" [text]="'Error: ' + error" styleClass="w-full">
+  <p-message *ngIf="error" severity="error" [text]="('superadmin-users-error' | transloco) + error"
+    styleClass="w-full">
   </p-message>
 
   <p-paginator *ngIf="pagination && pagination.pages > 1" [rows]="pagination.per_page" [totalRecords]="pagination.total"
     [first]="(pagination.page - 1) * pagination.per_page" (onPageChange)="onPageChange($event)"
-    [showCurrentPageReport]="true" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} users">
+    [showCurrentPageReport]="true"
+    [currentPageReportTemplate]="'superadmin-users-pagination' | transloco">
   </p-paginator>
 </div>
 
 <!-- Create/Edit Dialog -->
 <p-dialog [(visible)]="showModal" [modal]="true" [closable]="false"
-  [header]="editingUser ? 'Edit User' : 'Create New User'"
+  [header]="editingUser ? ('superadmin-users-edit-title' | transloco) : ('superadmin-users-create-title' | transloco)"
   [style]="{ width: '600px', maxWidth: '90vw', maxHeight: '90vh' }" [draggable]="false" [resizable]="false"
   (onHide)="closeModal()" styleClass="user-dialog" [attr.aria-labelledby]="'user-dialog-title'"
   [attr.aria-describedby]="'user-dialog-content'">
@@ -136,7 +143,9 @@
     <div class="dialog-header">
       <div class="header-content">
         <i class="header-icon" [ngClass]="editingUser ? 'pi pi-user-edit' : 'pi pi-user-plus'"></i>
-        <span class="header-title" id="user-dialog-title">{{ editingUser ? 'Edit User' : 'Create New User' }}</span>
+        <span class="header-title"
+          id="user-dialog-title">{{ editingUser ? ('superadmin-users-edit-title' | transloco) :
+          ('superadmin-users-create-title' | transloco) }}</span>
       </div>
       <button type="button" class="header-close-btn" (click)="closeModal()">
         <i class="pi pi-times"></i>
@@ -150,21 +159,21 @@
       <div class="form-section">
         <div class="section-header">
           <i class="pi pi-user section-icon"></i>
-          <h4>Basic Information</h4>
+          <h4>{{ 'superadmin-users-section-basic' | transloco }}</h4>
         </div>
 
         <div class="form-row">
           <div class="form-field">
             <label for="username" class="field-label">
               <i class="pi pi-at"></i>
-              Username *
+              {{ 'superadmin-users-username' | transloco }}
             </label>
             <input pInputText id="username" name="username" [(ngModel)]="userFormData.username"
-              placeholder="Enter username" required class="form-input">
+              [placeholder]="'superadmin-users-username-placeholder' | transloco" required class="form-input">
             <small *ngIf="userForm.form.get('username')?.invalid && userForm.form.get('username')?.touched"
               class="error-message">
               <i class="pi pi-exclamation-triangle"></i>
-              Username is required
+              {{ 'superadmin-users-username-required' | transloco }}
             </small>
           </div>
         </div>
@@ -173,14 +182,15 @@
           <div class="form-field">
             <label for="password" class="field-label">
               <i class="pi pi-lock"></i>
-              Password *
+              {{ 'superadmin-users-password' | transloco }}
             </label>
             <input pInputText id="password" name="password" [(ngModel)]="userFormData.password"
-              placeholder="Enter password" type="password" autocomplete="new-password" required class="form-input">
+              [placeholder]="'superadmin-users-password-placeholder' | transloco" type="password"
+              autocomplete="new-password" required class="form-input">
             <small *ngIf="userForm.form.get('password')?.invalid && userForm.form.get('password')?.touched"
               class="error-message">
               <i class="pi pi-exclamation-triangle"></i>
-              Password is required
+              {{ 'superadmin-users-password-required' | transloco }}
             </small>
           </div>
         </div>
@@ -190,21 +200,21 @@
       <div class="form-section">
         <div class="section-header">
           <i class="pi pi-id-card section-icon"></i>
-          <h4>Personal Information</h4>
+          <h4>{{ 'superadmin-users-section-personal' | transloco }}</h4>
         </div>
 
         <div class="form-row">
           <div class="form-field">
             <label for="name" class="field-label">
               <i class="pi pi-user"></i>
-              First Name *
+              {{ 'superadmin-users-first-name' | transloco }}
             </label>
-            <input pInputText id="name" name="name" [(ngModel)]="userFormData.name" placeholder="Enter first name"
-              required class="form-input">
+            <input pInputText id="name" name="name" [(ngModel)]="userFormData.name"
+              [placeholder]="'superadmin-users-first-name-placeholder' | transloco" required class="form-input">
             <small *ngIf="userForm.form.get('name')?.invalid && userForm.form.get('name')?.touched"
               class="error-message">
               <i class="pi pi-exclamation-triangle"></i>
-              First name is required
+              {{ 'superadmin-users-first-name-required' | transloco }}
             </small>
           </div>
         </div>
@@ -213,14 +223,14 @@
           <div class="form-field">
             <label for="surname" class="field-label">
               <i class="pi pi-users"></i>
-              Last Name *
+              {{ 'superadmin-users-last-name' | transloco }}
             </label>
             <input pInputText id="surname" name="surname" [(ngModel)]="userFormData.surname"
-              placeholder="Enter last name" required class="form-input">
+              [placeholder]="'superadmin-users-last-name-placeholder' | transloco" required class="form-input">
             <small *ngIf="userForm.form.get('surname')?.invalid && userForm.form.get('surname')?.touched"
               class="error-message">
               <i class="pi pi-exclamation-triangle"></i>
-              Last name is required
+              {{ 'superadmin-users-last-name-required' | transloco }}
             </small>
           </div>
         </div>
@@ -230,17 +240,17 @@
       <div class="form-section">
         <div class="section-header">
           <i class="pi pi-phone section-icon"></i>
-          <h4>Contact Information</h4>
+          <h4>{{ 'superadmin-users-section-contact' | transloco }}</h4>
         </div>
 
         <div class="form-row">
           <div class="form-field">
             <label for="email" class="field-label">
               <i class="pi pi-envelope"></i>
-              Email Address
+              {{ 'superadmin-users-email-label' | transloco }}
             </label>
-            <input pInputText id="email" name="email" [(ngModel)]="userFormData.email" placeholder="Enter email address"
-              type="email" class="form-input">
+            <input pInputText id="email" name="email" [(ngModel)]="userFormData.email"
+              [placeholder]="'superadmin-users-email-placeholder' | transloco" type="email" class="form-input">
           </div>
         </div>
 
@@ -248,10 +258,10 @@
           <div class="form-field">
             <label for="telephone" class="field-label">
               <i class="pi pi-phone"></i>
-              Phone Number
+              {{ 'superadmin-users-phone-label' | transloco }}
             </label>
             <input pInputText id="telephone" name="telephone" [(ngModel)]="userFormData.telephone"
-              placeholder="Enter phone number" type="tel" class="form-input">
+              [placeholder]="'superadmin-users-phone-placeholder' | transloco" type="tel" class="form-input">
           </div>
         </div>
       </div>
@@ -260,10 +270,11 @@
 
   <ng-template pTemplate="footer">
     <div class="dialog-footer">
-      <p-button label="Cancel" icon="pi pi-times" severity="secondary" (onClick)="closeModal()" [outlined]="true"
-        class="cancel-btn">
+      <p-button [label]="'superadmin-users-cancel' | transloco" icon="pi pi-times" severity="secondary"
+        (onClick)="closeModal()" [outlined]="true" class="cancel-btn">
       </p-button>
-      <p-button [label]="editingUser ? 'Update User' : 'Create User'"
+      <p-button
+        [label]="editingUser ? ('superadmin-users-update' | transloco) : ('superadmin-users-create' | transloco)"
         [icon]="editingUser ? 'pi pi-check' : 'pi pi-plus'" severity="primary" type="submit"
         [disabled]="!userForm.form.valid || submitting" [loading]="submitting" class="submit-btn"
         (onClick)="saveUser()">
@@ -273,7 +284,8 @@
 </p-dialog>
 
 <!-- Reset Password Dialog -->
-<p-dialog [(visible)]="showPasswordModal" [modal]="true" [closable]="false" header="Reset Password"
+<p-dialog [(visible)]="showPasswordModal" [modal]="true" [closable]="false"
+  [header]="'superadmin-users-reset-title' | transloco"
   [style]="{ width: '400px', maxWidth: '90vw' }" [draggable]="false" [resizable]="false" (onHide)="closePasswordModal()"
   styleClass="password-dialog">
 
@@ -281,7 +293,7 @@
     <div class="dialog-header">
       <div class="header-content">
         <i class="header-icon pi pi-key"></i>
-        <span class="header-title">Reset Password</span>
+        <span class="header-title">{{ 'superadmin-users-reset-title' | transloco }}</span>
       </div>
       <button type="button" class="header-close-btn" (click)="closePasswordModal()">
         <i class="pi pi-times"></i>
@@ -296,15 +308,16 @@
           <div class="form-field">
             <label for="newPassword" class="field-label">
               <i class="pi pi-lock"></i>
-              New Password *
+              {{ 'superadmin-users-new-password' | transloco }}
             </label>
             <input pInputText id="newPassword" name="newPassword" [(ngModel)]="passwordFormData.password"
-              placeholder="Enter new password" type="password" autocomplete="new-password" required class="form-input">
+              [placeholder]="'superadmin-users-new-password-placeholder' | transloco" type="password"
+              autocomplete="new-password" required class="form-input">
             <small
               *ngIf="passwordForm.form.get('newPassword')?.invalid && passwordForm.form.get('newPassword')?.touched"
               class="error-message">
               <i class="pi pi-exclamation-triangle"></i>
-              New password is required
+              {{ 'superadmin-users-new-password-required' | transloco }}
             </small>
           </div>
         </div>
@@ -314,10 +327,10 @@
 
   <ng-template pTemplate="footer">
     <div class="dialog-footer">
-      <p-button label="Cancel" icon="pi pi-times" severity="danger" (onClick)="closePasswordModal()" [outlined]="true"
-        class="cancel-btn">
+      <p-button [label]="'superadmin-users-cancel' | transloco" icon="pi pi-times" severity="danger"
+        (onClick)="closePasswordModal()" [outlined]="true" class="cancel-btn">
       </p-button>
-      <p-button label="Reset Password" icon="pi pi-key" severity="info" type="submit"
+      <p-button [label]="'superadmin-users-reset' | transloco" icon="pi pi-key" severity="info" type="submit"
         [disabled]="!passwordForm.form.valid || submittingPassword" [loading]="submittingPassword" class="submit-btn"
         (onClick)="confirmResetPassword()">
       </p-button>
@@ -326,7 +339,8 @@
 </p-dialog>
 
 <!-- Manage Structures Dialog -->
-<p-dialog [(visible)]="showStructuresModal" [modal]="true" [closable]="false" header="Manage User Structures"
+<p-dialog [(visible)]="showStructuresModal" [modal]="true" [closable]="false"
+  [header]="'superadmin-users-structures-title' | transloco"
   [style]="{ width: '700px', maxWidth: '90vw', height: '600px' }" [draggable]="false" [resizable]="false"
   (onHide)="closeStructuresModal()" styleClass="structures-dialog">
 
@@ -334,7 +348,8 @@
     <div class="dialog-header">
       <div class="header-content">
         <i class="header-icon pi pi-sitemap"></i>
-        <span class="header-title">Manage Structures for {{ selectedUser?.name }} {{ selectedUser?.surname }}</span>
+        <span class="header-title">{{ 'superadmin-users-structures-title' | transloco : { name: selectedUser?.name,
+          surname: selectedUser?.surname } }}</span>
       </div>
       <button type="button" class="header-close-btn" (click)="closeStructuresModal()">
         <i class="pi pi-times"></i>
@@ -347,7 +362,7 @@
     <div class="current-structures-section" *ngIf="userStructures.length > 0">
       <div class="section-header">
         <i class="pi pi-sitemap section-icon"></i>
-        <h4>Current Structures</h4>
+        <h4>{{ 'superadmin-users-current-structures' | transloco }}</h4>
       </div>
 
       <div class="structures-list">
@@ -368,17 +383,18 @@
     <div class="add-structure-section">
       <div class="section-header">
         <i class="pi pi-plus section-icon"></i>
-        <h4>Add Structure</h4>
+        <h4>{{ 'superadmin-users-add-structure' | transloco }}</h4>
       </div>
 
       <div class="add-structure-form">
         <div class="form-field">
           <label for="availableStructures" class="field-label">
             <i class="pi pi-building"></i>
-            Select Structure
+            {{ 'superadmin-users-select-structure' | transloco }}
           </label>
           <p-select id="availableStructures" name="availableStructures" [(ngModel)]="selectedStructureId"
-            [options]="availableStructures" placeholder="Choose a structure to assign" optionLabel="name"
+            [options]="availableStructures"
+            [placeholder]="'superadmin-users-select-structure-placeholder' | transloco" optionLabel="name"
             optionValue="id" styleClass="w-full" [panelStyleClass]="'structures-dropdown-panel'"
             [loading]="loadingStructures">
             <ng-template pTemplate="item" let-structure>
@@ -395,10 +411,10 @@
 
   <ng-template pTemplate="footer">
     <div class="dialog-footer">
-      <p-button label="Cancel" icon="pi pi-times" severity="danger" (onClick)="closeStructuresModal()" [outlined]="true"
-        class="cancel-btn">
+      <p-button [label]="'superadmin-users-cancel' | transloco" icon="pi pi-times" severity="danger"
+        (onClick)="closeStructuresModal()" [outlined]="true" class="cancel-btn">
       </p-button>
-      <p-button label="Add Structure" icon="pi pi-plus" severity="info"
+      <p-button [label]="'superadmin-users-add-structure' | transloco" icon="pi pi-plus" severity="info"
         [disabled]="!selectedStructureId || submittingStructure" [loading]="submittingStructure" class="submit-btn"
         (onClick)="addStructureToUser()">
       </p-button>
@@ -407,7 +423,8 @@
 </p-dialog>
 
 <!-- Change Role Dialog -->
-<p-dialog [(visible)]="showRoleModal" [modal]="true" [closable]="false" header="Change User Role"
+<p-dialog [(visible)]="showRoleModal" [modal]="true" [closable]="false"
+  [header]="'superadmin-users-role-title' | transloco"
   [style]="{ width: '500px', maxWidth: '90vw' }" [draggable]="false" [resizable]="false" (onHide)="closeRoleModal()"
   styleClass="role-dialog">
 
@@ -415,7 +432,8 @@
     <div class="dialog-header">
       <div class="header-content">
         <i class="header-icon pi pi-users"></i>
-        <span class="header-title">Change Role for {{ selectedUser?.name }} {{ selectedUser?.surname }}</span>
+        <span class="header-title">{{ 'superadmin-users-role-title' | transloco : { name: selectedUser?.name, surname:
+          selectedUser?.surname } }}</span>
       </div>
       <button type="button" class="header-close-btn" (click)="closeRoleModal()">
         <i class="pi pi-times"></i>
@@ -427,10 +445,10 @@
     <div class="current-role-section">
       <div class="section-header">
         <i class="pi pi-info-circle section-icon"></i>
-        <h4>Current Role</h4>
+        <h4>{{ 'superadmin-users-current-role' | transloco }}</h4>
       </div>
       <div class="current-role-info">
-        <p-tag [value]="selectedUser?.role || 'Unknown'"
+        <p-tag [value]="selectedUser?.role || ('superadmin-users-role-unknown' | transloco)"
           [severity]="selectedUser?.role === 'superadmin' ? 'danger' : 'info'" styleClass="role-tag">
         </p-tag>
       </div>
@@ -439,23 +457,23 @@
     <div class="new-role-section">
       <div class="section-header">
         <i class="pi pi-arrow-right section-icon"></i>
-        <h4>Select New Role</h4>
+        <h4>{{ 'superadmin-users-select-role' | transloco }}</h4>
       </div>
 
       <div class="role-form">
         <div class="form-field">
           <label for="newRole" class="field-label">
             <i class="pi pi-users"></i>
-            New Role
+            {{ 'superadmin-users-new-role' | transloco }}
           </label>
           <p-select id="newRole" name="newRole" [(ngModel)]="selectedRoleId" [options]="availableRoles"
-            placeholder="Select a new role" optionLabel="name" optionValue="id" styleClass="w-full"
-            [loading]="loadingRoles">
+            [placeholder]="'superadmin-users-new-role-placeholder' | transloco" optionLabel="name" optionValue="id"
+            styleClass="w-full" [loading]="loadingRoles">
             <ng-template pTemplate="item" let-role>
               <div class="role-option">
                 <span class="role-name">{{ role.name }}</span>
-                <span class="role-description">{{ role.name === 'superadmin' ? 'Full system access' : 'Structure
-                  management access' }}</span>
+                <span class="role-description">{{ role.name === 'superadmin' ? ('superadmin-users-role-desc-superadmin'
+                  | transloco) : ('superadmin-users-role-desc-admin' | transloco) }}</span>
               </div>
             </ng-template>
           </p-select>
@@ -466,10 +484,10 @@
 
   <ng-template pTemplate="footer">
     <div class="dialog-footer">
-      <p-button label="Cancel" icon="pi pi-times" severity="secondary" (onClick)="closeRoleModal()" [outlined]="true"
-        class="cancel-btn">
+      <p-button [label]="'superadmin-users-cancel' | transloco" icon="pi pi-times" severity="secondary"
+        (onClick)="closeRoleModal()" [outlined]="true" class="cancel-btn">
       </p-button>
-      <p-button label="Change Role" icon="pi pi-check" severity="primary"
+      <p-button [label]="'superadmin-users-role' | transloco" icon="pi pi-check" severity="primary"
         [disabled]="!selectedRoleId || submittingRole || selectedRoleId === getCurrentRoleId()"
         [loading]="submittingRole" class="submit-btn" (onClick)="confirmRoleChange()">
       </p-button>

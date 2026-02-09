@@ -1,21 +1,22 @@
 <div class="associations">
   <div class="associations-header">
-    <h2>User-Structure Associations</h2>
+    <h2>{{ 'superadmin-associations-title' | transloco }}</h2>
   </div>
 
   <div class="filters">
     <p-select [(ngModel)]="userFilter" (ngModelChange)="loadAssociations()" [options]="userOptions"
-      placeholder="All Users" name="userFilter" styleClass="w-full">
+      [placeholder]="'superadmin-associations-filter-user' | transloco" name="userFilter" styleClass="w-full">
     </p-select>
     <p-select [(ngModel)]="structureFilter" (ngModelChange)="loadAssociations()" [options]="structureOptions"
-      placeholder="All Structures" name="structureFilter" styleClass="w-full">
+      [placeholder]="'superadmin-associations-filter-structure' | transloco" name="structureFilter"
+      styleClass="w-full">
     </p-select>
   </div>
 
   <!-- Advanced Data Table View -->
   <div class="associations-table-container" *ngIf="!loading && associations.length > 0">
     <p-table #associationsTable [value]="associations" [paginator]="true" [rows]="10" [showCurrentPageReport]="true"
-      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} associations"
+      [currentPageReportTemplate]="'superadmin-associations-pagination' | transloco"
       [rowsPerPageOptions]="[5, 10, 25, 50]" styleClass="associations-table"
       [globalFilterFields]="['user.name', 'user.surname', 'user.username', 'structure.name', 'structure.city']">
 
@@ -23,32 +24,34 @@
         <div class="table-header">
           <div class="table-title">
             <i class="pi pi-link table-icon"></i>
-            <span>User-Structure Associations</span>
-            <span class="association-count" *ngIf="associations.length > 0">({{ associations.length }} total)</span>
+            <span>{{ 'superadmin-associations-table-title' | transloco }}</span>
+            <span class="association-count" *ngIf="associations.length > 0">({{ associations.length }}
+              {{ 'superadmin-associations-total' | transloco }})</span>
           </div>
           <div class="table-actions">
             <span class="p-input-icon-left">
               <i class="pi pi-search"></i>
-              <input pInputText type="text" placeholder="Search associations..." (input)="onGlobalFilter($event)"
-                class="search-input">
+              <input pInputText type="text" [placeholder]="'superadmin-associations-search' | transloco"
+                (input)="onGlobalFilter($event)" class="search-input">
             </span>
 
             <!-- Bulk Actions (shown when selections exist) -->
             <div class="bulk-actions" *ngIf="selectedAssociations.length > 0">
-              <span class="selection-count">{{ selectedAssociations.length }} selected</span>
-              <p-button label="Export Selected" icon="pi pi-download" severity="secondary" size="small"
-                [outlined]="true" (onClick)="exportSelected()">
+              <span class="selection-count">{{ selectedAssociations.length }}
+                {{ 'superadmin-associations-selected' | transloco }}</span>
+              <p-button [label]="'superadmin-associations-export-selected' | transloco" icon="pi pi-download"
+                severity="secondary" size="small" [outlined]="true" (onClick)="exportSelected()">
               </p-button>
-              <p-button label="Delete Selected" icon="pi pi-trash" severity="danger" size="small" [outlined]="true"
-                (onClick)="deleteSelected()">
+              <p-button [label]="'superadmin-associations-delete-selected' | transloco" icon="pi pi-trash"
+                severity="danger" size="small" [outlined]="true" (onClick)="deleteSelected()">
               </p-button>
             </div>
 
-            <p-button label="Export All" icon="pi pi-download" severity="secondary" size="small" [outlined]="true"
-              (onClick)="exportAll()">
+            <p-button [label]="'superadmin-associations-export-all' | transloco" icon="pi pi-download"
+              severity="secondary" size="small" [outlined]="true" (onClick)="exportAll()">
             </p-button>
-            <p-button label="Create Association" icon="pi pi-plus" severity="primary" size="small"
-              (onClick)="openCreateModal()">
+            <p-button [label]="'superadmin-associations-create' | transloco" icon="pi pi-plus" severity="primary"
+              size="small" (onClick)="openCreateModal()">
             </p-button>
           </div>
         </div>
@@ -63,41 +66,41 @@
           <th pSortableColumn="user.name" style="width: 18%">
             <div class="column-header">
               <i class="pi pi-user column-icon"></i>
-              User
+              {{ 'superadmin-associations-col-user' | transloco }}
               <p-sortIcon field="user.name"></p-sortIcon>
             </div>
           </th>
           <th pSortableColumn="user.username" style="width: 15%">
             <div class="column-header">
               <i class="pi pi-at column-icon"></i>
-              Username
+              {{ 'superadmin-associations-col-username' | transloco }}
               <p-sortIcon field="user.username"></p-sortIcon>
             </div>
           </th>
           <th pSortableColumn="structure.name" style="width: 25%">
             <div class="column-header">
               <i class="pi pi-building column-icon"></i>
-              Structure
+              {{ 'superadmin-associations-col-structure' | transloco }}
               <p-sortIcon field="structure.name"></p-sortIcon>
             </div>
           </th>
           <th pSortableColumn="structure.city" style="width: 15%">
             <div class="column-header">
               <i class="pi pi-map-marker column-icon"></i>
-              City
+              {{ 'superadmin-associations-col-city' | transloco }}
               <p-sortIcon field="structure.city"></p-sortIcon>
             </div>
           </th>
           <th style="width: 15%">
             <div class="column-header">
               <i class="pi pi-cog column-icon"></i>
-              Status
+              {{ 'superadmin-associations-col-status' | transloco }}
             </div>
           </th>
           <th style="width: 10%">
             <div class="column-header">
               <i class="pi pi-ellipsis-v column-icon"></i>
-              Actions
+              {{ 'superadmin-associations-col-actions' | transloco }}
             </div>
           </th>
         </tr>
@@ -137,13 +140,15 @@
             <span class="city-badge">{{ association.structure.city }}</span>
           </td>
           <td>
-            <p-tag value="Active" severity="success" icon="pi pi-check" styleClass="status-tag">
+            <p-tag [value]="'superadmin-associations-status-active' | transloco" severity="success"
+              icon="pi pi-check" styleClass="status-tag">
             </p-tag>
           </td>
           <td>
             <div class="action-buttons">
               <p-button icon="pi pi-trash" severity="danger" size="small" [outlined]="true" [rounded]="true"
-                pTooltip="Remove Association" (onClick)="deleteAssociation(association)">
+                [pTooltip]="'superadmin-associations-remove' | transloco"
+                (onClick)="deleteAssociation(association)">
               </p-button>
             </div>
           </td>
@@ -155,7 +160,7 @@
           <td colspan="7" class="empty-message">
             <div class="empty-state">
               <i class="pi pi-search empty-icon"></i>
-              <span>No associations found matching your search criteria.</span>
+              <span>{{ 'superadmin-associations-empty-search' | transloco }}</span>
             </div>
           </td>
         </tr>
@@ -166,22 +171,23 @@
   <div class="no-associations" *ngIf="!loading && associations.length === 0">
     <div class="empty-state">
       <i class="pi pi-link empty-icon"></i>
-      <h3>No associations found</h3>
-      <p>No user-structure associations match your current filter criteria.</p>
-      <button pButton label="Create First Association" icon="pi pi-link" (onClick)="openCreateModal()"
-        severity="primary">
+      <h3>{{ 'superadmin-associations-empty-title' | transloco }}</h3>
+      <p>{{ 'superadmin-associations-empty-subtitle' | transloco }}</p>
+      <button pButton [label]="'superadmin-associations-empty-cta' | transloco" icon="pi pi-link"
+        (onClick)="openCreateModal()" severity="primary">
       </button>
     </div>
   </div>
 
   <div class="loading" *ngIf="loading">
     <p-progressSpinner></p-progressSpinner>
-    <p>Loading associations...</p>
+    <p>{{ 'superadmin-associations-loading' | transloco }}</p>
   </div>
 </div>
 
 <!-- Create Association Modal -->
-<p-dialog [(visible)]="showModal" [modal]="true" [closable]="false" header="Create Association"
+<p-dialog [(visible)]="showModal" [modal]="true" [closable]="false"
+  [header]="'superadmin-associations-modal-title' | transloco"
   [style]="{ width: '600px', maxWidth: '90vw' }" [draggable]="false" [resizable]="false" (onHide)="closeModal()"
   styleClass="association-dialog">
 
@@ -189,7 +195,7 @@
     <div class="dialog-header">
       <div class="header-content">
         <i class="header-icon pi pi-link"></i>
-        <span class="header-title">Create Association</span>
+        <span class="header-title">{{ 'superadmin-associations-modal-title' | transloco }}</span>
       </div>
       <button type="button" class="header-close-btn" (click)="closeModal()">
         <i class="pi pi-times"></i>
@@ -203,23 +209,23 @@
       <div class="form-section">
         <div class="section-header">
           <i class="pi pi-user section-icon"></i>
-          <h4>User Selection</h4>
+          <h4>{{ 'superadmin-associations-modal-user-section' | transloco }}</h4>
         </div>
 
         <div class="form-row">
           <div class="form-field">
             <label for="userId" class="field-label">
               <i class="pi pi-user"></i>
-              Select User *
+              {{ 'superadmin-associations-modal-user-label' | transloco }}
             </label>
             <p-select id="userId" name="userId" [(ngModel)]="associationFormData.user_id" [options]="userOptions"
-              placeholder="Choose a user" required styleClass="w-full" [panelStyleClass]="'association-dropdown-panel'"
-              [appendTo]="'body'">
+              [placeholder]="'superadmin-associations-modal-user-placeholder' | transloco" required
+              styleClass="w-full" [panelStyleClass]="'association-dropdown-panel'" [appendTo]="'body'">
             </p-select>
             <small *ngIf="associationForm.controls['userId']?.invalid && associationForm.controls['userId']?.touched"
               class="error-message">
               <i class="pi pi-exclamation-triangle"></i>
-              User selection is required
+              {{ 'superadmin-associations-modal-user-required' | transloco }}
             </small>
           </div>
         </div>
@@ -229,24 +235,26 @@
       <div class="form-section">
         <div class="section-header">
           <i class="pi pi-building section-icon"></i>
-          <h4>Structure Selection</h4>
+          <h4>{{ 'superadmin-associations-modal-structure-section' | transloco }}</h4>
         </div>
 
         <div class="form-row">
           <div class="form-field">
             <label for="structureId" class="field-label">
               <i class="pi pi-building"></i>
-              Select Structure *
+              {{ 'superadmin-associations-modal-structure-label' | transloco }}
             </label>
             <p-select id="structureId" name="structureId" [(ngModel)]="associationFormData.structure_id"
-              [options]="structureOptions" placeholder="Choose a structure" required styleClass="w-full"
+              [options]="structureOptions"
+              [placeholder]="'superadmin-associations-modal-structure-placeholder' | transloco" required
+              styleClass="w-full"
               [panelStyleClass]="'association-dropdown-panel'" [appendTo]="'body'">
             </p-select>
             <small
               *ngIf="associationForm.controls['structureId']?.invalid && associationForm.controls['structureId']?.touched"
               class="error-message">
               <i class="pi pi-exclamation-triangle"></i>
-              Structure selection is required
+              {{ 'superadmin-associations-modal-structure-required' | transloco }}
             </small>
           </div>
         </div>
@@ -256,11 +264,12 @@
 
   <ng-template pTemplate="footer">
     <div class="dialog-footer">
-      <p-button label="Cancel" icon="pi pi-times" severity="secondary" (onClick)="closeModal()" [outlined]="true"
-        class="cancel-btn">
+      <p-button [label]="'superadmin-associations-modal-cancel' | transloco" icon="pi pi-times" severity="secondary"
+        (onClick)="closeModal()" [outlined]="true" class="cancel-btn">
       </p-button>
-      <p-button label="Create Association" icon="pi pi-check" severity="primary" type="submit"
-        [disabled]="!associationForm.form.valid || submitting" [loading]="submitting" class="submit-btn">
+      <p-button [label]="'superadmin-associations-modal-submit' | transloco" icon="pi pi-check" severity="primary"
+        type="submit" [disabled]="!associationForm.form.valid || submitting" [loading]="submitting"
+        class="submit-btn">
       </p-button>
     </div>
   </ng-template>

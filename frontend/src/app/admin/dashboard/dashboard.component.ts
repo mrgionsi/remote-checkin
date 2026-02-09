@@ -14,6 +14,7 @@ import { InputIconModule } from 'primeng/inputicon';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoService } from '@jsverse/transloco';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
@@ -64,20 +65,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   healthItems: Array<{ label: string; value: number; tone: 'neutral' | 'warning' | 'success' }> = [];
 
   // Filter options
-  statusOptions = [
-    { label: 'All Status', value: '' },
-    { label: 'Pending', value: 'Pending' },
-    { label: 'Approved', value: 'Approved' },
-    { label: 'Declined', value: 'Declined' },
-    { label: 'Sent back to customer', value: 'Sent back to customer' }
-  ];
-
-  dateRangeOptions = [
-    { label: 'All Dates', value: '' },
-    { label: 'Today', value: 'today' },
-    { label: 'This Week', value: 'week' },
-    { label: 'This Month', value: 'month' }
-  ];
+  statusOptions: Array<{ label: string; value: string }> = [];
+  dateRangeOptions: Array<{ label: string; value: string }> = [];
 
   roomOptions: any[] = [];
   filteredReservations: any[] = [];
@@ -99,9 +88,27 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private router: Router,
     private authService: AuthService,
     @Inject(PLATFORM_ID) private platformId: object,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private translocoService: TranslocoService
   ) {
 
+  }
+
+  private setFilterOptions(): void {
+    this.statusOptions = [
+      { label: this.translocoService.translate('dashboard-filter-status-all'), value: '' },
+      { label: this.translocoService.translate('dashboard-status-pending'), value: 'Pending' },
+      { label: this.translocoService.translate('dashboard-status-approved'), value: 'Approved' },
+      { label: this.translocoService.translate('dashboard-status-declined'), value: 'Declined' },
+      { label: this.translocoService.translate('dashboard-status-sent-back'), value: 'Sent back to customer' }
+    ];
+
+    this.dateRangeOptions = [
+      { label: this.translocoService.translate('dashboard-filter-date-all'), value: '' },
+      { label: this.translocoService.translate('dashboard-date-today'), value: 'today' },
+      { label: this.translocoService.translate('dashboard-date-week'), value: 'week' },
+      { label: this.translocoService.translate('dashboard-date-month'), value: 'month' }
+    ];
   }
 
   getStatusSeverity(status: string) {
@@ -119,6 +126,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
+  getStatusLabelKey(status: string): string {
+    switch (status) {
+      case 'Pending':
+        return 'dashboard-status-pending';
+      case 'Approved':
+        return 'dashboard-status-approved';
+      case 'Declined':
+        return 'dashboard-status-declined';
+      case 'Sent back to customer':
+        return 'dashboard-status-sent-back';
+      default:
+        return status;
+    }
+  }
+
 
 
   navigateToDetails(event: any): void {
@@ -131,6 +153,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     console.log('DashboardComponent initialized with ID:', this.componentId);
+    this.setFilterOptions();
     if (isPlatformBrowser(this.platformId)) {
       const structureIdStr = localStorage.getItem('selected_structure_id');
       const structureId = structureIdStr ? +structureIdStr : null;

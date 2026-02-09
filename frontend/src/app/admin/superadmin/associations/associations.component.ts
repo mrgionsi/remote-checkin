@@ -19,6 +19,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { TooltipModule } from 'primeng/tooltip';
 import { CheckboxModule } from 'primeng/checkbox';
 import { ConfirmationService, MessageService } from 'primeng/api';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
     selector: 'app-superadmin-associations',
@@ -38,7 +39,8 @@ import { ConfirmationService, MessageService } from 'primeng/api';
         TableModule,
         InputTextModule,
         TooltipModule,
-        CheckboxModule
+        CheckboxModule,
+        TranslocoPipe
     ],
     templateUrl: './associations.component.html',
     styleUrls: ['./associations.component.scss'],

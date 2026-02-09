@@ -17,6 +17,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { MessageModule } from 'primeng/message';
 import { PaginatorModule } from 'primeng/paginator';
 import { ToastModule } from 'primeng/toast';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 @Component({
     selector: 'app-superadmin-structures',
@@ -35,7 +36,8 @@ import { ToastModule } from 'primeng/toast';
         ProgressSpinnerModule,
         MessageModule,
         PaginatorModule,
-        ToastModule
+        ToastModule,
+        TranslocoPipe
     ],
     providers: [MessageService],
     templateUrl: './structures.component.html',
@@ -52,22 +54,28 @@ export class SuperadminStructuresComponent implements OnInit {
     structureForm!: FormGroup;
     submitting = false;
 
-    statusOptions = [
-        { label: 'All Status', value: '' },
-        { label: 'Active', value: 'true' },
-        { label: 'Archived', value: 'false' }
-    ];
+    statusOptions: Array<{ label: string; value: string }> = [];
 
     constructor(
         private superadminService: SuperadminService,
         private fb: FormBuilder,
         private errorHandler: ErrorHandlerService,
-        private messageService: MessageService
+        private messageService: MessageService,
+        private translocoService: TranslocoService
     ) { }
 
     ngOnInit(): void {
         this.initializeForm();
+        this.setStatusOptions();
         this.loadStructures();
+    }
+
+    private setStatusOptions(): void {
+        this.statusOptions = [
+            { label: this.translocoService.translate('superadmin-structures-status-all'), value: '' },
+            { label: this.translocoService.translate('superadmin-structures-filter-active'), value: 'true' },
+            { label: this.translocoService.translate('superadmin-structures-filter-archived'), value: 'false' }
+        ];
     }
 
     private initializeForm(): void {

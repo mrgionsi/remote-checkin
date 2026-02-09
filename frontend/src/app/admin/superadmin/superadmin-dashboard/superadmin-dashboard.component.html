@@ -1,9 +1,9 @@
 <div class="dashboard">
   <div class="dashboard-header">
     <div>
-      <span class="eyebrow">Overview</span>
-      <h2>Superadmin command center</h2>
-      <p>Keep tabs on the portfolio and take action where teams need support.</p>
+      <span class="eyebrow">{{ 'superadmin-dashboard-eyebrow' | transloco }}</span>
+      <h2>{{ 'superadmin-dashboard-title' | transloco }}</h2>
+      <p>{{ 'superadmin-dashboard-subtitle' | transloco }}</p>
     </div>
   </div>
 
@@ -13,7 +13,7 @@
         <i class="pi pi-building"></i>
       </div>
       <div class="stat-content">
-        <span class="stat-label">Total structures</span>
+        <span class="stat-label">{{ 'superadmin-dashboard-stat-total-structures' | transloco }}</span>
         <h3>{{ dashboardData.total_structures }}</h3>
       </div>
     </div>
@@ -23,7 +23,7 @@
         <i class="pi pi-check-circle"></i>
       </div>
       <div class="stat-content">
-        <span class="stat-label">Active structures</span>
+        <span class="stat-label">{{ 'superadmin-dashboard-stat-active-structures' | transloco }}</span>
         <h3>{{ dashboardData.active_structures }}</h3>
       </div>
     </div>
@@ -33,7 +33,7 @@
         <i class="pi pi-archive"></i>
       </div>
       <div class="stat-content">
-        <span class="stat-label">Archived structures</span>
+        <span class="stat-label">{{ 'superadmin-dashboard-stat-archived-structures' | transloco }}</span>
         <h3>{{ dashboardData.archived_structures }}</h3>
       </div>
     </div>
@@ -43,7 +43,7 @@
         <i class="pi pi-users"></i>
       </div>
       <div class="stat-content">
-        <span class="stat-label">Total users</span>
+        <span class="stat-label">{{ 'superadmin-dashboard-stat-total-users' | transloco }}</span>
         <h3>{{ dashboardData.total_users }}</h3>
       </div>
     </div>
@@ -53,7 +53,7 @@
         <i class="pi pi-exclamation-triangle"></i>
       </div>
       <div class="stat-content">
-        <span class="stat-label">Unassigned admins</span>
+        <span class="stat-label">{{ 'superadmin-dashboard-stat-unassigned-admins' | transloco }}</span>
         <h3>{{ dashboardData.unassigned_admins }}</h3>
       </div>
     </div>
@@ -63,7 +63,7 @@
         <i class="pi pi-calendar"></i>
       </div>
       <div class="stat-content">
-        <span class="stat-label">Total reservations</span>
+        <span class="stat-label">{{ 'superadmin-dashboard-stat-total-reservations' | transloco }}</span>
         <h3>{{ dashboardData.total_reservations }}</h3>
       </div>
     </div>
@@ -72,44 +72,44 @@
   <div class="dashboard-panels">
     <section class="panel-card">
       <div class="panel-header">
-        <h3>Fast actions</h3>
-        <span class="panel-caption">Most used operational shortcuts.</span>
+        <h3>{{ 'superadmin-dashboard-fast-actions-title' | transloco }}</h3>
+        <span class="panel-caption">{{ 'superadmin-dashboard-fast-actions-subtitle' | transloco }}</span>
       </div>
       <div class="panel-actions">
         <a routerLink="/admin/superadmin/structures" class="panel-action">
           <i class="pi pi-building"></i>
-          Manage structures
+          {{ 'superadmin-dashboard-action-structures' | transloco }}
         </a>
         <a routerLink="/admin/superadmin/users" class="panel-action">
           <i class="pi pi-users"></i>
-          Review users
+          {{ 'superadmin-dashboard-action-users' | transloco }}
         </a>
         <a routerLink="/admin/superadmin/associations" class="panel-action">
           <i class="pi pi-sitemap"></i>
-          Check associations
+          {{ 'superadmin-dashboard-action-associations' | transloco }}
         </a>
       </div>
     </section>
 
     <section class="panel-card subtle">
       <div class="panel-header">
-        <h3>Operational checklist</h3>
-        <span class="panel-caption">Keep coverage aligned across every structure.</span>
+        <h3>{{ 'superadmin-dashboard-checklist-title' | transloco }}</h3>
+        <span class="panel-caption">{{ 'superadmin-dashboard-checklist-subtitle' | transloco }}</span>
       </div>
       <ul class="panel-list">
-        <li>Confirm each active structure has an assigned admin.</li>
-        <li>Review inactive accounts and archive if needed.</li>
-        <li>Validate new structures are linked to a primary admin.</li>
+        <li>{{ 'superadmin-dashboard-checklist-item-1' | transloco }}</li>
+        <li>{{ 'superadmin-dashboard-checklist-item-2' | transloco }}</li>
+        <li>{{ 'superadmin-dashboard-checklist-item-3' | transloco }}</li>
       </ul>
     </section>
   </div>
 
   <div class="loading" *ngIf="loading">
     <div class="skeleton-row" *ngFor="let n of [1,2,3]"></div>
-    <p>Loading dashboard data...</p>
+    <p>{{ 'superadmin-dashboard-loading' | transloco }}</p>
   </div>
 
   <div class="error" *ngIf="error">
-    <p>Error loading dashboard: {{ error }}</p>
+    <p>{{ 'superadmin-dashboard-error' | transloco }} {{ error }}</p>
   </div>
 </div>

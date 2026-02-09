@@ -15,11 +15,13 @@ import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
 import { DialogModule } from 'primeng/dialog';
 import { ToastModule } from 'primeng/toast';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoService } from '@jsverse/transloco';
 
 @Component({
     selector: 'app-superadmin-users',
     standalone: true,
-    imports: [CommonModule, FormsModule, ButtonModule, CardModule, TagModule, MessageModule, PaginatorModule, ProgressSpinnerModule, SelectModule, InputTextModule, DialogModule, ToastModule],
+    imports: [CommonModule, FormsModule, ButtonModule, CardModule, TagModule, MessageModule, PaginatorModule, ProgressSpinnerModule, SelectModule, InputTextModule, DialogModule, ToastModule, TranslocoPipe],
     providers: [MessageService],
     templateUrl: './users.component.html',
     styleUrls: ['./users.component.scss']
@@ -78,20 +80,26 @@ export class SuperadminUsersComponent implements OnInit, OnDestroy {
     showRoleModal: boolean = false;
     availableRoles: any[] = [];
     selectedRoleId: number | null = null;
-    roleOptions = [
-        { label: 'All Roles', value: '' },
-        { label: 'Administrator', value: 'administrator' },
-        { label: 'Superadmin', value: 'superadmin' },
-    ];
+    roleOptions: Array<{ label: string; value: string }> = [];
 
     constructor(
         private superadminService: SuperadminService,
         private errorHandler: ErrorHandlerService,
-        private messageService: MessageService
+        private messageService: MessageService,
+        private translocoService: TranslocoService
     ) { }
 
     ngOnInit(): void {
+        this.setRoleOptions();
         this.loadUsers();
+    }
+
+    private setRoleOptions(): void {
+        this.roleOptions = [
+            { label: this.translocoService.translate('superadmin-users-filter-all-roles'), value: '' },
+            { label: this.translocoService.translate('superadmin-users-filter-admin'), value: 'administrator' },
+            { label: this.translocoService.translate('superadmin-users-filter-superadmin'), value: 'superadmin' }
+        ];
     }
 
     ngOnDestroy(): void {

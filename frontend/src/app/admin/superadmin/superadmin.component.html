@@ -1,7 +1,7 @@
 <!-- Loading state -->
 <div *ngIf="!isInitialized" class="superadmin-loading">
   <div class="spinner"></div>
-  <div class="loading-text">Loading Superadmin Panel...</div>
+  <div class="loading-text">{{ 'superadmin-loading' | transloco }}</div>
 </div>
 
 <!-- Main superadmin interface -->
@@ -9,18 +9,18 @@
   <div class="superadmin-shell">
     <div class="superadmin-hero">
       <div class="hero-copy">
-        <span class="hero-eyebrow">Superadmin</span>
-        <h1>Operations control for your portfolio</h1>
-        <p>Monitor activity, manage structures, and keep access aligned in one place.</p>
+        <span class="hero-eyebrow">{{ 'superadmin-hero-eyebrow' | transloco }}</span>
+        <h1>{{ 'superadmin-hero-title' | transloco }}</h1>
+        <p>{{ 'superadmin-hero-subtitle' | transloco }}</p>
       </div>
       <div class="hero-actions">
         <a routerLink="/admin/superadmin/structures" class="ghost-action">
           <i class="pi pi-building"></i>
-          New structure
+          {{ 'superadmin-hero-cta-structure' | transloco }}
         </a>
         <a routerLink="/admin/superadmin/users" class="primary-action">
           <i class="pi pi-user-plus"></i>
-          New user
+          {{ 'superadmin-hero-cta-user' | transloco }}
         </a>
       </div>
     </div>
@@ -28,19 +28,19 @@
     <nav class="superadmin-nav">
       <a routerLink="/admin/superadmin/dashboard" routerLinkActive="active" class="nav-link">
         <i class="pi pi-chart-bar"></i>
-        Dashboard
+        {{ 'superadmin-nav-dashboard' | transloco }}
       </a>
       <a routerLink="/admin/superadmin/structures" routerLinkActive="active" class="nav-link">
         <i class="pi pi-building"></i>
-        Structures
+        {{ 'superadmin-nav-structures' | transloco }}
       </a>
       <a routerLink="/admin/superadmin/users" routerLinkActive="active" class="nav-link">
         <i class="pi pi-users"></i>
-        Users
+        {{ 'superadmin-nav-users' | transloco }}
       </a>
       <a routerLink="/admin/superadmin/associations" routerLinkActive="active" class="nav-link">
         <i class="pi pi-link"></i>
-        Associations
+        {{ 'superadmin-nav-associations' | transloco }}
       </a>
     </nav>
 

@@ -1,7 +1,7 @@
 <p-toast />
 <!-- dashboard-remote-checkin.component.html -->
 <div class="p-fluid">
-    <h2 class="text-center mb-4">Remote Check-ins Dashboard</h2>
+    <h2 class="text-center mb-4">{{ 'dashboard-title' | transloco }}</h2>
 
     <!-- Summary Statistics Cards -->
     <div class="stats-grid">
@@ -12,7 +12,7 @@
                 </div>
                 <div class="stat-info">
                     <span class="stat-value">{{ summaryStats.totalReservations }}</span>
-                    <span class="stat-label">Total Reservations</span>
+                    <span class="stat-label">{{ 'dashboard-stat-total-reservations' | transloco }}</span>
                 </div>
             </div>
         </p-card>
@@ -24,7 +24,7 @@
                 </div>
                 <div class="stat-info">
                     <span class="stat-value">{{ summaryStats.pendingApprovals }}</span>
-                    <span class="stat-label">Pending Approvals</span>
+                    <span class="stat-label">{{ 'dashboard-stat-pending-approvals' | transloco }}</span>
                 </div>
             </div>
         </p-card>
@@ -36,7 +36,7 @@
                 </div>
                 <div class="stat-info">
                     <span class="stat-value">{{ summaryStats.checkinsToday }}</span>
-                    <span class="stat-label">Check-ins Today</span>
+                    <span class="stat-label">{{ 'dashboard-stat-checkins-today' | transloco }}</span>
                 </div>
             </div>
         </p-card>
@@ -48,7 +48,7 @@
                 </div>
                 <div class="stat-info">
                     <span class="stat-value">{{ summaryStats.checkoutsToday }}</span>
-                    <span class="stat-label">Check-outs Today</span>
+                    <span class="stat-label">{{ 'dashboard-stat-checkouts-today' | transloco }}</span>
                 </div>
             </div>
         </p-card>
@@ -100,10 +100,10 @@
     <!-- Chart Section -->
     <div class="chart-section">
         <div class="chart-header">
-            <h3><i class="pi pi-chart-line"></i> Monthly Check-ins Overview</h3>
+            <h3><i class="pi pi-chart-line"></i> {{ 'dashboard-chart-title' | transloco }}</h3>
             <div class="chart-controls">
                 <p-select [(ngModel)]="selectedChartType" [options]="chartTypeOptions" (onChange)="onChartTypeChange()"
-                    placeholder="Chart Type" styleClass="chart-type-selector">
+                    [placeholder]="'dashboard-chart-type' | transloco" styleClass="chart-type-selector">
                 </p-select>
             </div>
         </div>
@@ -118,7 +118,7 @@
             <div *ngIf="errorChart && !loadingChart" class="error-container">
                 <i class="pi pi-exclamation-triangle error-icon"></i>
                 <p class="error-text">{{ errorChart }}</p>
-                <p-button label="Retry" icon="pi pi-refresh" severity="secondary" size="small"
+                <p-button [label]="'dashboard-retry' | transloco" icon="pi pi-refresh" severity="secondary" size="small"
                     (onClick)="retryLoadData()" [outlined]="true">
                 </p-button>
             </div>
@@ -140,10 +140,12 @@
             <!-- Quick Action Buttons -->
             <div class="table-filters">
                 <div class="quick-actions">
-                    <p-button label="Pending Approvals" icon="pi pi-clock" severity="warn" size="small"
+                    <p-button [label]="'dashboard-table-pending' | transloco" icon="pi pi-clock" severity="warn"
+                        size="small"
                         [outlined]="true" (onClick)="filterPendingApprovals()">
                     </p-button>
-                    <p-button label="Clear Filters" icon="pi pi-filter-slash" severity="secondary" size="small"
+                    <p-button [label]="'dashboard-table-clear' | transloco" icon="pi pi-filter-slash"
+                        severity="secondary" size="small"
                         [outlined]="true" (onClick)="clearFilters()">
                     </p-button>
                 </div>
@@ -169,23 +171,24 @@
                 <div class="filter-controls">
                     <div class="filter-row">
                         <div class="filter-item">
-                            <label class="filter-label">Status:</label>
+                            <label class="filter-label">{{ 'dashboard-filter-status' | transloco }}</label>
                             <p-select [(ngModel)]="statusFilter" [options]="statusOptions" (onChange)="onFilterChange()"
-                                placeholder="All Status" styleClass="filter-select">
+                                [placeholder]="'dashboard-filter-status-all' | transloco" styleClass="filter-select">
                             </p-select>
                         </div>
 
                         <div class="filter-item">
-                            <label class="filter-label">Date Range:</label>
+                            <label class="filter-label">{{ 'dashboard-filter-date' | transloco }}</label>
                             <p-select [(ngModel)]="dateRangeFilter" [options]="dateRangeOptions"
-                                (onChange)="onFilterChange()" placeholder="All Dates" styleClass="filter-select">
+                                (onChange)="onFilterChange()" [placeholder]="'dashboard-filter-date-all' | transloco"
+                                styleClass="filter-select">
                             </p-select>
                         </div>
 
                         <div class="filter-item">
-                            <label class="filter-label">Room:</label>
+                            <label class="filter-label">{{ 'dashboard-filter-room' | transloco }}</label>
                             <p-select [(ngModel)]="roomFilter" [options]="roomOptions" (onChange)="onFilterChange()"
-                                placeholder="All Rooms" styleClass="filter-select">
+                                [placeholder]="'dashboard-filter-room-all' | transloco" styleClass="filter-select">
                             </p-select>
                         </div>
                     </div>
@@ -222,7 +225,7 @@
                 <td>{{ reservation.start_date }}</td>
                 <td>{{ reservation.end_date }}</td>
                 <td>
-                    <p-tag [value]="reservation.status | transloco"
+                    <p-tag [value]="getStatusLabelKey(reservation.status) | transloco"
                         [severity]="getStatusSeverity(reservation.status)"></p-tag>
                 </td>
             </tr>
@@ -234,7 +237,8 @@
                     <div *ngIf="errorReservations" class="error-message">
                         <i class="pi pi-exclamation-triangle"></i>
                         <span>{{ errorReservations }}</span>
-                        <p-button label="Retry" icon="pi pi-refresh" severity="secondary" size="small"
+                        <p-button [label]="'dashboard-retry' | transloco" icon="pi pi-refresh" severity="secondary"
+                            size="small"
                             (onClick)="retryLoadData()" [outlined]="true">
                         </p-button>
                     </div>
@@ -249,45 +253,46 @@
 </div>
 
 <!-- Keyboard Shortcuts Help Dialog -->
-<p-dialog [(visible)]="showShortcuts" [modal]="true" header="Keyboard Shortcuts"
+<p-dialog [(visible)]="showShortcuts" [modal]="true" [header]="'dashboard-shortcuts-title' | transloco"
     [style]="{ width: '500px', maxWidth: '90vw' }" styleClass="shortcuts-dialog">
 
     <div class="shortcuts-content">
         <div class="shortcut-category">
-            <h4><i class="pi pi-filter"></i> Filter Actions</h4>
+            <h4><i class="pi pi-filter"></i> {{ 'dashboard-shortcuts-filter-title' | transloco }}</h4>
             <div class="shortcut-item">
                 <span class="shortcut-key">Ctrl/Cmd + P</span>
-                <span class="shortcut-desc">Filter to pending approvals</span>
+                <span class="shortcut-desc">{{ 'dashboard-shortcuts-filter-pending' | transloco }}</span>
             </div>
             <div class="shortcut-item">
                 <span class="shortcut-key">Ctrl/Cmd + F</span>
-                <span class="shortcut-desc">Clear all filters</span>
+                <span class="shortcut-desc">{{ 'dashboard-shortcuts-filter-clear' | transloco }}</span>
             </div>
         </div>
 
         <div class="shortcut-category">
-            <h4><i class="pi pi-refresh"></i> Data Actions</h4>
+            <h4><i class="pi pi-refresh"></i> {{ 'dashboard-shortcuts-data-title' | transloco }}</h4>
             <div class="shortcut-item">
                 <span class="shortcut-key">Ctrl/Cmd + R</span>
-                <span class="shortcut-desc">Retry data loading</span>
+                <span class="shortcut-desc">{{ 'dashboard-shortcuts-data-retry' | transloco }}</span>
             </div>
         </div>
 
         <div class="shortcut-category">
-            <h4><i class="pi pi-question-circle"></i> Help</h4>
+            <h4><i class="pi pi-question-circle"></i> {{ 'dashboard-shortcuts-help-title' | transloco }}</h4>
             <div class="shortcut-item">
                 <span class="shortcut-key">Ctrl/Cmd + /</span>
-                <span class="shortcut-desc">Show/hide shortcuts help</span>
+                <span class="shortcut-desc">{{ 'dashboard-shortcuts-help-toggle' | transloco }}</span>
             </div>
             <div class="shortcut-item">
                 <span class="shortcut-key">Escape</span>
-                <span class="shortcut-desc">Close dialogs</span>
+                <span class="shortcut-desc">{{ 'dashboard-shortcuts-help-close' | transloco }}</span>
             </div>
         </div>
     </div>
 
     <ng-template pTemplate="footer">
-        <p-button label="Close" icon="pi pi-times" severity="secondary" (onClick)="showShortcuts = false"
+        <p-button [label]="'dashboard-shortcuts-close' | transloco" icon="pi pi-times" severity="secondary"
+            (onClick)="showShortcuts = false"
             [outlined]="true">
         </p-button>
     </ng-template>
