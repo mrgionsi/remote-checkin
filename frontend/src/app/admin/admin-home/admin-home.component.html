@@ -1,10 +1,13 @@
 <div class="admin-shell">
+    <!-- Show loading until component is initialized -->
     <div *ngIf="!isInitialized" class="admin-loading">
         <div class="spinner"></div>
         <div class="admin-loading__text">Loading...</div>
     </div>
 
+    <!-- Show content only when initialized -->
     <div *ngIf="isInitialized">
+        <!-- Admin interface for authenticated users -->
         <div *ngIf="isAuthenticated" class="admin-authenticated">
             <div class="admin-header" *ngIf="!isLoginPage()">
                 <button pButton label="Menu" (click)="toggleSidebar()" class="admin-header__menu">☰</button>
