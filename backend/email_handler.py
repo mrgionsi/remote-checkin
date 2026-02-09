@@ -249,7 +249,11 @@ class EmailService:
         """
         Return a safe guest display name.
         """
-        guest_name = str(reservation_data.get("guest_name", "")).strip()
+        raw_value = reservation_data.get("guest_name")
+        if raw_value is None:
+            return "Guest"
+
+        guest_name = str(raw_value).strip()
         return guest_name if guest_name else "Guest"
 
     def send_email(self, email_data: EmailData) -> Dict[str, Any]:
@@ -395,7 +399,7 @@ class EmailService:
 
         sender_name = self._get_sender_name()
         data = {
-            "from": f"{sender_name} <{self.config.mail_default_sender_email}>",
+            "from": formataddr((sender_name, self.config.mail_default_sender_email)),
             "to": email_data.to_email,
             "subject": email_data.subject,
             "text": email_data.body,
@@ -1549,6 +1553,268 @@ The Management Team
         </div>
 
         <p>We appreciate your understanding and look forward to resolving any questions you may have.</p>
+
+        <div class="footer">
+            <p>Best regards,<br>The Management Team</p>
+        </div>
+    </div>
+</body>
+        </html>
+        """.strip()
+
+    def _create_reservation_modification_html(self, reservation_data: Dict[str, Any]) -> str:
+        """
+        Return an HTML email body for a reservation modification notice.
+        """
+        reservation_number = html_mod.escape(str(reservation_data.get('reservation_number', 'N/A')))
+        guest_name = html_mod.escape(str(reservation_data.get('guest_name', 'Guest')))
+        start_date = html_mod.escape(str(reservation_data.get('start_date', 'N/A')))
+        end_date = html_mod.escape(str(reservation_data.get('end_date', 'N/A')))
+        room_name = html_mod.escape(str(reservation_data.get('room_name', 'N/A')))
+
+        return f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Reservation Modified</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background-color: #17a2b8; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }}
+        .content {{ background-color: #f8f9fa; padding: 20px; border-radius: 0 0 5px 5px; }}
+        .details {{ background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0; }}
+        .info-row {{ display: flex; justify-content: space-between; margin: 10px 0; padding: 5px 0; border-bottom: 1px solid #eee; }}
+        .label {{ font-weight: bold; color: #555; }}
+        .value {{ color: #333; }}
+        .footer {{ margin-top: 20px; padding-top: 15px; border-top: 1px solid #ddd; color: #666; }}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Reservation Modified</h1>
+    </div>
+
+    <div class="content">
+        <p>Dear <strong>{guest_name}</strong>,</p>
+        <p>Your reservation details have been modified. Please review the updated information below.</p>
+
+        <div class="details">
+            <h3>Reservation Details</h3>
+            <div class="info-row">
+                <span class="label">Reservation Number:</span>
+                <span class="value">{reservation_number}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Check-in Date:</span>
+                <span class="value">{start_date}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Check-out Date:</span>
+                <span class="value">{end_date}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Room:</span>
+                <span class="value">{room_name}</span>
+            </div>
+        </div>
+
+        <p>If anything looks incorrect, please reply to this email.</p>
+
+        <div class="footer">
+            <p>Best regards,<br>The Management Team</p>
+        </div>
+    </div>
+</body>
+</html>
+        """.strip()
+
+    def _create_reservation_reminder_html(self, reservation_data: Dict[str, Any]) -> str:
+        """
+        Return an HTML email body for a reservation reminder.
+        """
+        reservation_number = html_mod.escape(str(reservation_data.get('reservation_number', 'N/A')))
+        guest_name = html_mod.escape(str(reservation_data.get('guest_name', 'Guest')))
+        start_date = html_mod.escape(str(reservation_data.get('start_date', 'N/A')))
+        end_date = html_mod.escape(str(reservation_data.get('end_date', 'N/A')))
+        room_name = html_mod.escape(str(reservation_data.get('room_name', 'N/A')))
+
+        return f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Reservation Reminder</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background-color: #6f42c1; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }}
+        .content {{ background-color: #f8f9fa; padding: 20px; border-radius: 0 0 5px 5px; }}
+        .details {{ background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0; }}
+        .info-row {{ display: flex; justify-content: space-between; margin: 10px 0; padding: 5px 0; border-bottom: 1px solid #eee; }}
+        .label {{ font-weight: bold; color: #555; }}
+        .value {{ color: #333; }}
+        .footer {{ margin-top: 20px; padding-top: 15px; border-top: 1px solid #ddd; color: #666; }}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Reservation Reminder</h1>
+    </div>
+
+    <div class="content">
+        <p>Dear <strong>{guest_name}</strong>,</p>
+        <p>This is a friendly reminder about your upcoming reservation.</p>
+
+        <div class="details">
+            <h3>Reservation Details</h3>
+            <div class="info-row">
+                <span class="label">Reservation Number:</span>
+                <span class="value">{reservation_number}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Check-in Date:</span>
+                <span class="value">{start_date}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Check-out Date:</span>
+                <span class="value">{end_date}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Room:</span>
+                <span class="value">{room_name}</span>
+            </div>
+        </div>
+
+        <p>If you have any questions, just reply to this email.</p>
+
+        <div class="footer">
+            <p>Best regards,<br>The Management Team</p>
+        </div>
+    </div>
+</body>
+</html>
+        """.strip()
+
+    def _create_reservation_receipt_html(self, reservation_data: Dict[str, Any]) -> str:
+        """
+        Return an HTML email body for a reservation receipt.
+        """
+        reservation_number = html_mod.escape(str(reservation_data.get('reservation_number', 'N/A')))
+        guest_name = html_mod.escape(str(reservation_data.get('guest_name', 'Guest')))
+        start_date = html_mod.escape(str(reservation_data.get('start_date', 'N/A')))
+        end_date = html_mod.escape(str(reservation_data.get('end_date', 'N/A')))
+        room_name = html_mod.escape(str(reservation_data.get('room_name', 'N/A')))
+
+        return f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Reservation Receipt</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background-color: #20c997; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }}
+        .content {{ background-color: #f8f9fa; padding: 20px; border-radius: 0 0 5px 5px; }}
+        .details {{ background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0; }}
+        .info-row {{ display: flex; justify-content: space-between; margin: 10px 0; padding: 5px 0; border-bottom: 1px solid #eee; }}
+        .label {{ font-weight: bold; color: #555; }}
+        .value {{ color: #333; }}
+        .footer {{ margin-top: 20px; padding-top: 15px; border-top: 1px solid #ddd; color: #666; }}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Reservation Receipt</h1>
+    </div>
+
+    <div class="content">
+        <p>Dear <strong>{guest_name}</strong>,</p>
+        <p>Thank you for your payment. Here is your reservation receipt.</p>
+
+        <div class="details">
+            <h3>Reservation Details</h3>
+            <div class="info-row">
+                <span class="label">Reservation Number:</span>
+                <span class="value">{reservation_number}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Check-in Date:</span>
+                <span class="value">{start_date}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Check-out Date:</span>
+                <span class="value">{end_date}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Room:</span>
+                <span class="value">{room_name}</span>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Best regards,<br>The Management Team</p>
+        </div>
+    </div>
+</body>
+</html>
+        """.strip()
+
+    def _create_reservation_followup_html(self, reservation_data: Dict[str, Any]) -> str:
+        """
+        Return an HTML email body for a post-stay follow-up.
+        """
+        reservation_number = html_mod.escape(str(reservation_data.get('reservation_number', 'N/A')))
+        guest_name = html_mod.escape(str(reservation_data.get('guest_name', 'Guest')))
+        start_date = html_mod.escape(str(reservation_data.get('start_date', 'N/A')))
+        end_date = html_mod.escape(str(reservation_data.get('end_date', 'N/A')))
+        room_name = html_mod.escape(str(reservation_data.get('room_name', 'N/A')))
+
+        return f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Thank You for Your Stay</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background-color: #0d6efd; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }}
+        .content {{ background-color: #f8f9fa; padding: 20px; border-radius: 0 0 5px 5px; }}
+        .details {{ background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0; }}
+        .info-row {{ display: flex; justify-content: space-between; margin: 10px 0; padding: 5px 0; border-bottom: 1px solid #eee; }}
+        .label {{ font-weight: bold; color: #555; }}
+        .value {{ color: #333; }}
+        .footer {{ margin-top: 20px; padding-top: 15px; border-top: 1px solid #ddd; color: #666; }}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Thank You for Your Stay</h1>
+    </div>
+
+    <div class="content">
+        <p>Dear <strong>{guest_name}</strong>,</p>
+        <p>We hope you enjoyed your stay. We would love to hear your feedback.</p>
+
+        <div class="details">
+            <h3>Reservation Details</h3>
+            <div class="info-row">
+                <span class="label">Reservation Number:</span>
+                <span class="value">{reservation_number}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Check-in Date:</span>
+                <span class="value">{start_date}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Check-out Date:</span>
+                <span class="value">{end_date}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Room:</span>
+                <span class="value">{room_name}</span>
+            </div>
+        </div>
+
+        <p>Thank you for choosing us and we hope to welcome you again.</p>
 
         <div class="footer">
             <p>Best regards,<br>The Management Team</p>
