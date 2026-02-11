@@ -121,7 +121,7 @@ def add_room():  # pylint: disable=R0911
                 'error_details': str(e),
                 'operation_result': 'failed'
             })
-            return error_response(f"Room creation failed due to constraint violation: {str(e)}", 400)
+            return error_response("Room creation failed due to constraint violation.", 400)
         except SQLAlchemyError as e:
             db.rollback()
             logger.error("Database error during room creation", extra={
@@ -353,7 +353,7 @@ def update_room(room_id):
                 'error_details': str(e),
                 'operation_result': 'failed'
             })
-            return error_response(f"Room update failed due to constraint violation: {str(e)}", 400)
+            return error_response("Room update failed due to constraint violation.", 400)
         except SQLAlchemyError as e:
             db.rollback()
             logger.error("Database error during room update", extra={
@@ -431,7 +431,7 @@ def delete_room(room_id):
                 'error_details': str(e),
                 'operation_result': 'failed'
             })
-            return error_response(f"Failed to delete room due to foreign key constraints: {str(e)}", 400)
+            return error_response("Failed to delete room due to foreign key constraints.", 400)
         except SQLAlchemyError as e:
             db.rollback()
             logger.error("Database error during room deletion", extra={
@@ -440,7 +440,7 @@ def delete_room(room_id):
                 'error_details': str(e),
                 'operation_result': 'failed'
             })
-            return error_response(f"Failed to delete room: {str(e)}", 500)
+            return error_response("Failed to delete room due to database error.", 500)
         except (ValueError, TypeError) as e:
             db.rollback()
             logger.exception("Unexpected error during room deletion", extra={
