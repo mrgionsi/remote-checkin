@@ -9,10 +9,15 @@ import { environment } from '../../environments/environments';
 })
 export class AdminInfoService {
     private apiUrl = `${environment.apiBaseUrl}/api/v1/admin/me`;
+    private changePasswordUrl = `${environment.apiBaseUrl}/api/v1/admin/change-password`;
 
     constructor(private http: HttpClient, private authService: AuthService) { }
 
     getAdminInfo(): Observable<any> {
         return this.http.get(this.apiUrl, { headers: this.authService.getAuthHeaders() });
+    }
+
+    changePassword(payload: { current_password: string; new_password: string; confirm_password: string }): Observable<any> {
+        return this.http.post(this.changePasswordUrl, payload, { headers: this.authService.getAuthHeaders() });
     }
 }
