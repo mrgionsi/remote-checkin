@@ -147,7 +147,17 @@ def create_reservation():
                     .first()
                 )
             else:
-                room = session.query(Room).filter(Room.name == room_name).first()
+                if structure_id is None:
+                    return error_response("structureId is required when using roomName", 400)
+                try:
+                    structure_id = int(structure_id)
+                except (TypeError, ValueError):
+                    return error_response("Invalid structureId. Must be an integer.", 400)
+                room = (
+                    session.query(Room)
+                    .filter(Room.name == room_name, Room.id_structure == structure_id)
+                    .first()
+                )
         if not room:
             return error_response("Room not found", 404)
         if not is_superadmin() and not user_has_structure(session, current_user_id, room.id_structure):
@@ -302,9 +312,10 @@ def create_reservation():
         session.rollback()
         return error_response(f"Missing key: {str(e)}", 400)
     # pylint: disable=W0718
-    except Exception as e:
+    except Exception:
         session.rollback()
-        return error_response(str(e), 500)
+        logger.exception("Unexpected error while creating reservation")
+        return error_response("Internal server error", 500)
     finally:
         session.close()
 
@@ -429,9 +440,10 @@ def update_reservation(reservation_id):
             }
         }), 200
 
-    except Exception as e:
+    except Exception:
         db.rollback()
-        return error_response(f"Error updating reservation: {str(e)}", 500)
+        logger.exception("Unexpected error while updating reservation")
+        return error_response("Internal server error", 500)
     finally:
         db.close()
 @reservation_bp.route("/reservations/<int:reservation_id>", methods=["DELETE"])
@@ -469,9 +481,10 @@ def delete_reservation(reservation_id):
 
         return jsonify({"message": f"Reservation {reservation_id} deleted successfully"}), 200
 
-    except Exception as e:
+    except Exception:
         db.rollback()
-        return error_response(f"Error deleting reservation: {str(e)}", 500)
+        logger.exception("Unexpected error while deleting reservation")
+        return error_response("Internal server error", 500)
     finally:
         db.close()
 
@@ -527,6 +540,7 @@ def get_reservations_by_structure(structure_id):
             .all()
         )
     except SQLAlchemyError:
+        logger.exception("Database error while fetching reservations by structure")
         return error_response("Database error", 500)
     finally:
         db.close()
@@ -577,8 +591,9 @@ def get_admin_reservations_by_id(reservation_id):
             return error_response("Access denied for this reservation", 403)
 
         return jsonify(reservation.to_dict())
-    except Exception as e:
-        return error_response(f"Error retrieving reservation: {str(e)}", 500)
+    except Exception:
+        logger.exception("Unexpected error while retrieving admin reservation by id")
+        return error_response("Internal server error", 500)
     finally:
         db.close()
 
@@ -625,8 +640,9 @@ def check_get_reservations_by_id(reservation_id):
             'status': reservation.status,
             'registered_clients_count': client_count
         }), 200
-    except Exception as e:
-        return error_response(f"Error retrieving reservation: {str(e)}", 500)
+    except Exception:
+        logger.exception("Unexpected error while checking reservation by reference")
+        return error_response("Internal server error", 500)
     finally:
         db.close()
 
@@ -815,8 +831,9 @@ def update_reservation_status(reservation_id):
             }
         }), 200
 
-    except Exception as e:
+    except Exception:
         db.rollback()
-        return error_response(f"Error updating reservation status: {str(e)}", 500)
+        logger.exception("Unexpected error while updating reservation status")
+        return error_response("Internal server error", 500)
     finally:
         db.close()
