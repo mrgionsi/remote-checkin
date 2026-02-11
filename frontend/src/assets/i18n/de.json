@@ -450,6 +450,7 @@
     "rooms-delete-confirm-reject": "Abbrechen",
     "rooms-delete-confirm-accept": "Löschen",
     "rooms-delete-error": "Fehler beim Löschen des Zimmers.",
+    "rooms-delete-success": "Zimmer erfolgreich gelöscht.",
     "rooms-missing-structure-title": "Fehlende Struktur",
     "rooms-missing-structure-detail": "Wählen Sie eine Struktur aus, bevor Sie ein Zimmer erstellen.",
     "rooms-create-success": "Neues Zimmer hinzugefügt.",

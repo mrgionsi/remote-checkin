@@ -1416,6 +1416,7 @@
     "rooms-delete-confirm-reject": "Cancel",
     "rooms-delete-confirm-accept": "Delete",
     "rooms-delete-error": "Error deleting room.",
+    "rooms-delete-success": "Room deleted successfully.",
     "rooms-missing-structure-title": "Missing structure",
     "rooms-missing-structure-detail": "Select a structure before creating a room.",
     "rooms-create-success": "New room added.",

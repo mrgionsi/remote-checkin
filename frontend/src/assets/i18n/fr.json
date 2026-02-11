@@ -450,6 +450,7 @@
     "rooms-delete-confirm-reject": "Annuler",
     "rooms-delete-confirm-accept": "Supprimer",
     "rooms-delete-error": "Erreur lors de la suppression de la chambre.",
+    "rooms-delete-success": "Chambre supprimée avec succès.",
     "rooms-missing-structure-title": "Structure manquante",
     "rooms-missing-structure-detail": "Sélectionnez une structure avant de créer une chambre.",
     "rooms-create-success": "Nouvelle chambre ajoutée.",

@@ -1340,6 +1340,7 @@
     "rooms-delete-confirm-reject": "Annulla",
     "rooms-delete-confirm-accept": "Elimina",
     "rooms-delete-error": "Errore durante l'eliminazione della camera.",
+    "rooms-delete-success": "Camera eliminata con successo.",
     "rooms-missing-structure-title": "Struttura mancante",
     "rooms-missing-structure-detail": "Seleziona una struttura prima di creare una camera.",
     "rooms-create-success": "Nuova camera aggiunta.",
