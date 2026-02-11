@@ -24,20 +24,20 @@
         </div>
     </div>
     <div class="filter-chips">
-        <button class="chip" (click)="setStatusFilter('')" [class.chip--active]="statusFilter === ''">
+        <button class="chip" (click)="setStatusFilter('')" [class.chip-active]="statusFilter === ''">
             {{ 'superadmin-structures-filter-all' | transloco }}
         </button>
-        <button class="chip" (click)="setStatusFilter('true')" [class.chip--active]="statusFilter === 'true'">
+        <button class="chip" (click)="setStatusFilter('true')" [class.chip-active]="statusFilter === 'true'">
             {{ 'superadmin-structures-filter-active' | transloco }}
         </button>
-        <button class="chip" (click)="setStatusFilter('false')" [class.chip--active]="statusFilter === 'false'">
+        <button class="chip" (click)="setStatusFilter('false')" [class.chip-active]="statusFilter === 'false'">
             {{ 'superadmin-structures-filter-archived' | transloco }}
         </button>
     </div>
 
     <div class="structures-list" *ngIf="!loading">
         <article class="structure-tile" *ngFor="let structure of structures">
-            <div class="structure-tile__head">
+            <div class="structure-tile-head">
                 <div class="structure-identity">
                     <div class="structure-avatar">
                         <i class="pi pi-building"></i>
