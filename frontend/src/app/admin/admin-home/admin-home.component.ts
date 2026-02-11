@@ -87,6 +87,9 @@ export class AdminHomeComponent implements OnInit, OnDestroy {
         } else if (this.structures.length > 0) {
           this.selectedStructureId = this.structures[0].id;
           localStorage.setItem('selected_structure_id', String(this.selectedStructureId));
+        } else {
+          this.selectedStructureId = null;
+          localStorage.removeItem('selected_structure_id');
         }
         this.translocoService.selectTranslateObject([
           'admin-menu-operations',
