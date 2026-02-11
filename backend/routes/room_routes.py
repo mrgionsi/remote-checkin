@@ -24,7 +24,7 @@ from app_logging.config import get_logger
 from app_logging.decorators import log_route, log_database_operation, log_function
 from app_logging.utils import safe_extra_fields
 from utils.authz import is_superadmin
-from utils.route_helpers import get_user_structure_ids, user_has_structure
+from utils.route_helpers import get_user_structure_ids, user_has_structure, error_response
 from database import get_db  # Use absolute import
 
 # Configure logging
@@ -64,7 +64,7 @@ def _validate_room_update_data(data, db):
 @jwt_required()
 @log_route(include_request_data=True)
 @log_database_operation("CREATE")
-def add_room():
+def add_room():  # pylint: disable=R0911
     """
     Creates a new room using JSON data from the request and adds it to the database.
 
@@ -83,13 +83,12 @@ def add_room():
             or not data.get("id_structure")
             or not data.get("capacity")
         ):
-            return jsonify(
-                {
-                    "error": "Missing required fields: 'name', 'capacity', or 'id_structure'"
-                }
-            ), 400
+            return error_response("Missing required fields: 'name', 'capacity', or 'id_structure'", 400)
         if not is_superadmin() and not user_has_structure(db, current_user_id, data["id_structure"]):
-            return jsonify({"error": "Access denied for this structure"}), 403
+            return error_response("Access denied for this structure", 403)
+        structure = db.query(Structure).filter(Structure.id == data["id_structure"]).first()
+        if not structure:
+            return error_response("Invalid structure ID", 400)
 
         # Create a new room
         new_room = Room(
@@ -122,7 +121,7 @@ def add_room():
                 'error_details': str(e),
                 'operation_result': 'failed'
             })
-            return jsonify({"error": f"Room creation failed due to constraint violation: {str(e)}"}), 400
+            return error_response("Room creation failed due to constraint violation.", 400)
         except SQLAlchemyError as e:
             db.rollback()
             logger.error("Database error during room creation", extra={
@@ -133,7 +132,7 @@ def add_room():
                 'error_details': str(e),
                 'operation_result': 'failed'
             })
-            return jsonify({"error": "Failed to create room due to database error"}), 500
+            return error_response("Failed to create room due to database error", 500)
         except (ValueError, TypeError) as e:
             db.rollback()
             logger.exception("Unexpected error during room creation", extra={
@@ -144,7 +143,7 @@ def add_room():
                 'error_details': str(e),
                 'operation_result': 'failed'
             }, exc_info=True)
-            return jsonify({"error": "An unexpected error occurred while creating the room"}), 500
+            return error_response("An unexpected error occurred while creating the room", 500)
 
 
 # Get all rooms by structure
@@ -169,11 +168,11 @@ def get_rooms():
                 try:
                     id_structure = int(raw_structure_id)
                 except (TypeError, ValueError):
-                    return jsonify({"error": "Invalid structure_id. Must be an integer."}), 400
+                    return error_response("Invalid structure_id. Must be an integer.", 400)
 
             if id_structure is not None:
                 if not is_superadmin() and not user_has_structure(db, current_user_id, id_structure):
-                    return jsonify({"error": "Access denied for this structure"}), 403
+                    return error_response("Access denied for this structure", 403)
                 rooms = db.query(Room).filter(Room.id_structure == id_structure).order_by(Room.id).all()
             else:
                 if is_superadmin():
@@ -204,7 +203,7 @@ def get_rooms():
                 'error_details': str(e),
                 'operation_result': 'failed'
             })
-            return jsonify({"error": "Failed to retrieve rooms due to database error"}), 500
+            return error_response("Failed to retrieve rooms due to database error", 500)
         except (ValueError, TypeError) as e:
             logger.exception("Unexpected error retrieving rooms", extra={
                 'structure_id': id_structure,
@@ -212,7 +211,7 @@ def get_rooms():
                 'error_details': str(e),
                 'operation_result': 'failed'
             }, exc_info=True)
-            return jsonify({"error": "An unexpected error occurred while retrieving rooms"}), 500
+            return error_response("An unexpected error occurred while retrieving rooms", 500)
 
 
 # Get room by ID
@@ -236,7 +235,7 @@ def get_room(room_id):
             room = db.query(Room).filter(Room.id == room_id).first()
             if room:
                 if not is_superadmin() and not user_has_structure(db, current_user_id, room.id_structure):
-                    return jsonify({"error": "Access denied for this room"}), 403
+                    return error_response("Access denied for this room", 403)
                 logger.info("Room retrieved successfully", extra={
                     'room_id': room_id,
                     'room_name': room.name,
@@ -249,7 +248,7 @@ def get_room(room_id):
                 'room_id': room_id,
                 'operation_result': 'not_found'
             })
-            return jsonify({"error": "Room not found"}), 404
+            return error_response("Room not found", 404)
         except SQLAlchemyError as e:
             logger.error("Database error retrieving room", extra={
                 'room_id': room_id,
@@ -257,7 +256,7 @@ def get_room(room_id):
                 'error_details': str(e),
                 'operation_result': 'failed'
             })
-            return jsonify({"error": "Failed to retrieve room due to database error"}), 500
+            return error_response("Failed to retrieve room due to database error", 500)
         except (ValueError, TypeError) as e:
             logger.exception("Unexpected error retrieving room", extra={
                 'room_id': room_id,
@@ -265,7 +264,7 @@ def get_room(room_id):
                 'error_details': str(e),
                 'operation_result': 'failed'
             }, exc_info=True)
-            return jsonify({"error": "An unexpected error occurred while retrieving the room"}), 500
+            return error_response("An unexpected error occurred while retrieving the room", 500)
 
 
 # Update a room
@@ -295,9 +294,9 @@ def update_room(room_id):
                     'room_id': room_id,
                     'operation_result': 'not_found'
                 })
-                return jsonify({"error": "Room not found"}), 404
+                return error_response("Room not found", 404)
             if not is_superadmin() and not user_has_structure(db, current_user_id, room.id_structure):
-                return jsonify({"error": "Access denied for this room"}), 403
+                return error_response("Access denied for this room", 403)
 
             data = request.get_json()
 
@@ -318,10 +317,10 @@ def update_room(room_id):
                     'validation_error': validation_error,
                     'operation_result': 'validation_failed'
                 })
-                return jsonify({"error": validation_error}), 400
+                return error_response(validation_error, 400)
             if "id_structure" in data and not is_superadmin():
                 if not user_has_structure(db, current_user_id, data["id_structure"]):
-                    return jsonify({"error": "Access denied for this structure"}), 403
+                    return error_response("Access denied for this structure", 403)
 
             # Track what fields are being updated
             updated_fields = {}
@@ -354,7 +353,7 @@ def update_room(room_id):
                 'error_details': str(e),
                 'operation_result': 'failed'
             })
-            return jsonify({"error": f"Room update failed due to constraint violation: {str(e)}"}), 400
+            return error_response("Room update failed due to constraint violation.", 400)
         except SQLAlchemyError as e:
             db.rollback()
             logger.error("Database error during room update", extra={
@@ -363,7 +362,7 @@ def update_room(room_id):
                 'error_details': str(e),
                 'operation_result': 'failed'
             })
-            return jsonify({"error": "Failed to update room due to database error"}), 500
+            return error_response("Failed to update room due to database error", 500)
         except (ValueError, TypeError) as e:
             db.rollback()
             logger.exception("Unexpected error during room update", extra={
@@ -372,7 +371,7 @@ def update_room(room_id):
                 'error_details': str(e),
                 'operation_result': 'failed'
             }, exc_info=True)
-            return jsonify({"error": "An unexpected error occurred while updating the room"}), 500
+            return error_response("An unexpected error occurred while updating the room", 500)
 
 
 # Delete a room
@@ -402,10 +401,10 @@ def delete_room(room_id):
                     'room_id': room_id,
                     'operation_result': 'not_found'
                 })
-                return jsonify({"error": "Room not found"}), 404
+                return error_response("Room not found", 404)
 
             if not is_superadmin() and not user_has_structure(db, current_user_id, room.id_structure):
-                return jsonify({"error": "Access denied for this room"}), 403
+                return error_response("Access denied for this room", 403)
 
             # Log deletion attempt with room details
             room_details = {
@@ -432,7 +431,7 @@ def delete_room(room_id):
                 'error_details': str(e),
                 'operation_result': 'failed'
             })
-            return jsonify({"error": f"Failed to delete room due to foreign key constraints: {str(e)}"}), 400
+            return error_response("Failed to delete room due to foreign key constraints.", 400)
         except SQLAlchemyError as e:
             db.rollback()
             logger.error("Database error during room deletion", extra={
@@ -441,7 +440,7 @@ def delete_room(room_id):
                 'error_details': str(e),
                 'operation_result': 'failed'
             })
-            return jsonify({"error": f"Failed to delete room: {str(e)}"}), 500
+            return error_response("Failed to delete room due to database error.", 500)
         except (ValueError, TypeError) as e:
             db.rollback()
             logger.exception("Unexpected error during room deletion", extra={
@@ -450,4 +449,4 @@ def delete_room(room_id):
                 'error_details': str(e),
                 'operation_result': 'failed'
             }, exc_info=True)
-            return jsonify({"error": "An unexpected error occurred while deleting the room"}), 500
+            return error_response("An unexpected error occurred while deleting the room", 500)

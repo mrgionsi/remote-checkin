@@ -158,7 +158,7 @@ export class RoomComponent implements OnInit {
             this.messageService.add({
               severity: 'info',
               summary: this.translocoService.translate('rooms-toast-confirmed'),
-              detail: value.message
+              detail: this.translocoService.translate('rooms-delete-success')
             });
           },
           error: () => {

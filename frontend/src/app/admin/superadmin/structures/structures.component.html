@@ -14,54 +14,81 @@
         <div style="flex: 1;">
             <p-select [(ngModel)]="statusFilter" (ngModelChange)="loadStructures()" [options]="statusOptions"
                 [placeholder]="'superadmin-structures-status-all' | transloco" name="statusFilter" styleClass="w-full">
+                <ng-template let-option pTemplate="selectedItem">
+                    {{ option ? (option.labelKey | transloco) : ('superadmin-structures-status-all' | transloco) }}
+                </ng-template>
+                <ng-template let-option pTemplate="item">
+                    {{ option.labelKey | transloco }}
+                </ng-template>
             </p-select>
         </div>
     </div>
     <div class="filter-chips">
-        <button class="chip" (click)="setStatusFilter('')" [class.chip--active]="statusFilter === ''">
+        <button class="chip" (click)="setStatusFilter('')" [class.chip-active]="statusFilter === ''">
             {{ 'superadmin-structures-filter-all' | transloco }}
         </button>
-        <button class="chip" (click)="setStatusFilter('true')" [class.chip--active]="statusFilter === 'true'">
+        <button class="chip" (click)="setStatusFilter('true')" [class.chip-active]="statusFilter === 'true'">
             {{ 'superadmin-structures-filter-active' | transloco }}
         </button>
-        <button class="chip" (click)="setStatusFilter('false')" [class.chip--active]="statusFilter === 'false'">
+        <button class="chip" (click)="setStatusFilter('false')" [class.chip-active]="statusFilter === 'false'">
             {{ 'superadmin-structures-filter-archived' | transloco }}
         </button>
     </div>
 
     <div class="structures-list" *ngIf="!loading">
-        <p-card *ngFor="let structure of structures" styleClass="structure-card">
-            <ng-template pTemplate="header">
-                <div class="structure-header">
-                    <h3>{{ structure.name }}</h3>
-                    <p-tag [value]="structure.is_active ? ('superadmin-structures-status-active' | transloco) :
-                        ('superadmin-structures-status-archived' | transloco)"
-                        [severity]="structure.is_active ? 'success' : 'warn'">
-                    </p-tag>
+        <article class="structure-tile" *ngFor="let structure of structures">
+            <div class="structure-tile-head">
+                <div class="structure-identity">
+                    <div class="structure-avatar">
+                        <i class="pi pi-building"></i>
+                    </div>
+                    <div class="structure-title">
+                        <h3>{{ structure.name }}</h3>
+                        <span>{{ structure.city || ('superadmin-structures-na' | transloco) }}</span>
+                    </div>
                 </div>
-            </ng-template>
-
-            <div class="structure-info">
-                <p><strong>{{ 'superadmin-structures-city' | transloco }}</strong> {{ structure.city }}</p>
-                <p><strong>{{ 'superadmin-structures-address' | transloco }}</strong> {{ structure.street }}</p>
-                <p><strong>{{ 'superadmin-structures-cin' | transloco }}</strong> {{ structure.cin || ('superadmin-structures-na' | transloco) }}</p>
+                <p-tag [value]="structure.is_active ? ('superadmin-structures-status-active' | transloco) :
+                    ('superadmin-structures-status-archived' | transloco)"
+                    [severity]="structure.is_active ? 'success' : 'warn'">
+                </p-tag>
             </div>
 
-            <ng-template pTemplate="footer">
-                <div class="structure-actions">
-                    <p-button [label]="'superadmin-structures-edit' | transloco" icon="pi pi-pencil"
-                        severity="secondary" size="small"
-                        (onClick)="editStructure(structure)">
-                    </p-button>
-                    <p-button
-                        [label]="structure.is_active ? ('superadmin-structures-archive' | transloco) : ('superadmin-structures-restore' | transloco)"
-                        [icon]="structure.is_active ? 'pi pi-file-export' : 'pi pi-refresh'"
-                        [severity]="structure.is_active ? 'warn' : 'success'" size="small"
-                        (onClick)="toggleStructureStatus(structure)">
-                    </p-button>
+            <div class="structure-meta">
+                <div class="meta-item">
+                    <i class="pi pi-map-marker"></i>
+                    <div>
+                        <span class="meta-label">{{ 'superadmin-structures-city' | transloco }}</span>
+                        <p>{{ structure.city || ('superadmin-structures-na' | transloco) }}</p>
+                    </div>
                 </div>
-            </ng-template>
-        </p-card>
+                <div class="meta-item">
+                    <i class="pi pi-map"></i>
+                    <div>
+                        <span class="meta-label">{{ 'superadmin-structures-address' | transloco }}</span>
+                        <p>{{ structure.street || ('superadmin-structures-na' | transloco) }}</p>
+                    </div>
+                </div>
+                <div class="meta-item">
+                    <i class="pi pi-id-card"></i>
+                    <div>
+                        <span class="meta-label">{{ 'superadmin-structures-cin' | transloco }}</span>
+                        <p>{{ structure.cin || ('superadmin-structures-na' | transloco) }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="structure-actions">
+                <p-button [label]="'superadmin-structures-edit' | transloco" icon="pi pi-pencil" severity="secondary"
+                    size="small" (onClick)="editStructure(structure)">
+                </p-button>
+                <p-button
+                    [label]="structure.is_active ? ('superadmin-structures-archive' | transloco) : ('superadmin-structures-restore' | transloco)"
+                    [icon]="structure.is_active ? 'pi pi-file-export' : 'pi pi-refresh'"
+                    [severity]="structure.is_active ? 'warn' : 'success'" size="small"
+                    (onClick)="toggleStructureStatus(structure)">
+                </p-button>
+            </div>
+        </article>
     </div>
 
     <div class="loading-skeleton" *ngIf="loading">

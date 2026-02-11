@@ -132,7 +132,12 @@
                             styleClass="wide-input"></p-select>
                         <p *ngIf="reservationForm.get('roomName')?.invalid && reservationForm.get('roomName')?.touched"
                             class="p-error">
-                            {{ 'room-name-required' | transloco }}
+                            <span *ngIf="reservationForm.get('roomName')?.errors?.['required']">
+                                {{ 'room-name-required' | transloco }}
+                            </span>
+                            <span *ngIf="reservationForm.get('roomName')?.errors?.['roomNotFound'] || reservationForm.get('roomName')?.errors?.['structureRequired']">
+                                {{ getRoomResolutionErrorMessage() }}
+                            </span>
                         </p>
                     </div>
                 </div>

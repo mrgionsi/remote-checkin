@@ -9,7 +9,7 @@ import { ReservationService } from '../../services/reservation.service';
 import { CommonModule } from '@angular/common';
 import { RoomService } from '../../services/room.service';
 import { dateRangeValidator } from '../../validators/date-range.validator';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-create-reservation',
@@ -27,7 +27,8 @@ export class CreateReservationComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private roomService: RoomService
+    private roomService: RoomService,
+    private translocoService: TranslocoService
   ) {
     this.reservationForm = this.fb.group({
       reservationNumber: ['', Validators.required],
@@ -183,14 +184,47 @@ export class CreateReservationComponent implements OnInit {
       const reservation = this.reservationForm.value;
       console.log(reservation)
 
-      // Handle room name extraction safely
+      // Handle room name extraction safely and include room/structure identifiers
       if (reservation.roomName && reservation.roomName['name']) {
+        reservation.roomId = reservation.roomName['id'];
+        reservation.structureId = reservation.roomName['id_structure'] ?? Number(localStorage.getItem('selected_structure_id') || 0);
         reservation.roomName = reservation.roomName['name'];
+      } else if (typeof reservation.roomName === 'string') {
+        const roomMatch = this.rooms.find(room => room.name === reservation.roomName);
+        if (roomMatch) {
+          reservation.roomId = roomMatch.id;
+          reservation.structureId = roomMatch.id_structure ?? Number(localStorage.getItem('selected_structure_id') || 0);
+        } else {
+          reservation.structureId = Number(localStorage.getItem('selected_structure_id') || 0);
+          if (!reservation.structureId) {
+            this.setRoomControlError('structureRequired');
+            this.saving = false;
+            return;
+          }
+          this.setRoomControlError('roomNotFound');
+          this.saving = false;
+          return;
+        }
       } else {
         console.error('Room name is not selected or invalid:', reservation.roomName);
+        this.setRoomControlError('roomNotFound');
         this.saving = false; // Reset loading state on error
         return; // Don't submit if room is not selected
       }
+
+      if (!reservation.roomId) {
+        this.setRoomControlError('roomNotFound');
+        this.saving = false;
+        return;
+      }
+
+      if (!reservation.structureId) {
+        this.setRoomControlError('structureRequired');
+        this.saving = false;
+        return;
+      }
+
+      this.clearRoomResolutionErrors();
 
       // Handle date conversion safely using local timezone
       if (reservation.startDate instanceof Date) {
@@ -219,6 +253,10 @@ export class CreateReservationComponent implements OnInit {
         },
         error: (error: any) => {
           console.error('Error creating reservation', error);
+          const backendError = error?.error?.error;
+          if (backendError === 'structureId is required when using roomName') {
+            this.setRoomControlError('structureRequired');
+          }
           this.saving = false; // Reset loading state on error
         }
       };
@@ -238,4 +276,38 @@ export class CreateReservationComponent implements OnInit {
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   }
-}  
+
+  getRoomResolutionErrorMessage(): string {
+    const roomControl = this.reservationForm.get('roomName');
+    if (!roomControl?.errors) {
+      return '';
+    }
+    if (roomControl.errors['structureRequired']) {
+      return this.translocoService.translate('reservation-structure-required');
+    }
+    if (roomControl.errors['roomNotFound']) {
+      return this.translocoService.translate('reservation-room-not-found');
+    }
+    return '';
+  }
+
+  private setRoomControlError(errorKey: 'structureRequired' | 'roomNotFound'): void {
+    const roomControl = this.reservationForm.get('roomName');
+    if (!roomControl) {
+      return;
+    }
+    roomControl.setErrors({ ...(roomControl.errors || {}), [errorKey]: true });
+    roomControl.markAsTouched();
+  }
+
+  private clearRoomResolutionErrors(): void {
+    const roomControl = this.reservationForm.get('roomName');
+    if (!roomControl?.errors) {
+      return;
+    }
+    const errors = { ...roomControl.errors };
+    delete errors['structureRequired'];
+    delete errors['roomNotFound'];
+    roomControl.setErrors(Object.keys(errors).length ? errors : null);
+  }
+}

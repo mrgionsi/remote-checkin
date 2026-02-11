@@ -7,7 +7,6 @@ import { MessageService } from 'primeng/api';
 
 // PrimeNG imports
 import { ButtonModule } from 'primeng/button';
-import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { DialogModule } from 'primeng/dialog';
@@ -17,7 +16,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { MessageModule } from 'primeng/message';
 import { PaginatorModule } from 'primeng/paginator';
 import { ToastModule } from 'primeng/toast';
-import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
     selector: 'app-superadmin-structures',
@@ -27,7 +26,6 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
         ReactiveFormsModule,
         FormsModule,
         ButtonModule,
-        CardModule,
         InputTextModule,
         SelectModule,
         DialogModule,
@@ -54,14 +52,13 @@ export class SuperadminStructuresComponent implements OnInit {
     structureForm!: FormGroup;
     submitting = false;
 
-    statusOptions: Array<{ label: string; value: string }> = [];
+    statusOptions: Array<{ labelKey: string; value: string }> = [];
 
     constructor(
         private superadminService: SuperadminService,
         private fb: FormBuilder,
         private errorHandler: ErrorHandlerService,
-        private messageService: MessageService,
-        private translocoService: TranslocoService
+        private messageService: MessageService
     ) { }
 
     ngOnInit(): void {
@@ -72,9 +69,9 @@ export class SuperadminStructuresComponent implements OnInit {
 
     private setStatusOptions(): void {
         this.statusOptions = [
-            { label: this.translocoService.translate('superadmin-structures-status-all'), value: '' },
-            { label: this.translocoService.translate('superadmin-structures-filter-active'), value: 'true' },
-            { label: this.translocoService.translate('superadmin-structures-filter-archived'), value: 'false' }
+            { labelKey: 'superadmin-structures-filter-all', value: '' },
+            { labelKey: 'superadmin-structures-filter-active', value: 'true' },
+            { labelKey: 'superadmin-structures-filter-archived', value: 'false' }
         ];
     }
 

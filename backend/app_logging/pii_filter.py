@@ -48,8 +48,13 @@ class PIIRedactionFilter(logging.Filter):
         'user_id', 'customer_id', 'client_id', 'guest_id',
         'telephone', 'phone', 'mobile', 'contact_number',
         'name', 'surname', 'first_name', 'last_name', 'full_name',
+        'name_reference', 'guest_name', 'reservation_number', 'reservationnumber', 'id_reference',
+        'document_number', 'document_type', 'tax_code', 'cf',
+        'street', 'address', 'city', 'province', 'cap',
+        'birth_city', 'birth_country', 'residence_city', 'residence_country',
         'password', 'passwd', 'secret', 'token', 'key', 'authorization',
-        'x-api-key', 'x-auth-token', 'cookie', 'session'
+        'x-api-key', 'x-auth-token', 'cookie', 'session',
+        'portale_password', 'portale_username', 'wskey', 'web_service_key'
     }
 
     def __init__(self,

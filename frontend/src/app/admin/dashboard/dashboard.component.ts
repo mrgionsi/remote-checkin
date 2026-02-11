@@ -171,9 +171,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     console.log('DashboardComponent initialized with ID:', this.componentId);
     this.setFilterOptions();
     if (isPlatformBrowser(this.platformId)) {
-      const structureIdStr = localStorage.getItem('selected_structure_id');
-      const structureId = structureIdStr ? +structureIdStr : null;
-      console.log('Selected structure ID from localStorage:', structureIdStr, 'Parsed as:', structureId);
+      const structureId = this.getActiveStructureId();
+      console.log('Selected structure ID resolved as:', structureId);
       if (structureId && !isNaN(structureId) && structureId > 0) {
         // Subscribe to reservations and store subscription
         this.loadingReservations = true;
@@ -205,7 +204,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 life: 4000
               });
             } else {
-              const errorMessage = error?.error?.message || error?.message || 'Failed to load reservations. Please try again.';
+              const errorMessage = this.getFriendlyReservationError(error);
               this.errorReservations = errorMessage;
               this.messageService.add({
                 severity: 'error',
@@ -235,12 +234,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
           },
           error: (error) => {
             console.error('Error fetching monthly reservations:', error);
-            const errorMessage = error?.error?.message || error?.message || 'Failed to load monthly reservations chart. Please try again.';
+            const errorMessage = this.getFriendlyChartError(error);
             this.errorChart = errorMessage;
             this.loadingChart = false;
             this.messageService.add({
               severity: 'error',
-              summary: 'Chart load failed',
+              summary: this.translocoService.translate('dashboard-toast-chart-load-failed-title'),
               detail: errorMessage,
               life: 6000
             });
@@ -252,8 +251,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         });
         this.subscriptions.push(monthlySub);
       } else {
-        console.log('No valid structure ID found. Structure ID:', structureId);
-        console.log('localStorage selected_structure_id:', localStorage.getItem('selected_structure_id'));
+        this.handleNoStructureSelected();
       }
     }
   }
@@ -527,8 +525,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   retryLoadData(): void {
-    const structureIdStr = localStorage.getItem('selected_structure_id');
-    const structureId = structureIdStr ? +structureIdStr : null;
+    const structureId = this.getActiveStructureId();
 
     if (structureId && !isNaN(structureId) && structureId > 0) {
       // Retry reservations
@@ -547,7 +544,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.reservations = [];
           this.filteredReservations = [];
           this.loadingReservations = false;
-          const errorMessage = error?.error?.message || error?.message || this.translocoService.translate('dashboard-error-load-reservations');
+          const errorMessage = this.getFriendlyReservationError(error);
           this.errorReservations = errorMessage;
         }
       });
@@ -564,13 +561,65 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.loadingChart = false;
         },
         error: (error) => {
-          const errorMessage = error?.error?.message || error?.message || this.translocoService.translate('dashboard-error-load-chart');
+          const errorMessage = this.getFriendlyChartError(error);
           this.errorChart = errorMessage;
           this.loadingChart = false;
         }
       });
       this.subscriptions.push(monthlySub);
+    } else {
+      this.handleNoStructureSelected();
     }
+  }
+
+  private getActiveStructureId(): number | null {
+    const user = this.authService.getUser();
+    const structures = Array.isArray(user?.structures) ? user.structures : [];
+    if (structures.length === 0) {
+      localStorage.removeItem('selected_structure_id');
+      return null;
+    }
+
+    const structureIdStr = localStorage.getItem('selected_structure_id');
+    const selectedStructureId = structureIdStr ? +structureIdStr : NaN;
+    const isAllowed = structures.some((s: any) => s.id === selectedStructureId);
+    if (isAllowed && selectedStructureId > 0) {
+      return selectedStructureId;
+    }
+
+    const fallbackId = structures[0].id;
+    localStorage.setItem('selected_structure_id', String(fallbackId));
+    return fallbackId;
+  }
+
+  private handleNoStructureSelected(): void {
+    this.reservations = [];
+    this.filteredReservations = [];
+    this.monthly_reservatvion = [];
+    this.loadingReservations = false;
+    this.loadingChart = false;
+    this.errorReservations = this.translocoService.translate('dashboard-no-structure-error');
+    this.errorChart = this.translocoService.translate('dashboard-no-structure-chart-error');
+    this.messageService.add({
+      severity: 'info',
+      summary: this.translocoService.translate('dashboard-no-structure-title'),
+      detail: this.translocoService.translate('dashboard-no-structure-detail'),
+      life: 6000
+    });
+  }
+
+  private getFriendlyReservationError(error: any): string {
+    if (error?.status === 403) {
+      return this.translocoService.translate('dashboard-error-structure-forbidden');
+    }
+    return error?.error?.message || error?.message || this.translocoService.translate('dashboard-error-load-reservations');
+  }
+
+  private getFriendlyChartError(error: any): string {
+    if (error?.status === 403) {
+      return this.translocoService.translate('dashboard-error-chart-forbidden');
+    }
+    return error?.error?.message || error?.message || this.translocoService.translate('dashboard-error-load-chart');
   }
 
   @HostListener('document:keydown', ['$event'])
