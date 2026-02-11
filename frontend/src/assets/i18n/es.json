@@ -75,6 +75,8 @@
     "room-name-label": "Nombre de la habitación",
     "room-name-placeholder": "Seleccione una habitación",
     "room-name-required": "El nombre de la habitación es obligatorio.",
+    "reservation-room-not-found": "No se encontró la habitación seleccionada. Actualiza las habitaciones e inténtalo de nuevo.",
+    "reservation-structure-required": "No hay una estructura seleccionada. Selecciona una estructura antes de crear la reserva.",
     "date-range-invalid": "La fecha de inicio no puede ser posterior a la fecha de fin.",
     "create-reservation-btn": "Crear reserva",
     "create-room-btn": "Crear habitación",

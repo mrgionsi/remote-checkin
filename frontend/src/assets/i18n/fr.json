@@ -30,6 +30,8 @@
     "settings-saved-message": "Les paramètres ont été économisés avec succès.",
     "reservation-code-info": "Le code de réservation a été envoyé à votre courrier électronique. Si vous ne le trouvez pas, veuillez vérifier votre boîte de courrier indésirable.",
     "room-name-required": "Le nom de la Chambre est obligatoire.",
+    "reservation-room-not-found": "La chambre sélectionnée est introuvable. Actualisez la liste des chambres et réessayez.",
+    "reservation-structure-required": "Aucune structure sélectionnée. Sélectionnez une structure avant de créer la réservation.",
     "confirmation-sent-message": "Votre confirmation a été envoyée. Vous recevrez un courriel dans les plus brefs délais.",
     "reservation-code-placeholder": "Entrez votre code de réservation",
     "error": "Erreur",

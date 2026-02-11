@@ -40,6 +40,8 @@
     "reference-name-required": "Referenzname ist erforderlich.",
     "room-name-label": "Zimmername",
     "room-name-required": "Zimmername ist erforderlich.",
+    "reservation-room-not-found": "Das ausgewählte Zimmer wurde nicht gefunden. Aktualisieren Sie die Zimmerliste und versuchen Sie es erneut.",
+    "reservation-structure-required": "Keine Struktur ausgewählt. Wählen Sie vor dem Erstellen der Reservierung eine Struktur aus.",
     "date-range-invalid": "Das Startdatum darf nicht nach dem Enddatum liegen.",
     "room-name-header": "Name",
     "structure-header": "Struktur",
