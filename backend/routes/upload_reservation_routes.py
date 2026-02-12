@@ -124,8 +124,6 @@ def upload_file():
 
         except ValueError as e:
             raise BadRequest(f"Invalid date format: {str(e)}") from e
-        except Exception as e:
-            raise BadRequest(f"Validation error: {str(e)}") from e
 
         cf = form_data['cf']
         # Create a folder for the reservation if it doesn't exist
@@ -274,10 +272,11 @@ def upload_file():
         # Catch and handle specific BadRequest errors (file or form validation)
         return jsonify({"error": str(e)}), 400
 
-    except FileNotFoundError as e:
+    except FileNotFoundError:
         # Handle file not found errors
-        return jsonify({"error": f"File not found: {str(e)}"}), 404
+        return jsonify({"error": "File not found"}), 404
 
-    except Exception as e:
+    except Exception:
         # General exception for unexpected errors
-        return jsonify({"error": "Internal server error", "details": str(e)}), 500
+        logger.exception("Unexpected error during reservation upload")
+        return jsonify({"error": "Internal server error"}), 500

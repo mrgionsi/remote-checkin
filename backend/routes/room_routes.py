@@ -74,8 +74,11 @@ def add_room():  # pylint: disable=R0911
         tuple: JSON response containing the new room or an error message, and the corresponding HTTP status code.
     """
     with get_db() as db:  # Using the 'with' statement to manage the database session
-        data = request.get_json()
-        current_user_id = int(get_jwt_identity())
+        data = request.get_json() or {}
+        try:
+            current_user_id = int(get_jwt_identity())
+        except (TypeError, ValueError):
+            return error_response("Invalid user identity", 400)
 
         # Validate the input data
         if (

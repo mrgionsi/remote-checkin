@@ -42,6 +42,7 @@ Usage:
 from pathlib import Path
 
 from flask import Blueprint, jsonify, request, send_from_directory
+from sqlalchemy.exc import SQLAlchemyError
 from flask_jwt_extended import jwt_required, verify_jwt_in_request, get_jwt_identity
 from utils.authz import is_superadmin
 from utils.route_helpers import user_has_structure
@@ -104,8 +105,12 @@ def get_clients_by_reservation(reservation_id):
 
         return jsonify([client.to_dict() for client in client_reservations])
 
-    except Exception as e:
-        return jsonify({"error": f"Error retrieving clients: {str(e)}"}), 500
+    except SQLAlchemyError:
+        logger.exception("Database error while retrieving clients by reservation")
+        return jsonify({"error": "Database error"}), 500
+    except Exception:
+        logger.exception("Unexpected error while retrieving clients by reservation")
+        return jsonify({"error": "Internal server error"}), 500
     finally:
         db.close()
 
@@ -200,10 +205,20 @@ def check_images(reservation_id):
     db = SessionLocal()
 
     try:
+        try:
+            current_user_id = int(get_jwt_identity())
+        except (TypeError, ValueError):
+            return jsonify({"error": "Invalid user identity"}), 400
+
         reservation = db.query(Reservation).filter(
         Reservation.id_reference == str(reservation_id)).first()
         if not reservation:
             return jsonify({"error": "Error fetching reservation, reservation doesn't exists"}), 404
+        room = db.query(Room).filter(Room.id == reservation.id_room).first()
+        if not room:
+            return jsonify({"error": "Room not found for reservation"}), 404
+        if not is_superadmin() and not user_has_structure(db, current_user_id, room.id_structure):
+            return jsonify({"error": "Access denied for this reservation"}), 403
         client_exists = db.query(Client).join(
             ClientReservations, Client.id == ClientReservations.id_client
         ).filter(
@@ -215,6 +230,12 @@ def check_images(reservation_id):
 
         if not client_exists:
             return jsonify({"error": "Client not associated with this reservation"}), 404
+    except SQLAlchemyError:
+        logger.exception("Database error while checking client images")
+        return jsonify({"error": "Database error"}), 500
+    except Exception:
+        logger.exception("Unexpected error while checking client images")
+        return jsonify({"error": "Internal server error"}), 500
     finally:
         db.close()
 

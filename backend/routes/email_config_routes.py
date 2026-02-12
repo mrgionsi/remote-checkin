@@ -12,7 +12,7 @@ import json
 
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from email_handler import EmailService
 from utils.encryption_utils import get_encryption_key, encrypt_password, decrypt_password
 from models import EmailConfig
@@ -208,12 +208,16 @@ def create_or_update_email_config():
             "config": config.to_dict()
         })
 
-    except ValueError as e:
+    except ValueError:
         session.rollback()
-        return jsonify({"error": f"Invalid data: {str(e)}"}), 400
+        return jsonify({"error": "Invalid data"}), 400
     except IntegrityError:
         session.rollback()
         return jsonify({"error": "Database integrity error"}), 400
+    except SQLAlchemyError:
+        session.rollback()
+        logger.exception("Database error saving email config")
+        return jsonify({"error": "Failed to save email configuration"}), 500
     except Exception as e:
         session.rollback()
         logger.error("Error saving email config: %s", str(e))
@@ -279,9 +283,12 @@ def test_email_config():
             "result": result
         }), 400
 
+    except SQLAlchemyError:
+        logger.exception("Database error testing email config")
+        return jsonify({"error": "Test failed due to database error"}), 500
     except Exception as e:
         logger.error("Error testing email config: %s", str(e))
-        return jsonify({"error": f"Test failed: {str(e)}"}), 500
+        return jsonify({"error": "Test failed due to server error"}), 500
     finally:
         session.close()
 
@@ -350,6 +357,10 @@ def delete_email_config():
 
         return jsonify({"message": "Email configuration deleted successfully"})
 
+    except SQLAlchemyError:
+        session.rollback()
+        logger.exception("Database error deleting email config")
+        return jsonify({"error": "Failed to delete email configuration"}), 500
     except Exception as e:
         session.rollback()
         logger.error("Error deleting email config: %s", str(e))
@@ -430,9 +441,13 @@ def migrate_to_external_provider():
             "config": config.to_dict()
         })
 
+    except SQLAlchemyError:
+        session.rollback()
+        logger.exception("Database error migrating email config")
+        return jsonify({"error": "Migration failed due to database error"}), 500
     except Exception as e:
         session.rollback()
         logger.error("Error migrating email config: %s", str(e))
-        return jsonify({"error": f"Migration failed: {str(e)}"}), 500
+        return jsonify({"error": "Migration failed due to server error"}), 500
     finally:
         session.close()

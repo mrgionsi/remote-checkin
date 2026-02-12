@@ -95,7 +95,10 @@ def create_reservation():
     session = SessionLocal()
 
     try:
-        current_user_id = int(get_jwt_identity())
+        try:
+            current_user_id = int(get_jwt_identity())
+        except (TypeError, ValueError):
+            return error_response("Invalid user identity", 400)
         allowed_structure_ids = get_user_structure_ids(session, current_user_id)
         if not allowed_structure_ids:
             return error_response("No structure assigned to this user", 403)
@@ -310,7 +313,7 @@ def create_reservation():
         return error_response("Invalid date format. Use 'YYYY-MM-DD'", 400)
     except KeyError as e:
         session.rollback()
-        return error_response(f"Missing key: {str(e)}", 400)
+        return error_response("Missing required key in request data", 400)
     # pylint: disable=W0718
     except Exception:
         session.rollback()
@@ -440,6 +443,13 @@ def update_reservation(reservation_id):
             }
         }), 200
 
+    except SQLAlchemyError:
+        db.rollback()
+        logger.exception("Database error while updating reservation")
+        return error_response("Database error", 500)
+    except (TypeError, ValueError):
+        db.rollback()
+        return error_response("Invalid request data", 400)
     except Exception:
         db.rollback()
         logger.exception("Unexpected error while updating reservation")
@@ -481,6 +491,13 @@ def delete_reservation(reservation_id):
 
         return jsonify({"message": f"Reservation {reservation_id} deleted successfully"}), 200
 
+    except SQLAlchemyError:
+        db.rollback()
+        logger.exception("Database error while deleting reservation")
+        return error_response("Database error", 500)
+    except (TypeError, ValueError):
+        db.rollback()
+        return error_response("Invalid request data", 400)
     except Exception:
         db.rollback()
         logger.exception("Unexpected error while deleting reservation")
@@ -575,7 +592,10 @@ def get_admin_reservations_by_id(reservation_id):
     """
     db = SessionLocal()
     try:
-        current_user_id = int(get_jwt_identity())
+        try:
+            current_user_id = int(get_jwt_identity())
+        except (TypeError, ValueError):
+            return error_response("Invalid user identity", 400)
         reservation = (
             db.query(Reservation)
             .filter(Reservation.id == str(reservation_id))
@@ -591,6 +611,9 @@ def get_admin_reservations_by_id(reservation_id):
             return error_response("Access denied for this reservation", 403)
 
         return jsonify(reservation.to_dict())
+    except SQLAlchemyError:
+        logger.exception("Database error while retrieving admin reservation by id")
+        return error_response("Database error", 500)
     except Exception:
         logger.exception("Unexpected error while retrieving admin reservation by id")
         return error_response("Internal server error", 500)
@@ -641,6 +664,9 @@ def check_get_reservations_by_id(reservation_id):
             'registered_clients_count': client_count,
             'upload_token': _build_upload_token(str(reservation.id_reference))
         }), 200
+    except SQLAlchemyError:
+        logger.exception("Database error while checking reservation by reference")
+        return error_response("Database error", 500)
     except Exception:
         logger.exception("Unexpected error while checking reservation by reference")
         return error_response("Internal server error", 500)
@@ -667,7 +693,10 @@ def get_reservations_per_month(structure_id):
     """
     db = SessionLocal()
     try:
-        current_user_id = int(get_jwt_identity())
+        try:
+            current_user_id = int(get_jwt_identity())
+        except (TypeError, ValueError):
+            return error_response("Invalid user identity", 400)
         if not is_superadmin() and not user_has_structure(db, current_user_id, structure_id):
             return error_response("Access denied for this structure", 403)
         # Check if the structure exists
@@ -701,7 +730,9 @@ def get_reservations_per_month(structure_id):
             {"month": calendar.month_name[m], "total_reservations": count}
             for m, count in months.items()
         ]), 200
-
+    except SQLAlchemyError:
+        logger.exception("Database error while fetching monthly reservations")
+        return error_response("Database error", 500)
     finally:
         db.close()
 
@@ -832,6 +863,13 @@ def update_reservation_status(reservation_id):
             }
         }), 200
 
+    except SQLAlchemyError:
+        db.rollback()
+        logger.exception("Database error while updating reservation status")
+        return error_response("Database error", 500)
+    except (TypeError, ValueError):
+        db.rollback()
+        return error_response("Invalid request data", 400)
     except Exception:
         db.rollback()
         logger.exception("Unexpected error while updating reservation status")
