@@ -87,7 +87,7 @@ CORS(
     origins=allowed_origins,
     supports_credentials=True,
     methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization", "Accept", "Origin", "X-Requested-With"],
+    allow_headers=["Content-Type", "Authorization", "Accept", "Origin", "X-Requested-With", "X-Upload-Token"],
     expose_headers=["Content-Type", "Authorization"],
     max_age=3600,  # Cache preflight response for 1 hour
 )

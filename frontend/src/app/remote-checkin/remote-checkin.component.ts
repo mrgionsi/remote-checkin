@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { FormGroup, FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -18,6 +18,7 @@ import { DialogModule } from 'primeng/dialog';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { ReservationService } from '../services/reservation.service';
 import { HttpClient } from '@angular/common/http';
+import { Subscription } from 'rxjs';
 import {
   FALLBACK_MUNICIPALITY_OPTIONS,
   FALLBACK_MUNICIPALITY_MAPPINGS,
@@ -41,7 +42,7 @@ import {
   providers: [MessageService],
 
 })
-export class RemoteCheckinComponent implements OnInit {
+export class RemoteCheckinComponent implements OnInit, OnDestroy {
   clientForm: FormGroup;
   uploadForm: FormGroup;
   documentTypes = [{}];
@@ -69,6 +70,9 @@ export class RemoteCheckinComponent implements OnInit {
   public isLoadingData = true;
   public loadingLuogoEmissioneOptions = false;
   public isSubmitting = false;
+  private readonly draftTtlMs = 5 * 60 * 1000;
+  private readonly draftPrefix = 'checkin-draft:';
+  private formSubscriptions: Subscription[] = [];
 
 
   languageCode: string | null = '';
@@ -212,10 +216,17 @@ export class RemoteCheckinComponent implements OnInit {
         this.router.navigate(['/reservation-check', params['code']]);
       } else {
         this.reservationId = this.route.snapshot.paramMap.get('id');
+        this.restoreDraftIfValid();
+        this.setupDraftAutosave();
         // Load reservation details and check capacity
         this.loadReservationDetails();
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.formSubscriptions.forEach((sub) => sub.unsubscribe());
+    this.formSubscriptions = [];
   }
 
   goToStep(step: number, activateCallback: (value: number) => void) {
@@ -591,6 +602,7 @@ export class RemoteCheckinComponent implements OnInit {
       next: (response) => {
         // Show success message with API response
         console.log(response)
+        this.clearDraft();
         this.messageService.add({
           severity: 'success',
           summary: 'Success',
@@ -674,6 +686,81 @@ export class RemoteCheckinComponent implements OnInit {
   getLuogoEmissioneName(): string {
     const code = this.clientForm.get('luogo_emissione')?.value;
     return code ? this.getMunicipalityDisplayName(code) || code : '';
+  }
+
+  private getDraftKey(): string | null {
+    if (!this.reservationId) {
+      return null;
+    }
+    return `${this.draftPrefix}${this.reservationId}`;
+  }
+
+  private setupDraftAutosave(): void {
+    if (this.formSubscriptions.length > 0) {
+      return;
+    }
+    const clientSub = this.clientForm.valueChanges.subscribe(() => {
+      this.persistDraft();
+    });
+    this.formSubscriptions.push(clientSub);
+  }
+
+  private persistDraft(): void {
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return;
+    }
+    const draftKey = this.getDraftKey();
+    if (!draftKey) {
+      return;
+    }
+    const payload = {
+      savedAt: Date.now(),
+      clientForm: this.clientForm.getRawValue()
+    };
+    localStorage.setItem(draftKey, JSON.stringify(payload));
+  }
+
+  private restoreDraftIfValid(): void {
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return;
+    }
+    const draftKey = this.getDraftKey();
+    if (!draftKey) {
+      return;
+    }
+
+    const rawDraft = localStorage.getItem(draftKey);
+    if (!rawDraft) {
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(rawDraft);
+      const savedAt = Number(parsed?.savedAt || 0);
+      const isExpired = !savedAt || (Date.now() - savedAt > this.draftTtlMs);
+      if (isExpired) {
+        localStorage.removeItem(draftKey);
+        return;
+      }
+
+      const draftClientForm = parsed?.clientForm;
+      if (draftClientForm && typeof draftClientForm === 'object') {
+        this.clientForm.patchValue(draftClientForm, { emitEvent: false });
+      }
+    } catch {
+      localStorage.removeItem(draftKey);
+    }
+  }
+
+  private clearDraft(): void {
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return;
+    }
+    const draftKey = this.getDraftKey();
+    if (!draftKey) {
+      return;
+    }
+    localStorage.removeItem(draftKey);
   }
 
 
