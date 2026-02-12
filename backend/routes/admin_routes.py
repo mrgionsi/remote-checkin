@@ -516,7 +516,7 @@ def _prepare_reservation_data(reservation):
 @jwt_required()
 @log_route(include_request_data=True, include_response_data=True)
 @log_performance(threshold_ms=10000)
-def send_reservation_to_portale_alloggi(reservation_id):
+def send_reservation_to_portale_alloggi(reservation_id):  # pylint: disable=too-many-locals
     """
     Send guest data from a reservation to Portale Alloggi.
 
@@ -620,7 +620,7 @@ def send_reservation_to_portale_alloggi(reservation_id):
 @jwt_required()
 @log_route(include_request_data=True, include_response_data=True)
 @log_performance(threshold_ms=10000)
-def send_reservation_to_portale_alloggi_real(reservation_id):
+def send_reservation_to_portale_alloggi_real(reservation_id):  # pylint: disable=too-many-locals
     """
     Send guest data from a reservation to Portale Alloggi (REAL PRODUCTION).
 

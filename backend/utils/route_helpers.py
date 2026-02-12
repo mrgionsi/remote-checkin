@@ -1,4 +1,4 @@
-# pylint: disable=C0301,E0611,E0401,W0718,R0914,R0912
+# pylint: disable=C0301,E0611,E0401,W0718,R0914,R0912,R0801
 """
 Route helper utilities for common database operations and error handling.
 

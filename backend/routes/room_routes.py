@@ -159,7 +159,7 @@ def add_room():  # pylint: disable=R0911
 @jwt_required()
 @log_route(include_request_data=True)
 @log_database_operation("READ")
-def get_rooms():
+def get_rooms():  # pylint: disable=too-many-return-statements
     """
     Return a JSON array of rooms, optionally filtered by structure_id.
 
@@ -287,7 +287,7 @@ def get_room(room_id):
 @log_route(include_request_data=True, include_response_data=True)
 @log_database_operation("UPDATE")
 # pylint: disable=R0911
-def update_room(room_id):
+def update_room(room_id):  # pylint: disable=too-many-branches
     """
     Update the details of an existing room by its ID.
 
@@ -397,7 +397,7 @@ def update_room(room_id):
 @jwt_required()
 @log_route(include_request_data=True)
 @log_database_operation("DELETE")
-def delete_room(room_id):
+def delete_room(room_id):  # pylint: disable=too-many-return-statements
     """
     Delete a room by its ID and return a JSON response indicating the result.
 
