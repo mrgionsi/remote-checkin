@@ -1,15 +1,9 @@
 name: Build Flask and Angular with Docker
 
 on:
-#  push:
-#    branches:
-#      - 'dev'
-  pull_request:
-    types:
-      - opened
-      - synchronize
-      - reopened
-#      - closed  # Used for checking merges
+  push:
+    branches:
+      - dev
   workflow_dispatch:  # Allow manual or automated re-execution
   workflow_call:
 
