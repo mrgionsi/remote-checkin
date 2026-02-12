@@ -335,6 +335,7 @@ def get_portale_alloggi_config():
     if error_response:
         return error_response, error_code
 
+    db_session = None
     try:
         user_id = int(get_jwt_identity())
         db_session = SessionLocal()
@@ -351,7 +352,8 @@ def get_portale_alloggi_config():
     except Exception as e:
         return handle_database_error(e, "Portale Alloggi config retrieval")
     finally:
-        db_session.close()
+        if db_session is not None:
+            db_session.close()
 
 
 @admin_bp.route("/admin/portale-alloggi", methods=["POST"])
@@ -376,6 +378,7 @@ def update_portale_alloggi_config():
     if error_response:
         return error_response, error_code
 
+    db_session = None
     try:
         data = request.get_json()
         if not data:
@@ -407,10 +410,12 @@ def update_portale_alloggi_config():
         }), 200
 
     except Exception as e:
-        db_session.rollback()
+        if db_session is not None:
+            db_session.rollback()
         return handle_database_error(e, "Portale Alloggi config update")
     finally:
-        db_session.close()
+        if db_session is not None:
+            db_session.close()
 
 
 @admin_bp.route("/admin/portale-alloggi/test", methods=["POST"])
@@ -428,6 +433,7 @@ def test_portale_alloggi_connection():
     if error_response:
         return error_response, error_code
 
+    db_session = None
     try:
         user_id = int(get_jwt_identity())
         db_session = SessionLocal()
@@ -488,7 +494,8 @@ def test_portale_alloggi_connection():
     except Exception as e:
         return handle_database_error(e, "Portale Alloggi connection test")
     finally:
-        db_session.close()
+        if db_session is not None:
+            db_session.close()
 
 
 def _prepare_reservation_data(reservation):
