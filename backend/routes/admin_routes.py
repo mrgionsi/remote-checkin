@@ -1,4 +1,4 @@
-# pylint: disable=C0301,E0611,E0401,W0718
+# pylint: disable=C0301,E0611,E0401,W0718,R0801
 
 """Admin routes module for user authentication, account creation, and profile retrieval.
 
