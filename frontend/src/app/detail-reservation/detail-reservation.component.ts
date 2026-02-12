@@ -589,7 +589,7 @@ export class DetailReservationComponent implements OnInit {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: error.error?.error || this.translocoService.translate('data-send-failed')
+          detail: this.resolvePortaleErrorMessage(error)
         });
         this.sendingToPortaleAlloggi = false;
       }
@@ -618,7 +618,7 @@ export class DetailReservationComponent implements OnInit {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: error.error?.error || this.translocoService.translate('data-send-failed')
+          detail: this.resolvePortaleErrorMessage(error)
         });
         this.sendingToPortaleAlloggi = false;
       }
@@ -649,11 +649,19 @@ export class DetailReservationComponent implements OnInit {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: error.error?.error || this.translocoService.translate('data-send-failed')
+          detail: this.resolvePortaleErrorMessage(error)
         });
         this.sendingToPortaleAlloggi = false;
       }
     });
+  }
+
+  private resolvePortaleErrorMessage(error: any): string {
+    const backendError = error?.error?.error;
+    if (backendError === 'Portale Alloggi credentials not configured') {
+      return this.translocoService.translate('portale-alloggi-not-configured');
+    }
+    return backendError || this.translocoService.translate('data-send-failed');
   }
 
   // Load Portale Alloggi submission status

@@ -487,5 +487,6 @@
     "rooms-csv-empty-detail": "No se encontraron habitaciones válidas en el CSV.",
     "rooms-csv-skip-title": "Omitido",
     "rooms-csv-skip-detail": "No se pudo importar la habitación {{name}}.",
-    "rooms-csv-read-error": "No se pudo leer el archivo CSV."
+    "rooms-csv-read-error": "No se pudo leer el archivo CSV.",
+    "portale-alloggi-not-configured": "Portale Alloggi no está configurado. Configúralo primero en Ajustes."
 }
