@@ -1,6 +1,5 @@
 import pytest
 from flask import Flask
-from sqlalchemy import text
 from routes.room_routes import room_bp
 from database import engine, Base, SessionLocal
 from models import Room, Structure
@@ -27,16 +26,6 @@ def app():
     # Create all tables in the test database
     Base.metadata.create_all(bind=engine)
     yield app
-    with engine.connect() as conn:
-        try:
-            conn.execute(text("DROP VIEW IF EXISTS structure_reservations CASCADE"))
-        except Exception:
-            pass
-        try:
-            conn.execute(text("DROP TABLE IF EXISTS structure_reservations CASCADE"))
-        except Exception:
-            pass
-        conn.commit()
     Base.metadata.drop_all(bind=engine)  # Drop tables after tests
 
 

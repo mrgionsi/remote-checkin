@@ -15,16 +15,6 @@ def app():
     app.register_blueprint(reservation_bp)
     Base.metadata.create_all(bind=engine)
     yield app
-    with engine.connect() as conn:
-        try:
-            conn.execute(text("DROP VIEW IF EXISTS structure_reservations CASCADE"))
-        except Exception:
-            pass
-        try:
-            conn.execute(text("DROP TABLE IF EXISTS structure_reservations CASCADE"))
-        except Exception:
-            pass
-        conn.commit()
     Base.metadata.drop_all(bind=engine)
 
 
