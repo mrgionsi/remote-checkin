@@ -1,9 +1,10 @@
 import pytest
 from flask import Flask
+from flask_jwt_extended import JWTManager, create_access_token
 from sqlalchemy import text
 from routes.room_routes import room_bp
 from database import engine, Base, SessionLocal
-from models import Room, Structure
+from models import Room, Structure, Role, User, AdminStructure
 
 # pylint: disable=all
 
@@ -23,6 +24,8 @@ def app():
     """
     app = Flask(__name__)
     app.config.from_object("config.TestConfig")  # Load testing config
+    app.config["JWT_SECRET_KEY"] = "test-secret"
+    JWTManager(app)
     app.register_blueprint(room_bp)  # Register the room blueprint
     # Create all tables in the test database
     Base.metadata.create_all(bind=engine)
@@ -75,6 +78,29 @@ def init_db():
         Session: An active SQLAlchemy session containing the test Structure and Room.
     """
     db: SessionLocal = SessionLocal()
+    db.query(AdminStructure).delete()
+    db.query(User).delete()
+    db.query(Role).delete()
+    db.query(Room).delete()
+    db.query(Structure).delete()
+    db.commit()
+
+    role = Role(name="administrator")
+    db.add(role)
+    db.commit()
+    db.refresh(role)
+
+    user = User(
+        username="roomadmin",
+        password="hashed",
+        id_role=role.id,
+        name="Room",
+        surname="Admin",
+        email="room@example.com",
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
 
     # Add a test structure first so rooms can be linked to it
     structure = Structure(name="Test Structure", street="Test Street", city="Test City")
@@ -87,13 +113,26 @@ def init_db():
     db.add(room)
     db.commit()
     db.refresh(room)
+    db.add(AdminStructure(id_user=user.id, id_structure=structure.id))
+    db.commit()
     print(room)
     # Yield the db session so it can be used in the tests
     yield db
     db.close()  # Clean up the database after tests
 
 
-def test_add_room(client, init_db):
+@pytest.fixture
+def auth_headers(app, init_db):
+    user = init_db.query(User).filter_by(username="roomadmin").first()
+    with app.app_context():
+        token = create_access_token(
+            identity=str(user.id),
+            additional_claims={"role": "administrator"},
+        )
+    return {"Authorization": f"Bearer {token}"}
+
+
+def test_add_room(client, init_db, auth_headers):
     # Get the latest structure ID from the test database
     """
     Test the POST /api/v1/rooms endpoint for adding a new room.
@@ -118,6 +157,7 @@ def test_add_room(client, init_db):
     # Test the POST /rooms endpoint to add a room
     response = client.post(
         "/api/v1/rooms",
+        headers=auth_headers,
         json={
             "name": "New Room",
             "capacity": 3,
@@ -132,40 +172,40 @@ def test_add_room(client, init_db):
     assert data["id_structure"] == structure.id
 
 
-def test_get_rooms(client, init_db):
+def test_get_rooms(client, init_db, auth_headers):
     # Test the GET /rooms endpoint to fetch rooms
-    response = client.get("/api/v1/rooms")
+    response = client.get("/api/v1/rooms", headers=auth_headers)
     assert response.status_code == 200
     data = response.get_json()
     assert len(data) > 0  # Assuming there is at least one room in the test database
 
 
-def test_get_room_by_id(client, init_db):
+def test_get_room_by_id(client, init_db, auth_headers):
     # Test the GET /rooms/<id> endpoint
     room = init_db.query(Room).first()  # Get the first room from the test DB
-    response = client.get(f"/api/v1/rooms/{room.id}")
+    response = client.get(f"/api/v1/rooms/{room.id}", headers=auth_headers)
     assert response.status_code == 200
     data = response.get_json()
     assert data["id"] == room.id
     assert data["name"] == room.name
 
 
-def test_delete_room(client, init_db):
+def test_delete_room(client, init_db, auth_headers):
     # Test the DELETE /rooms/<id> endpoint
     room = init_db.query(Room).first()  # Get the first room from the test DB
-    response = client.delete(f"/api/v1/rooms/{room.id}")
+    response = client.delete(f"/api/v1/rooms/{room.id}", headers=auth_headers)
     assert response.status_code == 200
     data = response.get_json()
     assert data["message"] == "Room deleted successfully"
 
     # Try to fetch the room again and ensure it no longer exists
-    response = client.get(f"/api/v1/rooms/{room.id}")
+    response = client.get(f"/api/v1/rooms/{room.id}", headers=auth_headers)
     assert response.status_code == 404
     data = response.get_json()
     assert data["error"] == "Room not found"
 
 
-def test_add_room_invalid_data(client):
+def test_add_room_invalid_data(client, init_db, auth_headers):
     # Test the POST /rooms endpoint with invalid data
     # Missing required fields
     """
@@ -179,6 +219,7 @@ def test_add_room_invalid_data(client):
     """
     response = client.post(
         "/api/v1/rooms",
+        headers=auth_headers,
         json={
             "capacity": 3,  # Missing "name" and "id_structure"
         },
@@ -188,15 +229,15 @@ def test_add_room_invalid_data(client):
     assert "error" in data  # Ensure there is an error message
 
 
-def test_get_room_not_found(client):
+def test_get_room_not_found(client, init_db, auth_headers):
     # Test the GET /rooms/<id> endpoint with a non-existent room ID
-    response = client.get("/api/v1/rooms/99999")  # Assuming this ID doesn't exist
+    response = client.get("/api/v1/rooms/99999", headers=auth_headers)  # Assuming this ID doesn't exist
     assert response.status_code == 404
     data = response.get_json()
     assert data["error"] == "Room not found"
 
 
-def test_delete_room_not_found(client, init_db):
+def test_delete_room_not_found(client, init_db, auth_headers):
     # Test the DELETE /rooms/<id> endpoint with a non-existent room ID
     """
     Tests the DELETE /api/v1/rooms/<id> endpoint when attempting to delete a non-existent room.
@@ -210,13 +251,13 @@ def test_delete_room_not_found(client, init_db):
     Returns:
         None
     """
-    response = client.delete("/api/v1/rooms/99999")  # Assuming this ID doesn't exist
+    response = client.delete("/api/v1/rooms/99999", headers=auth_headers)  # Assuming this ID doesn't exist
     assert response.status_code == 404
     data = response.get_json()
     assert data["error"] == "Room not found"
 
 
-def test_get_rooms_empty(client, init_db):
+def test_get_rooms_empty(client, init_db, auth_headers):
     # Test the GET /rooms endpoint when there are no rooms
     # Delete all rooms from the DB for this test
     """
@@ -236,17 +277,18 @@ def test_get_rooms_empty(client, init_db):
     db.query(Room).delete()
     db.commit()
 
-    response = client.get("/api/v1/rooms")
+    response = client.get("/api/v1/rooms", headers=auth_headers)
     assert response.status_code == 200
     data = response.get_json()
     assert len(data) == 0  # Ensure no rooms are returned
 
 
-def test_add_room_with_existing_id(client, init_db):
+def test_add_room_with_existing_id(client, init_db, auth_headers):
     # Test adding a room with an existing structure ID
-    existing_structure_id = 1  # Assuming a structure with ID 1 exists
+    existing_structure_id = init_db.query(Structure).order_by(Structure.id.desc()).first().id
     response = client.post(
         "/api/v1/rooms",
+        headers=auth_headers,
         json={
             "name": "Another Room",
             "capacity": 4,

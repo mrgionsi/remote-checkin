@@ -14,6 +14,8 @@ from routes.upload_reservation_routes import (
     UPLOAD_TOKEN_SALT,
 )
 
+# pylint: disable=all
+
 
 def _multipart_payload(token=None):
     """Build a multipart payload with required upload fields."""

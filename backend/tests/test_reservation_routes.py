@@ -1,6 +1,7 @@
 from datetime import datetime
 import pytest
 from flask import Flask
+from flask_jwt_extended import JWTManager, create_access_token
 from sqlalchemy import text
 from routes.reservation_routes import reservation_bp
 from database import engine, Base, SessionLocal
@@ -12,6 +13,8 @@ from models import AdminStructure, Client, ClientReservations, Reservation, Role
 def app():
     app = Flask(__name__)
     app.config.from_object("config.TestConfig")
+    app.config["JWT_SECRET_KEY"] = "test-secret"
+    JWTManager(app)
     app.register_blueprint(reservation_bp)
     Base.metadata.create_all(bind=engine)
     yield app
@@ -49,7 +52,11 @@ def init_db():
         sqlalchemy.orm.Session: An initialized session connected to the cleaned and seeded test database.
     """
     db = SessionLocal()
-    db.execute(text('DROP VIEW IF EXISTS structure_reservations;'))  # Use CASCADE to remove dependent objects
+    try:
+        db.execute(text('DROP VIEW IF EXISTS structure_reservations CASCADE;'))
+    except Exception:
+        db.rollback()
+        db.execute(text('DROP TABLE IF EXISTS structure_reservations CASCADE;'))
 
     # Remove data from dependent tables first
     db.query(AdminStructure).delete()
@@ -65,8 +72,25 @@ def init_db():
     db.commit()
 
 
+    role = Role(name="administrator")
+    db.add(role)
+    db.commit()
+    db.refresh(role)
+
+    user = User(
+        username="testadmin",
+        password="hashed",
+        id_role=role.id,
+        name="Test",
+        surname="Admin",
+        email="admin@example.com",
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
     # Create a test structure
-    structure = Structure(id='1',name="Test Structure", street="Test Street", city="Test City")
+    structure = Structure(id='1', name="Test Structure", street="Test Street", city="Test City")
     db.add(structure)
     db.commit()
     db.flush()
@@ -78,20 +102,37 @@ def init_db():
     db.commit()
     db.refresh(room)
 
+    db.add(AdminStructure(id_user=user.id, id_structure=structure.id))
+    db.commit()
+
     yield db  # Provide initialized DB to tests
 
     db.close()
 
 
-def test_create_reservation(client, init_db):
+@pytest.fixture
+def auth_headers(app, init_db):
+    user = init_db.query(User).filter_by(username="testadmin").first()
+    with app.app_context():
+        token = create_access_token(
+            identity=str(user.id),
+            additional_claims={"role": "administrator"},
+        )
+    return {"Authorization": f"Bearer {token}"}
+
+
+def test_create_reservation(client, init_db, auth_headers):
     room = init_db.query(Room).first()
     response = client.post(
         "/api/v1/reservations",
+        headers=auth_headers,
         json={
             "reservationNumber": "RES12345",
             "startDate": "2025-02-10",
             "endDate": "2025-02-15",
             "roomName": room.name,
+            "structureId": room.id_structure,
+            "email": "guest@example.com",
         },
     )
     assert response.status_code == 201
@@ -100,61 +141,67 @@ def test_create_reservation(client, init_db):
     assert data["reservation"]["startDate"] == "2025-02-10"
 
 
-def test_create_reservation_missing_fields(client):
+def test_create_reservation_missing_fields(client, init_db, auth_headers):
     response = client.post(
-        "/api/v1/reservations", json={"reservationNumber": "RES12345"}
+        "/api/v1/reservations", headers=auth_headers, json={"reservationNumber": "RES12345"}
     )
     assert response.status_code == 400
     assert "error" in response.get_json()
 
 
-def test_create_reservation_invalid_date(client, init_db):
+def test_create_reservation_invalid_date(client, init_db, auth_headers):
     room = init_db.query(Room).first()
     response = client.post(
         "/api/v1/reservations",
+        headers=auth_headers,
         json={
             "reservationNumber": "RES12346",
             "startDate": "10-02-2025",
             "endDate": "15-02-2025",
             "roomName": room.name,
+            "structureId": room.id_structure,
+            "email": "guest@example.com",
         },
     )
     assert response.status_code == 400
     assert "error" in response.get_json()
 
 
-def test_create_reservation_room_not_found(client):
+def test_create_reservation_room_not_found(client, init_db, auth_headers):
     response = client.post(
         "/api/v1/reservations",
+        headers=auth_headers,
         json={
             "reservationNumber": "RES12347",
             "startDate": "2025-02-10",
             "endDate": "2025-02-15",
             "roomName": "NonExistentRoom",
+            "structureId": 1,
+            "email": "guest@example.com",
         },
     )
     assert response.status_code == 404
     assert "error" in response.get_json()
 
 
-def test_get_reservations(client):
-    response = client.get("/api/v1/reservations")
+def test_get_reservations(client, init_db, auth_headers):
+    response = client.get("/api/v1/reservations", headers=auth_headers)
     assert response.status_code == 200
     data = response.get_json()
     assert "reservations" in data
 
 
-def test_get_reservation_per_month(client, init_db):
+def test_get_reservation_per_month(client, init_db, auth_headers):
     structure = init_db.query(Structure).first()
     room = init_db.query(Room).first()
     reservations = [
-       Reservation(id_reference="RES1001", start_date="2025-01-10", end_date="2025-01-15", id_room=room.id, status="Pending"),
-       Reservation(id_reference="RES1002", start_date="2025-02-05", end_date="2025-02-10", id_room=room.id, status="Pending"),
+       Reservation(id_reference="RES1001", start_date="2025-01-10", end_date="2025-01-15", id_room=room.id, status="Pending", email="guest1@example.com"),
+       Reservation(id_reference="RES1002", start_date="2025-02-05", end_date="2025-02-10", id_room=room.id, status="Pending", email="guest2@example.com"),
     ]
     init_db.add_all(reservations)
     init_db.commit()
 
-    response = client.get(f"/api/v1/reservations/monthly/{structure.id}")
+    response = client.get(f"/api/v1/reservations/monthly/{structure.id}", headers=auth_headers)
     assert response.status_code == 200
     data = response.get_json()
 
@@ -179,7 +226,7 @@ def test_get_reservation_per_month(client, init_db):
 
 
 
-def test_get_reservations_per_month_basic(client, init_db):
+def test_get_reservations_per_month_basic(client, init_db, auth_headers):
     """Test normal reservation retrieval per month."""
     db = init_db
     structure_id = db.query(Structure).first().id
@@ -187,16 +234,16 @@ def test_get_reservations_per_month_basic(client, init_db):
     # Add reservations for different months
     room = db.query(Room).first()
     reservation1 = Reservation(
-        id_reference="RES1", start_date=datetime(2024, 1, 10), end_date=datetime(2024, 1, 15), id_room=room.id
+        id_reference="RES1", start_date=datetime(2024, 1, 10), end_date=datetime(2024, 1, 15), id_room=room.id, email="guest1@example.com"
     )
     reservation2 = Reservation(
-        id_reference="RES2", start_date=datetime(2024, 2, 5), end_date=datetime(2024, 2, 10), id_room=room.id
+        id_reference="RES2", start_date=datetime(2024, 2, 5), end_date=datetime(2024, 2, 10), id_room=room.id, email="guest2@example.com"
     )
 
     db.add_all([reservation1, reservation2])
     db.commit()
 
-    response = client.get(f"/api/v1/reservations/monthly/{structure_id}")
+    response = client.get(f"/api/v1/reservations/monthly/{structure_id}", headers=auth_headers)
 
     assert response.status_code == 200
     data = response.get_json()
@@ -206,12 +253,12 @@ def test_get_reservations_per_month_basic(client, init_db):
     assert any(item['month'] == 'February' and item['total_reservations'] == 1 for item in data)
 
 
-def test_get_reservations_per_month_no_reservations(client, init_db):
+def test_get_reservations_per_month_no_reservations(client, init_db, auth_headers):
     """Test the scenario where there are no reservations for the structure."""
     db = init_db
     structure_id = db.query(Structure).first().id
 
-    response = client.get(f"/api/v1/reservations/monthly/{structure_id}")
+    response = client.get(f"/api/v1/reservations/monthly/{structure_id}", headers=auth_headers)
 
     assert response.status_code == 200
     data = response.get_json()
@@ -220,20 +267,20 @@ def test_get_reservations_per_month_no_reservations(client, init_db):
     assert all(item['total_reservations'] == 0 for item in data)
 
 
-def test_get_reservations_per_month_invalid_structure_id(client, init_db):
+def test_get_reservations_per_month_invalid_structure_id(client, init_db, auth_headers):
     """Test the scenario where an invalid structure_id is provided."""
     invalid_structure_id = 9999  # Assuming this structure ID doesn't exist
 
-    response = client.get(f"/api/v1/reservations/monthly/{invalid_structure_id}")
+    response = client.get(f"/api/v1/reservations/monthly/{invalid_structure_id}", headers=auth_headers)
 
-    assert response.status_code == 404
+    assert response.status_code == 403
     data = response.get_json()
-    assert data["message"] == "Structure not found"  # Ensure the message matches the error returned
+    assert data["error"] == "Access denied for this structure"
 
     """Test when no reservations exist for a structure."""
     """ _, structure_id = init_db  # DB is clean from fixture """
 
-    response = client.get("/api/v1/reservations/monthly/1")
+    response = client.get("/api/v1/reservations/monthly/1", headers=auth_headers)
     assert response.status_code == 200
 
     data = response.get_json()
