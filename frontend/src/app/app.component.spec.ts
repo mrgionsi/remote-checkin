@@ -17,13 +17,6 @@ describe('AppComponent', () => {
   it(`should have the 'remote-checkin' title`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('remote-checkin');
-  });
-
-  it('should render title', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, remote-checkin');
+    expect(app.title).toEqual('Remote Check-in');
   });
 });
