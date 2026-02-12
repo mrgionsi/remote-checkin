@@ -742,6 +742,9 @@ def get_reservations_per_month(structure_id):
     except SQLAlchemyError:
         logger.exception("Database error while fetching monthly reservations")
         return error_response("Database error", 500)
+    except Exception:
+        logger.exception("Unexpected error while fetching monthly reservations")
+        return error_response("Internal server error", 500)
     finally:
         db.close()
 

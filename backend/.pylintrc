@@ -2,7 +2,7 @@
 # Correct way to modify the Python path in pylint
 init-hook='import sys; sys.path.append("backend")'
 [MESSAGES CONTROL]
-disable=E1101
+disable=E1101,duplicate-code
 
 
 [FORMAT]
