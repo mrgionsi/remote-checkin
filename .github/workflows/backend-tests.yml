@@ -1,16 +1,18 @@
-name: Build Flask and Angular with Docker
+name: Backend Tests
 
 on:
-  push:
+  pull_request:
     branches:
       - dev
-  workflow_call:
+    types:
+      - opened
+      - synchronize
+      - reopened
 
 jobs:
-  build-flask:
-    name: Build Flask Backend
+  test-backend:
+    name: Validate Backend Tests
     runs-on: ubuntu-latest
-    environment: pre-prod
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -18,7 +20,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.13'
+          python-version: "3.13"
 
       - name: Cache Python dependencies
         uses: actions/cache@v4
@@ -49,44 +51,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: backend-test-reports
+          name: backend-test-reports-pr-${{ github.event.pull_request.number }}
           path: backend/tests/reports/
           retention-days: 7
-
-  build-angular:
-    name: Build Angular Frontend
-    runs-on: ubuntu-latest
-    needs: build-flask
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-
-      - name: Cache Node.js dependencies
-        uses: actions/cache@v4
-        with:
-          path: frontend/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('frontend/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
-
-      - name: Install dependencies
-        run: |
-          cd frontend
-          npm ci
-
-      - name: Build Angular app
-        run: |
-          cd frontend
-          npm run build -- --configuration=preproduction
-
-      - name: Upload Angular build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: angular-dist
-          path: frontend/dist/
-          retention-days: 7  # Keeps artifact for 7 days
