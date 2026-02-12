@@ -42,13 +42,15 @@ Usage:
 from pathlib import Path
 
 from flask import Blueprint, jsonify, request, send_from_directory
-from flask_jwt_extended import jwt_required, verify_jwt_in_request
+from flask_jwt_extended import jwt_required, verify_jwt_in_request, get_jwt_identity
 
-from models import Client, ClientReservations, Reservation
+from models import Client, ClientReservations, Reservation, Room
 from app_logging.config import get_logger
 from app_logging.decorators import log_route, log_database_operation
 from app_logging.utils import safe_extra_fields
 from database import SessionLocal
+from utils.authz import is_superadmin
+from utils.route_helpers import user_has_structure
 
 
 # Blueprint setup
@@ -73,6 +75,22 @@ def get_clients_by_reservation(reservation_id):
     """
     db = SessionLocal()
     try:
+        try:
+            current_user_id = int(get_jwt_identity())
+        except (TypeError, ValueError):
+            return jsonify({"error": "Invalid user identity"}), 400
+
+        reservation = db.query(Reservation).filter(Reservation.id == reservation_id).first()
+        if not reservation:
+            return jsonify({"error": f"Reservation with ID {reservation_id} not found"}), 404
+
+        room = db.query(Room).filter(Room.id == reservation.id_room).first()
+        if not room:
+            return jsonify({"error": "Room not found for reservation"}), 404
+
+        if not is_superadmin() and not user_has_structure(db, current_user_id, room.id_structure):
+            return jsonify({"error": "Access denied for this reservation"}), 403
+
         # Get clients linked to the reservation
         client_reservations = (
             db.query(Client)
@@ -252,8 +270,27 @@ def get_image(reservation_id, filename):
 
     # For GET requests, require JWT authentication
     verify_jwt_in_request()
+    db = SessionLocal()
 
     try:
+        try:
+            current_user_id = int(get_jwt_identity())
+        except (TypeError, ValueError):
+            return jsonify({"error": "Invalid user identity"}), 400
+
+        reservation = db.query(Reservation).filter(
+            Reservation.id_reference == str(reservation_id)
+        ).first()
+        if not reservation:
+            return jsonify({"error": "Reservation not found"}), 404
+
+        room = db.query(Room).filter(Room.id == reservation.id_room).first()
+        if not room:
+            return jsonify({"error": "Room not found for reservation"}), 404
+
+        if not is_superadmin() and not user_has_structure(db, current_user_id, room.id_structure):
+            return jsonify({"error": "Access denied for this reservation"}), 403
+
         # Use secure path resolution to prevent path traversal
         file_path = get_secure_file_path(reservation_id, filename)
         logger.debug("Looking for client image file", extra=safe_extra_fields({
@@ -297,6 +334,8 @@ def get_image(reservation_id, filename):
             'operation_result': 'failed'
         }))
         return jsonify({"error": "Error accessing file"}), 500
+    finally:
+        db.close()
     response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
