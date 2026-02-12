@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, HostListener, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { FormGroup, FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -73,6 +73,20 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
   private readonly draftTtlMs = 5 * 60 * 1000;
   private readonly draftPrefix = 'checkin-draft:';
   private formSubscriptions: Subscription[] = [];
+  private readonly draftSafeFields = [
+    'document_type',
+    'sesso',
+    'nazionalita',
+    'stato_nascita',
+    'cittadinanza',
+    'luogo_emissione',
+    'autorita_rilascio',
+    'stato_residenza',
+    'comune_nascita_code',
+    'comune_residenza_code',
+    'provincia_nascita',
+    'provincia_residenza'
+  ] as const;
 
 
   languageCode: string | null = '';
@@ -227,6 +241,11 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.formSubscriptions.forEach((sub) => sub.unsubscribe());
     this.formSubscriptions = [];
+  }
+
+  @HostListener('window:beforeunload')
+  onWindowBeforeUnload(): void {
+    this.clearDraft();
   }
 
   goToStep(step: number, activateCallback: (value: number) => void) {
@@ -591,8 +610,8 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
     if (!this.uploadToken) {
       this.messageService.add({
         severity: 'error',
-        summary: 'Error',
-        detail: this.translocoService.translate('capacity-verification-failed')
+        summary: this.translocoService.translate('error'),
+        detail: this.translocoService.translate('upload-token-missing')
       });
       this.isSubmitting = false;
       return;
@@ -713,11 +732,12 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
     if (!draftKey) {
       return;
     }
-    const payload = {
+    const rawClientForm = this.clientForm.getRawValue();
+    const sanitizedPayload = {
       savedAt: Date.now(),
-      clientForm: this.clientForm.getRawValue()
+      clientForm: this.buildSanitizedDraft(rawClientForm)
     };
-    localStorage.setItem(draftKey, JSON.stringify(payload));
+    localStorage.setItem(draftKey, JSON.stringify(sanitizedPayload));
   }
 
   private restoreDraftIfValid(): void {
@@ -745,11 +765,36 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
 
       const draftClientForm = parsed?.clientForm;
       if (draftClientForm && typeof draftClientForm === 'object') {
+        this.reviveDraftDateFields(draftClientForm);
         this.clientForm.patchValue(draftClientForm, { emitEvent: false });
       }
     } catch {
       localStorage.removeItem(draftKey);
     }
+  }
+
+  private buildSanitizedDraft(rawClientForm: any): Record<string, any> {
+    const sanitized: Record<string, any> = {};
+    this.draftSafeFields.forEach((field) => {
+      const value = rawClientForm?.[field];
+      if (value !== undefined && value !== null && value !== '') {
+        sanitized[field] = value;
+      }
+    });
+    return sanitized;
+  }
+
+  private reviveDraftDateFields(draftClientForm: Record<string, any>): void {
+    const dateFields = ['birthday', 'data_emissione', 'data_scadenza'];
+    dateFields.forEach((field) => {
+      const value = draftClientForm[field];
+      if (typeof value === 'string') {
+        const parsedDate = new Date(value);
+        if (!Number.isNaN(parsedDate.getTime())) {
+          draftClientForm[field] = parsedDate;
+        }
+      }
+    });
   }
 
   private clearDraft(): void {
