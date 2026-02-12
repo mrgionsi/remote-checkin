@@ -11,6 +11,7 @@ jobs:
     name: Build Flask Backend
     runs-on: ubuntu-latest
     environment: pre-prod
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:15
@@ -56,6 +57,7 @@ jobs:
           pip install --upgrade pip
           pip install -r backend/requirements.txt
           pip install pytest-html
+          pip install pytest-timeout
 
       - name: Run backend tests and generate reports
         run: |
@@ -63,6 +65,9 @@ jobs:
           mkdir -p backend/tests/reports
           PYTHONPATH=backend pytest backend/tests \
             --ignore=backend/tests/test_email_handler.py \
+            -vv \
+            --timeout=120 \
+            --timeout-method=thread \
             --junitxml=backend/tests/reports/pytest-report.xml \
             --html=backend/tests/reports/pytest-report.html \
             --self-contained-html
