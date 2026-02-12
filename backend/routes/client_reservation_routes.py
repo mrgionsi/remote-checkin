@@ -1,4 +1,4 @@
-# pylint: disable=C0301,E0611,E0401,W0718,R0914
+# pylint: disable=C0301,E0611,E0401,W0718,R0914,R0911
 
 """
 Client Reservations API Blueprint
@@ -43,14 +43,14 @@ from pathlib import Path
 
 from flask import Blueprint, jsonify, request, send_from_directory
 from flask_jwt_extended import jwt_required, verify_jwt_in_request, get_jwt_identity
+from utils.authz import is_superadmin
+from utils.route_helpers import user_has_structure
 
 from models import Client, ClientReservations, Reservation, Room
 from app_logging.config import get_logger
 from app_logging.decorators import log_route, log_database_operation
 from app_logging.utils import safe_extra_fields
 from database import SessionLocal
-from utils.authz import is_superadmin
-from utils.route_helpers import user_has_structure
 
 
 # Blueprint setup
