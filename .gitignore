@@ -184,3 +184,4 @@ report.xml
 frontend/package-lock.json
 /backend/uploads
 .env.backup
+backend/tests/reports/

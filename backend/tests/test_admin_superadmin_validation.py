@@ -56,7 +56,7 @@ def test_admin_create_missing_required_fields(client, app):
 
 
 def test_admin_change_password_requires_json_body(client, app):
-    """POST /admin/change-password should return 400 on missing JSON body."""
+    """POST /admin/change-password should return 415 on missing JSON body."""
     headers = _auth_headers(app, "administrator")
     response = client.post("/api/v1/admin/change-password", headers=headers)
     assert response.status_code == 415

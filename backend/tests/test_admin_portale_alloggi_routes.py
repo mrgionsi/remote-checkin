@@ -7,6 +7,7 @@ from uuid import uuid4
 import pytest
 from flask import Flask
 from flask_jwt_extended import JWTManager, create_access_token
+from sqlalchemy.orm import close_all_sessions
 
 from models import Role, User
 from routes.admin_routes import PORTALE_CREDENTIALS_NOT_CONFIGURED, USER_NOT_FOUND, admin_bp
@@ -17,13 +18,16 @@ from database import Base, SessionLocal, engine
 def app():
     """Create a Flask app for admin Portale Alloggi route tests."""
     flask_app = Flask(__name__)
-    flask_app.config["TESTING"] = True
+    flask_app.config.from_object("config.TestConfig")
     flask_app.config["JWT_SECRET_KEY"] = "test-secret"
     flask_app.config["JWT_TOKEN_LOCATION"] = ["headers"]
     JWTManager(flask_app)
     flask_app.register_blueprint(admin_bp)
     Base.metadata.create_all(bind=engine)
     yield flask_app
+    close_all_sessions()
+    Base.metadata.drop_all(bind=engine)
+    engine.dispose()
 
 
 @pytest.fixture()

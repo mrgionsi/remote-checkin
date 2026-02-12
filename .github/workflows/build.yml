@@ -41,6 +41,24 @@ jobs:
           source venv/bin/activate
           pip install --upgrade pip
           pip install -r backend/requirements.txt
+          pip install pytest-html
+
+      - name: Run backend tests and generate reports
+        run: |
+          source venv/bin/activate
+          mkdir -p backend/tests/reports
+          PYTHONPATH=backend pytest backend/tests \
+            --junitxml=backend/tests/reports/pytest-report.xml \
+            --html=backend/tests/reports/pytest-report.html \
+            --self-contained-html
+
+      - name: Upload backend test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-reports
+          path: backend/tests/reports/
+          retention-days: 7
 
   build-angular:
     name: Build Angular Frontend
