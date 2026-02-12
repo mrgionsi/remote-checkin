@@ -15,7 +15,7 @@ Each route interacts with the database to perform the necessary actions related 
 """
 
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 #pylint: disable=E0611,E0401
@@ -24,7 +24,12 @@ from app_logging.config import get_logger
 from app_logging.decorators import log_route, log_database_operation, log_function
 from app_logging.utils import safe_extra_fields
 from utils.authz import is_superadmin
-from utils.route_helpers import get_user_structure_ids, user_has_structure, error_response
+from utils.route_helpers import (
+    get_user_structure_ids,
+    error_response,
+    get_current_user_id,
+    require_structure_access,
+)
 from database import get_db  # Use absolute import
 
 # Configure logging
@@ -74,8 +79,10 @@ def add_room():  # pylint: disable=R0911
         tuple: JSON response containing the new room or an error message, and the corresponding HTTP status code.
     """
     with get_db() as db:  # Using the 'with' statement to manage the database session
-        data = request.get_json()
-        current_user_id = int(get_jwt_identity())
+        data = request.get_json() or {}
+        current_user_id, user_error = get_current_user_id()
+        if user_error:
+            return user_error
 
         # Validate the input data
         if (
@@ -84,8 +91,9 @@ def add_room():  # pylint: disable=R0911
             or not data.get("capacity")
         ):
             return error_response("Missing required fields: 'name', 'capacity', or 'id_structure'", 400)
-        if not is_superadmin() and not user_has_structure(db, current_user_id, data["id_structure"]):
-            return error_response("Access denied for this structure", 403)
+        _, structure_error = require_structure_access(db, data["id_structure"], user_id=current_user_id)
+        if structure_error:
+            return structure_error
         structure = db.query(Structure).filter(Structure.id == data["id_structure"]).first()
         if not structure:
             return error_response("Invalid structure ID", 400)
@@ -151,7 +159,7 @@ def add_room():  # pylint: disable=R0911
 @jwt_required()
 @log_route(include_request_data=True)
 @log_database_operation("READ")
-def get_rooms():
+def get_rooms():  # pylint: disable=too-many-return-statements
     """
     Return a JSON array of rooms, optionally filtered by structure_id.
 
@@ -161,7 +169,9 @@ def get_rooms():
     """
     with get_db() as db:  # Using 'with' to properly manage the db session
         try:
-            current_user_id = int(get_jwt_identity())
+            current_user_id, user_error = get_current_user_id()
+            if user_error:
+                return user_error
             raw_structure_id = request.args.get("structure_id")
             id_structure = None
             if raw_structure_id is not None:
@@ -171,8 +181,9 @@ def get_rooms():
                     return error_response("Invalid structure_id. Must be an integer.", 400)
 
             if id_structure is not None:
-                if not is_superadmin() and not user_has_structure(db, current_user_id, id_structure):
-                    return error_response("Access denied for this structure", 403)
+                _, structure_error = require_structure_access(db, id_structure, user_id=current_user_id)
+                if structure_error:
+                    return structure_error
                 rooms = db.query(Room).filter(Room.id_structure == id_structure).order_by(Room.id).all()
             else:
                 if is_superadmin():
@@ -231,11 +242,14 @@ def get_room(room_id):
     """
     with get_db() as db:  # Using 'with' statement here as well
         try:
-            current_user_id = int(get_jwt_identity())
+            current_user_id, user_error = get_current_user_id()
+            if user_error:
+                return user_error
             room = db.query(Room).filter(Room.id == room_id).first()
             if room:
-                if not is_superadmin() and not user_has_structure(db, current_user_id, room.id_structure):
-                    return error_response("Access denied for this room", 403)
+                _, structure_error = require_structure_access(db, room.id_structure, user_id=current_user_id)
+                if structure_error:
+                    return structure_error
                 logger.info("Room retrieved successfully", extra={
                     'room_id': room_id,
                     'room_name': room.name,
@@ -273,7 +287,7 @@ def get_room(room_id):
 @log_route(include_request_data=True, include_response_data=True)
 @log_database_operation("UPDATE")
 # pylint: disable=R0911
-def update_room(room_id):
+def update_room(room_id):  # pylint: disable=too-many-branches
     """
     Update the details of an existing room by its ID.
 
@@ -287,7 +301,9 @@ def update_room(room_id):
     """
     with get_db() as db:
         try:
-            current_user_id = int(get_jwt_identity())
+            current_user_id, user_error = get_current_user_id()
+            if user_error:
+                return user_error
             room = db.query(Room).filter(Room.id == room_id).first()
             if not room:
                 logger.warning("Room not found for update", extra={
@@ -295,8 +311,9 @@ def update_room(room_id):
                     'operation_result': 'not_found'
                 })
                 return error_response("Room not found", 404)
-            if not is_superadmin() and not user_has_structure(db, current_user_id, room.id_structure):
-                return error_response("Access denied for this room", 403)
+            _, structure_error = require_structure_access(db, room.id_structure, user_id=current_user_id)
+            if structure_error:
+                return structure_error
 
             data = request.get_json()
 
@@ -319,8 +336,9 @@ def update_room(room_id):
                 })
                 return error_response(validation_error, 400)
             if "id_structure" in data and not is_superadmin():
-                if not user_has_structure(db, current_user_id, data["id_structure"]):
-                    return error_response("Access denied for this structure", 403)
+                _, structure_error = require_structure_access(db, data["id_structure"], user_id=current_user_id)
+                if structure_error:
+                    return structure_error
 
             # Track what fields are being updated
             updated_fields = {}
@@ -379,7 +397,7 @@ def update_room(room_id):
 @jwt_required()
 @log_route(include_request_data=True)
 @log_database_operation("DELETE")
-def delete_room(room_id):
+def delete_room(room_id):  # pylint: disable=too-many-return-statements
     """
     Delete a room by its ID and return a JSON response indicating the result.
 
@@ -393,7 +411,9 @@ def delete_room(room_id):
     """
     with get_db() as db:  # Again, using 'with' for context management
         try:
-            current_user_id = int(get_jwt_identity())
+            current_user_id, user_error = get_current_user_id()
+            if user_error:
+                return user_error
             room = db.query(Room).filter(Room.id == room_id).first()
 
             if not room:
@@ -403,8 +423,9 @@ def delete_room(room_id):
                 })
                 return error_response("Room not found", 404)
 
-            if not is_superadmin() and not user_has_structure(db, current_user_id, room.id_structure):
-                return error_response("Access denied for this room", 403)
+            _, structure_error = require_structure_access(db, room.id_structure, user_id=current_user_id)
+            if structure_error:
+                return structure_error
 
             # Log deletion attempt with room details
             room_details = {

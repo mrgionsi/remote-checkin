@@ -14,15 +14,19 @@ from flask import Blueprint, request, jsonify, current_app
 from sqlalchemy import  func
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql import extract
-from flask_jwt_extended import get_jwt_identity, jwt_required
+from flask_jwt_extended import jwt_required
 from itsdangerous import URLSafeTimedSerializer
 
 from models import Reservation, Room, Structure, StructureReservationsView, EmailConfig,Client, ClientReservations
 from email_handler import EmailService
 from routes.email_config_routes import get_encryption_key
 from utils.email_utils import get_admin_email_config
-from utils.authz import is_superadmin
-from utils.route_helpers import user_has_structure, get_user_structure_ids, error_response
+from utils.route_helpers import (
+    get_user_structure_ids,
+    error_response,
+    get_current_user_id,
+    require_structure_access,
+)
 from app_logging.config import get_logger
 from app_logging.decorators import log_route, log_database_operation, log_performance
 from app_logging.utils import safe_extra_fields, log_notification_error
@@ -95,7 +99,9 @@ def create_reservation():
     session = SessionLocal()
 
     try:
-        current_user_id = int(get_jwt_identity())
+        current_user_id, user_error = get_current_user_id()
+        if user_error:
+            return user_error
         allowed_structure_ids = get_user_structure_ids(session, current_user_id)
         if not allowed_structure_ids:
             return error_response("No structure assigned to this user", 403)
@@ -151,11 +157,14 @@ def create_reservation():
                 structure_id = int(structure_id)
             except (TypeError, ValueError):
                 return error_response("Invalid structureId. Must be an integer.", 400)
-            if structure_id not in allowed_structure_ids:
-                return error_response("Access denied for this structure", 403)
+            normalized_structure_id, structure_error = require_structure_access(
+                session, structure_id, user_id=current_user_id
+            )
+            if structure_error:
+                return structure_error
             room = (
                 session.query(Room)
-                .filter(Room.name == room_name, Room.id_structure == structure_id)
+                .filter(Room.name == room_name, Room.id_structure == normalized_structure_id)
                 .first()
             )
         if not room:
@@ -204,7 +213,6 @@ def create_reservation():
         try:
             # Get user's email configuration from database
 
-            current_user_id = get_jwt_identity()
             email_session = SessionLocal()
 
             try:
@@ -216,7 +224,7 @@ def create_reservation():
 
                 if not email_config:
                     logger.error("No email configuration found for user", extra=safe_extra_fields({
-                        'user_id': get_jwt_identity(),
+                        'user_id': current_user_id,
                         'operation': 'email_config_lookup',
                         'error_type': 'missing_email_config',
                         'operation_result': 'failed'
@@ -225,7 +233,7 @@ def create_reservation():
 
                 # Use database configuration
                 logger.info("Using database email configuration", extra=safe_extra_fields({
-                    'user_id': get_jwt_identity(),
+                    'user_id': current_user_id,
                     'email_config_source': 'database',
                     'operation': 'email_config_setup'
                 }))
@@ -310,7 +318,7 @@ def create_reservation():
         return error_response("Invalid date format. Use 'YYYY-MM-DD'", 400)
     except KeyError as e:
         session.rollback()
-        return error_response(f"Missing key: {str(e)}", 400)
+        return error_response("Missing required key in request data", 400)
     # pylint: disable=W0718
     except Exception:
         session.rollback()
@@ -351,7 +359,9 @@ def update_reservation(reservation_id):
 
     db = SessionLocal()
     try:
-        current_user_id = int(get_jwt_identity())
+        current_user_id, user_error = get_current_user_id()
+        if user_error:
+            return user_error
         reservation = db.query(Reservation).filter(Reservation.id == reservation_id).first()
 
         if not reservation:
@@ -359,8 +369,9 @@ def update_reservation(reservation_id):
         current_room = db.query(Room).filter(Room.id == reservation.id_room).first()
         if not current_room:
             return error_response("Current room not found", 404)
-        if not is_superadmin() and not user_has_structure(db, current_user_id, current_room.id_structure):
-            return error_response("Access denied for this reservation", 403)
+        _, structure_error = require_structure_access(db, current_room.id_structure, user_id=current_user_id)
+        if structure_error:
+            return structure_error
 
         # Optional updates
         if "start_date" in data:
@@ -407,8 +418,9 @@ def update_reservation(reservation_id):
             target_room = db.query(Room).filter(Room.id == data["room"]["id"]).first()
             if not target_room:
                 return error_response("Target room not found", 404)
-            if not is_superadmin() and not user_has_structure(db, current_user_id, target_room.id_structure):
-                return error_response("Access denied for target room", 403)
+            _, structure_error = require_structure_access(db, target_room.id_structure, user_id=current_user_id)
+            if structure_error:
+                return structure_error
         else:
             target_room = current_room
 
@@ -440,6 +452,13 @@ def update_reservation(reservation_id):
             }
         }), 200
 
+    except SQLAlchemyError:
+        db.rollback()
+        logger.exception("Database error while updating reservation")
+        return error_response("Database error", 500)
+    except (TypeError, ValueError):
+        db.rollback()
+        return error_response("Invalid request data", 400)
     except Exception:
         db.rollback()
         logger.exception("Unexpected error while updating reservation")
@@ -465,7 +484,9 @@ def delete_reservation(reservation_id):
     """
     db = SessionLocal()
     try:
-        current_user_id = int(get_jwt_identity())
+        current_user_id, user_error = get_current_user_id()
+        if user_error:
+            return user_error
         reservation = db.query(Reservation).filter(Reservation.id == reservation_id).first()
 
         if not reservation:
@@ -473,14 +494,22 @@ def delete_reservation(reservation_id):
         room = db.query(Room).filter(Room.id == reservation.id_room).first()
         if not room:
             return error_response("Room not found", 404)
-        if not is_superadmin() and not user_has_structure(db, current_user_id, room.id_structure):
-            return error_response("Access denied for this reservation", 403)
+        _, structure_error = require_structure_access(db, room.id_structure, user_id=current_user_id)
+        if structure_error:
+            return structure_error
 
         db.delete(reservation)
         db.commit()
 
         return jsonify({"message": f"Reservation {reservation_id} deleted successfully"}), 200
 
+    except SQLAlchemyError:
+        db.rollback()
+        logger.exception("Database error while deleting reservation")
+        return error_response("Database error", 500)
+    except (TypeError, ValueError):
+        db.rollback()
+        return error_response("Invalid request data", 400)
     except Exception:
         db.rollback()
         logger.exception("Unexpected error while deleting reservation")
@@ -522,40 +551,38 @@ def get_reservations_by_structure(structure_id):
         flask.Response: JSON array of reservation objects. If no reservations exist for the structure, an empty list is returned.
     """
     db = SessionLocal()
-    reservations = []
     try:
-        try:
-            current_user_id = int(get_jwt_identity())
-        except (TypeError, ValueError):
-            return error_response("Invalid user identity", 400)
-        try:
-            structure_id_int = int(structure_id)
-        except (TypeError, ValueError):
-            return error_response("Invalid structure_id. Must be an integer.", 400)
-        if not is_superadmin() and not user_has_structure(db, current_user_id, structure_id_int):
-            return error_response("Access denied for this structure", 403)
+        current_user_id, user_error = get_current_user_id()
+        if user_error:
+            return user_error
+        structure_id_int, structure_error = require_structure_access(db, structure_id, user_id=current_user_id)
+        if structure_error:
+            return structure_error
         reservations = (
             db.query(StructureReservationsView)
             .filter(StructureReservationsView.structure_id == structure_id_int)
             .all()
         )
+        return jsonify([{
+            "structure_id": r.structure_id,
+            "structure_name": r.structure_name,
+            "reservation_id": r.reservation_id,
+            "id_reference": r.id_reference,
+            "start_date": r.start_date.isoformat(),
+            "end_date": r.end_date.isoformat(),
+            "room_id": r.room_id,
+            "status": r.status,
+            "name_reference": r.name_reference,
+            "room_name": r.room_name
+        } for r in reservations])
     except SQLAlchemyError:
         logger.exception("Database error while fetching reservations by structure")
         return error_response("Database error", 500)
+    except Exception:
+        logger.exception("Unexpected error while fetching reservations by structure")
+        return error_response("Internal server error", 500)
     finally:
         db.close()
-    return jsonify([{
-        "structure_id": r.structure_id,
-        "structure_name": r.structure_name,
-        "reservation_id": r.reservation_id,
-        "id_reference": r.id_reference,
-        "start_date": r.start_date.isoformat(),
-        "end_date": r.end_date.isoformat(),
-        "room_id": r.room_id,
-        "status": r.status,
-        "name_reference": r.name_reference,
-        "room_name": r.room_name
-    } for r in reservations])
 
 @reservation_bp.route("/reservations/admin/<int:reservation_id>", methods=["GET"])
 @jwt_required()
@@ -575,7 +602,9 @@ def get_admin_reservations_by_id(reservation_id):
     """
     db = SessionLocal()
     try:
-        current_user_id = int(get_jwt_identity())
+        current_user_id, user_error = get_current_user_id()
+        if user_error:
+            return user_error
         reservation = (
             db.query(Reservation)
             .filter(Reservation.id == str(reservation_id))
@@ -587,10 +616,14 @@ def get_admin_reservations_by_id(reservation_id):
         room = db.query(Room).filter(Room.id == reservation.id_room).first()
         if not room:
             return error_response("Room not found", 404)
-        if not is_superadmin() and not user_has_structure(db, current_user_id, room.id_structure):
-            return error_response("Access denied for this reservation", 403)
+        _, structure_error = require_structure_access(db, room.id_structure, user_id=current_user_id)
+        if structure_error:
+            return structure_error
 
         return jsonify(reservation.to_dict())
+    except SQLAlchemyError:
+        logger.exception("Database error while retrieving admin reservation by id")
+        return error_response("Database error", 500)
     except Exception:
         logger.exception("Unexpected error while retrieving admin reservation by id")
         return error_response("Internal server error", 500)
@@ -641,6 +674,9 @@ def check_get_reservations_by_id(reservation_id):
             'registered_clients_count': client_count,
             'upload_token': _build_upload_token(str(reservation.id_reference))
         }), 200
+    except SQLAlchemyError:
+        logger.exception("Database error while checking reservation by reference")
+        return error_response("Database error", 500)
     except Exception:
         logger.exception("Unexpected error while checking reservation by reference")
         return error_response("Internal server error", 500)
@@ -667,9 +703,12 @@ def get_reservations_per_month(structure_id):
     """
     db = SessionLocal()
     try:
-        current_user_id = int(get_jwt_identity())
-        if not is_superadmin() and not user_has_structure(db, current_user_id, structure_id):
-            return error_response("Access denied for this structure", 403)
+        current_user_id, user_error = get_current_user_id()
+        if user_error:
+            return user_error
+        _, structure_error = require_structure_access(db, structure_id, user_id=current_user_id)
+        if structure_error:
+            return structure_error
         # Check if the structure exists
         structure = db.query(Structure).filter(Structure.id == structure_id).first()
         if not structure:
@@ -701,7 +740,12 @@ def get_reservations_per_month(structure_id):
             {"month": calendar.month_name[m], "total_reservations": count}
             for m, count in months.items()
         ]), 200
-
+    except SQLAlchemyError:
+        logger.exception("Database error while fetching monthly reservations")
+        return error_response("Database error", 500)
+    except Exception:
+        logger.exception("Unexpected error while fetching monthly reservations")
+        return error_response("Internal server error", 500)
     finally:
         db.close()
 
@@ -727,6 +771,8 @@ def update_reservation_status(reservation_id):
           - 500 for server-side errors.
     """
     data = request.get_json()
+    if not data:
+        return error_response("Missing or invalid JSON body", 400)
     allowed_statuses = {"Approved", "Pending", "Declined", STATUS_SENT_BACK_TO_CUSTOMER}
 
     if "status" not in data:
@@ -739,7 +785,9 @@ def update_reservation_status(reservation_id):
 
     db = SessionLocal()
     try:
-        current_user_id = int(get_jwt_identity())
+        current_user_id, user_error = get_current_user_id()
+        if user_error:
+            return user_error
         reservation = db.query(Reservation).filter(Reservation.id == str(reservation_id)).first()
 
         if not reservation:
@@ -749,8 +797,9 @@ def update_reservation_status(reservation_id):
         room = db.query(Room).filter(Room.id == reservation.id_room).first()
         if not room:
             return error_response("Room not found", 404)
-        if not is_superadmin() and not user_has_structure(db, current_user_id, room.id_structure):
-            return error_response("Access denied for this reservation", 403)
+        _, structure_error = require_structure_access(db, room.id_structure, user_id=current_user_id)
+        if structure_error:
+            return structure_error
 
         old_status = reservation.status
         reservation.status = new_status
@@ -832,6 +881,13 @@ def update_reservation_status(reservation_id):
             }
         }), 200
 
+    except SQLAlchemyError:
+        db.rollback()
+        logger.exception("Database error while updating reservation status")
+        return error_response("Database error", 500)
+    except (TypeError, ValueError):
+        db.rollback()
+        return error_response("Invalid request data", 400)
     except Exception:
         db.rollback()
         logger.exception("Unexpected error while updating reservation status")

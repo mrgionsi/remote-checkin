@@ -17,11 +17,18 @@ from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identi
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from models import User, Reservation, Client, ClientReservations
+from models import User, Reservation, Client, ClientReservations, Room
 from services.portale_alloggi_service import PortaleAlloggiService
 from utils.encryption_utils import encrypt_password, decrypt_password
 from utils.authz import verify_admin_access
-from utils.route_helpers import handle_database_error, handle_integrity_error, get_user_structures_query, create_user_response_data
+from utils.route_helpers import (
+    handle_database_error,
+    handle_integrity_error,
+    get_user_structures_query,
+    create_user_response_data,
+    get_current_user_id,
+    require_structure_access,
+)
 from app_logging.config import get_logger
 from app_logging.decorators import log_route, log_database_operation, log_performance
 from app_logging.utils import safe_extra_fields
@@ -470,11 +477,12 @@ def test_portale_alloggi_connection():
                 "status": "error",
                 "details": "Service module not found"
             }), 500
-        except Exception as service_error:
+        except Exception:
+            logger.exception("Portale Alloggi connection failed during service call")
             return jsonify({
                 "error": "Portale Alloggi connection failed",
                 "status": "error",
-                "details": str(service_error)
+                "details": "Unable to complete connection test"
             }), 400
 
     except Exception as e:
@@ -508,7 +516,7 @@ def _prepare_reservation_data(reservation):
 @jwt_required()
 @log_route(include_request_data=True, include_response_data=True)
 @log_performance(threshold_ms=10000)
-def send_reservation_to_portale_alloggi(reservation_id):
+def send_reservation_to_portale_alloggi(reservation_id):  # pylint: disable=too-many-locals
     """
     Send guest data from a reservation to Portale Alloggi.
 
@@ -523,7 +531,9 @@ def send_reservation_to_portale_alloggi(reservation_id):
         return error_response, error_code
 
     try:
-        user_id = int(get_jwt_identity())
+        user_id, user_error = get_current_user_id()
+        if user_error:
+            return user_error
         db_session = SessionLocal()
 
         # Get user with Portale Alloggi credentials
@@ -542,6 +552,12 @@ def send_reservation_to_portale_alloggi(reservation_id):
         reservation = db_session.query(Reservation).filter(Reservation.id == reservation_id).first()
         if not reservation:
             return jsonify({"error": RESERVATION_NOT_FOUND}), 404
+        room = db_session.query(Room).filter(Room.id == reservation.id_room).first()
+        if not room:
+            return jsonify({"error": "Room not found"}), 404
+        _, structure_error = require_structure_access(db_session, room.id_structure, user_id=user_id)
+        if structure_error:
+            return structure_error
 
         # Check if reservation is approved
         if reservation.status != 'Approved':
@@ -590,7 +606,7 @@ def send_reservation_to_portale_alloggi(reservation_id):
             }), 200
         return jsonify({
             "error": "Failed to test data with Portale Alloggi",
-            "details": result.get('error', 'Unknown error'),
+            "details": "Portale Alloggi rejected the submitted payload",
             "result": result
         }), 400
 
@@ -604,7 +620,7 @@ def send_reservation_to_portale_alloggi(reservation_id):
 @jwt_required()
 @log_route(include_request_data=True, include_response_data=True)
 @log_performance(threshold_ms=10000)
-def send_reservation_to_portale_alloggi_real(reservation_id):
+def send_reservation_to_portale_alloggi_real(reservation_id):  # pylint: disable=too-many-locals
     """
     Send guest data from a reservation to Portale Alloggi (REAL PRODUCTION).
 
@@ -619,7 +635,9 @@ def send_reservation_to_portale_alloggi_real(reservation_id):
         return error_response, error_code
 
     try:
-        user_id = int(get_jwt_identity())
+        user_id, user_error = get_current_user_id()
+        if user_error:
+            return user_error
         db_session = SessionLocal()
 
         # Get user with Portale Alloggi credentials
@@ -638,6 +656,12 @@ def send_reservation_to_portale_alloggi_real(reservation_id):
         reservation = db_session.query(Reservation).filter(Reservation.id == reservation_id).first()
         if not reservation:
             return jsonify({"error": RESERVATION_NOT_FOUND}), 404
+        room = db_session.query(Room).filter(Room.id == reservation.id_room).first()
+        if not room:
+            return jsonify({"error": "Room not found"}), 404
+        _, structure_error = require_structure_access(db_session, room.id_structure, user_id=user_id)
+        if structure_error:
+            return structure_error
 
         # Check if reservation is approved
         if reservation.status != 'Approved':
@@ -690,7 +714,7 @@ def send_reservation_to_portale_alloggi_real(reservation_id):
             }), 200
         return jsonify({
             "error": "Failed to send data to Portale Alloggi",
-            "details": result.get('error', 'Unknown error'),
+            "details": "Portale Alloggi rejected the submitted payload",
             "result": result
         }), 400
 
@@ -725,6 +749,15 @@ def get_portale_alloggi_status(reservation_id):
         reservation = db_session.query(Reservation).filter(Reservation.id == reservation_id).first()
         if not reservation:
             return jsonify({"error": RESERVATION_NOT_FOUND}), 404
+        user_id, user_error = get_current_user_id()
+        if user_error:
+            return user_error
+        room = db_session.query(Room).filter(Room.id == reservation.id_room).first()
+        if not room:
+            return jsonify({"error": "Room not found"}), 404
+        _, structure_error = require_structure_access(db_session, room.id_structure, user_id=user_id)
+        if structure_error:
+            return structure_error
 
         return jsonify({
             "portale_alloggi_sent": reservation.portale_alloggi_sent,

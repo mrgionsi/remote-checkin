@@ -1,4 +1,4 @@
-# pylint: disable=C0301,E0611,E0401,W0718,R0914,R0912
+# pylint: disable=C0301,E0611,E0401,W0718,R0914,R0912,R0801
 """
 Route helper utilities for common database operations and error handling.
 
@@ -11,6 +11,7 @@ from flask import jsonify
 from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended.exceptions import JWTExtendedException
 from app_logging.utils import safe_extra_fields
+from utils.authz import is_superadmin
 from models import AdminStructure, Structure
 
 logger = logging.getLogger(__name__)
@@ -133,6 +134,50 @@ def error_response(message, status_code=400):
     Return a standardized JSON error response.
     """
     return jsonify({"error": message}), status_code
+
+
+def get_current_user_id():
+    """
+    Parse and return the current JWT identity as int.
+
+    Returns:
+        tuple: (user_id, error_tuple)
+            - user_id (int | None)
+            - error_tuple is None on success, otherwise `(json_response, status_code)`
+    """
+    try:
+        return int(get_jwt_identity()), None
+    except (TypeError, ValueError):
+        return None, error_response("Invalid user identity", 400)
+
+
+def require_structure_access(db_session, structure_id, user_id=None, allow_superadmin=True):
+    """
+    Validate structure access for the current user in a single shared path.
+
+    Returns:
+        tuple: (normalized_structure_id, error_tuple)
+            - normalized_structure_id (int | None)
+            - error_tuple is None on success, otherwise `(json_response, status_code)`
+    """
+    try:
+        normalized_structure_id = int(structure_id)
+    except (TypeError, ValueError):
+        return None, error_response("Invalid structure_id. Must be an integer.", 400)
+
+    if allow_superadmin and is_superadmin():
+        return normalized_structure_id, None
+
+    effective_user_id = user_id
+    if effective_user_id is None:
+        effective_user_id, user_error = get_current_user_id()
+        if user_error:
+            return None, user_error
+
+    if not user_has_structure(db_session, effective_user_id, normalized_structure_id):
+        return normalized_structure_id, error_response("Access denied for this structure", 403)
+
+    return normalized_structure_id, None
 
 
 def get_user_structures_query(db_session, user_id):
