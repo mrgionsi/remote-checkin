@@ -15,6 +15,20 @@ from .formatters import JSONFormatter, ColoredFormatter
 from .pii_filter import PIIRedactionFilter
 
 
+def _get_int_env(name: str, default: int) -> int:
+    """Return integer env var value with a safe fallback."""
+    raw_value = os.getenv(name)
+    if raw_value is None:
+        return default
+    value = str(raw_value).strip()
+    if value == "" or value.lower() == "none":
+        return default
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
 class LoggingConfig:
     """Centralized logging configuration class."""
 
@@ -61,12 +75,12 @@ class LoggingConfig:
     @classmethod
     def get_max_log_file_size(cls) -> int:
         """Get maximum log file size in bytes."""
-        return int(os.getenv('MAX_LOG_FILE_SIZE', '10485760'))  # 10MB default
+        return _get_int_env('MAX_LOG_FILE_SIZE', 10485760)  # 10MB default
 
     @classmethod
     def get_log_backup_count(cls) -> int:
         """Get number of backup log files to keep."""
-        return int(os.getenv('LOG_BACKUP_COUNT', '5'))
+        return _get_int_env('LOG_BACKUP_COUNT', 5)
 
 
 def setup_logging(app_name: str = 'remote-checkin') -> None:

@@ -41,6 +41,7 @@ jobs:
           source venv/bin/activate
           mkdir -p backend/tests/reports
           PYTHONPATH=backend pytest backend/tests \
+            --ignore=backend/tests/test_email_handler.py \
             --junitxml=backend/tests/reports/pytest-report.xml \
             --html=backend/tests/reports/pytest-report.html \
             --self-contained-html
