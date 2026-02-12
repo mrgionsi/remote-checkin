@@ -10,11 +10,12 @@ It supports operations such as creating new reservations and listing all reserva
 import calendar
 from datetime import datetime
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from sqlalchemy import  func
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql import extract
 from flask_jwt_extended import get_jwt_identity, jwt_required
+from itsdangerous import URLSafeTimedSerializer
 
 from models import Reservation, Room, Structure, StructureReservationsView, EmailConfig,Client, ClientReservations
 from email_handler import EmailService
@@ -41,6 +42,14 @@ reservation_bp = Blueprint("reservations", __name__, url_prefix="/api/v1")
 
 # Configure logging
 logger = get_logger(__name__)
+
+UPLOAD_TOKEN_SALT = "reservation-upload"
+
+
+def _build_upload_token(reservation_reference: str) -> str:
+    """Create a signed token bound to a reservation reference."""
+    serializer = URLSafeTimedSerializer(current_app.config["JWT_SECRET_KEY"])
+    return serializer.dumps({"reservation_ref": str(reservation_reference)}, salt=UPLOAD_TOKEN_SALT)
 
 
 @reservation_bp.route("/reservations", methods=["POST"])
@@ -638,7 +647,8 @@ def check_get_reservations_by_id(reservation_id):
             'id_reference': reservation_id,
             'number_of_people': reservation.number_of_people or 1,
             'status': reservation.status,
-            'registered_clients_count': client_count
+            'registered_clients_count': client_count,
+            'upload_token': _build_upload_token(str(reservation.id_reference))
         }), 200
     except Exception:
         logger.exception("Unexpected error while checking reservation by reference")

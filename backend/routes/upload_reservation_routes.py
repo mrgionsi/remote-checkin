@@ -11,8 +11,9 @@ Functions:
 #pylint: disable=C0301,E0401,R0914,W0718,W0612,E0611,R0912,R0915,R1702
 import os
 from datetime import datetime
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from werkzeug.exceptions import BadRequest
+from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 
 from utils.file_utils import allowed_file, sanitize_filename, save_file
 from utils.ocr_utils import validate_document
@@ -29,6 +30,8 @@ upload_bp = Blueprint('upload', __name__, url_prefix="/api/v1")
 # Configure logging
 logger = get_logger(__name__)
 UPLOAD_FOLDER = 'uploads/'
+UPLOAD_TOKEN_SALT = "reservation-upload"
+UPLOAD_TOKEN_MAX_AGE_SECONDS = 60 * 60 * 2
 
 def _get_gender_display(sesso):
     """Convert gender code to display string."""
@@ -81,6 +84,28 @@ def upload_file():
         if any(value is None for value in form_data.values()):
             raise BadRequest("Missing one or more required fields")
 
+        reservation_id = str(form_data['reservationId'])
+
+        # Require a signed upload token tied to reservation reference to prevent anonymous uploads.
+        upload_token = request.headers.get("X-Upload-Token") or request.form.get("uploadToken")
+        if not upload_token:
+            return jsonify({"error": "Missing upload token"}), 401
+
+        serializer = URLSafeTimedSerializer(current_app.config["JWT_SECRET_KEY"])
+        try:
+            payload = serializer.loads(
+                upload_token,
+                salt=UPLOAD_TOKEN_SALT,
+                max_age=UPLOAD_TOKEN_MAX_AGE_SECONDS
+            )
+        except SignatureExpired:
+            return jsonify({"error": "Upload token expired"}), 401
+        except BadSignature:
+            return jsonify({"error": "Invalid upload token"}), 401
+
+        if str(payload.get("reservation_ref", "")) != reservation_id:
+            return jsonify({"error": "Upload token does not match reservation"}), 403
+
         # Validate Portale Alloggi specific fields
         try:
             # Validate gender (sesso)
@@ -102,7 +127,6 @@ def upload_file():
         except Exception as e:
             raise BadRequest(f"Validation error: {str(e)}") from e
 
-        reservation_id = form_data['reservationId']
         cf = form_data['cf']
         # Create a folder for the reservation if it doesn't exist
         reservation_folder = os.path.join(UPLOAD_FOLDER, reservation_id)

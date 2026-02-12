@@ -74,6 +74,7 @@ export class RemoteCheckinComponent implements OnInit {
   languageCode: string | null = '';
   reservationId: string | null = '';
   reservationDetails: any = null;
+  uploadToken: string | null = null;
   registeredClientsCount: number = 0;
   canRegister: boolean = true;
 
@@ -232,6 +233,7 @@ export class RemoteCheckinComponent implements OnInit {
     this.reservationService.getReservationById(this.reservationId).subscribe({
       next: (reservation) => {
         this.reservationDetails = reservation;
+        this.uploadToken = reservation?.upload_token || null;
         this.checkRegistrationCapacity();
       },
       error: (error) => {
@@ -575,7 +577,17 @@ export class RemoteCheckinComponent implements OnInit {
       formData.append('reservationId', this.reservationId.toString());
     }
 
-    this.uploadService.uploadImages(formData).subscribe({
+    if (!this.uploadToken) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: this.translocoService.translate('capacity-verification-failed')
+      });
+      this.isSubmitting = false;
+      return;
+    }
+
+    this.uploadService.uploadImages(formData, this.uploadToken).subscribe({
       next: (response) => {
         // Show success message with API response
         console.log(response)
