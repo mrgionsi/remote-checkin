@@ -125,7 +125,7 @@ def test_upload_missing_files(client):
     data = {"reservationId": "12345"}
     response = client.post("/api/v1/upload", data=data)
     assert response.status_code == 400
-    assert response.get_json()["error"] == "Invalid upload request"
+    assert response.get_json()["error"] == "Missing one or more required image files"
 
 
 ##Even pdf files can be uploaded
