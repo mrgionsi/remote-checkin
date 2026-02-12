@@ -325,3 +325,55 @@ def test_add_room_invalid_structure_type_returns_400(client, auth_headers):
     assert response.status_code == 400
     payload = response.get_json()
     assert payload["error"] == "Invalid structure_id. Must be an integer."
+
+
+def test_update_room_success(client, init_db, auth_headers):
+    """PUT updates room fields and returns updated room."""
+    room = init_db.query(Room).first()
+    response = client.put(
+        f"/api/v1/rooms/{room.id}",
+        headers=auth_headers,
+        json={"name": "Updated Room", "capacity": 5, "is_active": False},
+    )
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["name"] == "Updated Room"
+    assert payload["capacity"] == 5
+    assert payload["is_active"] is False
+
+
+def test_update_room_invalid_capacity_returns_400(client, init_db, auth_headers):
+    """PUT rejects invalid capacity values."""
+    room = init_db.query(Room).first()
+    response = client.put(
+        f"/api/v1/rooms/{room.id}",
+        headers=auth_headers,
+        json={"capacity": "bad-capacity"},
+    )
+    assert response.status_code == 400
+    payload = response.get_json()
+    assert payload["error"] == "Invalid capacity value"
+
+
+def test_update_room_invalid_is_active_type_returns_400(client, init_db, auth_headers):
+    """PUT rejects non-boolean is_active values."""
+    room = init_db.query(Room).first()
+    response = client.put(
+        f"/api/v1/rooms/{room.id}",
+        headers=auth_headers,
+        json={"is_active": "true"},
+    )
+    assert response.status_code == 400
+    payload = response.get_json()
+    assert payload["error"] == "Invalid active status value"
+
+
+def test_update_room_not_found_returns_404(client, auth_headers):
+    """PUT returns 404 when room id does not exist."""
+    response = client.put(
+        "/api/v1/rooms/999999",
+        headers=auth_headers,
+        json={"name": "No Room"},
+    )
+    assert response.status_code == 404
+    assert response.get_json()["error"] == "Room not found"

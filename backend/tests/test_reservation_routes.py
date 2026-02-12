@@ -367,3 +367,140 @@ def test_create_reservation_invalid_structure_id_type_returns_400(client, init_d
     assert response.status_code == 400
     payload = response.get_json()
     assert payload["error"] == "Invalid structureId. Must be an integer."
+
+
+def test_update_reservation_success(client, init_db, auth_headers):
+    """PATCH updates allowed fields and returns updated reservation payload."""
+    room = init_db.query(Room).first()
+    reservation = Reservation(
+        id_reference="RES-UPD-01",
+        start_date="2025-06-01",
+        end_date="2025-06-03",
+        id_room=room.id,
+        email="guest-update@example.com",
+        number_of_people=1,
+    )
+    init_db.add(reservation)
+    init_db.commit()
+    init_db.refresh(reservation)
+
+    response = client.patch(
+        f"/api/v1/reservations/{reservation.id}",
+        headers=auth_headers,
+        json={
+            "status": "Approved",
+            "number_of_people": 2,
+        },
+    )
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["reservation"]["status"] == "Approved"
+    assert payload["reservation"]["numberOfPeople"] == 2
+
+
+def test_update_reservation_invalid_number_type_returns_400(client, init_db, auth_headers):
+    """PATCH rejects non-numeric number_of_people."""
+    room = init_db.query(Room).first()
+    reservation = Reservation(
+        id_reference="RES-UPD-02",
+        start_date="2025-06-01",
+        end_date="2025-06-03",
+        id_room=room.id,
+        email="guest-update2@example.com",
+    )
+    init_db.add(reservation)
+    init_db.commit()
+    init_db.refresh(reservation)
+
+    response = client.patch(
+        f"/api/v1/reservations/{reservation.id}",
+        headers=auth_headers,
+        json={"number_of_people": "not-a-number"},
+    )
+    assert response.status_code == 400
+    payload = response.get_json()
+    assert "error" in payload
+    assert "Invalid number of people" in payload["error"]
+    assert "Traceback" not in payload["error"]
+
+
+def test_update_reservation_people_over_capacity_returns_400(client, init_db, auth_headers):
+    """PATCH enforces room capacity boundary."""
+    room = init_db.query(Room).first()
+    reservation = Reservation(
+        id_reference="RES-UPD-03",
+        start_date="2025-06-01",
+        end_date="2025-06-03",
+        id_room=room.id,
+        email="guest-update3@example.com",
+        number_of_people=1,
+    )
+    init_db.add(reservation)
+    init_db.commit()
+    init_db.refresh(reservation)
+
+    response = client.patch(
+        f"/api/v1/reservations/{reservation.id}",
+        headers=auth_headers,
+        json={"number_of_people": room.capacity + 1},
+    )
+    assert response.status_code == 400
+    payload = response.get_json()
+    assert "cannot exceed room capacity" in payload["error"]
+
+
+def test_update_reservation_target_room_not_found_returns_404(client, init_db, auth_headers):
+    """PATCH returns 404 when target room id does not exist."""
+    room = init_db.query(Room).first()
+    reservation = Reservation(
+        id_reference="RES-UPD-04",
+        start_date="2025-06-01",
+        end_date="2025-06-03",
+        id_room=room.id,
+        email="guest-update4@example.com",
+    )
+    init_db.add(reservation)
+    init_db.commit()
+    init_db.refresh(reservation)
+
+    response = client.patch(
+        f"/api/v1/reservations/{reservation.id}",
+        headers=auth_headers,
+        json={"room": {"id": 999999}},
+    )
+    assert response.status_code == 404
+    assert response.get_json()["error"] == "Target room not found"
+
+
+def test_delete_reservation_success(client, init_db, auth_headers):
+    """DELETE removes reservation and returns success message."""
+    room = init_db.query(Room).first()
+    reservation = Reservation(
+        id_reference="RES-DEL-01",
+        start_date="2025-06-01",
+        end_date="2025-06-03",
+        id_room=room.id,
+        email="guest-delete@example.com",
+    )
+    init_db.add(reservation)
+    init_db.commit()
+    init_db.refresh(reservation)
+
+    response = client.delete(
+        f"/api/v1/reservations/{reservation.id}",
+        headers=auth_headers,
+    )
+    assert response.status_code == 200
+    assert "deleted successfully" in response.get_json()["message"]
+
+    deleted = init_db.query(Reservation).filter(Reservation.id == reservation.id).first()
+    assert deleted is None
+
+
+def test_delete_reservation_not_found_returns_404(client, init_db, auth_headers):
+    """DELETE returns 404 for unknown reservation id."""
+    response = client.delete("/api/v1/reservations/999999", headers=auth_headers)
+    assert response.status_code == 404
+    payload = response.get_json()
+    assert "error" in payload
+    assert "not found" in payload["error"].lower()
