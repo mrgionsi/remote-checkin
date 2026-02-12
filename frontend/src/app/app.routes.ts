@@ -18,6 +18,7 @@ import { SuperadminStructuresComponent } from './admin/superadmin/structures/str
 import { SuperadminUsersComponent } from './admin/superadmin/users/users.component';
 import { SuperadminAssociationsComponent } from './admin/superadmin/associations/associations.component';
 import { CheckinCompleteComponent } from './checkin-complete/checkin-complete.component';
+import { ChangePasswordComponent } from './admin/change-password/change-password.component';
 
 export const routes: Routes = [
     {
@@ -50,6 +51,7 @@ export const routes: Routes = [
             { path: 'reservation-details/:id_reservation', component: DetailReservationComponent, canActivate: [authGuard] },
             { path: 'create-reservation', component: CreateReservationComponent, canActivate: [authGuard] },
             { path: 'admin-info', component: AdminInfoComponent, canActivate: [authGuard] },
+            { path: 'change-password', component: ChangePasswordComponent, canActivate: [authGuard] },
             { path: 'settings', component: SettingsComponent, canActivate: [authGuard] },
             {
                 path: 'superadmin',

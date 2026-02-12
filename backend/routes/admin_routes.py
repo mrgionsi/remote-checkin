@@ -1,4 +1,4 @@
-# pylint: disable=C0301,E0611,E0401,W0718
+# pylint: disable=C0301,E0611,E0401,W0718,R0801
 
 """Admin routes module for user authentication, account creation, and profile retrieval.
 
@@ -40,6 +40,22 @@ INTERNAL_SERVER_ERROR = "Internal server error"
 PORTALE_CREDENTIALS_NOT_CONFIGURED = "Portale Alloggi credentials not configured"
 RESERVATION_NOT_FOUND = "Reservation not found"
 USER_CREATION_OPERATION = "user creation"
+
+
+def _is_valid_password(password: str) -> bool:
+    """
+    Validate basic password strength.
+
+    Rules:
+    - at least 8 characters
+    - at least one letter
+    - at least one digit
+    """
+    if len(password) < 8:
+        return False
+    has_letter = any(char.isalpha() for char in password)
+    has_digit = any(char.isdigit() for char in password)
+    return has_letter and has_digit
 
 
 @admin_bp.route("/admin/login", methods=["POST"])
@@ -175,6 +191,65 @@ def create_admin_user():
     except Exception:
         db_session.rollback()
         return handle_database_error(Exception("Unexpected error"), USER_CREATION_OPERATION, username=data.get('username'))
+    finally:
+        db_session.close()
+
+
+@admin_bp.route("/admin/change-password", methods=["POST"])
+@jwt_required()
+@log_route(include_request_data=False)
+@log_database_operation("UPDATE")
+def change_admin_password():
+    """
+    Change password for the currently authenticated admin user.
+
+    Expects JSON body with:
+    - current_password
+    - new_password
+    - confirm_password
+    """
+    error_resp, error_code = verify_admin_access()
+    if error_resp:
+        return error_resp, error_code
+
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "JSON data required"}), 400
+
+    current_password = str(data.get("current_password", "")).strip()
+    new_password = str(data.get("new_password", "")).strip()
+    confirm_password = str(data.get("confirm_password", "")).strip()
+
+    if not current_password or not new_password or not confirm_password:
+        return jsonify({"error": "current_password, new_password and confirm_password are required"}), 400
+
+    if new_password != confirm_password:
+        return jsonify({"error": "New password and confirmation do not match"}), 400
+
+    if not _is_valid_password(new_password):
+        return jsonify({"error": "Password must be at least 8 characters long and contain at least one letter and one number"}), 400
+
+    db_session = SessionLocal()
+    try:
+        user_id = int(get_jwt_identity())
+        user = db_session.query(User).filter(User.id == user_id).first()
+        if not user:
+            return jsonify({"error": USER_NOT_FOUND}), 404
+
+        if not check_password_hash(user.password, current_password):
+            return jsonify({"error": "Current password is incorrect"}), 400
+
+        if check_password_hash(user.password, new_password):
+            return jsonify({"error": "New password must be different from current password"}), 400
+
+        user.password = generate_password_hash(new_password)
+        db_session.commit()
+
+        return jsonify({"message": "Password changed successfully"}), 200
+
+    except SQLAlchemyError:
+        db_session.rollback()
+        return jsonify({"error": INTERNAL_SERVER_ERROR}), 500
     finally:
         db_session.close()
 

@@ -1,4 +1,4 @@
-# pylint: disable=C0301,E0611,E0401,W0718,R0914,R0912,C0302
+# pylint: disable=C0301,E0611,E0401,W0718,R0914,R0912,C0302,R0911,R0801
 """
 Superadmin Routes
 
@@ -33,6 +33,22 @@ INTERNAL_SERVER_ERROR = "Internal server error"
 JSON_DATA_REQUIRED = "JSON data required"
 STRUCTURE_NOT_FOUND = "Structure not found"
 USER_NOT_FOUND = "User not found"
+
+
+def _is_valid_password(password: str) -> bool:
+    """
+    Validate basic password strength.
+
+    Rules:
+    - at least 8 characters
+    - at least one letter
+    - at least one digit
+    """
+    if len(password) < 8:
+        return False
+    has_letter = any(char.isalpha() for char in password)
+    has_digit = any(char.isdigit() for char in password)
+    return has_letter and has_digit
 
 
 def parse_boolean_value(value):
@@ -671,6 +687,8 @@ def reset_user_password(user_id):
     new_password = data.get("password", "").strip()
     if not new_password:
         return jsonify({"error": "Password is required"}), 400
+    if not _is_valid_password(new_password):
+        return jsonify({"error": "Password must be at least 8 characters long and contain at least one letter and one number"}), 400
 
     db_session = None
     try:
