@@ -87,7 +87,7 @@ def test_superadmin_create_user_requires_superadmin_role(client, app):
 
 
 def test_superadmin_create_user_requires_json_body(client, app):
-    """POST /superadmin/users should return 400 for missing JSON body."""
+    """POST /superadmin/users should return 415 for missing JSON body."""
     headers = _auth_headers(app, "superadmin")
     response = client.post("/api/v1/superadmin/users", headers=headers)
     assert response.status_code == 415

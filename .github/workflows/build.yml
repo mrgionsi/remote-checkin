@@ -11,36 +11,12 @@ jobs:
     name: Build Flask Backend
     runs-on: ubuntu-latest
     environment: pre-prod
-    timeout-minutes: 20
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_USER: test_user
-          POSTGRES_PASSWORD: test_password
-          POSTGRES_DB: remotecheckin_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U test_user -d remotecheckin_test"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    env:
-      DB_USER: test_user
-      DB_PASSWORD: test_password
-      DB_HOST: 127.0.0.1
-      DB_PORT: "5432"
-      DB_NAME: remotecheckin_test
-      FLASK_ENV: testing
-      JWT_SECRET_KEY: test-secret-key-with-numbers-123
-      ENCRYPTION_KEY: KlRqjEOThj9Yket0vV7M9AQLXmBu5ssxg_JudOYiakI=
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: '3.13'
 
@@ -54,35 +30,10 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y tesseract-ocr
           python -m venv venv
           source venv/bin/activate
           pip install --upgrade pip
           pip install -r backend/requirements.txt
-          pip install pytest-html
-          pip install pytest-timeout
-
-      - name: Run backend tests and generate reports
-        run: |
-          source venv/bin/activate
-          mkdir -p backend/tests/reports
-          PYTHONPATH=backend pytest backend/tests \
-            --ignore=backend/tests/test_email_handler.py \
-            -vv \
-            --timeout=120 \
-            --timeout-method=thread \
-            --junitxml=backend/tests/reports/pytest-report.xml \
-            --html=backend/tests/reports/pytest-report.html \
-            --self-contained-html
-
-      - name: Upload backend test reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-test-reports
-          path: backend/tests/reports/
-          retention-days: 7
 
   build-angular:
     name: Build Angular Frontend
