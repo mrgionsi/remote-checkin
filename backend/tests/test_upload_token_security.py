@@ -99,7 +99,7 @@ def test_upload_rejects_expired_token(client, monkeypatch):
     )
     serializer = URLSafeTimedSerializer("test-secret")
     token = serializer.dumps({"reservation_ref": "RES-SEC-001"}, salt=UPLOAD_TOKEN_SALT)
-    time.sleep(1.1)
+    time.sleep(2.0)
     response = client.post(
         "/api/v1/upload",
         data=_multipart_payload(token=token),
