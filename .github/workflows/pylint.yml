@@ -35,4 +35,4 @@ jobs:
 
     - name: Analysing the code with pylint
       run: |
-        pylint $(git ls-files 'backend/*.py')
+        pylint --rcfile=backend/.pylintrc $(git ls-files 'backend/*.py')
