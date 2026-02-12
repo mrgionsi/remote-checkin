@@ -1,1381 +1,1382 @@
 {
-    "select-your-language": "Seleziona la tua lingua",
-    "languages": {
-        "en": "Inglese",
-        "it": "Italiano",
-        "es": "Spagnolo",
-        "fr": "Francese",
-        "de": "Tedesco",
-        "pt": "Portoghese",
-        "ru": "Russo",
-        "zh": "Cinese"
+  "select-your-language": "Seleziona la tua lingua",
+  "languages": {
+    "en": "Inglese",
+    "it": "Italiano",
+    "es": "Spagnolo",
+    "fr": "Francese",
+    "de": "Tedesco",
+    "pt": "Portoghese",
+    "ru": "Russo",
+    "zh": "Cinese"
+  },
+  "remote-checkin-title": "Check-in Remoto",
+  "reservation-check-description": "Per continuare, inserisci il tuo codice prenotazione",
+  "reservation-code-label": "Codice Prenotazione",
+  "reservation-code-placeholder": "Inserisci il tuo codice prenotazione",
+  "go-to-checkin": "VAI AL CHECK-IN",
+  "reservation-code-info": "Il codice della prenotazione è stato inviato alla tua email. Se non lo trovi, verifica nella cartella Spam.",
+  "need-help-contact-us": "Hai bisogno di aiuto? Contattaci.",
+  "checkinComplete": {
+    "title": "Check-in completato",
+    "subtitle": "Grazie per aver inviato i tuoi dati. Sei pronto per l'arrivo.",
+    "reservationLabel": "Prenotazione",
+    "nextTitle": "Cosa succede ora",
+    "nextEmail": "Riceverai presto un'email di conferma.",
+    "nextCompliance": "I tuoi dati sono archiviati in sicurezza per la compliance.",
+    "nextArrival": "Presentati all'orario previsto e goditi il soggiorno.",
+    "primaryAction": "Torna alla home",
+    "secondaryAction": "Contatta supporto"
+  },
+  "success": "Completato",
+  "error": "Errore",
+  "reservation-success": "Prenotazione validata correttamente.",
+  "reservation-error": "ID prenotazione non valido. Controlla e riprova.",
+  "reservation-check-fail": "Impossibile convalidare la prenotazione. Riprova o contatta l'amministratore.",
+  "upload-images-step": "Carica Immagini",
+  "confirm-data-step": "Conferma Dati",
+  "client-information": "Informazioni Cliente",
+  "name-label": "Nome",
+  "namePlaceholder": "Inserisci il nome",
+  "surname-label": "Cognome",
+  "surnamePlaceholder": "Inserisci il cognome",
+  "birthday-label": "Data di nascita",
+  "birthdayPlaceholder": "Seleziona la data di nascita",
+  "street-label": "Via",
+  "streetPlaceholder": "Indirizzo",
+  "city-label": "Città",
+  "cityPlaceholder": "Città",
+  "cap-label": "CAP",
+  "capPlaceholder": "CAP a 5 cifre",
+  "cap-error": "Il CAP deve essere di 5 cifre",
+  "province-label": "Provincia",
+  "provincePlaceholder": "Provincia",
+  "number-city-label": "Numero Civico",
+  "numberCityPlaceholder": "Inserisci numero civico",
+  "telephonePlaceholder": "Numero di telefono",
+  "document-type-label": "Tipo di Documento",
+  "documentTypePlaceholder": "Seleziona il tipo di documento",
+  "document-number-label": "Numero Documento",
+  "documentNumberPlaceholder": "Numero del documento",
+  "cf-label": "Codice Fiscale",
+  "cfPlaceholder": "Codice Fiscale (16 caratteri)",
+  "cf-error": "Il Codice Fiscale deve avere 16 caratteri alfanumerici",
+  "portale-alloggi-fields": "Informazioni Aggiuntive Richieste",
+  "gender-label": "Sesso",
+  "genderPlaceholder": "Seleziona Sesso",
+  "gender-male": "Maschio",
+  "gender-female": "Femmina",
+  "nationality-label": "Nazionalità",
+  "nationalityPlaceholder": "Seleziona Nazionalità",
+  "emailPlaceholder": "Inserisci Indirizzo Email",
+  "email-error": "Formato email non valido",
+  "birth-municipality-label": "Comune di Nascita",
+  "birthMunicipalityPlaceholder": "Inserisci Comune di Nascita",
+  "birth-province-label": "Provincia di Nascita",
+  "birthProvincePlaceholder": "Seleziona Provincia di Nascita",
+  "birth-country-label": "Paese di Nascita",
+  "birthCountryPlaceholder": "Seleziona Paese di Nascita",
+  "citizenship-label": "Cittadinanza",
+  "citizenshipPlaceholder": "Seleziona Cittadinanza",
+  "document-issue-place-label": "Luogo di Emissione Documento",
+  "documentIssuePlacePlaceholder": "Inserisci Luogo di Emissione",
+  "document-issue-date-label": "Data di Emissione Documento",
+  "documentIssueDatePlaceholder": "Seleziona Data di Emissione",
+  "document-expiry-date-label": "Data di Scadenza Documento",
+  "documentExpiryDatePlaceholder": "Seleziona Data di Scadenza",
+  "issuing-authority-label": "Autorità Emittente",
+  "issuingAuthorityPlaceholder": "Inserisci Autorità Emittente",
+  "residence-municipality-label": "Comune di Residenza",
+  "residenceMunicipalityPlaceholder": "Inserisci Comune di Residenza",
+  "residence-province-label": "Provincia di Residenza",
+  "residenceProvincePlaceholder": "Seleziona Provincia di Residenza",
+  "residence-country-label": "Paese di Residenza",
+  "residenceCountryPlaceholder": "Seleziona Paese di Residenza",
+  "next": "Avanti",
+  "back": "Indietro",
+  "form-details": "Riepilogo",
+  "reservation-id-label": "ID Prenotazione",
+  "uploaded-images": "Immagini Caricate",
+  "front-image-label": "Immagine Fronte",
+  "back-image-label": "Immagine Retro",
+  "selfie-image-label": "Selfie",
+  "submit": "Invia",
+  "confirmation-sent-title": "Conferma Inviata",
+  "confirmation-sent-message": "La tua conferma è stata inviata. Riceverai un'email a breve.",
+  "ok": "OK",
+  "driver-license-label": "Patente di Guida",
+  "passport-label": "Passaporto",
+  "identity-document-upload-title": "Carica i documenti d'identità",
+  "front-side-label": "Immagine Fronte",
+  "back-side-label": "Back Side",
+  "selfie-with-document-label": "Selfie con documento",
+  "file-size-exceeds": "La grandezza del file supera i 5MB",
+  "only-images-allowed": "Solo immagini sono consentite",
+  "identity-card-label": "Carta d'identità",
+  "images-uploaded-success": "Immagini caricate con successo",
+  "select-structure-placeholder": "Seleziona struttura",
+  "images-uploaded-fail": "Upload fallito",
+  "hello-label": "Ciao",
+  "admin-panel-title": "Pannello Admin",
+  "loading-label": "Caricamento...",
+  "global-search-placeholder": "Ricerca Globale",
+  "reservation-number-header": "Numero Prenotazione",
+  "guest-name-header": "Nome Ospite",
+  "room-header": "Stanza",
+  "checkin-date-header": "Data Check-in",
+  "checkout-date-header": "Data Check-out",
+  "status-header": "Stato",
+  "no-data-found-message": "Nessun dato trovato.",
+  "Approved": "Approvato",
+  "Declined": "Rifiutato",
+  "Sent back to customer": "Rimandato al cliente",
+  "Pending": "In attesa",
+  "add-reservation-title": "Add a Reservation",
+  "reservation-number-label": "Numero Prenotazione (Da Booking or AirBnB)",
+  "reservation-number-placeholder": "Inserisci il codice prenotazione",
+  "reservation-number-required": "Codice prenotazione è obbligatorio.",
+  "start-date-label": "Data di inizio",
+  "start-date-placeholder": "Seleziona la data di inizio",
+  "start-date-required": "La data di inizio è obbligatoria.",
+  "end-date-label": "Data di fine",
+  "end-date-placeholder": "Selezione data di fine",
+  "end-date-required": "La data di fine è obbligatoria.",
+  "reference-name-label": "Nome referente",
+  "reference-name-placeholder": "Inserisci nome referente",
+  "reference-name-required": "Nome referente è obbligatorio.",
+  "email-label": "Email",
+  "email-placeholder": "Inserisci indirizzo email",
+  "email-required": "L'email è obbligatoria.",
+  "email-invalid": "Inserisci un indirizzo email valido.",
+  "telephone-label": "Telefono",
+  "telephone-placeholder": "Inserisci numero di telefono",
+  "telephone-invalid": "Inserisci un numero di telefono valido.",
+  "room-name-label": "Nome stanza",
+  "room-name-placeholder": "Seleziona una stanza",
+  "room-name-required": "Nome stanza è obbligatorio.",
+  "reservation-room-not-found": "La stanza selezionata non è stata trovata. Aggiorna l'elenco stanze e riprova.",
+  "reservation-structure-required": "Nessuna struttura selezionata. Seleziona una struttura prima di creare la prenotazione.",
+  "date-range-invalid": "La data di inizio non può essere successiva alla data di fine.",
+  "create-reservation-btn": "Crea prenotazione",
+  "create-room-btn": "Crea Stanza",
+  "room-id-header": "ID",
+  "room-name-header": "Nome",
+  "structure-header": "Struttura",
+  "capacity-header": "Capienza",
+  "actions-header": "Azioni",
+  "edit-btn": "Modifica",
+  "delete-btn": "Elimina",
+  "save-btn": "Salva",
+  "cancel-btn": "Annulla",
+  "add-room-title": "Aggiungi stanza",
+  "room-name-placeholder-insert": "Inserisci il nome della stanza",
+  "capacity-label": "Capacità",
+  "capacity-placeholder": "Inserisci la capienza",
+  "reservation-details-title": "Dettagli Prenotazione",
+  "id-reference-label": "ID Codice Riferimento",
+  "id-reference-placeholder": "Inserisci ID Codice Riferimento",
+  "room-label": "Stanza",
+  "room-placeholder": "Seleziona Stanza",
+  "end-date-error": "Data di fine deve essere successiva alla data di inizio.",
+  "guest-label": "Ospite",
+  "guest-placeholder": "Inserisci nome ospite",
+  "status-label": "Stato",
+  "status-placeholder": "Seleziona stato",
+  "status-approved": "Approvato",
+  "status-declined": "Rifiutato",
+  "status-sent-back-to-customer": "Re-inviato al cliente",
+  "status-pending": "In attesa",
+  "remove-btn": "Elimina",
+  "people-associated-title": "Persone associate a questa prenotazione",
+  "front-photo-header": "Foto fronte",
+  "back-photo-header": "Foto Retro",
+  "selfie-photo-header": "Selfie",
+  "name-header": "Nome",
+  "surname-header": "Cognome",
+  "birthday-header": "Data di nascita",
+  "street-header": "Indirizzo",
+  "city-header": "Città",
+  "province-header": "Provincia",
+  "cap-header": "CAP",
+  "telephone-header": "Telefono",
+  "document-number-header": "Numero di documento",
+  "cf-header": "CF",
+  "document-type-header": "Tipo di documento",
+  "missing-images-title": "Immagini mancanti",
+  "complete-title": "Completato",
+  "not-found-label": "Non trovato",
+  "zoomable-image-alt": "Zoom immagine",
+  "download-image-tooltip": "Download immagine",
+  "client-details-title": "Dettagli ospite",
+  "settings-title": "Impostazioni",
+  "select-language-label": "Lingua",
+  "select-language-placeholder": "Seleziona lingua",
+  "settings-saved-message": "Impostazioni salvate.",
+  "dashboard-label": "Dashboard",
+  "add-reservation-label": "Aggiungi Prenotazione",
+  "rooms-label": "Gestione Stanze",
+  "settings-label": "Impostazioni",
+  "user-info-label": "Info Utente",
+  "admin-info-title": "Informazioni utente",
+  "admin-info-username": "Username",
+  "admin-info-name": "Nome",
+  "admin-info-surname": "Cognome",
+  "admin-info-role": "Ruolo",
+  "admin-info-email": "Email",
+  "admin-info-telephone": "Telefono",
+  "admin-info-structures": "Strutture assegnate",
+  "admin-info-no-structures": "Nessuna struttura assegnata.",
+  "admin-info-error": "Impossibile caricare le informazioni utente.",
+  "change-password-label": "Cambia Password",
+  "change-password-title": "Cambia la tua password",
+  "change-password-current-label": "Password attuale",
+  "change-password-current-placeholder": "Inserisci la password attuale",
+  "change-password-new-label": "Nuova password",
+  "change-password-new-placeholder": "Inserisci la nuova password",
+  "change-password-confirm-label": "Conferma nuova password",
+  "change-password-confirm-placeholder": "Reinserisci la nuova password",
+  "change-password-submit": "Aggiorna password",
+  "change-password-current-required": "La password attuale è obbligatoria.",
+  "change-password-new-required": "La nuova password è obbligatoria.",
+  "change-password-confirm-required": "La conferma password è obbligatoria.",
+  "change-password-mismatch": "Nuova password e conferma non coincidono.",
+  "change-password-weak": "Usa almeno 8 caratteri con almeno una lettera e un numero.",
+  "change-password-success": "Password aggiornata con successo.",
+  "change-password-error": "Impossibile aggiornare la password. Riprova.",
+  "save-changes-btn": "Salva",
+  "email-configuration-title": "Configurazione Email",
+  "provider-preset-label": "Preimpostazione provider",
+  "provider-preset-placeholder": "Seleziona una preimpostazione per compilare automaticamente le impostazioni",
+  "provider-preset-help": "Scegli una preimpostazione per configurare automaticamente i provider email più comuni",
+  "provider-type-label": "Tipo di provider",
+  "provider-type-placeholder": "smtp, mailgun, sendgrid",
+  "smtp-server-label": "Server SMTP",
+  "smtp-server-placeholder": "smtp.gmail.com",
+  "port-label": "Porta",
+  "port-placeholder": "587",
+  "security-label": "Sicurezza",
+  "tls-label": "TLS",
+  "ssl-label": "SSL",
+  "username-email-label": "Nome utente / Email",
+  "username-email-placeholder": "tua-email@gmail.com",
+  "password-app-password-label": "Password / Password per le app",
+  "password-placeholder": "Inserisci la tua password o la password per le app",
+  "password-help": "Per Gmail, usa una password per le app invece della password normale. <a href='https://support.google.com/accounts/answer/185833' target='_blank' rel='noopener noreferrer' class='text-primary hover:underline'>Scopri come creare una password per le app</a>",
+  "sender-name-label": "Nome Mittente",
+  "sender-name-placeholder": "Nome della tua attività",
+  "sender-name-help": "Apparirà come \"Remote Check-in System ('Nome della tua attività')\"",
+  "sender-email-label": "Email Mittente",
+  "sender-email-placeholder": "mittente@tuodominio.com",
+  "provider-config-title": "Configurazione del provider (opzionale)",
+  "provider-config-help": "Impostazioni aggiuntive per provider email esterni come Mailgun o SendGrid",
+  "domain-label": "Dominio (Mailgun)",
+  "domain-placeholder": "mg.tuodominio.com",
+  "api-key-label": "Chiave API (Mailgun/SendGrid)",
+  "api-key-placeholder": "La tua chiave API",
+  "test-configuration-btn": "Verifica configurazione",
+  "save-configuration-btn": "Salva Configurazione",
+  "portale-alloggi-configuration-title": "Configurazione Portale Alloggi",
+  "portale-alloggi-username-label": "Nome utente",
+  "portale-alloggi-username-placeholder": "Inserisci il tuo nome utente Portale Alloggi",
+  "portale-alloggi-password-label": "Password",
+  "portale-alloggi-password-placeholder": "Inserisci la tua password Portale Alloggi",
+  "portale-alloggi-password-help": "Lascia vuoto per mantenere la password corrente o inserisci una nuova password per aggiornare. La password è nascosta per sicurezza.",
+  "portale-alloggi-password-configured-message": "La password è configurata ma nascosta per sicurezza. Lascia vuoto per mantenere la password corrente o inserisci una nuova password per aggiornare.",
+  "portale-alloggi-wskey-label": "Chiave Web Service (WsKey)",
+  "portale-alloggi-wskey-placeholder": "Inserisci la tua Chiave Web Service",
+  "portale-alloggi-help": "Configura le tue credenziali Portale Alloggi per abilitare l'invio automatico dei dati degli ospiti al registro degli alloggi italiano.",
+  "test-portale-connection-btn": "Verifica Connessione",
+  "save-portale-config-btn": "Salva Configurazione Portale Alloggi",
+  "portale-connection-success": "Connessione Portale Alloggi riuscita!",
+  "portale-connection-failed": "Connessione Portale Alloggi fallita. Controlla le tue credenziali.",
+  "portale-config-saved": "Configurazione Portale Alloggi salvata con successo!",
+  "language-settings-title": "Impostazioni lingua",
+  "number-of-people-label": "Numero di Persone",
+  "number-of-people-placeholder": "Inserisci numero di persone",
+  "number-of-people-required": "Il numero di persone è obbligatorio.",
+  "number-of-people-min": "Il numero di persone deve essere almeno 1.",
+  "number-of-people-invalid": "Inserisci un numero valido.",
+  "number-of-people-exceeds-capacity": "Il numero di persone non può superare la capienza della stanza",
+  "room-capacity-info": "Capienza stanza",
+  "registration-full": "Registrazione Completa",
+  "reservation-full-message": "Questa prenotazione è piena e non accetta più nuove registrazioni",
+  "reservation-capacity-status": "Questa prenotazione è piena ({{registered}}/{{max}} persone registrate)",
+  "registration-available": "Registrazione Disponibile",
+  "registration-unavailable": "Registrazione Non Disponibile",
+  "capacity-verification-failed": "Impossibile verificare la capienza della prenotazione. La registrazione è temporaneamente disabilitata.",
+  "capacity-status": "{{registered}}/{{max}} persone registrate",
+  "presetApplied": "Preimpostazione Applicata",
+  "presetInstructions": "Istruzioni: {{instructions}}",
+  "validation": "Validazione",
+  "fillRequiredFields": "Compila i campi obbligatori.",
+  "saved": "Salvato",
+  "emailConfigSaved": "Configurazione email salvata.",
+  "saveFailed": "Salvataggio fallito",
+  "testEmail": "Email di Test",
+  "setTestRecipientFirst": "Imposta prima un destinatario di test.",
+  "testEmailSentSuccessfully": "Email di test inviata con successo.",
+  "testEmailFailed": "Email di test fallita.",
+  "testFailed": "Test fallito",
+  "gender-header": "Sesso",
+  "nationality-header": "Nazionalità",
+  "email-header": "Email",
+  "birth-municipality-header": "Comune di Nascita",
+  "birth-province-header": "Provincia di Nascita",
+  "birth-country-header": "Stato di Nascita",
+  "citizenship-header": "Cittadinanza",
+  "document-issue-place-header": "Luogo di Emissione",
+  "document-issue-date-header": "Data di Emissione",
+  "document-expiry-date-header": "Data di Scadenza",
+  "issuing-authority-header": "Autorità Rilascio",
+  "residence-municipality-header": "Comune di Residenza",
+  "residence-province-header": "Provincia di Residenza",
+  "residence-country-header": "Stato di Residenza",
+  "male": "Maschio",
+  "female": "Femmina",
+  "document-expiry-date-error": "La data di scadenza del documento deve essere successiva alla data di emissione",
+  "send-to-portale-alloggi-btn": "Invia a Portale Alloggi",
+  "send-to-portale-alloggi-title": "Invia Dati Ospiti a Portale Alloggi",
+  "send-to-portale-alloggi-description": "Rivedi i dati degli ospiti prima di inviarli al registro degli alloggi italiano. Questa azione non può essere annullata.",
+  "send-to-portale-alloggi-test-btn": "Test portale alloggi (SOAP)",
+  "send-to-portale-alloggi-real-btn": "Invia dati a portale alloggi",
+  "data-sent-to-portale-alloggi": "Dati Inviati a Portale Alloggi",
+  "data-sent-success-test": "Dati inviati con successo a Portale Alloggi (MODALITÀ TEST)",
+  "data-sent-success-real": "Dati inviati con successo a Portale Alloggi (PRODUZIONE)",
+  "guest-data-review": "Rivedi Dati Ospiti",
+  "reservation-info": "Informazioni Prenotazione",
+  "guests-to-send": "Ospiti da Inviare",
+  "confirm-send-data": "Conferma Invio Dati",
+  "cancel-send": "Annulla",
+  "sending-data": "Invio dati a Portale Alloggi...",
+  "data-sent-success": "Dati ospiti inviati con successo a Portale Alloggi",
+  "data-send-failed": "Invio dati a Portale Alloggi fallito",
+  "no-guests-to-send": "Nessun ospite disponibile per l'invio",
+  "portale-alloggi-not-configured": "Portale Alloggi non è configurato. Configuralo prima nelle Impostazioni.",
+  "all-fields-required-error": "Tutti i campi e le immagini sono obbligatori",
+  "complete-all-fields-step1": "Completa tutti i campi obbligatori per continuare",
+  "upload-all-images-step2": "Carica tutte le immagini richieste per continuare",
+  "complete-all-data-step3": "Completa tutte le informazioni richieste per inviare",
+  "gender-not-specified": "Non specificato",
+  "upload-instructions": "Carica foto chiare del tuo documento d'identità e un selfie",
+  "front-image-description": "Carica il lato anteriore del tuo documento d'identità",
+  "back-image-description": "Carica il lato posteriore del tuo documento d'identità",
+  "selfie-description": "Scatta un selfie tenendo in mano il tuo documento d'identità",
+  "click-to-upload": "Clicca per caricare",
+  "uploaded": "Caricato",
+  "remove-image": "Rimuovi immagine",
+  "front-image-required": "L'immagine frontale è obbligatoria",
+  "back-image-required": "L'immagine posteriore è obbligatoria",
+  "selfie-required": "Il selfie è obbligatorio",
+  "upload-progress": "Progresso Caricamento",
+  "images-uploaded": "immagini caricate",
+  "review-summary-description": "Rivedi tutte le tue informazioni prima di inviare",
+  "personal-information": "Informazioni Personali",
+  "contact-information": "Informazioni di Contatto",
+  "contact-residence-information": "Informazioni di Contatto e Residenza",
+  "document-information": "Informazioni Documento",
+  "birth-information": "Informazioni di Nascita",
+  "residence-information": "Informazioni di Residenza",
+  "additional-information": "Informazioni Aggiuntive",
+  "search-document-types": "Cerca tipi di documento...",
+  "search-municipalities": "Cerca comuni...",
+  "search-provinces": "Cerca province...",
+  "search-countries": "Cerca paesi...",
+  "updated": "Aggiornato",
+  "reservation-updated-success": "La prenotazione è stata aggiornata con successo.",
+  "luogo-di-rilascio-documento": "Luogo di rilascio documento",
+  "comune-di-residenza": "Comune di residenza",
+  "tipo-ospite": "Tipo ospite",
+  "numero-ospiti": "Numero ospiti",
+  "data-inizio-prenotazione": "Data inizio prenotazione",
+  "ospite-singolo": "Ospite Singolo",
+  "capo-famiglia": "Capo Famiglia",
+  "capo-gruppo": "Capo Gruppo",
+  "familiare": "Familiare",
+  "membro-gruppo": "Membro Gruppo",
+  "front-header": "Immagine Fronte",
+  "back-header": "Immagine Retro",
+  "selfie-header": "Selfie",
+  "landing": {
+    "brand": {
+      "title": "Check-in Remoto",
+      "tagline": "Percorsi ospiti senza incertezze"
     },
-    "remote-checkin-title": "Check-in Remoto",
-    "reservation-check-description": "Per continuare, inserisci il tuo codice prenotazione",
-    "reservation-code-label": "Codice Prenotazione",
-    "reservation-code-placeholder": "Inserisci il tuo codice prenotazione",
-    "go-to-checkin": "VAI AL CHECK-IN",
-    "reservation-code-info": "Il codice della prenotazione è stato inviato alla tua email. Se non lo trovi, verifica nella cartella Spam.",
-    "need-help-contact-us": "Hai bisogno di aiuto? Contattaci.",
-    "checkinComplete": {
-        "title": "Check-in completato",
-        "subtitle": "Grazie per aver inviato i tuoi dati. Sei pronto per l'arrivo.",
-        "reservationLabel": "Prenotazione",
-        "nextTitle": "Cosa succede ora",
-        "nextEmail": "Riceverai presto un'email di conferma.",
-        "nextCompliance": "I tuoi dati sono archiviati in sicurezza per la compliance.",
-        "nextArrival": "Presentati all'orario previsto e goditi il soggiorno.",
-        "primaryAction": "Torna alla home",
-        "secondaryAction": "Contatta supporto"
+    "nav": {
+      "howItWorks": "Come funziona",
+      "advantages": "Vantaggi",
+      "features": "Caratteristiche",
+      "pricing": "Prezzi",
+      "selfHost": "Self-hosting",
+      "faq": "FAQ"
     },
-    "success": "Completato",
-    "error": "Errore",
-    "reservation-success": "Prenotazione validata correttamente.",
-    "reservation-error": "ID prenotazione non valido. Controlla e riprova.",
-    "reservation-check-fail": "Impossibile convalidare la prenotazione. Riprova o contatta l'amministratore.",
-    "upload-images-step": "Carica Immagini",
-    "confirm-data-step": "Conferma Dati",
-    "client-information": "Informazioni Cliente",
-    "name-label": "Nome",
-    "namePlaceholder": "Inserisci il nome",
-    "surname-label": "Cognome",
-    "surnamePlaceholder": "Inserisci il cognome",
-    "birthday-label": "Data di nascita",
-    "birthdayPlaceholder": "Seleziona la data di nascita",
-    "street-label": "Via",
-    "streetPlaceholder": "Indirizzo",
-    "city-label": "Città",
-    "cityPlaceholder": "Città",
-    "cap-label": "CAP",
-    "capPlaceholder": "CAP a 5 cifre",
-    "cap-error": "Il CAP deve essere di 5 cifre",
-    "province-label": "Provincia",
-    "provincePlaceholder": "Provincia",
-    "number-city-label": "Numero Civico",
-    "numberCityPlaceholder": "Inserisci numero civico",
-    "telephonePlaceholder": "Numero di telefono",
-    "document-type-label": "Tipo di Documento",
-    "documentTypePlaceholder": "Seleziona il tipo di documento",
-    "document-number-label": "Numero Documento",
-    "documentNumberPlaceholder": "Numero del documento",
-    "cf-label": "Codice Fiscale",
-    "cfPlaceholder": "Codice Fiscale (16 caratteri)",
-    "cf-error": "Il Codice Fiscale deve avere 16 caratteri alfanumerici",
-    "portale-alloggi-fields": "Informazioni Aggiuntive Richieste",
-    "gender-label": "Sesso",
-    "genderPlaceholder": "Seleziona Sesso",
-    "gender-male": "Maschio",
-    "gender-female": "Femmina",
-    "nationality-label": "Nazionalità",
-    "nationalityPlaceholder": "Seleziona Nazionalità",
-    "emailPlaceholder": "Inserisci Indirizzo Email",
-    "email-error": "Formato email non valido",
-    "birth-municipality-label": "Comune di Nascita",
-    "birthMunicipalityPlaceholder": "Inserisci Comune di Nascita",
-    "birth-province-label": "Provincia di Nascita",
-    "birthProvincePlaceholder": "Seleziona Provincia di Nascita",
-    "birth-country-label": "Paese di Nascita",
-    "birthCountryPlaceholder": "Seleziona Paese di Nascita",
-    "citizenship-label": "Cittadinanza",
-    "citizenshipPlaceholder": "Seleziona Cittadinanza",
-    "document-issue-place-label": "Luogo di Emissione Documento",
-    "documentIssuePlacePlaceholder": "Inserisci Luogo di Emissione",
-    "document-issue-date-label": "Data di Emissione Documento",
-    "documentIssueDatePlaceholder": "Seleziona Data di Emissione",
-    "document-expiry-date-label": "Data di Scadenza Documento",
-    "documentExpiryDatePlaceholder": "Seleziona Data di Scadenza",
-    "issuing-authority-label": "Autorità Emittente",
-    "issuingAuthorityPlaceholder": "Inserisci Autorità Emittente",
-    "residence-municipality-label": "Comune di Residenza",
-    "residenceMunicipalityPlaceholder": "Inserisci Comune di Residenza",
-    "residence-province-label": "Provincia di Residenza",
-    "residenceProvincePlaceholder": "Seleziona Provincia di Residenza",
-    "residence-country-label": "Paese di Residenza",
-    "residenceCountryPlaceholder": "Seleziona Paese di Residenza",
-    "next": "Avanti",
-    "back": "Indietro",
-    "form-details": "Riepilogo",
-    "reservation-id-label": "ID Prenotazione",
-    "uploaded-images": "Immagini Caricate",
-    "front-image-label": "Immagine Fronte",
-    "back-image-label": "Immagine Retro",
-    "selfie-image-label": "Selfie",
-    "submit": "Invia",
-    "confirmation-sent-title": "Conferma Inviata",
-    "confirmation-sent-message": "La tua conferma è stata inviata. Riceverai un'email a breve.",
-    "ok": "OK",
-    "driver-license-label": "Patente di Guida",
-    "passport-label": "Passaporto",
-    "identity-document-upload-title": "Carica i documenti d'identità",
-    "front-side-label": "Immagine Fronte",
-    "back-side-label": "Back Side",
-    "selfie-with-document-label": "Selfie con documento",
-    "file-size-exceeds": "La grandezza del file supera i 5MB",
-    "only-images-allowed": "Solo immagini sono consentite",
-    "identity-card-label": "Carta d'identità",
-    "images-uploaded-success": "Immagini caricate con successo",
-    "select-structure-placeholder": "Seleziona struttura",
-    "images-uploaded-fail": "Upload fallito",
-    "hello-label": "Ciao",
-    "admin-panel-title": "Pannello Admin",
-    "loading-label": "Caricamento...",
-    "global-search-placeholder": "Ricerca Globale",
-    "reservation-number-header": "Numero Prenotazione",
-    "guest-name-header": "Nome Ospite",
-    "room-header": "Stanza",
-    "checkin-date-header": "Data Check-in",
-    "checkout-date-header": "Data Check-out",
-    "status-header": "Stato",
-    "no-data-found-message": "Nessun dato trovato.",
-    "Approved": "Approvato",
-    "Declined": "Rifiutato",
-    "Sent back to customer": "Rimandato al cliente",
-    "Pending": "In attesa",
-    "add-reservation-title": "Add a Reservation",
-    "reservation-number-label": "Numero Prenotazione (Da Booking or AirBnB)",
-    "reservation-number-placeholder": "Inserisci il codice prenotazione",
-    "reservation-number-required": "Codice prenotazione è obbligatorio.",
-    "start-date-label": "Data di inizio",
-    "start-date-placeholder": "Seleziona la data di inizio",
-    "start-date-required": "La data di inizio è obbligatoria.",
-    "end-date-label": "Data di fine",
-    "end-date-placeholder": "Selezione data di fine",
-    "end-date-required": "La data di fine è obbligatoria.",
-    "reference-name-label": "Nome referente",
-    "reference-name-placeholder": "Inserisci nome referente",
-    "reference-name-required": "Nome referente è obbligatorio.",
-    "email-label": "Email",
-    "email-placeholder": "Inserisci indirizzo email",
-    "email-required": "L'email è obbligatoria.",
-    "email-invalid": "Inserisci un indirizzo email valido.",
-    "telephone-label": "Telefono",
-    "telephone-placeholder": "Inserisci numero di telefono",
-    "telephone-invalid": "Inserisci un numero di telefono valido.",
-    "room-name-label": "Nome stanza",
-    "room-name-placeholder": "Seleziona una stanza",
-    "room-name-required": "Nome stanza è obbligatorio.",
-    "reservation-room-not-found": "La stanza selezionata non è stata trovata. Aggiorna l'elenco stanze e riprova.",
-    "reservation-structure-required": "Nessuna struttura selezionata. Seleziona una struttura prima di creare la prenotazione.",
-    "date-range-invalid": "La data di inizio non può essere successiva alla data di fine.",
-    "create-reservation-btn": "Crea prenotazione",
-    "create-room-btn": "Crea Stanza",
-    "room-id-header": "ID",
-    "room-name-header": "Nome",
-    "structure-header": "Struttura",
-    "capacity-header": "Capienza",
-    "actions-header": "Azioni",
-    "edit-btn": "Modifica",
-    "delete-btn": "Elimina",
-    "save-btn": "Salva",
-    "cancel-btn": "Annulla",
-    "add-room-title": "Aggiungi stanza",
-    "room-name-placeholder-insert": "Inserisci il nome della stanza",
-    "capacity-label": "Capacità",
-    "capacity-placeholder": "Inserisci la capienza",
-    "reservation-details-title": "Dettagli Prenotazione",
-    "id-reference-label": "ID Codice Riferimento",
-    "id-reference-placeholder": "Inserisci ID Codice Riferimento",
-    "room-label": "Stanza",
-    "room-placeholder": "Seleziona Stanza",
-    "end-date-error": "Data di fine deve essere successiva alla data di inizio.",
-    "guest-label": "Ospite",
-    "guest-placeholder": "Inserisci nome ospite",
-    "status-label": "Stato",
-    "status-placeholder": "Seleziona stato",
-    "status-approved": "Approvato",
-    "status-declined": "Rifiutato",
-    "status-sent-back-to-customer": "Re-inviato al cliente",
-    "status-pending": "In attesa",
-    "remove-btn": "Elimina",
-    "people-associated-title": "Persone associate a questa prenotazione",
-    "front-photo-header": "Foto fronte",
-    "back-photo-header": "Foto Retro",
-    "selfie-photo-header": "Selfie",
-    "name-header": "Nome",
-    "surname-header": "Cognome",
-    "birthday-header": "Data di nascita",
-    "street-header": "Indirizzo",
-    "city-header": "Città",
-    "province-header": "Provincia",
-    "cap-header": "CAP",
-    "telephone-header": "Telefono",
-    "document-number-header": "Numero di documento",
-    "cf-header": "CF",
-    "document-type-header": "Tipo di documento",
-    "missing-images-title": "Immagini mancanti",
-    "complete-title": "Completato",
-    "not-found-label": "Non trovato",
-    "zoomable-image-alt": "Zoom immagine",
-    "download-image-tooltip": "Download immagine",
-    "client-details-title": "Dettagli ospite",
-    "settings-title": "Impostazioni",
-    "select-language-label": "Lingua",
-    "select-language-placeholder": "Seleziona lingua",
-    "settings-saved-message": "Impostazioni salvate.",
-    "dashboard-label": "Dashboard",
-    "add-reservation-label": "Aggiungi Prenotazione",
-    "rooms-label": "Gestione Stanze",
-    "settings-label": "Impostazioni",
-    "user-info-label": "Info Utente",
-    "admin-info-title": "Informazioni utente",
-    "admin-info-username": "Username",
-    "admin-info-name": "Nome",
-    "admin-info-surname": "Cognome",
-    "admin-info-role": "Ruolo",
-    "admin-info-email": "Email",
-    "admin-info-telephone": "Telefono",
-    "admin-info-structures": "Strutture assegnate",
-    "admin-info-no-structures": "Nessuna struttura assegnata.",
-    "admin-info-error": "Impossibile caricare le informazioni utente.",
-    "change-password-label": "Cambia Password",
-    "change-password-title": "Cambia la tua password",
-    "change-password-current-label": "Password attuale",
-    "change-password-current-placeholder": "Inserisci la password attuale",
-    "change-password-new-label": "Nuova password",
-    "change-password-new-placeholder": "Inserisci la nuova password",
-    "change-password-confirm-label": "Conferma nuova password",
-    "change-password-confirm-placeholder": "Reinserisci la nuova password",
-    "change-password-submit": "Aggiorna password",
-    "change-password-current-required": "La password attuale è obbligatoria.",
-    "change-password-new-required": "La nuova password è obbligatoria.",
-    "change-password-confirm-required": "La conferma password è obbligatoria.",
-    "change-password-mismatch": "Nuova password e conferma non coincidono.",
-    "change-password-weak": "Usa almeno 8 caratteri con almeno una lettera e un numero.",
-    "change-password-success": "Password aggiornata con successo.",
-    "change-password-error": "Impossibile aggiornare la password. Riprova.",
-    "save-changes-btn": "Salva",
-    "email-configuration-title": "Configurazione Email",
-    "provider-preset-label": "Preimpostazione provider",
-    "provider-preset-placeholder": "Seleziona una preimpostazione per compilare automaticamente le impostazioni",
-    "provider-preset-help": "Scegli una preimpostazione per configurare automaticamente i provider email più comuni",
-    "provider-type-label": "Tipo di provider",
-    "provider-type-placeholder": "smtp, mailgun, sendgrid",
-    "smtp-server-label": "Server SMTP",
-    "smtp-server-placeholder": "smtp.gmail.com",
-    "port-label": "Porta",
-    "port-placeholder": "587",
-    "security-label": "Sicurezza",
-    "tls-label": "TLS",
-    "ssl-label": "SSL",
-    "username-email-label": "Nome utente / Email",
-    "username-email-placeholder": "tua-email@gmail.com",
-    "password-app-password-label": "Password / Password per le app",
-    "password-placeholder": "Inserisci la tua password o la password per le app",
-    "password-help": "Per Gmail, usa una password per le app invece della password normale. <a href='https://support.google.com/accounts/answer/185833' target='_blank' rel='noopener noreferrer' class='text-primary hover:underline'>Scopri come creare una password per le app</a>",
-    "sender-name-label": "Nome Mittente",
-    "sender-name-placeholder": "Nome della tua attività",
-    "sender-name-help": "Apparirà come \"Remote Check-in System ('Nome della tua attività')\"",
-    "sender-email-label": "Email Mittente",
-    "sender-email-placeholder": "mittente@tuodominio.com",
-    "provider-config-title": "Configurazione del provider (opzionale)",
-    "provider-config-help": "Impostazioni aggiuntive per provider email esterni come Mailgun o SendGrid",
-    "domain-label": "Dominio (Mailgun)",
-    "domain-placeholder": "mg.tuodominio.com",
-    "api-key-label": "Chiave API (Mailgun/SendGrid)",
-    "api-key-placeholder": "La tua chiave API",
-    "test-configuration-btn": "Verifica configurazione",
-    "save-configuration-btn": "Salva Configurazione",
-    "portale-alloggi-configuration-title": "Configurazione Portale Alloggi",
-    "portale-alloggi-username-label": "Nome utente",
-    "portale-alloggi-username-placeholder": "Inserisci il tuo nome utente Portale Alloggi",
-    "portale-alloggi-password-label": "Password",
-    "portale-alloggi-password-placeholder": "Inserisci la tua password Portale Alloggi",
-    "portale-alloggi-password-help": "Lascia vuoto per mantenere la password corrente o inserisci una nuova password per aggiornare. La password è nascosta per sicurezza.",
-    "portale-alloggi-password-configured-message": "La password è configurata ma nascosta per sicurezza. Lascia vuoto per mantenere la password corrente o inserisci una nuova password per aggiornare.",
-    "portale-alloggi-wskey-label": "Chiave Web Service (WsKey)",
-    "portale-alloggi-wskey-placeholder": "Inserisci la tua Chiave Web Service",
-    "portale-alloggi-help": "Configura le tue credenziali Portale Alloggi per abilitare l'invio automatico dei dati degli ospiti al registro degli alloggi italiano.",
-    "test-portale-connection-btn": "Verifica Connessione",
-    "save-portale-config-btn": "Salva Configurazione Portale Alloggi",
-    "portale-connection-success": "Connessione Portale Alloggi riuscita!",
-    "portale-connection-failed": "Connessione Portale Alloggi fallita. Controlla le tue credenziali.",
-    "portale-config-saved": "Configurazione Portale Alloggi salvata con successo!",
-    "language-settings-title": "Impostazioni lingua",
-    "number-of-people-label": "Numero di Persone",
-    "number-of-people-placeholder": "Inserisci numero di persone",
-    "number-of-people-required": "Il numero di persone è obbligatorio.",
-    "number-of-people-min": "Il numero di persone deve essere almeno 1.",
-    "number-of-people-invalid": "Inserisci un numero valido.",
-    "number-of-people-exceeds-capacity": "Il numero di persone non può superare la capienza della stanza",
-    "room-capacity-info": "Capienza stanza",
-    "registration-full": "Registrazione Completa",
-    "reservation-full-message": "Questa prenotazione è piena e non accetta più nuove registrazioni",
-    "reservation-capacity-status": "Questa prenotazione è piena ({{registered}}/{{max}} persone registrate)",
-    "registration-available": "Registrazione Disponibile",
-    "registration-unavailable": "Registrazione Non Disponibile",
-    "capacity-verification-failed": "Impossibile verificare la capienza della prenotazione. La registrazione è temporaneamente disabilitata.",
-    "capacity-status": "{{registered}}/{{max}} persone registrate",
-    "presetApplied": "Preimpostazione Applicata",
-    "presetInstructions": "Istruzioni: {{instructions}}",
-    "validation": "Validazione",
-    "fillRequiredFields": "Compila i campi obbligatori.",
-    "saved": "Salvato",
-    "emailConfigSaved": "Configurazione email salvata.",
-    "saveFailed": "Salvataggio fallito",
-    "testEmail": "Email di Test",
-    "setTestRecipientFirst": "Imposta prima un destinatario di test.",
-    "testEmailSentSuccessfully": "Email di test inviata con successo.",
-    "testEmailFailed": "Email di test fallita.",
-    "testFailed": "Test fallito",
-    "gender-header": "Sesso",
-    "nationality-header": "Nazionalità",
-    "email-header": "Email",
-    "birth-municipality-header": "Comune di Nascita",
-    "birth-province-header": "Provincia di Nascita",
-    "birth-country-header": "Stato di Nascita",
-    "citizenship-header": "Cittadinanza",
-    "document-issue-place-header": "Luogo di Emissione",
-    "document-issue-date-header": "Data di Emissione",
-    "document-expiry-date-header": "Data di Scadenza",
-    "issuing-authority-header": "Autorità Rilascio",
-    "residence-municipality-header": "Comune di Residenza",
-    "residence-province-header": "Provincia di Residenza",
-    "residence-country-header": "Stato di Residenza",
-    "male": "Maschio",
-    "female": "Femmina",
-    "document-expiry-date-error": "La data di scadenza del documento deve essere successiva alla data di emissione",
-    "send-to-portale-alloggi-btn": "Invia a Portale Alloggi",
-    "send-to-portale-alloggi-title": "Invia Dati Ospiti a Portale Alloggi",
-    "send-to-portale-alloggi-description": "Rivedi i dati degli ospiti prima di inviarli al registro degli alloggi italiano. Questa azione non può essere annullata.",
-    "send-to-portale-alloggi-test-btn": "Test portale alloggi (SOAP)",
-    "send-to-portale-alloggi-real-btn": "Invia dati a portale alloggi",
-    "data-sent-to-portale-alloggi": "Dati Inviati a Portale Alloggi",
-    "data-sent-success-test": "Dati inviati con successo a Portale Alloggi (MODALITÀ TEST)",
-    "data-sent-success-real": "Dati inviati con successo a Portale Alloggi (PRODUZIONE)",
-    "guest-data-review": "Rivedi Dati Ospiti",
-    "reservation-info": "Informazioni Prenotazione",
-    "guests-to-send": "Ospiti da Inviare",
-    "confirm-send-data": "Conferma Invio Dati",
-    "cancel-send": "Annulla",
-    "sending-data": "Invio dati a Portale Alloggi...",
-    "data-sent-success": "Dati ospiti inviati con successo a Portale Alloggi",
-    "data-send-failed": "Invio dati a Portale Alloggi fallito",
-    "no-guests-to-send": "Nessun ospite disponibile per l'invio",
-    "portale-alloggi-not-configured": "Portale Alloggi non è configurato. Configuralo prima nelle Impostazioni.",
-    "all-fields-required-error": "Tutti i campi e le immagini sono obbligatori",
-    "complete-all-fields-step1": "Completa tutti i campi obbligatori per continuare",
-    "upload-all-images-step2": "Carica tutte le immagini richieste per continuare",
-    "complete-all-data-step3": "Completa tutte le informazioni richieste per inviare",
-    "gender-not-specified": "Non specificato",
-    "upload-instructions": "Carica foto chiare del tuo documento d'identità e un selfie",
-    "front-image-description": "Carica il lato anteriore del tuo documento d'identità",
-    "back-image-description": "Carica il lato posteriore del tuo documento d'identità",
-    "selfie-description": "Scatta un selfie tenendo in mano il tuo documento d'identità",
-    "click-to-upload": "Clicca per caricare",
-    "uploaded": "Caricato",
-    "remove-image": "Rimuovi immagine",
-    "front-image-required": "L'immagine frontale è obbligatoria",
-    "back-image-required": "L'immagine posteriore è obbligatoria",
-    "selfie-required": "Il selfie è obbligatorio",
-    "upload-progress": "Progresso Caricamento",
-    "images-uploaded": "immagini caricate",
-    "review-summary-description": "Rivedi tutte le tue informazioni prima di inviare",
-    "personal-information": "Informazioni Personali",
-    "contact-information": "Informazioni di Contatto",
-    "contact-residence-information": "Informazioni di Contatto e Residenza",
-    "document-information": "Informazioni Documento",
-    "birth-information": "Informazioni di Nascita",
-    "residence-information": "Informazioni di Residenza",
-    "additional-information": "Informazioni Aggiuntive",
-    "search-document-types": "Cerca tipi di documento...",
-    "search-municipalities": "Cerca comuni...",
-    "search-provinces": "Cerca province...",
-    "search-countries": "Cerca paesi...",
-    "updated": "Aggiornato",
-    "reservation-updated-success": "La prenotazione è stata aggiornata con successo.",
-    "luogo-di-rilascio-documento": "Luogo di rilascio documento",
-    "comune-di-residenza": "Comune di residenza",
-    "tipo-ospite": "Tipo ospite",
-    "numero-ospiti": "Numero ospiti",
-    "data-inizio-prenotazione": "Data inizio prenotazione",
-    "ospite-singolo": "Ospite Singolo",
-    "capo-famiglia": "Capo Famiglia",
-    "capo-gruppo": "Capo Gruppo",
-    "familiare": "Familiare",
-    "membro-gruppo": "Membro Gruppo",
-    "front-header": "Immagine Fronte",
-    "back-header": "Immagine Retro",
-    "selfie-header": "Selfie",
-    "landing": {
-        "brand": {
-            "title": "Check-in Remoto",
-            "tagline": "Percorsi ospiti senza incertezze"
+    "actions": {
+      "signIn": "Accedi",
+      "claimSpot": "Rivendica il tuo posto",
+      "previewJourney": "Anteprima percorso ospite",
+      "getStarted": "Inizia",
+      "contactSales": "Parla con le vendite",
+      "requestGuide": "Richiedi guida deployment",
+      "scheduleWalkthrough": "Pianifica una demo"
+    },
+    "hero": {
+      "eyebrow": "Ospitalità remota, fiducia reale",
+      "title": "Offri un'esperienza di check-in remoto senza attriti per ogni ospite.",
+      "description": "Remote Check-in è una piattaforma SaaS di livello hospitality che cattura documenti, sincronizza con il tuo PMS e mantiene ogni arrivo conforme e in linea con il brand—senza chioschi, senza carta, solo ospiti soddisfatti.",
+      "highlights": {
+        "identity": "Verifica identità sicura",
+        "compliance": "Dichiarazioni legali automatizzate",
+        "analytics": "Analitiche multi-struttura"
+      },
+      "stats": {
+        "header": "Strutture attive",
+        "properties": "Strutture attive",
+        "propertiesValue": "48",
+        "completion": "Check-in automatici completati",
+        "completionValue": "92%",
+        "timeSaved": "Tempo medio risparmiato per ospite",
+        "timeSavedSuffix": "ore",
+        "timeSavedValue": "1,8 ore",
+        "upsell": "Aumento conversioni upsell",
+        "upsellValue": "+36%"
+      }
+    },
+    "persona": {
+      "eyebrow": "Pensato per team e ospiti",
+      "title": "Due esperienze, un solo percorso fluido.",
+      "description": "Cambia prospettiva e scopri come Remote Check-in supporta operatori e ospiti.",
+      "operators": {
+        "label": "Per operatori",
+        "title": "Gestisci gli arrivi con sicurezza.",
+        "description": "Mantieni ogni prenotazione in movimento restando conforme e coerente con il brand.",
+        "bullets": {
+          "ops": "Dashboard centrale per camere, prenotazioni e ospiti.",
+          "compliance": "Report automatici alle autorita con log pronti per audit.",
+          "brand": "Flussi ospite e comunicazioni personalizzabili."
+        }
+      },
+      "guests": {
+        "label": "Per ospiti",
+        "title": "Un arrivo piu veloce, da qualsiasi dispositivo.",
+        "description": "Gli ospiti verificano identita, inviano documenti e completano il check-in in pochi minuti.",
+        "bullets": {
+          "mobile": "Moduli mobile-first su qualsiasi telefono.",
+          "speed": "Salta la fila alla reception con la verifica pre-arrivo.",
+          "control": "Rivedi e conferma i dettagli prima dell'arrivo."
+        }
+      }
+    },
+    "journey": {
+      "eyebrow": "Snapshot del percorso ospite",
+      "title": "Dall'invito alla conferma in tre passaggi.",
+      "description": "Mostra agli ospiti cosa aspettarsi con un flusso semplice e guidato.",
+      "steps": {
+        "invite": {
+          "title": "Invita",
+          "description": "Invia inviti brandizzati con i dettagli della prenotazione."
         },
-        "nav": {
-            "howItWorks": "Come funziona",
-            "advantages": "Vantaggi",
-            "features": "Caratteristiche",
-            "pricing": "Prezzi",
-            "selfHost": "Self-hosting",
-            "faq": "FAQ"
+        "verify": {
+          "title": "Verifica",
+          "description": "Raccogli documenti ID e valida in un unico flusso."
         },
-        "actions": {
-            "signIn": "Accedi",
-            "claimSpot": "Rivendica il tuo posto",
-            "previewJourney": "Anteprima percorso ospite",
-            "getStarted": "Inizia",
-            "contactSales": "Parla con le vendite",
-            "requestGuide": "Richiedi guida deployment",
-            "scheduleWalkthrough": "Pianifica una demo"
+        "confirm": {
+          "title": "Conferma",
+          "description": "Approva il check-in e avvisa subito l'ospite."
+        }
+      }
+    },
+    "compliance": {
+      "eyebrow": "Compliance e dati",
+      "title": "Sicurezza e compliance integrate.",
+      "description": "Gestisci dati sensibili con policy chiare e workflow sicuri.",
+      "items": {
+        "gdpr": {
+          "title": "Workflow pronti per GDPR",
+          "description": "Supporto a consenso, conservazione e requisiti di audit."
         },
-        "hero": {
-            "eyebrow": "Ospitalità remota, fiducia reale",
-            "title": "Offri un'esperienza di check-in remoto senza attriti per ogni ospite.",
-            "description": "Remote Check-in è una piattaforma SaaS di livello hospitality che cattura documenti, sincronizza con il tuo PMS e mantiene ogni arrivo conforme e in linea con il brand—senza chioschi, senza carta, solo ospiti soddisfatti.",
-            "highlights": {
-                "identity": "Verifica identità sicura",
-                "compliance": "Dichiarazioni legali automatizzate",
-                "analytics": "Analitiche multi-struttura"
-            },
-            "stats": {
-                "header": "Strutture attive",
-                "properties": "Strutture attive",
-                "propertiesValue": "48",
-                "completion": "Check-in automatici completati",
-                "completionValue": "92%",
-                "timeSaved": "Tempo medio risparmiato per ospite",
-                "timeSavedSuffix": "ore",
-                "timeSavedValue": "1,8 ore",
-                "upsell": "Aumento conversioni upsell",
-                "upsellValue": "+36%"
-            }
+        "encryption": {
+          "title": "Credenziali cifrate",
+          "description": "Protegge SMTP e dati identita con crittografia."
         },
-        "persona": {
-            "eyebrow": "Pensato per team e ospiti",
-            "title": "Due esperienze, un solo percorso fluido.",
-            "description": "Cambia prospettiva e scopri come Remote Check-in supporta operatori e ospiti.",
-            "operators": {
-                "label": "Per operatori",
-                "title": "Gestisci gli arrivi con sicurezza.",
-                "description": "Mantieni ogni prenotazione in movimento restando conforme e coerente con il brand.",
-                "bullets": {
-                    "ops": "Dashboard centrale per camere, prenotazioni e ospiti.",
-                    "compliance": "Report automatici alle autorita con log pronti per audit.",
-                    "brand": "Flussi ospite e comunicazioni personalizzabili."
-                }
-            },
-            "guests": {
-                "label": "Per ospiti",
-                "title": "Un arrivo piu veloce, da qualsiasi dispositivo.",
-                "description": "Gli ospiti verificano identita, inviano documenti e completano il check-in in pochi minuti.",
-                "bullets": {
-                    "mobile": "Moduli mobile-first su qualsiasi telefono.",
-                    "speed": "Salta la fila alla reception con la verifica pre-arrivo.",
-                    "control": "Rivedi e conferma i dettagli prima dell'arrivo."
-                }
-            }
+        "portale": {
+          "title": "Integrazione Portale Alloggi",
+          "description": "Invia i dati richiesti alle autorita in pochi minuti."
+        }
+      }
+    },
+    "howItWorks": {
+      "eyebrow": "Come funziona",
+      "title": "Lancia percorsi ospiti remoti in tre semplici passaggi.",
+      "description": "Orchestra gli arrivi in modo fluido collegando il tuo PMS, guidando ogni ospite attraverso la verifica e mantenendo team e autorità aggiornati.",
+      "steps": {
+        "invite": {
+          "stage": "Passaggio 1",
+          "title": "Invita e prepara",
+          "description": "Sincronizza le prenotazioni dal tuo PMS o carica liste ospiti in blocco. Attiva inviti brandizzati via email o SMS con un clic."
         },
-        "journey": {
-            "eyebrow": "Snapshot del percorso ospite",
-            "title": "Dall'invito alla conferma in tre passaggi.",
-            "description": "Mostra agli ospiti cosa aspettarsi con un flusso semplice e guidato.",
-            "steps": {
-                "invite": {
-                    "title": "Invita",
-                    "description": "Invia inviti brandizzati con i dettagli della prenotazione."
-                },
-                "verify": {
-                    "title": "Verifica",
-                    "description": "Raccogli documenti ID e valida in un unico flusso."
-                },
-                "confirm": {
-                    "title": "Conferma",
-                    "description": "Approva il check-in e avvisa subito l'ospite."
-                }
-            }
+        "capture": {
+          "stage": "Passaggio 2",
+          "title": "Cattura e verifica",
+          "description": "Gli ospiti caricano documenti, selfie e firme da qualsiasi dispositivo. Controlli automatici confermano identità e completezza istantaneamente."
+        },
+        "sync": {
+          "stage": "Passaggio 3",
+          "title": "Sincronizza e conforma",
+          "description": "I profili approvati fluiscono nel tuo PMS e nei report delle autorità. I team ricevono avvisi, mentre le analitiche monitorano lo stato su tutte le strutture."
+        },
+        "payment": {
+          "stage": "Passaggio 4",
+          "title": "Pagamento e conferma",
+          "description": "Processa pagamenti sicuri, invia conferme e aggiorna lo stato delle prenotazioni automaticamente."
+        }
+      }
+    },
+    "advantages": {
+      "eyebrow": "Perché Remote Check-in",
+      "title": "Trasforma le tue operazioni hospitality con risultati misurabili.",
+      "description": "La nostra soluzione di check-in remoto fornisce vantaggi tangibili che impattano il tuo bilancio e la soddisfazione degli ospiti.",
+      "cards": {
+        "timeSavings": {
+          "title": "Risparmio di Tempo Drastico",
+          "description": "Riduci il carico di lavoro della reception automatizzando gli arrivi e l'elaborazione della carta.",
+          "benefits": {
+            "checkin": "Processamento check-in automatizzato",
+            "paperwork": "Gestione documenti digitale",
+            "staff": "Libera il personale per l'esperienza ospite"
+          }
+        },
+        "costReduction": {
+          "title": "Riduzione Costi Significativa",
+          "description": "Abbassa i costi operativi migliorando la qualità del servizio attraverso l'automazione.",
+          "benefits": {
+            "staffing": "Riduci le esigenze di personale reception",
+            "printing": "Elimina costi di carta e stampa",
+            "errors": "Minimizza errori di inserimento dati"
+          }
+        },
+        "guestExperience": {
+          "title": "Esperienza Ospite Migliorata",
+          "description": "Delizia gli ospiti con arrivi senza contatto e servizio personalizzato.",
+          "benefits": {
+            "speed": "Esperienza di arrivo senza-coda",
+            "convenience": "Processo check-in mobile-first",
+            "satisfaction": "Punteggi di soddisfazione ospite più alti"
+          }
         },
         "compliance": {
-            "eyebrow": "Compliance e dati",
-            "title": "Sicurezza e compliance integrate.",
-            "description": "Gestisci dati sensibili con policy chiare e workflow sicuri.",
-            "items": {
-                "gdpr": {
-                    "title": "Workflow pronti per GDPR",
-                    "description": "Supporto a consenso, conservazione e requisiti di audit."
-                },
-                "encryption": {
-                    "title": "Credenziali cifrate",
-                    "description": "Protegge SMTP e dati identita con crittografia."
-                },
-                "portale": {
-                    "title": "Integrazione Portale Alloggi",
-                    "description": "Invia i dati richiesti alle autorita in pochi minuti."
-                }
-            }
-        },
-        "howItWorks": {
-            "eyebrow": "Come funziona",
-            "title": "Lancia percorsi ospiti remoti in tre semplici passaggi.",
-            "description": "Orchestra gli arrivi in modo fluido collegando il tuo PMS, guidando ogni ospite attraverso la verifica e mantenendo team e autorità aggiornati.",
-            "steps": {
-                "invite": {
-                    "stage": "Passaggio 1",
-                    "title": "Invita e prepara",
-                    "description": "Sincronizza le prenotazioni dal tuo PMS o carica liste ospiti in blocco. Attiva inviti brandizzati via email o SMS con un clic."
-                },
-                "capture": {
-                    "stage": "Passaggio 2",
-                    "title": "Cattura e verifica",
-                    "description": "Gli ospiti caricano documenti, selfie e firme da qualsiasi dispositivo. Controlli automatici confermano identità e completezza istantaneamente."
-                },
-                "sync": {
-                    "stage": "Passaggio 3",
-                    "title": "Sincronizza e conforma",
-                    "description": "I profili approvati fluiscono nel tuo PMS e nei report delle autorità. I team ricevono avvisi, mentre le analitiche monitorano lo stato su tutte le strutture."
-                },
-                "payment": {
-                    "stage": "Passaggio 4",
-                    "title": "Pagamento e conferma",
-                    "description": "Processa pagamenti sicuri, invia conferme e aggiorna lo stato delle prenotazioni automaticamente."
-                }
-            }
-        },
-        "advantages": {
-            "eyebrow": "Perché Remote Check-in",
-            "title": "Trasforma le tue operazioni hospitality con risultati misurabili.",
-            "description": "La nostra soluzione di check-in remoto fornisce vantaggi tangibili che impattano il tuo bilancio e la soddisfazione degli ospiti.",
-            "cards": {
-                "timeSavings": {
-                    "title": "Risparmio di Tempo Drastico",
-                    "description": "Riduci il carico di lavoro della reception automatizzando gli arrivi e l'elaborazione della carta.",
-                    "benefits": {
-                        "checkin": "Processamento check-in automatizzato",
-                        "paperwork": "Gestione documenti digitale",
-                        "staff": "Libera il personale per l'esperienza ospite"
-                    }
-                },
-                "costReduction": {
-                    "title": "Riduzione Costi Significativa",
-                    "description": "Abbassa i costi operativi migliorando la qualità del servizio attraverso l'automazione.",
-                    "benefits": {
-                        "staffing": "Riduci le esigenze di personale reception",
-                        "printing": "Elimina costi di carta e stampa",
-                        "errors": "Minimizza errori di inserimento dati"
-                    }
-                },
-                "guestExperience": {
-                    "title": "Esperienza Ospite Migliorata",
-                    "description": "Delizia gli ospiti con arrivi senza contatto e servizio personalizzato.",
-                    "benefits": {
-                        "speed": "Esperienza di arrivo senza-coda",
-                        "convenience": "Processo check-in mobile-first",
-                        "satisfaction": "Punteggi di soddisfazione ospite più alti"
-                    }
-                },
-                "compliance": {
-                    "title": "Automazione Compliance Completa",
-                    "description": "Rimani pienamente conforme con i regolamenti hospitality attraverso report automatizzati.",
-                    "benefits": {
-                        "automated": "Generazione automatica moduli legali",
-                        "legal": "Sempre aggiornato con i regolamenti",
-                        "audit": "Documentazione pronta per audit"
-                    }
-                }
-            }
-        },
-        "socialProof": {
-            "gdpr": "Nativo GDPR",
-            "security": "TLS 1.3 & crittografia dati",
-            "languages": "12+ lingue",
-            "api": "API aperta",
-            "quote": "Ispirato dai leader di produttività moderni che combinano trasparenza con roadmap guidate dalla community per rimanere avanti.",
-            "attribution": "Remote Check-in Product Team",
-            "note": "Metriche di esempio a scopo illustrativo."
-        },
-        "features": {
-            "eyebrow": "Perché i team hospitality cambiano",
-            "title": "Progettato per eroi della reception, leader revenue e professionisti operativi.",
-            "description": "Tutto il necessario per orchestrare arrivi deliziosi, ridurre i passaggi di conformità manuali e abilitare i team a collaborare.",
-            "cards": {
-                "automated": {
-                    "title": "Esperienza Ospite Automatizzata",
-                    "description": "Cattura remota documenti, validazione identità e firme digitali snelliscono ogni arrivo."
-                },
-                "compliance": {
-                    "title": "Pronto per la Compliance",
-                    "description": "Genera e invia le dichiarazioni hospitality richieste in pochi minuti, conforme ai regolamenti locali."
-                },
-                "insights": {
-                    "title": "Approfondimenti in Tempo Reale",
-                    "description": "Monitora occupazione, progresso ospiti e previsioni revenue da una singola dashboard multi-struttura."
-                },
-                "collaboration": {
-                    "title": "Collaborazione Team",
-                    "description": "Invita partner, team pulizie e personale reception con permessi basati su ruoli che scalano con te."
-                },
-                "mobile": {
-                    "title": "Esperienza Mobile-First",
-                    "description": "Ospiti completano il check-in da qualsiasi dispositivo con interfaccia ottimizzata per mobile."
-                },
-                "integration": {
-                    "title": "Integrazioni Potenti",
-                    "description": "Connettiti con PMS, CRM e sistemi hospitality tramite API e webhook nativi."
-                }
-            }
-        },
-        "trusted": {
-            "eyebrow": "Scelto dai team di hospitality più moderni",
-            "title": "Dalle boutique hotel ai gruppi multi-struttura."
-        },
-        "testimonials": {
-            "items": {
-                "claudia": {
-                    "quote": "Remote Check-in ha ridotto l'80% della burocrazia in arrivo e ha dato agli ospiti un primo contatto impeccabile prima ancora del check-in.",
-                    "author": "Claudia Marino",
-                    "role": "Guest Experience Lead · Breeze Hotels"
-                },
-                "david": {
-                    "quote": "L'automazione della compliance si è ripagata in una settimana: non inseguiamo più le autorità per le conferme.",
-                    "author": "David O’Sullivan",
-                    "role": "Operations Director · Atlas Hospitality"
-                },
-                "lina": {
-                    "quote": "Il nostro team controlla ogni prenotazione da un'unica dashboard. Integrare il PMS è stato sorprendentemente semplice.",
-                    "author": "Lina Gomez",
-                    "role": "Digital Transformation · UrbanNest Co."
-                }
-            }
-        },
-        "pricing": {
-            "eyebrow": "Prezzi Trasparenti",
-            "title": "Piani costruiti per ogni portfolio di proprietà.",
-            "description": "Inizia gratis con i primi 20 abbonati o ospitalo tu stesso. Scala quando sei pronto—nessun costo nascosto.",
-            "selfHostNote": "Preferisci self-hosting? Supportiamo deployment gestiti e self-hosted.",
-            "pricePerMonth": "/mese",
-            "pricePerYear": "/anno",
-            "paymentMethods": "Metodi di pagamento accettati",
-            "toggle": {
-                "monthly": "Mensile",
-                "annually": "Annuale",
-                "discount": "Risparmia 2 mesi"
-            },
-            "security": {
-                "title": "Elaborazione pagamenti sicura",
-                "description": "Tutte le transazioni sono crittografate e elaborate tramite provider di pagamento conformi PCI."
-            },
-            "walkthrough": "Vedi il dettaglio completo dei prezzi",
-            "plans": {
-                "launch": {
-                    "name": "Launch",
-                    "tagline": "Primi 20 abbonati — tutto il necessario per iniziare.",
-                    "bullets": {
-                        "properties": "Strutture e prenotazioni illimitate",
-                        "journey": "Percorso ospite digitale con upload documenti",
-                        "emails": "Email di conferma automatizzate",
-                        "community": "Supporto community e voto roadmap"
-                    }
-                },
-                "growth": {
-                    "name": "Growth",
-                    "tagline": "Ideale per boutique hotel e appartamenti serviti che scalano le operazioni.",
-                    "bullets": {
-                        "allLaunch": "Tutto in Launch",
-                        "brandable": "Portale ospite personalizzabile e notifiche SMS",
-                        "integrations": "Integrazioni PMS bidirezionali e flussi automazione",
-                        "support": "Supporto prioritario in-app e email",
-                        "analytics": "Dashboard analitiche avanzate"
-                    }
-                },
-                "enterprise": {
-                    "name": "Enterprise",
-                    "priceNote": "Prezzi personalizzati",
-                    "tagline": "Implementazioni personalizzate per gruppi alberghieri e marchi hospitality.",
-                    "bullets": {
-                        "onboarding": "Onboarding dedicato e manager successo",
-                        "analytics": "Analitiche avanzate ed esportazioni BI",
-                        "workflows": "Workflow conformità personalizzati per regione",
-                        "security": "SAML SSO e report SOC 2 su richiesta",
-                        "dedicated": "Opzioni infrastruttura dedicata"
-                    }
-                }
-            }
-        },
-        "selfHost": {
-            "eyebrow": "Preferisci self-hosting?",
-            "title": "Distribuisci Remote Check-in sulla tua infrastruttura.",
-            "description": "Ottieni la stessa deliziosa esperienza ospite abbinata a controllo completo su infrastruttura e residenza dati.",
-            "benefits": {
-                "deploy": "Distribuisci sulla tua infrastruttura con container Docker e script infrastructure-as-code.",
-                "ownership": "Mantieni piena proprietà dati sfruttando le stesse caratteristiche offerte nei nostri piani hosted.",
-                "hybrid": "Modalità ibrida — sincronizza proprietà selezionate sul nostro cloud, mantieni il resto on-premise.",
-                "api": "Ecosistema API aperta e webhook per integrazioni e automazioni personalizzate."
-            },
-            "terminal": {
-                "comment": "Provisiona storage compatibile S3"
-            }
-        },
-        "faq": {
-            "eyebrow": "FAQ",
-            "title": "Risposte che mantengono il tuo rollout in carreggiata.",
-            "items": {
-                "launch": {
-                    "question": "Quanto velocemente possiamo lanciare?",
-                    "answer": "La maggior parte dei clienti va live in meno di due settimane: connetti PMS, aggiungi template email, invita staff. Forniamo template migrazione e playbook onboarding collaudati."
-                },
-                "compliance": {
-                    "question": "Quale copertura conformità è inclusa?",
-                    "answer": "Spediamo con moduli legali configurabili per multiple regioni. Esporta report direttamente per le autorità con gli stessi standard di crittografia provati nei nostri workflow check-in remoti."
-                },
-                "extend": {
-                    "question": "Possiamo estendere la piattaforma?",
-                    "answer": "Sì. Usa le nostre API REST e webhook per connettere automazione marketing, piattaforme housekeeping, o app ospite personalizzate. Gli SDK includono helper autenticazione e bot di esempio."
-                },
-                "mobile": {
-                    "question": "Supportate esperienze mobile-first?",
-                    "answer": "Assolutamente. Gli ospiti possono completare il percorso su qualsiasi dispositivo, con validazione real-time ottimizzata per fotocamere e code cattura offline per connettività limitata."
-                },
-                "payment": {
-                    "question": "Quali metodi di pagamento accettate?",
-                    "answer": "Accettiamo tutte le carte di credito principali, PayPal, Apple Pay, Google Pay e bonifici bancari per i piani Enterprise. Tutti i pagamenti sono elaborati in sicurezza tramite provider conformi PCI."
-                },
-                "data": {
-                    "question": "Come sono protetti i dati dei nostri ospiti?",
-                    "answer": "Tutti i dati ospiti sono crittografati end-to-end, memorizzati in data center sicuri e gestiti secondo GDPR e regolamenti privacy hospitality. Mantieni piena proprietà dati e puoi esportarli in qualsiasi momento."
-                }
-            }
-        },
-        "cta": {
-            "title": "Offri arrivi senza sforzo iniziando oggi.",
-            "description": "Unisciti ai primi 20 team per sbloccare il piano Launch gratis o esplora self-hosting per controllo completo."
-        },
-        "footer": {
-            "description": "Dalla cattura documenti alla reportistica conforme—tutto ciò che i leader hospitality necessitano per deliziare ogni arrivo.",
-            "badges": {
-                "soc2": "SOC 2-ready",
-                "encrypted": "Dati crittografati end-to-end"
-            },
-            "columns": {
-                "product": {
-                    "heading": "Prodotto",
-                    "links": {
-                        "roadmap": "Roadmap",
-                        "security": "Sicurezza",
-                        "status": "Stato"
-                    }
-                },
-                "company": {
-                    "heading": "Azienda",
-                    "links": {
-                        "about": "Chi siamo",
-                        "careers": "Carriere",
-                        "press": "Kit stampa"
-                    }
-                },
-                "resources": {
-                    "heading": "Risorse",
-                    "links": {
-                        "docs": "Documentazione",
-                        "api": "API",
-                        "slack": "Community Slack",
-                        "pricing": "Prezzi",
-                        "faq": "FAQ"
-                    }
-                }
-            },
-            "privacy": "Privacy Policy",
-            "terms": "Termini",
-            "support": "Supporto",
-            "copyright": "© {{year}} Remote Check-in Labs. Tutti i diritti riservati."
-        },
-        "stickyCta": {
-            "message": "Il piano Launch è gratis per i primi 20 team hospitality.",
-            "close": "Chiudi offerta"
-        },
-        "mobileNav": {
-            "overview": "Panoramica",
-            "pricing": "Prezzi",
-            "faq": "FAQ"
-        },
-        "resources": {
-            "eyebrow": "Continua l'esplorazione",
-            "title": "Risorse per distribuire il check-in da remoto nel tuo team.",
-            "cards": {
-                "playbook": {
-                    "title": "Playbook: Automatizzare la compliance degli ospiti",
-                    "description": "Scarica la guida passo-passo che gli operatori usano per ridurre la burocrazia restando pronti ai controlli.",
-                    "action": "Scarica il playbook"
-                },
-                "walkthrough": {
-                    "title": "Walkthrough on-demand",
-                    "description": "Guarda un tour di 12 minuti con flussi ospite, dashboard amministrative e automazione Portale Alloggi.",
-                    "action": "Guarda la demo"
-                },
-                "docs": {
-                    "title": "Documentazione API e integrazioni",
-                    "description": "Esplora API REST, webhook e template per collegare Remote Check-in al tuo stack.",
-                    "action": "Consulta i docs"
-                }
-            }
+          "title": "Automazione Compliance Completa",
+          "description": "Rimani pienamente conforme con i regolamenti hospitality attraverso report automatizzati.",
+          "benefits": {
+            "automated": "Generazione automatica moduli legali",
+            "legal": "Sempre aggiornato con i regolamenti",
+            "audit": "Documentazione pronta per audit"
+          }
         }
+      }
     },
-    "pricingDetails": {
-        "hero": {
-            "eyebrow": "Prezzi pensati per crescere",
-            "title": "Scegli l'infrastruttura di check-in remoto che scala con ogni struttura.",
-            "subtitle": "Piani trasparenti con ospiti illimitati, onboarding flessibile e automazioni di compliance integrate.",
-            "billingLabel": "Ciclo di fatturazione",
-            "monthly": "Mensile",
-            "annual": "Annuale",
-            "annualBadge": "2 mesi in regalo"
+    "socialProof": {
+      "gdpr": "Nativo GDPR",
+      "security": "TLS 1.3 & crittografia dati",
+      "languages": "12+ lingue",
+      "api": "API aperta",
+      "quote": "Ispirato dai leader di produttività moderni che combinano trasparenza con roadmap guidate dalla community per rimanere avanti.",
+      "attribution": "Remote Check-in Product Team",
+      "note": "Metriche di esempio a scopo illustrativo."
+    },
+    "features": {
+      "eyebrow": "Perché i team hospitality cambiano",
+      "title": "Progettato per eroi della reception, leader revenue e professionisti operativi.",
+      "description": "Tutto il necessario per orchestrare arrivi deliziosi, ridurre i passaggi di conformità manuali e abilitare i team a collaborare.",
+      "cards": {
+        "automated": {
+          "title": "Esperienza Ospite Automatizzata",
+          "description": "Cattura remota documenti, validazione identità e firme digitali snelliscono ogni arrivo."
         },
-        "pricing": {
-            "currencySymbol": "€",
-            "perMonth": "/mese",
-            "perYear": "/anno",
-            "free": "Gratis",
-            "save": "Risparmia {{ amount }}"
+        "compliance": {
+          "title": "Pronto per la Compliance",
+          "description": "Genera e invia le dichiarazioni hospitality richieste in pochi minuti, conforme ai regolamenti locali."
         },
-        "plans": {
-            "launch": {
-                "name": "Launch",
-                "description": "Perfetto per le strutture indipendenti che digitalizzano il check-in per la prima volta.",
-                "features": {
-                    "unlimited": "Strutture e prenotazioni illimitate",
-                    "journey": "Percorso digitale dell'ospite e acquisizione documenti",
-                    "emails": "Email di conferma e promemoria",
-                    "community": "Supporto community e voto roadmap"
-                },
-                "cta": "Inizia gratis"
-            },
-            "growth": {
-                "name": "Growth",
-                "description": "Per boutique hotel e appartamenti serviti che scalano le operazioni remote.",
-                "features": {
-                    "everythingLaunch": "Tutto del piano Launch",
-                    "portal": "Portale ospite personalizzabile e template multilingua",
-                    "sms": "Promemoria SMS e sincronizzazione PMS bidirezionale",
-                    "support": "Supporto prioritario in-app ed email"
-                },
-                "cta": "Parla con noi"
-            },
-            "enterprise": {
-                "name": "Enterprise",
-                "description": "Programmi su misura per gruppi multi-struttura con esigenze di governance e integrazione.",
-                "features": {
-                    "everythingGrowth": "Tutto del piano Growth",
-                    "success": "Customer success dedicato e servizi di lancio",
-                    "analytics": "Analitiche avanzate e dashboard personalizzate",
-                    "compliance": "Workflow di compliance per regione e SSO"
-                },
-                "cta": "Prenota una call strategica"
-            }
+        "insights": {
+          "title": "Approfondimenti in Tempo Reale",
+          "description": "Monitora occupazione, progresso ospiti e previsioni revenue da una singola dashboard multi-struttura."
         },
-        "comparison": {
-            "title": "Confronta i piani nel dettaglio",
-            "subtitle": "Scopri cosa è incluso e scegli gli strumenti operativi più adatti al tuo portfolio.",
-            "header": {
-                "feature": "Funzionalità",
-                "launch": "Launch",
-                "growth": "Growth",
-                "enterprise": "Enterprise"
-            },
-            "rows": {
-                "properties": "Strutture e prenotazioni",
-                "documents": "Acquisizione documenti e firme",
-                "portale": "Automazione Portale Alloggi",
-                "sms": "Promemoria SMS e link WhatsApp",
-                "analytics": "Analitiche avanzate ed esportazione dati",
-                "successManager": "Customer success manager"
-            },
-            "value": {
-                "unlimited": "Illimitato",
-                "limited": "Limitato",
-                "included": "Incluso",
-                "notIncluded": "—"
-            }
+        "collaboration": {
+          "title": "Collaborazione Team",
+          "description": "Invita partner, team pulizie e personale reception con permessi basati su ruoli che scalano con te."
         },
-        "addons": {
-            "title": "Ti serve qualcosa in più?",
-            "subtitle": "Combina gli add-on con qualsiasi piano per adattare l'esperienza in ogni mercato.",
-            "handbook": {
-                "title": "Manuale digitale per gli ospiti",
-                "description": "Micro-sito personalizzato per ogni prenotazione con upsell e consigli locali.",
-                "price": "€25 / struttura / mese"
-            },
-            "integrations": {
-                "title": "Integrazioni personalizzate",
-                "description": "Costruiamo workflow su misura per PMS, CRM e strumenti di loyalty cruciali per la tua operatività.",
-                "price": "Da €1.200 (una tantum)"
-            },
-            "concierge": {
-                "title": "Team concierge multilingue",
-                "description": "Un concierge distribuito disponibile 24/7 che gestisce le domande d'arrivo per tuo conto.",
-                "price": "€150 / mese / struttura"
-            }
+        "mobile": {
+          "title": "Esperienza Mobile-First",
+          "description": "Ospiti completano il check-in da qualsiasi dispositivo con interfaccia ottimizzata per mobile."
         },
-        "faq": {
-            "title": "FAQ sui prezzi",
-            "subtitle": "Le risposte che i team chiedono prima di adottare Remote Check-in.",
-            "mixPlans": {
-                "question": "Possiamo usare piani diversi per struttura?",
-                "answer": "Sì. Puoi combinare piani differenti e ricevere una fattura consolidata ogni mese. Enterprise offre governance sul rollout."
-            },
-            "perGuest": {
-                "question": "Applicate un costo per ospite?",
-                "answer": "No. Ogni piano include ospiti e prenotazioni illimitati. Paghi solo per il set di funzionalità più adatto alle tue operazioni."
-            },
-            "annualDiscount": {
-                "question": "Come funziona lo sconto annuale?",
-                "answer": "Il pagamento annuale ti regala due mesi (paghi 10, usi 12). Puoi cambiare piano in qualsiasi momento con fatturazione pro-rata."
-            },
-            "onboarding": {
-                "question": "L'onboarding è incluso?",
-                "answer": "Launch include una libreria self-service. Growth ed Enterprise prevedono sessioni dedicate e supporto alla migrazione."
-            }
-        },
-        "cta": {
-            "title": "Pronto a offrire arrivi straordinari?",
-            "subtitle": "Prenota una walkthrough con il nostro team o attiva gratis il piano Launch.",
-            "primary": "Parla con noi",
-            "secondary": "Attiva Launch gratis"
+        "integration": {
+          "title": "Integrazioni Potenti",
+          "description": "Connettiti con PMS, CRM e sistemi hospitality tramite API e webhook nativi."
         }
+      }
+    },
+    "trusted": {
+      "eyebrow": "Scelto dai team di hospitality più moderni",
+      "title": "Dalle boutique hotel ai gruppi multi-struttura."
+    },
+    "testimonials": {
+      "items": {
+        "claudia": {
+          "quote": "Remote Check-in ha ridotto l'80% della burocrazia in arrivo e ha dato agli ospiti un primo contatto impeccabile prima ancora del check-in.",
+          "author": "Claudia Marino",
+          "role": "Guest Experience Lead · Breeze Hotels"
+        },
+        "david": {
+          "quote": "L'automazione della compliance si è ripagata in una settimana: non inseguiamo più le autorità per le conferme.",
+          "author": "David O’Sullivan",
+          "role": "Operations Director · Atlas Hospitality"
+        },
+        "lina": {
+          "quote": "Il nostro team controlla ogni prenotazione da un'unica dashboard. Integrare il PMS è stato sorprendentemente semplice.",
+          "author": "Lina Gomez",
+          "role": "Digital Transformation · UrbanNest Co."
+        }
+      }
+    },
+    "pricing": {
+      "eyebrow": "Prezzi Trasparenti",
+      "title": "Piani costruiti per ogni portfolio di proprietà.",
+      "description": "Inizia gratis con i primi 20 abbonati o ospitalo tu stesso. Scala quando sei pronto—nessun costo nascosto.",
+      "selfHostNote": "Preferisci self-hosting? Supportiamo deployment gestiti e self-hosted.",
+      "pricePerMonth": "/mese",
+      "pricePerYear": "/anno",
+      "paymentMethods": "Metodi di pagamento accettati",
+      "toggle": {
+        "monthly": "Mensile",
+        "annually": "Annuale",
+        "discount": "Risparmia 2 mesi"
+      },
+      "security": {
+        "title": "Elaborazione pagamenti sicura",
+        "description": "Tutte le transazioni sono crittografate e elaborate tramite provider di pagamento conformi PCI."
+      },
+      "walkthrough": "Vedi il dettaglio completo dei prezzi",
+      "plans": {
+        "launch": {
+          "name": "Launch",
+          "tagline": "Primi 20 abbonati — tutto il necessario per iniziare.",
+          "bullets": {
+            "properties": "Strutture e prenotazioni illimitate",
+            "journey": "Percorso ospite digitale con upload documenti",
+            "emails": "Email di conferma automatizzate",
+            "community": "Supporto community e voto roadmap"
+          }
+        },
+        "growth": {
+          "name": "Growth",
+          "tagline": "Ideale per boutique hotel e appartamenti serviti che scalano le operazioni.",
+          "bullets": {
+            "allLaunch": "Tutto in Launch",
+            "brandable": "Portale ospite personalizzabile e notifiche SMS",
+            "integrations": "Integrazioni PMS bidirezionali e flussi automazione",
+            "support": "Supporto prioritario in-app e email",
+            "analytics": "Dashboard analitiche avanzate"
+          }
+        },
+        "enterprise": {
+          "name": "Enterprise",
+          "priceNote": "Prezzi personalizzati",
+          "tagline": "Implementazioni personalizzate per gruppi alberghieri e marchi hospitality.",
+          "bullets": {
+            "onboarding": "Onboarding dedicato e manager successo",
+            "analytics": "Analitiche avanzate ed esportazioni BI",
+            "workflows": "Workflow conformità personalizzati per regione",
+            "security": "SAML SSO e report SOC 2 su richiesta",
+            "dedicated": "Opzioni infrastruttura dedicata"
+          }
+        }
+      }
+    },
+    "selfHost": {
+      "eyebrow": "Preferisci self-hosting?",
+      "title": "Distribuisci Remote Check-in sulla tua infrastruttura.",
+      "description": "Ottieni la stessa deliziosa esperienza ospite abbinata a controllo completo su infrastruttura e residenza dati.",
+      "benefits": {
+        "deploy": "Distribuisci sulla tua infrastruttura con container Docker e script infrastructure-as-code.",
+        "ownership": "Mantieni piena proprietà dati sfruttando le stesse caratteristiche offerte nei nostri piani hosted.",
+        "hybrid": "Modalità ibrida — sincronizza proprietà selezionate sul nostro cloud, mantieni il resto on-premise.",
+        "api": "Ecosistema API aperta e webhook per integrazioni e automazioni personalizzate."
+      },
+      "terminal": {
+        "comment": "Provisiona storage compatibile S3"
+      }
     },
     "faq": {
-        "nav": {
-            "home": "Home",
-            "pricing": "Prezzi"
+      "eyebrow": "FAQ",
+      "title": "Risposte che mantengono il tuo rollout in carreggiata.",
+      "items": {
+        "launch": {
+          "question": "Quanto velocemente possiamo lanciare?",
+          "answer": "La maggior parte dei clienti va live in meno di due settimane: connetti PMS, aggiungi template email, invita staff. Forniamo template migrazione e playbook onboarding collaudati."
         },
-        "hero": {
-            "eyebrow": "Domande Frequenti",
-            "title": "Tutto quello che devi sapere su Remote Check-in",
-            "description": "Trova risposte alle domande comuni su configurazione, funzionalità, prezzi, requisiti tecnici, conformità e supporto."
+        "compliance": {
+          "question": "Quale copertura conformità è inclusa?",
+          "answer": "Spediamo con moduli legali configurabili per multiple regioni. Esporta report direttamente per le autorità con gli stessi standard di crittografia provati nei nostri workflow check-in remoti."
         },
-        "categories": {
-            "gettingStarted": {
-                "title": "Iniziare",
-                "items": {
-                    "setup": {
-                        "question": "Come configuro Remote Check-in per la mia struttura?",
-                        "answer": "Configurare Remote Check-in è semplice. Dopo la registrazione, collegherai il tuo PMS (Sistema di Gestione Proprietà) o caricherai manualmente le liste degli ospiti. Configura i tuoi modelli email, invita i membri del team e sei pronto per iniziare a inviare inviti di check-in agli ospiti. Il nostro team di onboarding fornisce una guida passo-passo e modelli di migrazione per rendere il processo fluido."
-                    },
-                    "onboarding": {
-                        "question": "Quale supporto per l'onboarding è incluso?",
-                        "answer": "Il piano Launch include l'accesso alla nostra libreria di modelli self-service e al supporto della community. I clienti Growth ed Enterprise ricevono sessioni di onboarding dedicate con il nostro team, assistenza per la migrazione e supporto prioritario. Forniamo playbook collaudati, guide di integrazione e best practice per garantire un lancio senza problemi."
-                    },
-                    "timeToLaunch": {
-                        "question": "Quanto velocemente possiamo andare live?",
-                        "answer": "La maggior parte dei clienti va live in meno di due settimane. I tempi dipendono dalla complessità dell'integrazione PMS e dalle esigenze di personalizzazione. Le configurazioni semplici possono essere operative in pochi giorni, mentre le implementazioni personalizzate possono richiedere 2-4 settimane. Il nostro team lavora con te per stabilire una tempistica realistica in base alle tue esigenze."
-                    },
-                    "training": {
-                        "question": "È incluso l'addestramento del personale?",
-                        "answer": "Sì, forniamo risorse di formazione complete inclusi tutorial video, documentazione e guide alle best practice. I piani Growth ed Enterprise includono sessioni di formazione live per il tuo team. Offriamo anche supporto continuo per aiutare il tuo personale a diventare competente con la piattaforma."
-                    }
-                }
-            },
-            "features": {
-                "title": "Funzionalità",
-                "items": {
-                    "documents": {
-                        "question": "Quali tipi di documenti possono caricare gli ospiti?",
-                        "answer": "Gli ospiti possono caricare documenti di identità inclusi passaporti, carte d'identità nazionali, patenti di guida e altri documenti d'identità rilasciati dal governo. Il sistema supporta immagini frontali e posteriori dei documenti, più un selfie con il documento per la verifica dell'identità. Tutti i caricamenti sono crittografati e archiviati in modo sicuro."
-                    },
-                    "languages": {
-                        "question": "Quali lingue sono supportate?",
-                        "answer": "Remote Check-in supporta 12+ lingue inclusi inglese, italiano, spagnolo, francese, tedesco e altro. L'interfaccia ospite rileva automaticamente la lingua del browser dell'utente o consente la selezione manuale. Puoi anche personalizzare le traduzioni per la terminologia specifica del tuo brand."
-                    },
-                    "mobile": {
-                        "question": "Gli ospiti hanno bisogno di un'app mobile?",
-                        "answer": "Non è richiesta un'app mobile. Gli ospiti completano il processo di check-in tramite qualsiasi browser web sul loro smartphone, tablet o computer. L'interfaccia è ottimizzata per dispositivi mobili con validazione in tempo reale, integrazione della fotocamera per la cattura dei documenti e supporto della coda offline per aree con connettività limitata."
-                    },
-                    "notifications": {
-                        "question": "Come ricevono gli ospiti gli inviti al check-in?",
-                        "answer": "Gli ospiti ricevono inviti personalizzati via email o SMS (disponibile nei piani Growth ed Enterprise). Gli inviti includono un link sicuro per completare il loro check-in. Puoi personalizzare i modelli email con il tuo branding, informazioni sulla struttura e suggerimenti locali. I promemoria automatizzati vengono inviati per check-in incompleti."
-                    },
-                    "customization": {
-                        "question": "Posso personalizzare l'esperienza dell'ospite?",
-                        "answer": "Sì, i piani Growth ed Enterprise includono portali ospiti personalizzabili dove puoi personalizzare colori, loghi, messaggi e aggiungere contenuti specifici della struttura. Puoi anche creare flussi di lavoro personalizzati, aggiungere opportunità di upsell e integrare con i tuoi sistemi esistenti per un'esperienza di marca senza soluzione di continuità."
-                    }
-                }
-            },
-            "pricing": {
-                "title": "Prezzi e Fatturazione",
-                "items": {
-                    "plans": {
-                        "question": "Qual è la differenza tra i piani Launch, Growth ed Enterprise?",
-                        "answer": "Launch è gratuito per i primi 20 abbonati e include funzionalità principali come cattura documenti, email automatizzate e proprietà illimitate. Growth aggiunge portali personalizzabili, notifiche SMS, integrazioni PMS e supporto prioritario. Enterprise offre implementazioni personalizzate, success manager dedicati, analisi avanzate, flussi di lavoro di conformità regionali e SSO."
-                    },
-                    "billing": {
-                        "question": "Come funziona la fatturazione?",
-                        "answer": "Puoi scegliere fatturazione mensile o annuale. La fatturazione annuale ti fa risparmiare 2 mesi (paga per 10, ottieni 12). Tutti i piani includono ospiti e prenotazioni illimitate—paghi solo in base al set di funzionalità. I piani Enterprise hanno prezzi personalizzati in base alle tue esigenze specifiche. Puoi aggiornare o degradare in qualsiasi momento con fatturazione proporzionale."
-                    },
-                    "cancellation": {
-                        "question": "Posso cancellare il mio abbonamento in qualsiasi momento?",
-                        "answer": "Sì, puoi cancellare il tuo abbonamento in qualsiasi momento. Non ci sono contratti a lungo termine o commissioni di cancellazione. Quando cancelli, manterrai l'accesso fino alla fine del periodo di fatturazione corrente. I tuoi dati rimangono disponibili per l'esportazione per 30 giorni dopo la cancellazione."
-                    },
-                    "trial": {
-                        "question": "C'è una prova gratuita?",
-                        "answer": "Il piano Launch è gratuito per i primi 20 team hospitality, che funge da nostro livello gratuito. Per i piani Growth ed Enterprise, offriamo una prova gratuita di 14 giorni in modo da poter esplorare tutte le funzionalità. Nessuna carta di credito richiesta per il periodo di prova."
-                    },
-                    "refund": {
-                        "question": "Qual è la vostra politica di rimborso?",
-                        "answer": "Offriamo una garanzia di rimborso di 30 giorni per tutti i piani a pagamento. Se non sei soddisfatto entro i primi 30 giorni, contatta il nostro team di supporto per un rimborso completo. Dopo 30 giorni, i rimborsi sono gestiti caso per caso per gli abbonamenti annuali."
-                    }
-                }
-            },
-            "technical": {
-                "title": "Tecnico e Integrazione",
-                "items": {
-                    "integration": {
-                        "question": "Con quali sistemi PMS vi integrate?",
-                        "answer": "Offriamo integrazioni native con i principali provider PMS e supportiamo la sincronizzazione bidirezionale tramite API REST e webhook. Le integrazioni popolari includono sistemi come Mews, Cloudbeds, Little Hotelier e molti altri. Possiamo anche costruire integrazioni personalizzate per il tuo PMS specifico attraverso il nostro piano Enterprise."
-                    },
-                    "api": {
-                        "question": "Fornite accesso API?",
-                        "answer": "Sì, tutti i piani includono l'accesso API. Il nostro ecosistema API REST e webhook ti consente di costruire integrazioni personalizzate, automatizzare i flussi di lavoro e collegare Remote Check-in con i tuoi strumenti esistenti. Forniamo documentazione API completa, helper di autenticazione e codice di esempio per iniziare."
-                    },
-                    "selfHost": {
-                        "question": "Posso auto-ospitare Remote Check-in?",
-                        "answer": "Sì, offriamo opzioni di self-hosting per il controllo completo sulla tua infrastruttura e residenza dei dati. Puoi distribuire sui tuoi server utilizzando contenitori Docker e script infrastructure-as-code. Supportiamo anche distribuzioni ibride in cui selezionate proprietà si sincronizzano con il nostro cloud mentre altre rimangono in locale."
-                    },
-                    "requirements": {
-                        "question": "Quali sono i requisiti tecnici?",
-                        "answer": "Remote Check-in è un SaaS basato su cloud che non richiede installazione da parte tua. Gli ospiti hanno solo bisogno di un browser web moderno e connessione internet. Per il self-hosting, avrai bisogno di server in grado di eseguire contenitori Docker, storage compatibile S3 e infrastruttura web standard. Forniamo requisiti di infrastruttura dettagliati nella nostra guida di distribuzione."
-                    },
-                    "uptime": {
-                        "question": "Qual è la vostra garanzia di uptime?",
-                        "answer": "Manteniamo un SLA di uptime del 99,9% per il nostro servizio ospitato. La nostra infrastruttura è costruita su sistemi ridondanti con failover automatico, backup regolari e monitoraggio 24/7. I clienti Enterprise ricevono garanzie SLA aggiuntive e opzioni di infrastruttura dedicate per distribuzioni mission-critical."
-                    }
-                }
-            },
-            "compliance": {
-                "title": "Sicurezza e Conformità",
-                "items": {
-                    "gdpr": {
-                        "question": "Remote Check-in è conforme al GDPR?",
-                        "answer": "Sì, Remote Check-in è completamente conforme al GDPR. Implementiamo crittografia dei dati, controlli di accesso, diritto alla cancellazione e tutte le misure di privacy richieste. I dati degli ospiti sono crittografati end-to-end e mantieni la piena proprietà dei dati. Puoi esportare o eliminare i dati degli ospiti in qualsiasi momento tramite la dashboard di amministrazione."
-                    },
-                    "portaleAlloggi": {
-                        "question": "Si integra con Portale Alloggi?",
-                        "answer": "Sì, Remote Check-in include l'integrazione automatizzata con il Portale Alloggi italiano (registro delle strutture ricettive). Il sistema invia automaticamente i dati degli ospiti richiesti nel formato corretto, garantendo la conformità con i regolamenti hospitality italiani. Questa funzionalità è disponibile in tutti i piani e può essere configurata nelle tue impostazioni."
-                    },
-                    "dataRetention": {
-                        "question": "Per quanto tempo vengono archiviati i dati degli ospiti?",
-                        "answer": "Controlli le politiche di conservazione dei dati attraverso le tue impostazioni di amministrazione. Per impostazione predefinita, i dati vengono conservati secondo i regolamenti hospitality locali (tipicamente 5-7 anni per scopi di conformità). Puoi configurare programmi di eliminazione automatica o eliminare manualmente i dati. Tutte le eliminazioni sono permanenti e irreversibili."
-                    },
-                    "audit": {
-                        "question": "Sono disponibili tracce di audit?",
-                        "answer": "Sì, tutti i piani includono log di audit completi che tracciano azioni utente, accesso ai dati, modifiche al sistema e invii di conformità. I piani Enterprise includono funzionalità di audit avanzate con reporting dettagliato, capacità di esportazione e integrazione con i tuoi sistemi di audit esistenti. Tutti i log sono a prova di manomissione e conservati secondo le tue politiche di conservazione."
-                    },
-                    "regions": {
-                        "question": "Quali regioni e regolamenti sono supportati?",
-                        "answer": "Supportiamo i requisiti di conformità per più regioni inclusi Italia (Portale Alloggi), GDPR (Unione Europea) e altri principali mercati hospitality. I nostri moduli di conformità sono configurabili e aggiornati regolarmente per riflettere i regolamenti attuali. I clienti Enterprise possono richiedere flussi di lavoro di conformità personalizzati per requisiti regionali specifici."
-                    }
-                }
-            },
-            "support": {
-                "title": "Supporto e Aiuto",
-                "items": {
-                    "contact": {
-                        "question": "Come posso contattare il supporto?",
-                        "answer": "I clienti del piano Launch possono accedere ai forum di supporto della community e al supporto email. I clienti Growth ed Enterprise ricevono supporto prioritario in-app ed email con tempi di risposta più rapidi. I clienti Enterprise ricevono anche un success manager dedicato. Per problemi urgenti, i clienti Enterprise hanno accesso al supporto telefonico durante l'orario lavorativo."
-                    },
-                    "responseTime": {
-                        "question": "Quali sono i vostri tempi di risposta al supporto?",
-                        "answer": "Piano Launch: Supporto community e risposte email entro 48 ore. Piano Growth: Supporto email prioritario con risposte entro 24 ore nei giorni lavorativi. Piano Enterprise: Supporto dedicato con risposte entro 4 ore durante l'orario lavorativo, più un success manager dedicato per assistenza proattiva."
-                    },
-                    "documentation": {
-                        "question": "Dove posso trovare la documentazione?",
-                        "answer": "La documentazione completa è disponibile nel nostro centro assistenza, che copre guide di configurazione, riferimenti API, tutorial di integrazione, best practice e risoluzione dei problemi. Tutti i clienti hanno accesso a tutorial video, guide passo-passo e la nostra knowledge base. I clienti Enterprise ricevono documentazione personalizzata per la loro implementazione specifica."
-                    },
-                    "community": {
-                        "question": "C'è una community o un forum?",
-                        "answer": "Sì, abbiamo una community attiva dove gli utenti condividono suggerimenti, fanno domande e votano sulle funzionalità della roadmap del prodotto. I clienti del piano Launch hanno pieno accesso ai forum della community. Organizziamo anche webinar regolari, orari di ufficio e incontri utenti per aiutarti a ottenere il massimo da Remote Check-in."
-                    }
-                }
-            }
+        "extend": {
+          "question": "Possiamo estendere la piattaforma?",
+          "answer": "Sì. Usa le nostre API REST e webhook per connettere automazione marketing, piattaforme housekeeping, o app ospite personalizzate. Gli SDK includono helper autenticazione e bot di esempio."
         },
-        "cta": {
-            "title": "Hai ancora domande?",
-            "description": "Non trovi quello che cerchi? Il nostro team è qui per aiutarti a iniziare o rispondere a qualsiasi domanda specifica sul tuo caso d'uso.",
-            "primaryAction": "Inizia",
-            "secondaryAction": "Contatta il Supporto"
+        "mobile": {
+          "question": "Supportate esperienze mobile-first?",
+          "answer": "Assolutamente. Gli ospiti possono completare il percorso su qualsiasi dispositivo, con validazione real-time ottimizzata per fotocamere e code cattura offline per connettività limitata."
+        },
+        "payment": {
+          "question": "Quali metodi di pagamento accettate?",
+          "answer": "Accettiamo tutte le carte di credito principali, PayPal, Apple Pay, Google Pay e bonifici bancari per i piani Enterprise. Tutti i pagamenti sono elaborati in sicurezza tramite provider conformi PCI."
+        },
+        "data": {
+          "question": "Come sono protetti i dati dei nostri ospiti?",
+          "answer": "Tutti i dati ospiti sono crittografati end-to-end, memorizzati in data center sicuri e gestiti secondo GDPR e regolamenti privacy hospitality. Mantieni piena proprietà dati e puoi esportarli in qualsiasi momento."
         }
+      }
     },
-    "admin-menu-operations": "Operazioni",
-    "admin-menu-settings": "Impostazioni",
-    "admin-menu-superadmin": "Pannello superadmin",
-    "admin-menu-quick-actions": "Azioni rapide",
-    "admin-quick-create-reservation": "Crea prenotazione",
-    "admin-quick-add-room": "Aggiungi stanza",
-    "reservation-section-title": "Prenotazione",
-    "dates-section-title": "Date",
-    "guest-section-title": "Dettagli ospite",
-    "room-section-title": "Selezione stanza",
-    "date-helper": "Orari mostrati nel fuso orario locale.",
-    "rooms-subtitle": "Gestisci inventario e disponibilità camere.",
-    "rooms-import-csv": "Importa CSV",
-    "rooms-select-structure-notice": "Seleziona una struttura prima di creare una stanza.",
-    "rooms-guests-label": "ospiti",
-    "dashboard-health-title": "Riepilogo stato",
-    "dashboard-health-subtitle": "Elementi da attenzionare",
-    "dashboard-health-pending": "Approvazioni in sospeso",
-    "dashboard-health-checkins": "Check-in di oggi",
-    "dashboard-health-checkouts": "Check-out di oggi",
-    "dashboard-recent-title": "Attività recente",
-    "dashboard-recent-subtitle": "Ultimi arrivi e aggiornamenti",
-    "dashboard-recent-empty": "Non c'è ancora attività recente.",
-    "dashboard-chart-loading": "Caricamento grafico...",
-    "dashboard-filter-pending": "In sospeso",
-    "dashboard-filter-approved": "Approvate",
-    "dashboard-filter-today": "Oggi",
-    "dashboard-filter-week": "Ultimi 7 giorni",
-    "dashboard-filter-clear": "Pulisci",
-    "rooms-status-label": "Stato",
-    "rooms-active-label": "Attivo",
-    "rooms-inactive-label": "Inattivo",
-    "rooms-search-placeholder": "Cerca stanze",
-    "rooms-empty-title": "Nessuna stanza",
-    "rooms-empty-subtitle": "Aggiungi la prima stanza per iniziare a ricevere prenotazioni.",
-    "rooms-capacity-filter-label": "Capacità",
-    "rooms-status-filter-label": "Stato",
-    "rooms-all-statuses": "Tutti gli stati",
-    "rooms-all-capacities": "Tutte le capacità",
-    "rooms-capacity-1-2": "1-2 ospiti",
-    "rooms-capacity-3-4": "3-4 ospiti",
-    "rooms-capacity-5-6": "5-6 ospiti",
-    "rooms-capacity-7-plus": "7+ ospiti",
-    "superadmin-loading": "Caricamento pannello superadmin...",
-    "superadmin-hero-eyebrow": "Superadmin",
-    "superadmin-hero-title": "Controllo operativo per il tuo portfolio",
-    "superadmin-hero-subtitle": "Monitora l'attività, gestisci le strutture e mantieni gli accessi allineati in un unico posto.",
-    "superadmin-hero-cta-structure": "Nuova struttura",
-    "superadmin-hero-cta-user": "Nuovo utente",
-    "superadmin-nav-dashboard": "Dashboard",
-    "superadmin-nav-structures": "Strutture",
-    "superadmin-nav-users": "Utenti",
-    "superadmin-nav-associations": "Associazioni",
-    "superadmin-dashboard-eyebrow": "Panoramica",
-    "superadmin-dashboard-title": "Centro di comando superadmin",
-    "superadmin-dashboard-subtitle": "Tieni sotto controllo il portfolio e agisci dove i team hanno bisogno di supporto.",
-    "superadmin-dashboard-stat-total-structures": "Strutture totali",
-    "superadmin-dashboard-stat-active-structures": "Strutture attive",
-    "superadmin-dashboard-stat-archived-structures": "Strutture archiviate",
-    "superadmin-dashboard-stat-total-users": "Utenti totali",
-    "superadmin-dashboard-stat-unassigned-admins": "Admin non assegnati",
-    "superadmin-dashboard-stat-total-reservations": "Prenotazioni totali",
-    "superadmin-dashboard-fast-actions-title": "Azioni rapide",
-    "superadmin-dashboard-fast-actions-subtitle": "Scorciatoie operative più usate.",
-    "superadmin-dashboard-action-structures": "Gestisci strutture",
-    "superadmin-dashboard-action-users": "Rivedi utenti",
-    "superadmin-dashboard-action-associations": "Verifica associazioni",
-    "superadmin-dashboard-checklist-title": "Checklist operativa",
-    "superadmin-dashboard-checklist-subtitle": "Mantieni la copertura allineata per ogni struttura.",
-    "superadmin-dashboard-checklist-item-1": "Conferma che ogni struttura attiva abbia un admin assegnato.",
-    "superadmin-dashboard-checklist-item-2": "Rivedi gli account inattivi e archiviali se necessario.",
-    "superadmin-dashboard-checklist-item-3": "Verifica che le nuove strutture siano collegate a un admin principale.",
-    "superadmin-dashboard-loading": "Caricamento dati dashboard...",
-    "superadmin-dashboard-error": "Errore durante il caricamento della dashboard:",
-    "superadmin-associations-title": "Associazioni utente-struttura",
-    "superadmin-associations-filter-user": "Tutti gli utenti",
-    "superadmin-associations-filter-structure": "Tutte le strutture",
-    "superadmin-associations-table-title": "Associazioni utente-struttura",
-    "superadmin-associations-total": "totale",
-    "superadmin-associations-search": "Cerca associazioni...",
-    "superadmin-associations-selected": "selezionati",
-    "superadmin-associations-export-selected": "Esporta selezionati",
-    "superadmin-associations-delete-selected": "Elimina selezionati",
-    "superadmin-associations-export-all": "Esporta tutti",
-    "superadmin-associations-create": "Crea associazione",
-    "superadmin-associations-col-user": "Utente",
-    "superadmin-associations-col-username": "Username",
-    "superadmin-associations-col-structure": "Struttura",
-    "superadmin-associations-col-city": "Città",
-    "superadmin-associations-col-status": "Stato",
-    "superadmin-associations-col-actions": "Azioni",
-    "superadmin-associations-status-active": "Attivo",
-    "superadmin-associations-remove": "Rimuovi associazione",
-    "superadmin-associations-empty-search": "Nessuna associazione trovata con questi criteri di ricerca.",
-    "superadmin-associations-empty-title": "Nessuna associazione trovata",
-    "superadmin-associations-empty-subtitle": "Nessuna associazione utente-struttura corrisponde ai filtri attuali.",
-    "superadmin-associations-empty-cta": "Crea la prima associazione",
-    "superadmin-associations-loading": "Caricamento associazioni...",
-    "superadmin-associations-modal-title": "Crea associazione",
-    "superadmin-associations-modal-user-section": "Selezione utente",
-    "superadmin-associations-modal-user-label": "Seleziona utente *",
-    "superadmin-associations-modal-user-placeholder": "Scegli un utente",
-    "superadmin-associations-modal-user-required": "La selezione dell'utente è obbligatoria",
-    "superadmin-associations-modal-structure-section": "Selezione struttura",
-    "superadmin-associations-modal-structure-label": "Seleziona struttura *",
-    "superadmin-associations-modal-structure-placeholder": "Scegli una struttura",
-    "superadmin-associations-modal-structure-required": "La selezione della struttura è obbligatoria",
-    "superadmin-associations-modal-cancel": "Annulla",
-    "superadmin-associations-modal-submit": "Crea associazione",
-    "superadmin-users-title": "Gestione utenti",
-    "superadmin-users-create": "Crea utente",
-    "superadmin-users-create-aria": "Crea un nuovo account utente",
-    "superadmin-users-search": "Cerca utenti...",
-    "superadmin-users-search-aria": "Cerca utenti per nome, username o email",
-    "superadmin-users-filter-all-roles": "Tutti i ruoli",
-    "superadmin-users-filter-aria": "Filtra gli utenti per ruolo",
-    "superadmin-users-filter-all": "Tutti",
-    "superadmin-users-filter-admin": "Amministratore",
-    "superadmin-users-filter-superadmin": "Superadmin",
-    "superadmin-users-email": "Email:",
-    "superadmin-users-phone": "Telefono:",
-    "superadmin-users-no-contact": "Nessuna informazione di contatto fornita",
-    "superadmin-users-assigned-structures": "Strutture assegnate",
-    "superadmin-users-no-structures": "Nessuna struttura assegnata",
-    "superadmin-users-edit": "Modifica",
-    "superadmin-users-reset": "Reimposta password",
-    "superadmin-users-structures": "Gestisci strutture",
-    "superadmin-users-role": "Cambia ruolo",
-    "superadmin-users-edit-aria": "Modifica utente {{name}} {{surname}}",
-    "superadmin-users-reset-aria": "Reimposta password per utente {{name}} {{surname}}",
-    "superadmin-users-structures-aria": "Gestisci strutture per utente {{name}} {{surname}}",
-    "superadmin-users-role-aria": "Cambia ruolo per utente {{name}} {{surname}}",
-    "superadmin-users-empty-title": "Nessun utente trovato",
-    "superadmin-users-empty-subtitle": "Nessun utente corrisponde ai criteri di ricerca.",
-    "superadmin-users-empty-cta": "Crea il primo utente",
-    "superadmin-users-error": "Errore: ",
-    "superadmin-users-pagination": "Mostrando da {first} a {last} di {totalRecords} utenti",
-    "superadmin-users-edit-title": "Modifica utente",
-    "superadmin-users-create-title": "Crea nuovo utente",
-    "superadmin-users-section-basic": "Informazioni di base",
-    "superadmin-users-username": "Username *",
-    "superadmin-users-username-placeholder": "Inserisci username",
-    "superadmin-users-username-required": "Username obbligatorio",
-    "superadmin-users-password": "Password *",
-    "superadmin-users-password-placeholder": "Inserisci password",
-    "superadmin-users-password-required": "Password obbligatoria",
-    "superadmin-users-section-personal": "Informazioni personali",
-    "superadmin-users-first-name": "Nome *",
-    "superadmin-users-first-name-placeholder": "Inserisci nome",
-    "superadmin-users-first-name-required": "Nome obbligatorio",
-    "superadmin-users-last-name": "Cognome *",
-    "superadmin-users-last-name-placeholder": "Inserisci cognome",
-    "superadmin-users-last-name-required": "Cognome obbligatorio",
-    "superadmin-users-section-contact": "Informazioni di contatto",
-    "superadmin-users-email-label": "Indirizzo email",
-    "superadmin-users-email-placeholder": "Inserisci indirizzo email",
-    "superadmin-users-phone-label": "Numero di telefono",
-    "superadmin-users-phone-placeholder": "Inserisci numero di telefono",
-    "superadmin-users-cancel": "Annulla",
-    "superadmin-users-update": "Aggiorna utente",
-    "superadmin-users-reset-title": "Reimposta password",
-    "superadmin-users-new-password": "Nuova password *",
-    "superadmin-users-new-password-placeholder": "Inserisci nuova password",
-    "superadmin-users-new-password-required": "Nuova password obbligatoria",
-    "superadmin-users-structures-title": "Gestisci strutture per {{name}} {{surname}}",
-    "superadmin-users-current-structures": "Strutture correnti",
-    "superadmin-users-add-structure": "Aggiungi struttura",
-    "superadmin-users-select-structure": "Seleziona struttura",
-    "superadmin-users-select-structure-placeholder": "Scegli una struttura da assegnare",
-    "superadmin-users-role-title": "Cambia ruolo per {{name}} {{surname}}",
-    "superadmin-users-current-role": "Ruolo attuale",
-    "superadmin-users-select-role": "Seleziona nuovo ruolo",
-    "superadmin-users-new-role": "Nuovo ruolo",
-    "superadmin-users-new-role-placeholder": "Seleziona un nuovo ruolo",
-    "superadmin-users-role-desc-superadmin": "Accesso completo al sistema",
-    "superadmin-users-role-desc-admin": "Accesso alla gestione delle strutture",
-    "superadmin-structures-title": "Gestione strutture",
-    "superadmin-structures-create": "Crea struttura",
-    "superadmin-structures-search": "Cerca strutture...",
-    "superadmin-structures-status-all": "Tutti gli stati",
-    "superadmin-structures-filter-all": "Tutti",
-    "superadmin-structures-filter-active": "Attive",
-    "superadmin-structures-filter-archived": "Archiviate",
-    "superadmin-structures-status-active": "Attiva",
-    "superadmin-structures-status-archived": "Archiviata",
-    "superadmin-structures-city": "Città:",
-    "superadmin-structures-address": "Indirizzo:",
-    "superadmin-structures-cin": "CIN:",
-    "superadmin-structures-edit": "Modifica",
-    "superadmin-structures-archive": "Archivia",
-    "superadmin-structures-restore": "Ripristina",
-    "superadmin-structures-pagination": "Mostrando da {first} a {last} di {totalRecords} strutture",
-    "superadmin-structures-edit-title": "Modifica struttura",
-    "superadmin-structures-create-title": "Crea nuova struttura",
-    "superadmin-structures-section-basic": "Informazioni di base",
-    "superadmin-structures-name": "Nome struttura *",
-    "superadmin-structures-name-placeholder": "Inserisci nome struttura",
-    "superadmin-structures-name-required": "Il nome della struttura è obbligatorio",
-    "superadmin-structures-city-label": "Città *",
-    "superadmin-structures-city-placeholder": "Inserisci nome città",
-    "superadmin-structures-city-required": "La città è obbligatoria",
-    "superadmin-structures-section-address": "Informazioni indirizzo",
-    "superadmin-structures-street": "Indirizzo",
-    "superadmin-structures-street-placeholder": "Inserisci indirizzo",
-    "superadmin-structures-cin-label": "CIN (Numero di identificazione aziendale)",
-    "superadmin-structures-cin-placeholder": "Inserisci CIN",
-    "superadmin-structures-section-status": "Stato",
-    "superadmin-structures-active-label": "Struttura attiva",
-    "superadmin-structures-active-hint": "Deseleziona per archiviare questa struttura",
-    "superadmin-structures-cancel": "Annulla",
-    "superadmin-structures-update": "Aggiorna struttura",
-    "dashboard-title": "Dashboard check-in remoti",
-    "dashboard-stat-total-reservations": "Prenotazioni totali",
-    "dashboard-stat-pending-approvals": "Approvazioni in sospeso",
-    "dashboard-stat-checkins-today": "Check-in oggi",
-    "dashboard-stat-checkouts-today": "Check-out oggi",
-    "dashboard-chart-title": "Panoramica check-in mensili",
-    "dashboard-chart-type": "Tipo di grafico",
-    "dashboard-retry": "Riprova",
-    "dashboard-table-pending": "Approvazioni in sospeso",
-    "dashboard-table-clear": "Cancella filtri",
-    "dashboard-filter-status": "Stato:",
-    "dashboard-filter-status-all": "Tutti gli stati",
-    "dashboard-filter-date": "Intervallo date:",
-    "dashboard-filter-date-all": "Tutte le date",
-    "dashboard-filter-room": "Camera:",
-    "dashboard-filter-room-all": "Tutte le camere",
-    "dashboard-shortcuts-title": "Scorciatoie da tastiera",
-    "dashboard-shortcuts-filter-title": "Azioni filtro",
-    "dashboard-shortcuts-filter-pending": "Filtra approvazioni in sospeso",
-    "dashboard-shortcuts-filter-clear": "Cancella tutti i filtri",
-    "dashboard-shortcuts-data-title": "Azioni dati",
-    "dashboard-shortcuts-data-retry": "Riprova caricamento dati",
-    "dashboard-shortcuts-help-title": "Aiuto",
-    "dashboard-shortcuts-help-toggle": "Mostra/nascondi scorciatoie",
-    "dashboard-shortcuts-help-close": "Chiudi finestre",
-    "dashboard-shortcuts-close": "Chiudi",
-    "dashboard-status-pending": "In sospeso",
-    "dashboard-status-approved": "Approvato",
-    "dashboard-status-declined": "Rifiutato",
-    "dashboard-status-sent-back": "Inviato al cliente",
-    "dashboard-date-today": "Oggi",
-    "dashboard-date-week": "Questa settimana",
-    "dashboard-date-month": "Questo mese",
-    "rooms-import-coming-soon": "Disponibile presto!",
-    "superadmin-associations-pagination": "Mostrando da {first} a {last} di {totalRecords} associazioni",
-    "superadmin-users-role-unknown": "Sconosciuto",
-    "superadmin-structures-na": "N/D",
-    "dashboard-error-no-reservations": "Nessuna prenotazione trovata per questa struttura",
-    "dashboard-error-load-reservations": "Impossibile caricare le prenotazioni. Riprova.",
-    "dashboard-error-load-chart": "Impossibile caricare il grafico delle prenotazioni mensili. Riprova.",
-    "dashboard-error-structure-forbidden": "Non hai accesso a questa struttura.",
-    "dashboard-error-chart-forbidden": "Impossibile caricare i dati del grafico per questa struttura.",
-    "dashboard-no-structure-title": "Nessuna struttura assegnata",
-    "dashboard-no-structure-detail": "Il tuo utente non è ancora associato a nessuna struttura. Contatta un admin.",
-    "dashboard-no-structure-error": "Nessuna struttura selezionata. Chiedi a un admin di assegnarne una.",
-    "dashboard-no-structure-chart-error": "Grafico non disponibile perché non hai una struttura assegnata.",
-    "dashboard-toast-no-reservations-title": "Nessuna prenotazione",
-    "dashboard-toast-no-reservations-detail": "Nessuna prenotazione trovata per questa struttura",
-    "dashboard-toast-load-failed-title": "Caricamento prenotazioni non riuscito",
-    "dashboard-toast-chart-load-failed-title": "Caricamento grafico non riuscito",
-    "dashboard-toast-shortcut-title": "Scorciatoia da tastiera",
-    "dashboard-toast-shortcut-pending": "Filtrate le approvazioni in sospeso",
-    "dashboard-toast-shortcut-clear": "Filtri cancellati",
-    "dashboard-toast-shortcut-retry": "Ricaricamento dati in corso",
-    "admin-menu-label": "Menu",
-    "rooms-toast-failed": "Operazione non riuscita",
-    "rooms-toast-confirmed": "Confermato",
-    "rooms-fetch-error": "Impossibile caricare le camere. Riprova o contatta l'amministratore.",
-    "rooms-update-success": "Camera aggiornata.",
-    "rooms-update-error": "Errore durante la modifica della camera. Riprova.",
-    "rooms-delete-confirm-message": "Vuoi eliminare questo record?",
-    "rooms-delete-confirm-header": "Zona pericolosa",
-    "rooms-delete-confirm-reject": "Annulla",
-    "rooms-delete-confirm-accept": "Elimina",
-    "rooms-delete-error": "Errore durante l'eliminazione della camera.",
-    "rooms-delete-success": "Camera eliminata con successo.",
-    "rooms-missing-structure-title": "Struttura mancante",
-    "rooms-missing-structure-detail": "Seleziona una struttura prima di creare una camera.",
-    "rooms-create-success": "Nuova camera aggiunta.",
-    "rooms-create-error": "Errore durante l'aggiunta della camera.",
-    "rooms-status-error": "Impossibile aggiornare lo stato della camera. Riprova.",
-    "rooms-csv-empty-title": "Nessuna riga",
-    "rooms-csv-empty-detail": "Nessuna camera valida trovata nel CSV.",
-    "rooms-csv-skip-title": "Saltato",
-    "rooms-csv-skip-detail": "Impossibile importare la camera {{name}}.",
-    "rooms-csv-read-error": "Impossibile leggere il file CSV."
+    "cta": {
+      "title": "Offri arrivi senza sforzo iniziando oggi.",
+      "description": "Unisciti ai primi 20 team per sbloccare il piano Launch gratis o esplora self-hosting per controllo completo."
+    },
+    "footer": {
+      "description": "Dalla cattura documenti alla reportistica conforme—tutto ciò che i leader hospitality necessitano per deliziare ogni arrivo.",
+      "badges": {
+        "soc2": "SOC 2-ready",
+        "encrypted": "Dati crittografati end-to-end"
+      },
+      "columns": {
+        "product": {
+          "heading": "Prodotto",
+          "links": {
+            "roadmap": "Roadmap",
+            "security": "Sicurezza",
+            "status": "Stato"
+          }
+        },
+        "company": {
+          "heading": "Azienda",
+          "links": {
+            "about": "Chi siamo",
+            "careers": "Carriere",
+            "press": "Kit stampa"
+          }
+        },
+        "resources": {
+          "heading": "Risorse",
+          "links": {
+            "docs": "Documentazione",
+            "api": "API",
+            "slack": "Community Slack",
+            "pricing": "Prezzi",
+            "faq": "FAQ"
+          }
+        }
+      },
+      "privacy": "Privacy Policy",
+      "terms": "Termini",
+      "support": "Supporto",
+      "copyright": "© {{year}} Remote Check-in Labs. Tutti i diritti riservati."
+    },
+    "stickyCta": {
+      "message": "Il piano Launch è gratis per i primi 20 team hospitality.",
+      "close": "Chiudi offerta"
+    },
+    "mobileNav": {
+      "overview": "Panoramica",
+      "pricing": "Prezzi",
+      "faq": "FAQ"
+    },
+    "resources": {
+      "eyebrow": "Continua l'esplorazione",
+      "title": "Risorse per distribuire il check-in da remoto nel tuo team.",
+      "cards": {
+        "playbook": {
+          "title": "Playbook: Automatizzare la compliance degli ospiti",
+          "description": "Scarica la guida passo-passo che gli operatori usano per ridurre la burocrazia restando pronti ai controlli.",
+          "action": "Scarica il playbook"
+        },
+        "walkthrough": {
+          "title": "Walkthrough on-demand",
+          "description": "Guarda un tour di 12 minuti con flussi ospite, dashboard amministrative e automazione Portale Alloggi.",
+          "action": "Guarda la demo"
+        },
+        "docs": {
+          "title": "Documentazione API e integrazioni",
+          "description": "Esplora API REST, webhook e template per collegare Remote Check-in al tuo stack.",
+          "action": "Consulta i docs"
+        }
+      }
+    }
+  },
+  "pricingDetails": {
+    "hero": {
+      "eyebrow": "Prezzi pensati per crescere",
+      "title": "Scegli l'infrastruttura di check-in remoto che scala con ogni struttura.",
+      "subtitle": "Piani trasparenti con ospiti illimitati, onboarding flessibile e automazioni di compliance integrate.",
+      "billingLabel": "Ciclo di fatturazione",
+      "monthly": "Mensile",
+      "annual": "Annuale",
+      "annualBadge": "2 mesi in regalo"
+    },
+    "pricing": {
+      "currencySymbol": "€",
+      "perMonth": "/mese",
+      "perYear": "/anno",
+      "free": "Gratis",
+      "save": "Risparmia {{ amount }}"
+    },
+    "plans": {
+      "launch": {
+        "name": "Launch",
+        "description": "Perfetto per le strutture indipendenti che digitalizzano il check-in per la prima volta.",
+        "features": {
+          "unlimited": "Strutture e prenotazioni illimitate",
+          "journey": "Percorso digitale dell'ospite e acquisizione documenti",
+          "emails": "Email di conferma e promemoria",
+          "community": "Supporto community e voto roadmap"
+        },
+        "cta": "Inizia gratis"
+      },
+      "growth": {
+        "name": "Growth",
+        "description": "Per boutique hotel e appartamenti serviti che scalano le operazioni remote.",
+        "features": {
+          "everythingLaunch": "Tutto del piano Launch",
+          "portal": "Portale ospite personalizzabile e template multilingua",
+          "sms": "Promemoria SMS e sincronizzazione PMS bidirezionale",
+          "support": "Supporto prioritario in-app ed email"
+        },
+        "cta": "Parla con noi"
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "description": "Programmi su misura per gruppi multi-struttura con esigenze di governance e integrazione.",
+        "features": {
+          "everythingGrowth": "Tutto del piano Growth",
+          "success": "Customer success dedicato e servizi di lancio",
+          "analytics": "Analitiche avanzate e dashboard personalizzate",
+          "compliance": "Workflow di compliance per regione e SSO"
+        },
+        "cta": "Prenota una call strategica"
+      }
+    },
+    "comparison": {
+      "title": "Confronta i piani nel dettaglio",
+      "subtitle": "Scopri cosa è incluso e scegli gli strumenti operativi più adatti al tuo portfolio.",
+      "header": {
+        "feature": "Funzionalità",
+        "launch": "Launch",
+        "growth": "Growth",
+        "enterprise": "Enterprise"
+      },
+      "rows": {
+        "properties": "Strutture e prenotazioni",
+        "documents": "Acquisizione documenti e firme",
+        "portale": "Automazione Portale Alloggi",
+        "sms": "Promemoria SMS e link WhatsApp",
+        "analytics": "Analitiche avanzate ed esportazione dati",
+        "successManager": "Customer success manager"
+      },
+      "value": {
+        "unlimited": "Illimitato",
+        "limited": "Limitato",
+        "included": "Incluso",
+        "notIncluded": "—"
+      }
+    },
+    "addons": {
+      "title": "Ti serve qualcosa in più?",
+      "subtitle": "Combina gli add-on con qualsiasi piano per adattare l'esperienza in ogni mercato.",
+      "handbook": {
+        "title": "Manuale digitale per gli ospiti",
+        "description": "Micro-sito personalizzato per ogni prenotazione con upsell e consigli locali.",
+        "price": "€25 / struttura / mese"
+      },
+      "integrations": {
+        "title": "Integrazioni personalizzate",
+        "description": "Costruiamo workflow su misura per PMS, CRM e strumenti di loyalty cruciali per la tua operatività.",
+        "price": "Da €1.200 (una tantum)"
+      },
+      "concierge": {
+        "title": "Team concierge multilingue",
+        "description": "Un concierge distribuito disponibile 24/7 che gestisce le domande d'arrivo per tuo conto.",
+        "price": "€150 / mese / struttura"
+      }
+    },
+    "faq": {
+      "title": "FAQ sui prezzi",
+      "subtitle": "Le risposte che i team chiedono prima di adottare Remote Check-in.",
+      "mixPlans": {
+        "question": "Possiamo usare piani diversi per struttura?",
+        "answer": "Sì. Puoi combinare piani differenti e ricevere una fattura consolidata ogni mese. Enterprise offre governance sul rollout."
+      },
+      "perGuest": {
+        "question": "Applicate un costo per ospite?",
+        "answer": "No. Ogni piano include ospiti e prenotazioni illimitati. Paghi solo per il set di funzionalità più adatto alle tue operazioni."
+      },
+      "annualDiscount": {
+        "question": "Come funziona lo sconto annuale?",
+        "answer": "Il pagamento annuale ti regala due mesi (paghi 10, usi 12). Puoi cambiare piano in qualsiasi momento con fatturazione pro-rata."
+      },
+      "onboarding": {
+        "question": "L'onboarding è incluso?",
+        "answer": "Launch include una libreria self-service. Growth ed Enterprise prevedono sessioni dedicate e supporto alla migrazione."
+      }
+    },
+    "cta": {
+      "title": "Pronto a offrire arrivi straordinari?",
+      "subtitle": "Prenota una walkthrough con il nostro team o attiva gratis il piano Launch.",
+      "primary": "Parla con noi",
+      "secondary": "Attiva Launch gratis"
+    }
+  },
+  "faq": {
+    "nav": {
+      "home": "Home",
+      "pricing": "Prezzi"
+    },
+    "hero": {
+      "eyebrow": "Domande Frequenti",
+      "title": "Tutto quello che devi sapere su Remote Check-in",
+      "description": "Trova risposte alle domande comuni su configurazione, funzionalità, prezzi, requisiti tecnici, conformità e supporto."
+    },
+    "categories": {
+      "gettingStarted": {
+        "title": "Iniziare",
+        "items": {
+          "setup": {
+            "question": "Come configuro Remote Check-in per la mia struttura?",
+            "answer": "Configurare Remote Check-in è semplice. Dopo la registrazione, collegherai il tuo PMS (Sistema di Gestione Proprietà) o caricherai manualmente le liste degli ospiti. Configura i tuoi modelli email, invita i membri del team e sei pronto per iniziare a inviare inviti di check-in agli ospiti. Il nostro team di onboarding fornisce una guida passo-passo e modelli di migrazione per rendere il processo fluido."
+          },
+          "onboarding": {
+            "question": "Quale supporto per l'onboarding è incluso?",
+            "answer": "Il piano Launch include l'accesso alla nostra libreria di modelli self-service e al supporto della community. I clienti Growth ed Enterprise ricevono sessioni di onboarding dedicate con il nostro team, assistenza per la migrazione e supporto prioritario. Forniamo playbook collaudati, guide di integrazione e best practice per garantire un lancio senza problemi."
+          },
+          "timeToLaunch": {
+            "question": "Quanto velocemente possiamo andare live?",
+            "answer": "La maggior parte dei clienti va live in meno di due settimane. I tempi dipendono dalla complessità dell'integrazione PMS e dalle esigenze di personalizzazione. Le configurazioni semplici possono essere operative in pochi giorni, mentre le implementazioni personalizzate possono richiedere 2-4 settimane. Il nostro team lavora con te per stabilire una tempistica realistica in base alle tue esigenze."
+          },
+          "training": {
+            "question": "È incluso l'addestramento del personale?",
+            "answer": "Sì, forniamo risorse di formazione complete inclusi tutorial video, documentazione e guide alle best practice. I piani Growth ed Enterprise includono sessioni di formazione live per il tuo team. Offriamo anche supporto continuo per aiutare il tuo personale a diventare competente con la piattaforma."
+          }
+        }
+      },
+      "features": {
+        "title": "Funzionalità",
+        "items": {
+          "documents": {
+            "question": "Quali tipi di documenti possono caricare gli ospiti?",
+            "answer": "Gli ospiti possono caricare documenti di identità inclusi passaporti, carte d'identità nazionali, patenti di guida e altri documenti d'identità rilasciati dal governo. Il sistema supporta immagini frontali e posteriori dei documenti, più un selfie con il documento per la verifica dell'identità. Tutti i caricamenti sono crittografati e archiviati in modo sicuro."
+          },
+          "languages": {
+            "question": "Quali lingue sono supportate?",
+            "answer": "Remote Check-in supporta 12+ lingue inclusi inglese, italiano, spagnolo, francese, tedesco e altro. L'interfaccia ospite rileva automaticamente la lingua del browser dell'utente o consente la selezione manuale. Puoi anche personalizzare le traduzioni per la terminologia specifica del tuo brand."
+          },
+          "mobile": {
+            "question": "Gli ospiti hanno bisogno di un'app mobile?",
+            "answer": "Non è richiesta un'app mobile. Gli ospiti completano il processo di check-in tramite qualsiasi browser web sul loro smartphone, tablet o computer. L'interfaccia è ottimizzata per dispositivi mobili con validazione in tempo reale, integrazione della fotocamera per la cattura dei documenti e supporto della coda offline per aree con connettività limitata."
+          },
+          "notifications": {
+            "question": "Come ricevono gli ospiti gli inviti al check-in?",
+            "answer": "Gli ospiti ricevono inviti personalizzati via email o SMS (disponibile nei piani Growth ed Enterprise). Gli inviti includono un link sicuro per completare il loro check-in. Puoi personalizzare i modelli email con il tuo branding, informazioni sulla struttura e suggerimenti locali. I promemoria automatizzati vengono inviati per check-in incompleti."
+          },
+          "customization": {
+            "question": "Posso personalizzare l'esperienza dell'ospite?",
+            "answer": "Sì, i piani Growth ed Enterprise includono portali ospiti personalizzabili dove puoi personalizzare colori, loghi, messaggi e aggiungere contenuti specifici della struttura. Puoi anche creare flussi di lavoro personalizzati, aggiungere opportunità di upsell e integrare con i tuoi sistemi esistenti per un'esperienza di marca senza soluzione di continuità."
+          }
+        }
+      },
+      "pricing": {
+        "title": "Prezzi e Fatturazione",
+        "items": {
+          "plans": {
+            "question": "Qual è la differenza tra i piani Launch, Growth ed Enterprise?",
+            "answer": "Launch è gratuito per i primi 20 abbonati e include funzionalità principali come cattura documenti, email automatizzate e proprietà illimitate. Growth aggiunge portali personalizzabili, notifiche SMS, integrazioni PMS e supporto prioritario. Enterprise offre implementazioni personalizzate, success manager dedicati, analisi avanzate, flussi di lavoro di conformità regionali e SSO."
+          },
+          "billing": {
+            "question": "Come funziona la fatturazione?",
+            "answer": "Puoi scegliere fatturazione mensile o annuale. La fatturazione annuale ti fa risparmiare 2 mesi (paga per 10, ottieni 12). Tutti i piani includono ospiti e prenotazioni illimitate—paghi solo in base al set di funzionalità. I piani Enterprise hanno prezzi personalizzati in base alle tue esigenze specifiche. Puoi aggiornare o degradare in qualsiasi momento con fatturazione proporzionale."
+          },
+          "cancellation": {
+            "question": "Posso cancellare il mio abbonamento in qualsiasi momento?",
+            "answer": "Sì, puoi cancellare il tuo abbonamento in qualsiasi momento. Non ci sono contratti a lungo termine o commissioni di cancellazione. Quando cancelli, manterrai l'accesso fino alla fine del periodo di fatturazione corrente. I tuoi dati rimangono disponibili per l'esportazione per 30 giorni dopo la cancellazione."
+          },
+          "trial": {
+            "question": "C'è una prova gratuita?",
+            "answer": "Il piano Launch è gratuito per i primi 20 team hospitality, che funge da nostro livello gratuito. Per i piani Growth ed Enterprise, offriamo una prova gratuita di 14 giorni in modo da poter esplorare tutte le funzionalità. Nessuna carta di credito richiesta per il periodo di prova."
+          },
+          "refund": {
+            "question": "Qual è la vostra politica di rimborso?",
+            "answer": "Offriamo una garanzia di rimborso di 30 giorni per tutti i piani a pagamento. Se non sei soddisfatto entro i primi 30 giorni, contatta il nostro team di supporto per un rimborso completo. Dopo 30 giorni, i rimborsi sono gestiti caso per caso per gli abbonamenti annuali."
+          }
+        }
+      },
+      "technical": {
+        "title": "Tecnico e Integrazione",
+        "items": {
+          "integration": {
+            "question": "Con quali sistemi PMS vi integrate?",
+            "answer": "Offriamo integrazioni native con i principali provider PMS e supportiamo la sincronizzazione bidirezionale tramite API REST e webhook. Le integrazioni popolari includono sistemi come Mews, Cloudbeds, Little Hotelier e molti altri. Possiamo anche costruire integrazioni personalizzate per il tuo PMS specifico attraverso il nostro piano Enterprise."
+          },
+          "api": {
+            "question": "Fornite accesso API?",
+            "answer": "Sì, tutti i piani includono l'accesso API. Il nostro ecosistema API REST e webhook ti consente di costruire integrazioni personalizzate, automatizzare i flussi di lavoro e collegare Remote Check-in con i tuoi strumenti esistenti. Forniamo documentazione API completa, helper di autenticazione e codice di esempio per iniziare."
+          },
+          "selfHost": {
+            "question": "Posso auto-ospitare Remote Check-in?",
+            "answer": "Sì, offriamo opzioni di self-hosting per il controllo completo sulla tua infrastruttura e residenza dei dati. Puoi distribuire sui tuoi server utilizzando contenitori Docker e script infrastructure-as-code. Supportiamo anche distribuzioni ibride in cui selezionate proprietà si sincronizzano con il nostro cloud mentre altre rimangono in locale."
+          },
+          "requirements": {
+            "question": "Quali sono i requisiti tecnici?",
+            "answer": "Remote Check-in è un SaaS basato su cloud che non richiede installazione da parte tua. Gli ospiti hanno solo bisogno di un browser web moderno e connessione internet. Per il self-hosting, avrai bisogno di server in grado di eseguire contenitori Docker, storage compatibile S3 e infrastruttura web standard. Forniamo requisiti di infrastruttura dettagliati nella nostra guida di distribuzione."
+          },
+          "uptime": {
+            "question": "Qual è la vostra garanzia di uptime?",
+            "answer": "Manteniamo un SLA di uptime del 99,9% per il nostro servizio ospitato. La nostra infrastruttura è costruita su sistemi ridondanti con failover automatico, backup regolari e monitoraggio 24/7. I clienti Enterprise ricevono garanzie SLA aggiuntive e opzioni di infrastruttura dedicate per distribuzioni mission-critical."
+          }
+        }
+      },
+      "compliance": {
+        "title": "Sicurezza e Conformità",
+        "items": {
+          "gdpr": {
+            "question": "Remote Check-in è conforme al GDPR?",
+            "answer": "Sì, Remote Check-in è completamente conforme al GDPR. Implementiamo crittografia dei dati, controlli di accesso, diritto alla cancellazione e tutte le misure di privacy richieste. I dati degli ospiti sono crittografati end-to-end e mantieni la piena proprietà dei dati. Puoi esportare o eliminare i dati degli ospiti in qualsiasi momento tramite la dashboard di amministrazione."
+          },
+          "portaleAlloggi": {
+            "question": "Si integra con Portale Alloggi?",
+            "answer": "Sì, Remote Check-in include l'integrazione automatizzata con il Portale Alloggi italiano (registro delle strutture ricettive). Il sistema invia automaticamente i dati degli ospiti richiesti nel formato corretto, garantendo la conformità con i regolamenti hospitality italiani. Questa funzionalità è disponibile in tutti i piani e può essere configurata nelle tue impostazioni."
+          },
+          "dataRetention": {
+            "question": "Per quanto tempo vengono archiviati i dati degli ospiti?",
+            "answer": "Controlli le politiche di conservazione dei dati attraverso le tue impostazioni di amministrazione. Per impostazione predefinita, i dati vengono conservati secondo i regolamenti hospitality locali (tipicamente 5-7 anni per scopi di conformità). Puoi configurare programmi di eliminazione automatica o eliminare manualmente i dati. Tutte le eliminazioni sono permanenti e irreversibili."
+          },
+          "audit": {
+            "question": "Sono disponibili tracce di audit?",
+            "answer": "Sì, tutti i piani includono log di audit completi che tracciano azioni utente, accesso ai dati, modifiche al sistema e invii di conformità. I piani Enterprise includono funzionalità di audit avanzate con reporting dettagliato, capacità di esportazione e integrazione con i tuoi sistemi di audit esistenti. Tutti i log sono a prova di manomissione e conservati secondo le tue politiche di conservazione."
+          },
+          "regions": {
+            "question": "Quali regioni e regolamenti sono supportati?",
+            "answer": "Supportiamo i requisiti di conformità per più regioni inclusi Italia (Portale Alloggi), GDPR (Unione Europea) e altri principali mercati hospitality. I nostri moduli di conformità sono configurabili e aggiornati regolarmente per riflettere i regolamenti attuali. I clienti Enterprise possono richiedere flussi di lavoro di conformità personalizzati per requisiti regionali specifici."
+          }
+        }
+      },
+      "support": {
+        "title": "Supporto e Aiuto",
+        "items": {
+          "contact": {
+            "question": "Come posso contattare il supporto?",
+            "answer": "I clienti del piano Launch possono accedere ai forum di supporto della community e al supporto email. I clienti Growth ed Enterprise ricevono supporto prioritario in-app ed email con tempi di risposta più rapidi. I clienti Enterprise ricevono anche un success manager dedicato. Per problemi urgenti, i clienti Enterprise hanno accesso al supporto telefonico durante l'orario lavorativo."
+          },
+          "responseTime": {
+            "question": "Quali sono i vostri tempi di risposta al supporto?",
+            "answer": "Piano Launch: Supporto community e risposte email entro 48 ore. Piano Growth: Supporto email prioritario con risposte entro 24 ore nei giorni lavorativi. Piano Enterprise: Supporto dedicato con risposte entro 4 ore durante l'orario lavorativo, più un success manager dedicato per assistenza proattiva."
+          },
+          "documentation": {
+            "question": "Dove posso trovare la documentazione?",
+            "answer": "La documentazione completa è disponibile nel nostro centro assistenza, che copre guide di configurazione, riferimenti API, tutorial di integrazione, best practice e risoluzione dei problemi. Tutti i clienti hanno accesso a tutorial video, guide passo-passo e la nostra knowledge base. I clienti Enterprise ricevono documentazione personalizzata per la loro implementazione specifica."
+          },
+          "community": {
+            "question": "C'è una community o un forum?",
+            "answer": "Sì, abbiamo una community attiva dove gli utenti condividono suggerimenti, fanno domande e votano sulle funzionalità della roadmap del prodotto. I clienti del piano Launch hanno pieno accesso ai forum della community. Organizziamo anche webinar regolari, orari di ufficio e incontri utenti per aiutarti a ottenere il massimo da Remote Check-in."
+          }
+        }
+      }
+    },
+    "cta": {
+      "title": "Hai ancora domande?",
+      "description": "Non trovi quello che cerchi? Il nostro team è qui per aiutarti a iniziare o rispondere a qualsiasi domanda specifica sul tuo caso d'uso.",
+      "primaryAction": "Inizia",
+      "secondaryAction": "Contatta il Supporto"
+    }
+  },
+  "admin-menu-operations": "Operazioni",
+  "admin-menu-settings": "Impostazioni",
+  "admin-menu-superadmin": "Pannello superadmin",
+  "admin-menu-quick-actions": "Azioni rapide",
+  "admin-quick-create-reservation": "Crea prenotazione",
+  "admin-quick-add-room": "Aggiungi stanza",
+  "reservation-section-title": "Prenotazione",
+  "dates-section-title": "Date",
+  "guest-section-title": "Dettagli ospite",
+  "room-section-title": "Selezione stanza",
+  "date-helper": "Orari mostrati nel fuso orario locale.",
+  "rooms-subtitle": "Gestisci inventario e disponibilità camere.",
+  "rooms-import-csv": "Importa CSV",
+  "rooms-select-structure-notice": "Seleziona una struttura prima di creare una stanza.",
+  "rooms-guests-label": "ospiti",
+  "dashboard-health-title": "Riepilogo stato",
+  "dashboard-health-subtitle": "Elementi da attenzionare",
+  "dashboard-health-pending": "Approvazioni in sospeso",
+  "dashboard-health-checkins": "Check-in di oggi",
+  "dashboard-health-checkouts": "Check-out di oggi",
+  "dashboard-recent-title": "Attività recente",
+  "dashboard-recent-subtitle": "Ultimi arrivi e aggiornamenti",
+  "dashboard-recent-empty": "Non c'è ancora attività recente.",
+  "dashboard-chart-loading": "Caricamento grafico...",
+  "dashboard-filter-pending": "In sospeso",
+  "dashboard-filter-approved": "Approvate",
+  "dashboard-filter-today": "Oggi",
+  "dashboard-filter-week": "Ultimi 7 giorni",
+  "dashboard-filter-clear": "Pulisci",
+  "rooms-status-label": "Stato",
+  "rooms-active-label": "Attivo",
+  "rooms-inactive-label": "Inattivo",
+  "rooms-search-placeholder": "Cerca stanze",
+  "rooms-empty-title": "Nessuna stanza",
+  "rooms-empty-subtitle": "Aggiungi la prima stanza per iniziare a ricevere prenotazioni.",
+  "rooms-capacity-filter-label": "Capacità",
+  "rooms-status-filter-label": "Stato",
+  "rooms-all-statuses": "Tutti gli stati",
+  "rooms-all-capacities": "Tutte le capacità",
+  "rooms-capacity-1-2": "1-2 ospiti",
+  "rooms-capacity-3-4": "3-4 ospiti",
+  "rooms-capacity-5-6": "5-6 ospiti",
+  "rooms-capacity-7-plus": "7+ ospiti",
+  "superadmin-loading": "Caricamento pannello superadmin...",
+  "superadmin-hero-eyebrow": "Superadmin",
+  "superadmin-hero-title": "Controllo operativo per il tuo portfolio",
+  "superadmin-hero-subtitle": "Monitora l'attività, gestisci le strutture e mantieni gli accessi allineati in un unico posto.",
+  "superadmin-hero-cta-structure": "Nuova struttura",
+  "superadmin-hero-cta-user": "Nuovo utente",
+  "superadmin-nav-dashboard": "Dashboard",
+  "superadmin-nav-structures": "Strutture",
+  "superadmin-nav-users": "Utenti",
+  "superadmin-nav-associations": "Associazioni",
+  "superadmin-dashboard-eyebrow": "Panoramica",
+  "superadmin-dashboard-title": "Centro di comando superadmin",
+  "superadmin-dashboard-subtitle": "Tieni sotto controllo il portfolio e agisci dove i team hanno bisogno di supporto.",
+  "superadmin-dashboard-stat-total-structures": "Strutture totali",
+  "superadmin-dashboard-stat-active-structures": "Strutture attive",
+  "superadmin-dashboard-stat-archived-structures": "Strutture archiviate",
+  "superadmin-dashboard-stat-total-users": "Utenti totali",
+  "superadmin-dashboard-stat-unassigned-admins": "Admin non assegnati",
+  "superadmin-dashboard-stat-total-reservations": "Prenotazioni totali",
+  "superadmin-dashboard-fast-actions-title": "Azioni rapide",
+  "superadmin-dashboard-fast-actions-subtitle": "Scorciatoie operative più usate.",
+  "superadmin-dashboard-action-structures": "Gestisci strutture",
+  "superadmin-dashboard-action-users": "Rivedi utenti",
+  "superadmin-dashboard-action-associations": "Verifica associazioni",
+  "superadmin-dashboard-checklist-title": "Checklist operativa",
+  "superadmin-dashboard-checklist-subtitle": "Mantieni la copertura allineata per ogni struttura.",
+  "superadmin-dashboard-checklist-item-1": "Conferma che ogni struttura attiva abbia un admin assegnato.",
+  "superadmin-dashboard-checklist-item-2": "Rivedi gli account inattivi e archiviali se necessario.",
+  "superadmin-dashboard-checklist-item-3": "Verifica che le nuove strutture siano collegate a un admin principale.",
+  "superadmin-dashboard-loading": "Caricamento dati dashboard...",
+  "superadmin-dashboard-error": "Errore durante il caricamento della dashboard:",
+  "superadmin-associations-title": "Associazioni utente-struttura",
+  "superadmin-associations-filter-user": "Tutti gli utenti",
+  "superadmin-associations-filter-structure": "Tutte le strutture",
+  "superadmin-associations-table-title": "Associazioni utente-struttura",
+  "superadmin-associations-total": "totale",
+  "superadmin-associations-search": "Cerca associazioni...",
+  "superadmin-associations-selected": "selezionati",
+  "superadmin-associations-export-selected": "Esporta selezionati",
+  "superadmin-associations-delete-selected": "Elimina selezionati",
+  "superadmin-associations-export-all": "Esporta tutti",
+  "superadmin-associations-create": "Crea associazione",
+  "superadmin-associations-col-user": "Utente",
+  "superadmin-associations-col-username": "Username",
+  "superadmin-associations-col-structure": "Struttura",
+  "superadmin-associations-col-city": "Città",
+  "superadmin-associations-col-status": "Stato",
+  "superadmin-associations-col-actions": "Azioni",
+  "superadmin-associations-status-active": "Attivo",
+  "superadmin-associations-remove": "Rimuovi associazione",
+  "superadmin-associations-empty-search": "Nessuna associazione trovata con questi criteri di ricerca.",
+  "superadmin-associations-empty-title": "Nessuna associazione trovata",
+  "superadmin-associations-empty-subtitle": "Nessuna associazione utente-struttura corrisponde ai filtri attuali.",
+  "superadmin-associations-empty-cta": "Crea la prima associazione",
+  "superadmin-associations-loading": "Caricamento associazioni...",
+  "superadmin-associations-modal-title": "Crea associazione",
+  "superadmin-associations-modal-user-section": "Selezione utente",
+  "superadmin-associations-modal-user-label": "Seleziona utente *",
+  "superadmin-associations-modal-user-placeholder": "Scegli un utente",
+  "superadmin-associations-modal-user-required": "La selezione dell'utente è obbligatoria",
+  "superadmin-associations-modal-structure-section": "Selezione struttura",
+  "superadmin-associations-modal-structure-label": "Seleziona struttura *",
+  "superadmin-associations-modal-structure-placeholder": "Scegli una struttura",
+  "superadmin-associations-modal-structure-required": "La selezione della struttura è obbligatoria",
+  "superadmin-associations-modal-cancel": "Annulla",
+  "superadmin-associations-modal-submit": "Crea associazione",
+  "superadmin-users-title": "Gestione utenti",
+  "superadmin-users-create": "Crea utente",
+  "superadmin-users-create-aria": "Crea un nuovo account utente",
+  "superadmin-users-search": "Cerca utenti...",
+  "superadmin-users-search-aria": "Cerca utenti per nome, username o email",
+  "superadmin-users-filter-all-roles": "Tutti i ruoli",
+  "superadmin-users-filter-aria": "Filtra gli utenti per ruolo",
+  "superadmin-users-filter-all": "Tutti",
+  "superadmin-users-filter-admin": "Amministratore",
+  "superadmin-users-filter-superadmin": "Superadmin",
+  "superadmin-users-email": "Email:",
+  "superadmin-users-phone": "Telefono:",
+  "superadmin-users-no-contact": "Nessuna informazione di contatto fornita",
+  "superadmin-users-assigned-structures": "Strutture assegnate",
+  "superadmin-users-no-structures": "Nessuna struttura assegnata",
+  "superadmin-users-edit": "Modifica",
+  "superadmin-users-reset": "Reimposta password",
+  "superadmin-users-structures": "Gestisci strutture",
+  "superadmin-users-role": "Cambia ruolo",
+  "superadmin-users-edit-aria": "Modifica utente {{name}} {{surname}}",
+  "superadmin-users-reset-aria": "Reimposta password per utente {{name}} {{surname}}",
+  "superadmin-users-structures-aria": "Gestisci strutture per utente {{name}} {{surname}}",
+  "superadmin-users-role-aria": "Cambia ruolo per utente {{name}} {{surname}}",
+  "superadmin-users-empty-title": "Nessun utente trovato",
+  "superadmin-users-empty-subtitle": "Nessun utente corrisponde ai criteri di ricerca.",
+  "superadmin-users-empty-cta": "Crea il primo utente",
+  "superadmin-users-error": "Errore: ",
+  "superadmin-users-pagination": "Mostrando da {first} a {last} di {totalRecords} utenti",
+  "superadmin-users-edit-title": "Modifica utente",
+  "superadmin-users-create-title": "Crea nuovo utente",
+  "superadmin-users-section-basic": "Informazioni di base",
+  "superadmin-users-username": "Username *",
+  "superadmin-users-username-placeholder": "Inserisci username",
+  "superadmin-users-username-required": "Username obbligatorio",
+  "superadmin-users-password": "Password *",
+  "superadmin-users-password-placeholder": "Inserisci password",
+  "superadmin-users-password-required": "Password obbligatoria",
+  "superadmin-users-section-personal": "Informazioni personali",
+  "superadmin-users-first-name": "Nome *",
+  "superadmin-users-first-name-placeholder": "Inserisci nome",
+  "superadmin-users-first-name-required": "Nome obbligatorio",
+  "superadmin-users-last-name": "Cognome *",
+  "superadmin-users-last-name-placeholder": "Inserisci cognome",
+  "superadmin-users-last-name-required": "Cognome obbligatorio",
+  "superadmin-users-section-contact": "Informazioni di contatto",
+  "superadmin-users-email-label": "Indirizzo email",
+  "superadmin-users-email-placeholder": "Inserisci indirizzo email",
+  "superadmin-users-phone-label": "Numero di telefono",
+  "superadmin-users-phone-placeholder": "Inserisci numero di telefono",
+  "superadmin-users-cancel": "Annulla",
+  "superadmin-users-update": "Aggiorna utente",
+  "superadmin-users-reset-title": "Reimposta password",
+  "superadmin-users-new-password": "Nuova password *",
+  "superadmin-users-new-password-placeholder": "Inserisci nuova password",
+  "superadmin-users-new-password-required": "Nuova password obbligatoria",
+  "superadmin-users-structures-title": "Gestisci strutture per {{name}} {{surname}}",
+  "superadmin-users-current-structures": "Strutture correnti",
+  "superadmin-users-add-structure": "Aggiungi struttura",
+  "superadmin-users-select-structure": "Seleziona struttura",
+  "superadmin-users-select-structure-placeholder": "Scegli una struttura da assegnare",
+  "superadmin-users-role-title": "Cambia ruolo per {{name}} {{surname}}",
+  "superadmin-users-current-role": "Ruolo attuale",
+  "superadmin-users-select-role": "Seleziona nuovo ruolo",
+  "superadmin-users-new-role": "Nuovo ruolo",
+  "superadmin-users-new-role-placeholder": "Seleziona un nuovo ruolo",
+  "superadmin-users-role-desc-superadmin": "Accesso completo al sistema",
+  "superadmin-users-role-desc-admin": "Accesso alla gestione delle strutture",
+  "superadmin-structures-title": "Gestione strutture",
+  "superadmin-structures-create": "Crea struttura",
+  "superadmin-structures-search": "Cerca strutture...",
+  "superadmin-structures-status-all": "Tutti gli stati",
+  "superadmin-structures-filter-all": "Tutti",
+  "superadmin-structures-filter-active": "Attive",
+  "superadmin-structures-filter-archived": "Archiviate",
+  "superadmin-structures-status-active": "Attiva",
+  "superadmin-structures-status-archived": "Archiviata",
+  "superadmin-structures-city": "Città:",
+  "superadmin-structures-address": "Indirizzo:",
+  "superadmin-structures-cin": "CIN:",
+  "superadmin-structures-edit": "Modifica",
+  "superadmin-structures-archive": "Archivia",
+  "superadmin-structures-restore": "Ripristina",
+  "superadmin-structures-pagination": "Mostrando da {first} a {last} di {totalRecords} strutture",
+  "superadmin-structures-edit-title": "Modifica struttura",
+  "superadmin-structures-create-title": "Crea nuova struttura",
+  "superadmin-structures-section-basic": "Informazioni di base",
+  "superadmin-structures-name": "Nome struttura *",
+  "superadmin-structures-name-placeholder": "Inserisci nome struttura",
+  "superadmin-structures-name-required": "Il nome della struttura è obbligatorio",
+  "superadmin-structures-city-label": "Città *",
+  "superadmin-structures-city-placeholder": "Inserisci nome città",
+  "superadmin-structures-city-required": "La città è obbligatoria",
+  "superadmin-structures-section-address": "Informazioni indirizzo",
+  "superadmin-structures-street": "Indirizzo",
+  "superadmin-structures-street-placeholder": "Inserisci indirizzo",
+  "superadmin-structures-cin-label": "CIN (Numero di identificazione aziendale)",
+  "superadmin-structures-cin-placeholder": "Inserisci CIN",
+  "superadmin-structures-section-status": "Stato",
+  "superadmin-structures-active-label": "Struttura attiva",
+  "superadmin-structures-active-hint": "Deseleziona per archiviare questa struttura",
+  "superadmin-structures-cancel": "Annulla",
+  "superadmin-structures-update": "Aggiorna struttura",
+  "dashboard-title": "Dashboard check-in remoti",
+  "dashboard-stat-total-reservations": "Prenotazioni totali",
+  "dashboard-stat-pending-approvals": "Approvazioni in sospeso",
+  "dashboard-stat-checkins-today": "Check-in oggi",
+  "dashboard-stat-checkouts-today": "Check-out oggi",
+  "dashboard-chart-title": "Panoramica check-in mensili",
+  "dashboard-chart-type": "Tipo di grafico",
+  "dashboard-retry": "Riprova",
+  "dashboard-table-pending": "Approvazioni in sospeso",
+  "dashboard-table-clear": "Cancella filtri",
+  "dashboard-filter-status": "Stato:",
+  "dashboard-filter-status-all": "Tutti gli stati",
+  "dashboard-filter-date": "Intervallo date:",
+  "dashboard-filter-date-all": "Tutte le date",
+  "dashboard-filter-room": "Camera:",
+  "dashboard-filter-room-all": "Tutte le camere",
+  "dashboard-shortcuts-title": "Scorciatoie da tastiera",
+  "dashboard-shortcuts-filter-title": "Azioni filtro",
+  "dashboard-shortcuts-filter-pending": "Filtra approvazioni in sospeso",
+  "dashboard-shortcuts-filter-clear": "Cancella tutti i filtri",
+  "dashboard-shortcuts-data-title": "Azioni dati",
+  "dashboard-shortcuts-data-retry": "Riprova caricamento dati",
+  "dashboard-shortcuts-help-title": "Aiuto",
+  "dashboard-shortcuts-help-toggle": "Mostra/nascondi scorciatoie",
+  "dashboard-shortcuts-help-close": "Chiudi finestre",
+  "dashboard-shortcuts-close": "Chiudi",
+  "dashboard-status-pending": "In sospeso",
+  "dashboard-status-approved": "Approvato",
+  "dashboard-status-declined": "Rifiutato",
+  "dashboard-status-sent-back": "Inviato al cliente",
+  "dashboard-date-today": "Oggi",
+  "dashboard-date-week": "Questa settimana",
+  "dashboard-date-month": "Questo mese",
+  "rooms-import-coming-soon": "Disponibile presto!",
+  "superadmin-associations-pagination": "Mostrando da {first} a {last} di {totalRecords} associazioni",
+  "superadmin-users-role-unknown": "Sconosciuto",
+  "superadmin-structures-na": "N/D",
+  "dashboard-error-no-reservations": "Nessuna prenotazione trovata per questa struttura",
+  "dashboard-error-load-reservations": "Impossibile caricare le prenotazioni. Riprova.",
+  "dashboard-error-load-chart": "Impossibile caricare il grafico delle prenotazioni mensili. Riprova.",
+  "dashboard-error-structure-forbidden": "Non hai accesso a questa struttura.",
+  "dashboard-error-chart-forbidden": "Impossibile caricare i dati del grafico per questa struttura.",
+  "dashboard-no-structure-title": "Nessuna struttura assegnata",
+  "dashboard-no-structure-detail": "Il tuo utente non è ancora associato a nessuna struttura. Contatta un admin.",
+  "dashboard-no-structure-error": "Nessuna struttura selezionata. Chiedi a un admin di assegnarne una.",
+  "dashboard-no-structure-chart-error": "Grafico non disponibile perché non hai una struttura assegnata.",
+  "dashboard-toast-no-reservations-title": "Nessuna prenotazione",
+  "dashboard-toast-no-reservations-detail": "Nessuna prenotazione trovata per questa struttura",
+  "dashboard-toast-load-failed-title": "Caricamento prenotazioni non riuscito",
+  "dashboard-toast-chart-load-failed-title": "Caricamento grafico non riuscito",
+  "dashboard-toast-shortcut-title": "Scorciatoia da tastiera",
+  "dashboard-toast-shortcut-pending": "Filtrate le approvazioni in sospeso",
+  "dashboard-toast-shortcut-clear": "Filtri cancellati",
+  "dashboard-toast-shortcut-retry": "Ricaricamento dati in corso",
+  "admin-menu-label": "Menu",
+  "rooms-toast-failed": "Operazione non riuscita",
+  "rooms-toast-confirmed": "Confermato",
+  "rooms-fetch-error": "Impossibile caricare le camere. Riprova o contatta l'amministratore.",
+  "rooms-update-success": "Camera aggiornata.",
+  "rooms-update-error": "Errore durante la modifica della camera. Riprova.",
+  "rooms-delete-confirm-message": "Vuoi eliminare questo record?",
+  "rooms-delete-confirm-header": "Zona pericolosa",
+  "rooms-delete-confirm-reject": "Annulla",
+  "rooms-delete-confirm-accept": "Elimina",
+  "rooms-delete-error": "Errore durante l'eliminazione della camera.",
+  "rooms-delete-success": "Camera eliminata con successo.",
+  "rooms-missing-structure-title": "Struttura mancante",
+  "rooms-missing-structure-detail": "Seleziona una struttura prima di creare una camera.",
+  "rooms-create-success": "Nuova camera aggiunta.",
+  "rooms-create-error": "Errore durante l'aggiunta della camera.",
+  "rooms-status-error": "Impossibile aggiornare lo stato della camera. Riprova.",
+  "rooms-csv-empty-title": "Nessuna riga",
+  "rooms-csv-empty-detail": "Nessuna camera valida trovata nel CSV.",
+  "rooms-csv-skip-title": "Saltato",
+  "rooms-csv-skip-detail": "Impossibile importare la camera {{name}}.",
+  "rooms-csv-read-error": "Impossibile leggere il file CSV.",
+  "upload-token-missing": "Impossibile continuare: token di sicurezza upload mancante. Aggiorna la pagina e riprova."
 }

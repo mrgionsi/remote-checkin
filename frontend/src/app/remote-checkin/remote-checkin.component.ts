@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { FormGroup, FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -18,6 +18,7 @@ import { DialogModule } from 'primeng/dialog';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { ReservationService } from '../services/reservation.service';
 import { HttpClient } from '@angular/common/http';
+import { Subscription } from 'rxjs';
 import {
   FALLBACK_MUNICIPALITY_OPTIONS,
   FALLBACK_MUNICIPALITY_MAPPINGS,
@@ -41,7 +42,7 @@ import {
   providers: [MessageService],
 
 })
-export class RemoteCheckinComponent implements OnInit {
+export class RemoteCheckinComponent implements OnInit, OnDestroy {
   clientForm: FormGroup;
   uploadForm: FormGroup;
   documentTypes = [{}];
@@ -69,11 +70,29 @@ export class RemoteCheckinComponent implements OnInit {
   public isLoadingData = true;
   public loadingLuogoEmissioneOptions = false;
   public isSubmitting = false;
+  private readonly draftTtlMs = 5 * 60 * 1000;
+  private readonly draftPrefix = 'checkin-draft:';
+  private formSubscriptions: Subscription[] = [];
+  private readonly draftSafeFields = [
+    'document_type',
+    'sesso',
+    'nazionalita',
+    'stato_nascita',
+    'cittadinanza',
+    'luogo_emissione',
+    'autorita_rilascio',
+    'stato_residenza',
+    'comune_nascita_code',
+    'comune_residenza_code',
+    'provincia_nascita',
+    'provincia_residenza'
+  ] as const;
 
 
   languageCode: string | null = '';
   reservationId: string | null = '';
   reservationDetails: any = null;
+  uploadToken: string | null = null;
   registeredClientsCount: number = 0;
   canRegister: boolean = true;
 
@@ -211,10 +230,22 @@ export class RemoteCheckinComponent implements OnInit {
         this.router.navigate(['/reservation-check', params['code']]);
       } else {
         this.reservationId = this.route.snapshot.paramMap.get('id');
+        this.restoreDraftIfValid();
+        this.setupDraftAutosave();
         // Load reservation details and check capacity
         this.loadReservationDetails();
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.formSubscriptions.forEach((sub) => sub.unsubscribe());
+    this.formSubscriptions = [];
+  }
+
+  @HostListener('window:beforeunload')
+  onWindowBeforeUnload(): void {
+    this.clearDraft();
   }
 
   goToStep(step: number, activateCallback: (value: number) => void) {
@@ -232,6 +263,7 @@ export class RemoteCheckinComponent implements OnInit {
     this.reservationService.getReservationById(this.reservationId).subscribe({
       next: (reservation) => {
         this.reservationDetails = reservation;
+        this.uploadToken = reservation?.upload_token || null;
         this.checkRegistrationCapacity();
       },
       error: (error) => {
@@ -575,10 +607,21 @@ export class RemoteCheckinComponent implements OnInit {
       formData.append('reservationId', this.reservationId.toString());
     }
 
-    this.uploadService.uploadImages(formData).subscribe({
+    if (!this.uploadToken) {
+      this.messageService.add({
+        severity: 'error',
+        summary: this.translocoService.translate('error'),
+        detail: this.translocoService.translate('upload-token-missing')
+      });
+      this.isSubmitting = false;
+      return;
+    }
+
+    this.uploadService.uploadImages(formData, this.uploadToken).subscribe({
       next: (response) => {
         // Show success message with API response
         console.log(response)
+        this.clearDraft();
         this.messageService.add({
           severity: 'success',
           summary: 'Success',
@@ -662,6 +705,107 @@ export class RemoteCheckinComponent implements OnInit {
   getLuogoEmissioneName(): string {
     const code = this.clientForm.get('luogo_emissione')?.value;
     return code ? this.getMunicipalityDisplayName(code) || code : '';
+  }
+
+  private getDraftKey(): string | null {
+    if (!this.reservationId) {
+      return null;
+    }
+    return `${this.draftPrefix}${this.reservationId}`;
+  }
+
+  private setupDraftAutosave(): void {
+    if (this.formSubscriptions.length > 0) {
+      return;
+    }
+    const clientSub = this.clientForm.valueChanges.subscribe(() => {
+      this.persistDraft();
+    });
+    this.formSubscriptions.push(clientSub);
+  }
+
+  private persistDraft(): void {
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return;
+    }
+    const draftKey = this.getDraftKey();
+    if (!draftKey) {
+      return;
+    }
+    const rawClientForm = this.clientForm.getRawValue();
+    const sanitizedPayload = {
+      savedAt: Date.now(),
+      clientForm: this.buildSanitizedDraft(rawClientForm)
+    };
+    localStorage.setItem(draftKey, JSON.stringify(sanitizedPayload));
+  }
+
+  private restoreDraftIfValid(): void {
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return;
+    }
+    const draftKey = this.getDraftKey();
+    if (!draftKey) {
+      return;
+    }
+
+    const rawDraft = localStorage.getItem(draftKey);
+    if (!rawDraft) {
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(rawDraft);
+      const savedAt = Number(parsed?.savedAt || 0);
+      const isExpired = !savedAt || (Date.now() - savedAt > this.draftTtlMs);
+      if (isExpired) {
+        localStorage.removeItem(draftKey);
+        return;
+      }
+
+      const draftClientForm = parsed?.clientForm;
+      if (draftClientForm && typeof draftClientForm === 'object') {
+        this.reviveDraftDateFields(draftClientForm);
+        this.clientForm.patchValue(draftClientForm, { emitEvent: false });
+      }
+    } catch {
+      localStorage.removeItem(draftKey);
+    }
+  }
+
+  private buildSanitizedDraft(rawClientForm: any): Record<string, any> {
+    const sanitized: Record<string, any> = {};
+    this.draftSafeFields.forEach((field) => {
+      const value = rawClientForm?.[field];
+      if (value !== undefined && value !== null && value !== '') {
+        sanitized[field] = value;
+      }
+    });
+    return sanitized;
+  }
+
+  private reviveDraftDateFields(draftClientForm: Record<string, any>): void {
+    const dateFields = ['birthday', 'data_emissione', 'data_scadenza'];
+    dateFields.forEach((field) => {
+      const value = draftClientForm[field];
+      if (typeof value === 'string') {
+        const parsedDate = new Date(value);
+        if (!Number.isNaN(parsedDate.getTime())) {
+          draftClientForm[field] = parsedDate;
+        }
+      }
+    });
+  }
+
+  private clearDraft(): void {
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return;
+    }
+    const draftKey = this.getDraftKey();
+    if (!draftKey) {
+      return;
+    }
+    localStorage.removeItem(draftKey);
   }
 
 

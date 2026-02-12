@@ -1,6 +1,7 @@
 <div class="admin-form">
     <div class="admin-form__card p-fluid">
         <h2 class="admin-form__title">{{ 'add-reservation-title' | transloco }}</h2>
+        <p class="p-error" *ngIf="!canCreateReservation">{{ 'reservation-structure-required' | transloco }}</p>
 
         <form [formGroup]="reservationForm" (ngSubmit)="onSubmit()">
             <div class="form-section">
@@ -177,7 +178,7 @@
 
             <div class="admin-form__actions">
                 <button pButton [label]="'create-reservation-btn' | transloco" type="submit"
-                    [disabled]="reservationForm.invalid || saving" [loading]="saving"></button>
+                    [disabled]="!canCreateReservation || reservationForm.invalid || saving" [loading]="saving"></button>
             </div>
         </form>
     </div>

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environments';
 
@@ -11,7 +11,10 @@ export class UploadService {
 
   constructor(private http: HttpClient) { }
 
-  uploadImages(formData: FormData): Observable<any> {
-    return this.http.post(this.apiUrl, formData);
+  uploadImages(formData: FormData, uploadToken?: string | null): Observable<any> {
+    const headers = uploadToken
+      ? new HttpHeaders({ 'X-Upload-Token': uploadToken })
+      : undefined;
+    return this.http.post(this.apiUrl, formData, { headers });
   }
 }
