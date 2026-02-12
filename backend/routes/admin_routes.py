@@ -283,7 +283,7 @@ def get_admin_info():
     try:
         claims = get_jwt()
         user_role = claims.get("role", "").lower()
-        if user_role != "admin":
+        if user_role not in ["admin", "superadmin", "administrator"]:
             return jsonify({"error": "Access denied"}), 403
     except Exception:
         return jsonify({"error": "Access denied"}), 403

@@ -41,18 +41,20 @@ export class ChangePasswordComponent {
   successMessage = '';
   errorMessage = '';
 
-  readonly form = this.fb.group({
-    currentPassword: ['', [Validators.required]],
-    newPassword: ['', [Validators.required, passwordStrengthValidator]],
-    confirmPassword: ['', [Validators.required]]
-  }, { validators: passwordsMatchValidator });
+  readonly form;
 
   constructor(
     private readonly fb: FormBuilder,
     private readonly adminInfoService: AdminInfoService,
     private readonly translocoService: TranslocoService,
     private readonly router: Router
-  ) {}
+  ) {
+    this.form = this.fb.group({
+      currentPassword: ['', [Validators.required]],
+      newPassword: ['', [Validators.required, passwordStrengthValidator]],
+      confirmPassword: ['', [Validators.required]]
+    }, { validators: passwordsMatchValidator });
+  }
 
   onSubmit(): void {
     if (this.form.invalid) {
