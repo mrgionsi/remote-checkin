@@ -14,7 +14,7 @@ from flask import Blueprint, request, jsonify, current_app
 from sqlalchemy import  func
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql import extract
-from flask_jwt_extended import get_jwt_identity, jwt_required
+from flask_jwt_extended import jwt_required
 from itsdangerous import URLSafeTimedSerializer
 
 from models import Reservation, Room, Structure, StructureReservationsView, EmailConfig,Client, ClientReservations
@@ -213,7 +213,6 @@ def create_reservation():
         try:
             # Get user's email configuration from database
 
-            current_user_id = get_jwt_identity()
             email_session = SessionLocal()
 
             try:
@@ -225,7 +224,7 @@ def create_reservation():
 
                 if not email_config:
                     logger.error("No email configuration found for user", extra=safe_extra_fields({
-                        'user_id': get_jwt_identity(),
+                        'user_id': current_user_id,
                         'operation': 'email_config_lookup',
                         'error_type': 'missing_email_config',
                         'operation_result': 'failed'
@@ -234,7 +233,7 @@ def create_reservation():
 
                 # Use database configuration
                 logger.info("Using database email configuration", extra=safe_extra_fields({
-                    'user_id': get_jwt_identity(),
+                    'user_id': current_user_id,
                     'email_config_source': 'database',
                     'operation': 'email_config_setup'
                 }))
@@ -552,7 +551,6 @@ def get_reservations_by_structure(structure_id):
         flask.Response: JSON array of reservation objects. If no reservations exist for the structure, an empty list is returned.
     """
     db = SessionLocal()
-    reservations = []
     try:
         current_user_id, user_error = get_current_user_id()
         if user_error:
@@ -565,23 +563,26 @@ def get_reservations_by_structure(structure_id):
             .filter(StructureReservationsView.structure_id == structure_id_int)
             .all()
         )
+        return jsonify([{
+            "structure_id": r.structure_id,
+            "structure_name": r.structure_name,
+            "reservation_id": r.reservation_id,
+            "id_reference": r.id_reference,
+            "start_date": r.start_date.isoformat(),
+            "end_date": r.end_date.isoformat(),
+            "room_id": r.room_id,
+            "status": r.status,
+            "name_reference": r.name_reference,
+            "room_name": r.room_name
+        } for r in reservations])
     except SQLAlchemyError:
         logger.exception("Database error while fetching reservations by structure")
         return error_response("Database error", 500)
+    except Exception:
+        logger.exception("Unexpected error while fetching reservations by structure")
+        return error_response("Internal server error", 500)
     finally:
         db.close()
-    return jsonify([{
-        "structure_id": r.structure_id,
-        "structure_name": r.structure_name,
-        "reservation_id": r.reservation_id,
-        "id_reference": r.id_reference,
-        "start_date": r.start_date.isoformat(),
-        "end_date": r.end_date.isoformat(),
-        "room_id": r.room_id,
-        "status": r.status,
-        "name_reference": r.name_reference,
-        "room_name": r.room_name
-    } for r in reservations])
 
 @reservation_bp.route("/reservations/admin/<int:reservation_id>", methods=["GET"])
 @jwt_required()
@@ -770,6 +771,8 @@ def update_reservation_status(reservation_id):
           - 500 for server-side errors.
     """
     data = request.get_json()
+    if not data:
+        return error_response("Missing or invalid JSON body", 400)
     allowed_statuses = {"Approved", "Pending", "Declined", STATUS_SENT_BACK_TO_CUSTOMER}
 
     if "status" not in data:
