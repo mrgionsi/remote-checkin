@@ -268,9 +268,9 @@ def upload_file():
             }
         }), 200
 
-    except BadRequest as e:
+    except BadRequest:
         # Catch and handle specific BadRequest errors (file or form validation)
-        return jsonify({"error": str(e)}), 400
+        return jsonify({"error": "Invalid upload request"}), 400
 
     except FileNotFoundError:
         # Handle file not found errors

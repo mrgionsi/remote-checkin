@@ -21,8 +21,12 @@ from models import Reservation, Room, Structure, StructureReservationsView, Emai
 from email_handler import EmailService
 from routes.email_config_routes import get_encryption_key
 from utils.email_utils import get_admin_email_config
-from utils.authz import is_superadmin
-from utils.route_helpers import user_has_structure, get_user_structure_ids, error_response
+from utils.route_helpers import (
+    get_user_structure_ids,
+    error_response,
+    get_current_user_id,
+    require_structure_access,
+)
 from app_logging.config import get_logger
 from app_logging.decorators import log_route, log_database_operation, log_performance
 from app_logging.utils import safe_extra_fields, log_notification_error
@@ -95,10 +99,9 @@ def create_reservation():
     session = SessionLocal()
 
     try:
-        try:
-            current_user_id = int(get_jwt_identity())
-        except (TypeError, ValueError):
-            return error_response("Invalid user identity", 400)
+        current_user_id, user_error = get_current_user_id()
+        if user_error:
+            return user_error
         allowed_structure_ids = get_user_structure_ids(session, current_user_id)
         if not allowed_structure_ids:
             return error_response("No structure assigned to this user", 403)
@@ -154,11 +157,14 @@ def create_reservation():
                 structure_id = int(structure_id)
             except (TypeError, ValueError):
                 return error_response("Invalid structureId. Must be an integer.", 400)
-            if structure_id not in allowed_structure_ids:
-                return error_response("Access denied for this structure", 403)
+            normalized_structure_id, structure_error = require_structure_access(
+                session, structure_id, user_id=current_user_id
+            )
+            if structure_error:
+                return structure_error
             room = (
                 session.query(Room)
-                .filter(Room.name == room_name, Room.id_structure == structure_id)
+                .filter(Room.name == room_name, Room.id_structure == normalized_structure_id)
                 .first()
             )
         if not room:
@@ -354,7 +360,9 @@ def update_reservation(reservation_id):
 
     db = SessionLocal()
     try:
-        current_user_id = int(get_jwt_identity())
+        current_user_id, user_error = get_current_user_id()
+        if user_error:
+            return user_error
         reservation = db.query(Reservation).filter(Reservation.id == reservation_id).first()
 
         if not reservation:
@@ -362,8 +370,9 @@ def update_reservation(reservation_id):
         current_room = db.query(Room).filter(Room.id == reservation.id_room).first()
         if not current_room:
             return error_response("Current room not found", 404)
-        if not is_superadmin() and not user_has_structure(db, current_user_id, current_room.id_structure):
-            return error_response("Access denied for this reservation", 403)
+        _, structure_error = require_structure_access(db, current_room.id_structure, user_id=current_user_id)
+        if structure_error:
+            return structure_error
 
         # Optional updates
         if "start_date" in data:
@@ -410,8 +419,9 @@ def update_reservation(reservation_id):
             target_room = db.query(Room).filter(Room.id == data["room"]["id"]).first()
             if not target_room:
                 return error_response("Target room not found", 404)
-            if not is_superadmin() and not user_has_structure(db, current_user_id, target_room.id_structure):
-                return error_response("Access denied for target room", 403)
+            _, structure_error = require_structure_access(db, target_room.id_structure, user_id=current_user_id)
+            if structure_error:
+                return structure_error
         else:
             target_room = current_room
 
@@ -475,7 +485,9 @@ def delete_reservation(reservation_id):
     """
     db = SessionLocal()
     try:
-        current_user_id = int(get_jwt_identity())
+        current_user_id, user_error = get_current_user_id()
+        if user_error:
+            return user_error
         reservation = db.query(Reservation).filter(Reservation.id == reservation_id).first()
 
         if not reservation:
@@ -483,8 +495,9 @@ def delete_reservation(reservation_id):
         room = db.query(Room).filter(Room.id == reservation.id_room).first()
         if not room:
             return error_response("Room not found", 404)
-        if not is_superadmin() and not user_has_structure(db, current_user_id, room.id_structure):
-            return error_response("Access denied for this reservation", 403)
+        _, structure_error = require_structure_access(db, room.id_structure, user_id=current_user_id)
+        if structure_error:
+            return structure_error
 
         db.delete(reservation)
         db.commit()
@@ -541,16 +554,12 @@ def get_reservations_by_structure(structure_id):
     db = SessionLocal()
     reservations = []
     try:
-        try:
-            current_user_id = int(get_jwt_identity())
-        except (TypeError, ValueError):
-            return error_response("Invalid user identity", 400)
-        try:
-            structure_id_int = int(structure_id)
-        except (TypeError, ValueError):
-            return error_response("Invalid structure_id. Must be an integer.", 400)
-        if not is_superadmin() and not user_has_structure(db, current_user_id, structure_id_int):
-            return error_response("Access denied for this structure", 403)
+        current_user_id, user_error = get_current_user_id()
+        if user_error:
+            return user_error
+        structure_id_int, structure_error = require_structure_access(db, structure_id, user_id=current_user_id)
+        if structure_error:
+            return structure_error
         reservations = (
             db.query(StructureReservationsView)
             .filter(StructureReservationsView.structure_id == structure_id_int)
@@ -592,10 +601,9 @@ def get_admin_reservations_by_id(reservation_id):
     """
     db = SessionLocal()
     try:
-        try:
-            current_user_id = int(get_jwt_identity())
-        except (TypeError, ValueError):
-            return error_response("Invalid user identity", 400)
+        current_user_id, user_error = get_current_user_id()
+        if user_error:
+            return user_error
         reservation = (
             db.query(Reservation)
             .filter(Reservation.id == str(reservation_id))
@@ -607,8 +615,9 @@ def get_admin_reservations_by_id(reservation_id):
         room = db.query(Room).filter(Room.id == reservation.id_room).first()
         if not room:
             return error_response("Room not found", 404)
-        if not is_superadmin() and not user_has_structure(db, current_user_id, room.id_structure):
-            return error_response("Access denied for this reservation", 403)
+        _, structure_error = require_structure_access(db, room.id_structure, user_id=current_user_id)
+        if structure_error:
+            return structure_error
 
         return jsonify(reservation.to_dict())
     except SQLAlchemyError:
@@ -693,12 +702,12 @@ def get_reservations_per_month(structure_id):
     """
     db = SessionLocal()
     try:
-        try:
-            current_user_id = int(get_jwt_identity())
-        except (TypeError, ValueError):
-            return error_response("Invalid user identity", 400)
-        if not is_superadmin() and not user_has_structure(db, current_user_id, structure_id):
-            return error_response("Access denied for this structure", 403)
+        current_user_id, user_error = get_current_user_id()
+        if user_error:
+            return user_error
+        _, structure_error = require_structure_access(db, structure_id, user_id=current_user_id)
+        if structure_error:
+            return structure_error
         # Check if the structure exists
         structure = db.query(Structure).filter(Structure.id == structure_id).first()
         if not structure:
@@ -770,7 +779,9 @@ def update_reservation_status(reservation_id):
 
     db = SessionLocal()
     try:
-        current_user_id = int(get_jwt_identity())
+        current_user_id, user_error = get_current_user_id()
+        if user_error:
+            return user_error
         reservation = db.query(Reservation).filter(Reservation.id == str(reservation_id)).first()
 
         if not reservation:
@@ -780,8 +791,9 @@ def update_reservation_status(reservation_id):
         room = db.query(Room).filter(Room.id == reservation.id_room).first()
         if not room:
             return error_response("Room not found", 404)
-        if not is_superadmin() and not user_has_structure(db, current_user_id, room.id_structure):
-            return error_response("Access denied for this reservation", 403)
+        _, structure_error = require_structure_access(db, room.id_structure, user_id=current_user_id)
+        if structure_error:
+            return structure_error
 
         old_status = reservation.status
         reservation.status = new_status

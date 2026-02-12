@@ -43,9 +43,8 @@ from pathlib import Path
 
 from flask import Blueprint, jsonify, request, send_from_directory
 from sqlalchemy.exc import SQLAlchemyError
-from flask_jwt_extended import jwt_required, verify_jwt_in_request, get_jwt_identity
-from utils.authz import is_superadmin
-from utils.route_helpers import user_has_structure
+from flask_jwt_extended import jwt_required, verify_jwt_in_request
+from utils.route_helpers import get_current_user_id, require_structure_access
 
 from models import Client, ClientReservations, Reservation, Room
 from app_logging.config import get_logger
@@ -76,10 +75,9 @@ def get_clients_by_reservation(reservation_id):
     """
     db = SessionLocal()
     try:
-        try:
-            current_user_id = int(get_jwt_identity())
-        except (TypeError, ValueError):
-            return jsonify({"error": "Invalid user identity"}), 400
+        current_user_id, user_error = get_current_user_id()
+        if user_error:
+            return user_error
 
         reservation = db.query(Reservation).filter(Reservation.id == reservation_id).first()
         if not reservation:
@@ -89,8 +87,9 @@ def get_clients_by_reservation(reservation_id):
         if not room:
             return jsonify({"error": "Room not found for reservation"}), 404
 
-        if not is_superadmin() and not user_has_structure(db, current_user_id, room.id_structure):
-            return jsonify({"error": "Access denied for this reservation"}), 403
+        _, structure_error = require_structure_access(db, room.id_structure, user_id=current_user_id)
+        if structure_error:
+            return structure_error
 
         # Get clients linked to the reservation
         client_reservations = (
@@ -205,10 +204,9 @@ def check_images(reservation_id):
     db = SessionLocal()
 
     try:
-        try:
-            current_user_id = int(get_jwt_identity())
-        except (TypeError, ValueError):
-            return jsonify({"error": "Invalid user identity"}), 400
+        current_user_id, user_error = get_current_user_id()
+        if user_error:
+            return user_error
 
         reservation = db.query(Reservation).filter(
         Reservation.id_reference == str(reservation_id)).first()
@@ -217,8 +215,9 @@ def check_images(reservation_id):
         room = db.query(Room).filter(Room.id == reservation.id_room).first()
         if not room:
             return jsonify({"error": "Room not found for reservation"}), 404
-        if not is_superadmin() and not user_has_structure(db, current_user_id, room.id_structure):
-            return jsonify({"error": "Access denied for this reservation"}), 403
+        _, structure_error = require_structure_access(db, room.id_structure, user_id=current_user_id)
+        if structure_error:
+            return structure_error
         client_exists = db.query(Client).join(
             ClientReservations, Client.id == ClientReservations.id_client
         ).filter(
@@ -294,10 +293,9 @@ def get_image(reservation_id, filename):
     db = SessionLocal()
 
     try:
-        try:
-            current_user_id = int(get_jwt_identity())
-        except (TypeError, ValueError):
-            return jsonify({"error": "Invalid user identity"}), 400
+        current_user_id, user_error = get_current_user_id()
+        if user_error:
+            return user_error
 
         reservation = db.query(Reservation).filter(
             Reservation.id_reference == str(reservation_id)
@@ -309,8 +307,9 @@ def get_image(reservation_id, filename):
         if not room:
             return jsonify({"error": "Room not found for reservation"}), 404
 
-        if not is_superadmin() and not user_has_structure(db, current_user_id, room.id_structure):
-            return jsonify({"error": "Access denied for this reservation"}), 403
+        _, structure_error = require_structure_access(db, room.id_structure, user_id=current_user_id)
+        if structure_error:
+            return structure_error
 
         # Use secure path resolution to prevent path traversal
         file_path = get_secure_file_path(reservation_id, filename)
