@@ -85,7 +85,7 @@ def create_reservation():
       - 404: room not found.
       - 500: unexpected server error.
     """
-    data = request.get_json()
+    data = request.get_json() or {}
 
     # Validate required fields
     required_fields = ["reservationNumber", "startDate", "endDate", "email"]
@@ -96,6 +96,9 @@ def create_reservation():
 
     try:
         current_user_id = int(get_jwt_identity())
+        allowed_structure_ids = get_user_structure_ids(session, current_user_id)
+        if not allowed_structure_ids:
+            return error_response("No structure assigned to this user", 403)
         # Log the received reservation data
         logger.info("Processing reservation creation", extra=safe_extra_fields({
             'reservation_number': data.get('reservationNumber'),
@@ -139,37 +142,25 @@ def create_reservation():
             except (TypeError, ValueError):
                 return error_response("Invalid roomId. Must be an integer.", 400)
             room = session.query(Room).filter(Room.id == room_id).first()
+            if room and room.id_structure not in allowed_structure_ids:
+                return error_response("Access denied for this structure", 403)
         else:
-            if not is_superadmin():
-                if structure_id is None:
-                    return error_response("structureId is required when using roomName", 400)
-                try:
-                    structure_id = int(structure_id)
-                except (TypeError, ValueError):
-                    return error_response("Invalid structureId. Must be an integer.", 400)
-                allowed_structure_ids = get_user_structure_ids(session, current_user_id)
-                if structure_id not in allowed_structure_ids:
-                    return error_response("Access denied for this structure", 403)
-                room = (
-                    session.query(Room)
-                    .filter(Room.name == room_name, Room.id_structure == structure_id)
-                    .first()
-                )
-            else:
-                if structure_id is None:
-                    return error_response("structureId is required when using roomName", 400)
-                try:
-                    structure_id = int(structure_id)
-                except (TypeError, ValueError):
-                    return error_response("Invalid structureId. Must be an integer.", 400)
-                room = (
-                    session.query(Room)
-                    .filter(Room.name == room_name, Room.id_structure == structure_id)
-                    .first()
-                )
+            if structure_id is None:
+                return error_response("structureId is required when using roomName", 400)
+            try:
+                structure_id = int(structure_id)
+            except (TypeError, ValueError):
+                return error_response("Invalid structureId. Must be an integer.", 400)
+            if structure_id not in allowed_structure_ids:
+                return error_response("Access denied for this structure", 403)
+            room = (
+                session.query(Room)
+                .filter(Room.name == room_name, Room.id_structure == structure_id)
+                .first()
+            )
         if not room:
             return error_response("Room not found", 404)
-        if not is_superadmin() and not user_has_structure(session, current_user_id, room.id_structure):
+        if room.id_structure not in allowed_structure_ids:
             return error_response("Access denied for this structure", 403)
 
         # Validate number_of_people if provided - safely coerce to int

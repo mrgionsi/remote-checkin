@@ -24,6 +24,7 @@ export class CreateReservationComponent implements OnInit {
   // Array of room options for the dropdown
   rooms: any[] = [];
   saving = false; // Loading state for save button
+  canCreateReservation = true;
   constructor(
     private fb: FormBuilder,
     private router: Router,
@@ -92,6 +93,12 @@ export class CreateReservationComponent implements OnInit {
   // Method to get rooms from the backend
   getRooms(): void {
     const selectedStructureId = Number(localStorage.getItem('selected_structure_id') || 0);
+    if (!selectedStructureId) {
+      this.canCreateReservation = false;
+      this.rooms = [];
+      return;
+    }
+    this.canCreateReservation = true;
     this.roomService.getRooms(selectedStructureId || null).subscribe({
       next: (rooms) => {
         console.log('Rooms loaded:', rooms);
@@ -179,6 +186,10 @@ export class CreateReservationComponent implements OnInit {
   }
 
   onSubmit(): void {
+    if (!this.canCreateReservation) {
+      this.setRoomControlError('structureRequired');
+      return;
+    }
     if (this.reservationForm.valid) {
       this.saving = true; // Set loading state
       const reservation = this.reservationForm.value;
