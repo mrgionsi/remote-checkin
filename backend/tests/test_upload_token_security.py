@@ -1,3 +1,7 @@
+"""Security tests for reservation upload token validation."""
+
+# pylint: disable=redefined-outer-name
+
 from io import BytesIO
 import time
 
@@ -12,6 +16,7 @@ from routes.upload_reservation_routes import (
 
 
 def _multipart_payload(token=None):
+    """Build a multipart payload with required upload fields."""
     data = {
         "reservationId": "RES-SEC-001",
         "name": "John",
@@ -49,6 +54,7 @@ def _multipart_payload(token=None):
 
 @pytest.fixture()
 def app():
+    """Create a minimal Flask app configured for upload route tests."""
     app = Flask(__name__)
     app.config["TESTING"] = True
     app.config["JWT_SECRET_KEY"] = "test-secret"
@@ -58,10 +64,12 @@ def app():
 
 @pytest.fixture()
 def client(app):
+    """Return the Flask test client."""
     return app.test_client()
 
 
 def test_upload_rejects_missing_token(client):
+    """Reject upload requests without a token."""
     response = client.post(
         "/api/v1/upload",
         data=_multipart_payload(),
@@ -72,6 +80,7 @@ def test_upload_rejects_missing_token(client):
 
 
 def test_upload_rejects_invalid_token(client):
+    """Reject upload requests with a malformed token."""
     response = client.post(
         "/api/v1/upload",
         data=_multipart_payload(token="invalid-token"),
@@ -82,6 +91,7 @@ def test_upload_rejects_invalid_token(client):
 
 
 def test_upload_rejects_expired_token(client, monkeypatch):
+    """Reject upload requests when token age exceeds max_age."""
     # Keep this test deterministic by forcing a short max_age.
     monkeypatch.setattr(
         "routes.upload_reservation_routes.UPLOAD_TOKEN_MAX_AGE_SECONDS",
@@ -97,4 +107,3 @@ def test_upload_rejects_expired_token(client, monkeypatch):
     )
     assert response.status_code == 401
     assert response.get_json()["error"] == "Upload token expired"
-
