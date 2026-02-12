@@ -286,3 +286,84 @@ def test_get_reservations_per_month_invalid_structure_id(client, init_db, auth_h
     data = response.get_json()
     assert len(data) == 12  # 12 months
     assert all(month["total_reservations"] == 0 for month in data)  # No reservations, so all months should be 0
+
+
+def test_create_reservation_end_before_start_returns_400(client, init_db, auth_headers):
+    """Validation: endDate before startDate must be rejected with standard error envelope."""
+    room = init_db.query(Room).first()
+    response = client.post(
+        "/api/v1/reservations",
+        headers=auth_headers,
+        json={
+            "reservationNumber": "RES-END-BEFORE-START",
+            "startDate": "2025-03-15",
+            "endDate": "2025-03-10",
+            "roomName": room.name,
+            "structureId": room.id_structure,
+            "email": "guest@example.com",
+        },
+    )
+    assert response.status_code == 400
+    payload = response.get_json()
+    assert "error" in payload
+    assert "Traceback" not in payload["error"]
+
+
+def test_create_reservation_invalid_room_id_type_returns_400(client, init_db, auth_headers):
+    """Validation: roomId must be an integer."""
+    response = client.post(
+        "/api/v1/reservations",
+        headers=auth_headers,
+        json={
+            "reservationNumber": "RES-BAD-ROOMID",
+            "startDate": "2025-03-10",
+            "endDate": "2025-03-15",
+            "roomId": "bad-id",
+            "email": "guest@example.com",
+        },
+    )
+    assert response.status_code == 400
+    payload = response.get_json()
+    assert payload["error"] == "Invalid roomId. Must be an integer."
+
+
+def test_create_reservation_people_over_capacity_returns_400(client, init_db, auth_headers):
+    """Validation: numberOfPeople cannot exceed room capacity."""
+    room = init_db.query(Room).first()
+    response = client.post(
+        "/api/v1/reservations",
+        headers=auth_headers,
+        json={
+            "reservationNumber": "RES-OVER-CAP",
+            "startDate": "2025-04-10",
+            "endDate": "2025-04-12",
+            "roomId": room.id,
+            "numberOfPeople": room.capacity + 1,
+            "email": "guest@example.com",
+        },
+    )
+    assert response.status_code == 400
+    payload = response.get_json()
+    assert "error" in payload
+    assert "cannot exceed room capacity" in payload["error"]
+    assert "sqlalchemy" not in payload["error"].lower()
+
+
+def test_create_reservation_invalid_structure_id_type_returns_400(client, init_db, auth_headers):
+    """Validation: structureId must be an integer when roomName is used."""
+    room = init_db.query(Room).first()
+    response = client.post(
+        "/api/v1/reservations",
+        headers=auth_headers,
+        json={
+            "reservationNumber": "RES-BAD-STRUCTURE",
+            "startDate": "2025-05-01",
+            "endDate": "2025-05-03",
+            "roomName": room.name,
+            "structureId": "not-an-int",
+            "email": "guest@example.com",
+        },
+    )
+    assert response.status_code == 400
+    payload = response.get_json()
+    assert payload["error"] == "Invalid structureId. Must be an integer."

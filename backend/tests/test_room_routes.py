@@ -300,3 +300,28 @@ def test_add_room_with_existing_id(client, init_db, auth_headers):
     assert data["name"] == "Another Room"
     assert data["capacity"] == 4
     assert data["id_structure"] == existing_structure_id
+
+
+def test_get_rooms_invalid_structure_query_returns_400(client, auth_headers):
+    """Validation: non-integer structure_id query should return 400 error envelope."""
+    response = client.get("/api/v1/rooms?structure_id=invalid", headers=auth_headers)
+    assert response.status_code == 400
+    payload = response.get_json()
+    assert payload["error"] == "Invalid structure_id. Must be an integer."
+    assert "Traceback" not in payload["error"]
+
+
+def test_add_room_invalid_structure_type_returns_400(client, auth_headers):
+    """Validation: id_structure type must be coercible to integer."""
+    response = client.post(
+        "/api/v1/rooms",
+        headers=auth_headers,
+        json={
+            "name": "Type Check Room",
+            "capacity": 2,
+            "id_structure": "bad-structure-id",
+        },
+    )
+    assert response.status_code == 400
+    payload = response.get_json()
+    assert payload["error"] == "Invalid structure_id. Must be an integer."

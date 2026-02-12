@@ -154,3 +154,22 @@ def test_upload_nonexistent_reservation(client):
         print(response.json)
         assert response.status_code == 404
         assert "Reservation not found" in response.get_json()["error"]
+
+
+def test_upload_invalid_gender_returns_validation_error(client):
+    """Validation: invalid gender value should return a 400 with safe error payload."""
+    token = _build_upload_token(client.application, "12345")
+    with open(TEST_IMAGES_DIR / "front.jpeg", "rb") as front_file, \
+         open(TEST_IMAGES_DIR / "back.jpeg", "rb") as back_file, \
+         open(TEST_IMAGES_DIR / "selfie.jpeg", "rb") as selfie_file:
+        data = _base_upload_form("12345", token)
+        data["sesso"] = "9"
+        data["frontimage"] = (front_file, "front.jpeg", "image/jpeg")
+        data["backimage"] = (back_file, "back.jpeg", "image/jpeg")
+        data["selfie"] = (selfie_file, "selfie.jpeg", "image/jpeg")
+        response = client.post("/api/v1/upload", data=data, content_type="multipart/form-data")
+
+    assert response.status_code == 400
+    payload = response.get_json()
+    assert "error" in payload
+    assert "Traceback" not in payload["error"]
