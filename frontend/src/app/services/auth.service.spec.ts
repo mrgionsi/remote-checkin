@@ -38,4 +38,14 @@ describe('AuthService', () => {
     localStorage.setItem('admin_token', buildToken(Math.floor(Date.now() / 1000) + 600));
     expect(service.isLoggedIn()).toBeTrue();
   });
+
+  it('should return false for malformed token payload', () => {
+    localStorage.setItem('admin_token', 'not.a.jwt');
+    expect(service.isTokenValid()).toBeFalse();
+  });
+
+  it('should return empty auth headers when token is missing', () => {
+    localStorage.removeItem('admin_token');
+    expect(service.getAuthHeaders().keys().length).toBe(0);
+  });
 });

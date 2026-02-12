@@ -7,7 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "test:ci": "ng test --watch=false --browsers=ChromeHeadless --code-coverage --include=\"src/app/guards/**/*.spec.ts\" --include=\"src/app/services/**/*.spec.ts\" --include=\"src/app/app.component.spec.ts\"",
+    "test:ci": "ng test --watch=false --browsers=ChromeHeadless --code-coverage --include=\"src/app/guards/**/*.spec.ts\" --include=\"src/app/services/**/*.spec.ts\" --include=\"src/app/admin/dashboard/dashboard.component.spec.ts\" --include=\"src/app/admin/room/room.component.spec.ts\" --include=\"src/app/app.component.spec.ts\"",
     "serve:ssr:remote-checkin": "node dist/remote-checkin/server/server.mjs"
   },
   "private": true,
