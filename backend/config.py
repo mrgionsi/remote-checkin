@@ -13,6 +13,20 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+def _get_int_env(name: str, default: int) -> int:
+    """Return integer env var value with a safe fallback."""
+    raw_value = os.getenv(name)
+    if raw_value is None:
+        return default
+    value = str(raw_value).strip()
+    if value == "" or value.lower() == "none":
+        return default
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
 class Config:
     """
     Base configuration class for production environment.
@@ -40,7 +54,7 @@ class Config:
     #    os.getenv('MAIL_DEFAULT_SENDER_NAME', 'Remote Check-in'),
     #    os.getenv('MAIL_DEFAULT_SENDER_EMAIL')
     #)
-    MAIL_MAX_EMAILS = int(os.getenv('MAIL_MAX_EMAILS', '100'))
+    MAIL_MAX_EMAILS = _get_int_env('MAIL_MAX_EMAILS', 100)
     MAIL_ASCII_ATTACHMENTS = os.getenv('MAIL_ASCII_ATTACHMENTS', 'False').lower() == 'true'
     # Email templates
     EMAIL_TEMPLATES: ClassVar[dict] = {
