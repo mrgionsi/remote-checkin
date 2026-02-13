@@ -42,6 +42,11 @@ export const appConfig: ApplicationConfig = {
         availableLangs: ['en', 'es', 'it', 'fr', 'de'],
         defaultLang: 'en',
         fallbackLang: 'en',
+        missingHandler: {
+          logMissingKey: false,
+          useFallbackTranslation: true,
+          allowEmpty: true
+        },
         // Remove this option if your application doesn't support changing language in runtime.
         reRenderOnLangChange: true,
         prodMode: !isDevMode(),

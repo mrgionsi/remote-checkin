@@ -1,59 +1,74 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpHeaders, provideHttpClient } from '@angular/common/http';
+import { TestBed } from '@angular/core/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+
+import { environment } from '../../environments/environments';
+import { AuthService } from './auth.service';
 import { ReservationService } from './reservation.service';
-import { ReactiveFormsModule } from '@angular/forms';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { By } from '@angular/platform-browser';
-import { of } from 'rxjs';
-import { CreateReservationComponent } from '../admin/create-reservation/create-reservation.component';
 
-describe('CreateReservationComponent', () => {
-  let component: CreateReservationComponent;
-  let fixture: ComponentFixture<CreateReservationComponent>;
-  let reservationService: ReservationService;
+describe('ReservationService', () => {
+  let service: ReservationService;
+  let httpMock: HttpTestingController;
+  let checkAuthAndRedirectSpy: jasmine.Spy;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [CreateReservationComponent],
-      imports: [ReactiveFormsModule, HttpClientTestingModule],
-      providers: [ReservationService],
-    }).compileComponents();
-  });
+  const authHeaders = new HttpHeaders({ Authorization: 'Bearer test-token' });
+  const authServiceStub = {
+    checkAuthAndRedirect: () => true,
+    getAuthHeaders: () => authHeaders
+  };
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(CreateReservationComponent);
-    component = fixture.componentInstance;
-    reservationService = TestBed.inject(ReservationService);
-    fixture.detectChanges();
-  });
+    checkAuthAndRedirectSpy = spyOn(authServiceStub, 'checkAuthAndRedirect').and.returnValue(true);
 
-  it('should create the component', () => {
-    expect(component).toBeTruthy();
-  });
-
-  it('should call the createReservation method of the service when form is valid', () => {
-    const spy = spyOn(reservationService, 'createReservation').and.returnValue(of({}));
-
-    // Set up form values
-    component.reservationForm.setValue({
-      reservationNumber: '123',
-      startDate: '2025-02-01',
-      endDate: '2025-02-05',
-      roomName: 'Deluxe Suite',
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: AuthService, useValue: authServiceStub }
+      ]
     });
 
-    // Trigger form submit
-    component.onSubmit();
-
-    // Verify the service was called
-    expect(spy).toHaveBeenCalled();
+    service = TestBed.inject(ReservationService);
+    httpMock = TestBed.inject(HttpTestingController);
   });
 
-  it('should display error message if form is invalid', () => {
-    // Trigger submit with empty form
-    component.onSubmit();
+  afterEach(() => {
+    httpMock.verify();
+  });
 
-    // Check if validation error message is displayed
-    const errorMessages = fixture.debugElement.queryAll(By.css('.p-error'));
-    expect(errorMessages.length).toBeGreaterThan(0);
+  it('should create a reservation when authenticated', () => {
+    const payload = { roomName: 'A1' };
+
+    service.createReservation(payload).subscribe((res) => {
+      expect(res).toEqual({ id: 1 });
+    });
+
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/api/v1/reservations`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.headers.get('Authorization')).toBe('Bearer test-token');
+    expect(req.request.body).toEqual(payload);
+    req.flush({ id: 1 });
+  });
+
+  it('should not call API when auth check fails', () => {
+    checkAuthAndRedirectSpy.and.returnValue(false);
+
+    service.createReservation({}).subscribe({
+      next: () => fail('Expected auth failure'),
+      error: (error) => expect(String(error.message)).toContain('Authentication failed')
+    });
+
+    httpMock.expectNone(`${environment.apiBaseUrl}/api/v1/reservations`);
+  });
+
+  it('should fetch monthly reservations with auth header', () => {
+    service.getMonthlyReservation(3).subscribe((res) => {
+      expect(res).toEqual([{ month: 'Jan', total_reservations: 5 }]);
+    });
+
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/api/v1/reservations/monthly/3`);
+    expect(req.request.method).toBe('GET');
+    expect(req.request.headers.get('Authorization')).toBe('Bearer test-token');
+    req.flush([{ month: 'Jan', total_reservations: 5 }]);
   });
 });

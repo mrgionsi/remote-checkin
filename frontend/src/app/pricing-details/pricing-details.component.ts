@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { HeaderComponent } from '../shared/header/header.component';
 import { LANDING_NAV_LINKS } from '../shared/navigation';
 
@@ -176,33 +176,21 @@ export class PricingDetailsComponent {
     this.billing.set(cycle);
   }
 
-  getPriceForPlan(plan: PricingPlan): string {
-    const cycle = this.billing();
-    const amount = cycle === 'monthly' ? plan.monthly : plan.annual;
-
-    if (plan.monthly === 0 && plan.annual === 0) {
-      return this.transloco.translate('pricingDetails.pricing.free');
-    }
-
-    const prefix = this.transloco.translate('pricingDetails.pricing.currencySymbol');
-    const suffixKey = cycle === 'monthly' ? 'pricingDetails.pricing.perMonth' : 'pricingDetails.pricing.perYear';
-    const suffix = this.transloco.translate(suffixKey);
-    return `${prefix}${amount}${suffix}`;
+  getAmountForPlan(plan: PricingPlan): number {
+    return this.billing() === 'monthly' ? plan.monthly : plan.annual;
   }
 
   isFeatureIncluded(value: boolean | string): boolean {
     return value === true;
   }
 
-  displayFeatureValue(value: boolean | string): string {
+  getFeatureValueKey(value: boolean | string): string {
     if (typeof value === 'string') {
-      return this.transloco.translate(value);
+      return value;
     }
     if (value) {
-      return this.transloco.translate('pricingDetails.comparison.value.included');
+      return 'pricingDetails.comparison.value.included';
     }
-    return this.transloco.translate('pricingDetails.comparison.value.notIncluded');
+    return 'pricingDetails.comparison.value.notIncluded';
   }
-
-  constructor(private readonly transloco: TranslocoService) { }
 }

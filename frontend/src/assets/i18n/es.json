@@ -489,5 +489,26 @@
   "rooms-csv-skip-detail": "No se pudo importar la habitación {{name}}.",
   "rooms-csv-read-error": "No se pudo leer el archivo CSV.",
   "portale-alloggi-not-configured": "Portale Alloggi no está configurado. Configúralo primero en Ajustes.",
-  "upload-token-missing": "No se puede continuar: falta el token de seguridad de carga. Actualiza la página e inténtalo de nuevo."
+  "upload-token-missing": "No se puede continuar: falta el token de seguridad de carga. Actualiza la página e inténtalo de nuevo.",
+  "pricingDetails": {
+    "pricing": {
+      "currencySymbol": "€",
+      "perMonth": "/mes",
+      "perYear": "/año",
+      "free": "Gratis",
+      "save": "Ahorra {{ amount }}"
+    },
+    "comparison": {
+      "value": {
+        "unlimited": "Ilimitado",
+        "limited": "Limitado",
+        "included": "Incluido",
+        "notIncluded": "—"
+      }
+    }
+  },
+  "gender-male": "Masculino",
+  "gender-female": "Femenino",
+  "registration-unavailable": "Registro no disponible",
+  "capacity-verification-failed": "No se puede verificar la capacidad ahora. Inténtalo de nuevo más tarde."
 }

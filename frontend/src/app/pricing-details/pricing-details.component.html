@@ -33,7 +33,15 @@
         <h2>{{ plan.nameKey | transloco }}</h2>
         <p>{{ plan.descriptionKey | transloco }}</p>
         <div class="plan-card__price">
-          <span>{{ getPriceForPlan(plan) }}</span>
+          <ng-container *ngIf="plan.monthly === 0 && plan.annual === 0; else paidPrice">
+            <span>{{ 'pricingDetails.pricing.free' | transloco }}</span>
+          </ng-container>
+          <ng-template #paidPrice>
+            <span>
+              {{ 'pricingDetails.pricing.currencySymbol' | transloco }}{{ getAmountForPlan(plan) }}{{ (billing() ===
+              'monthly' ? 'pricingDetails.pricing.perMonth' : 'pricingDetails.pricing.perYear') | transloco }}
+            </span>
+          </ng-template>
           <small *ngIf="billing() === 'annual' && plan.monthly !== 0">
             {{ 'pricingDetails.pricing.save' | transloco:{ amount: (plan.monthly * 12 - plan.annual) |
             currency:'USD':'symbol':'1.0-0' } }}
@@ -69,19 +77,19 @@
           <ng-container *ngIf="isFeatureIncluded(row.launch); else launchText">
             <i class="pi pi-check"></i>
           </ng-container>
-          <ng-template #launchText>{{ displayFeatureValue(row.launch) }}</ng-template>
+          <ng-template #launchText>{{ getFeatureValueKey(row.launch) | transloco }}</ng-template>
         </div>
         <div class="comparison__cell" role="cell">
           <ng-container *ngIf="isFeatureIncluded(row.growth); else growthText">
             <i class="pi pi-check"></i>
           </ng-container>
-          <ng-template #growthText>{{ displayFeatureValue(row.growth) }}</ng-template>
+          <ng-template #growthText>{{ getFeatureValueKey(row.growth) | transloco }}</ng-template>
         </div>
         <div class="comparison__cell" role="cell">
           <ng-container *ngIf="isFeatureIncluded(row.enterprise); else enterpriseText">
             <i class="pi pi-check"></i>
           </ng-container>
-          <ng-template #enterpriseText>{{ displayFeatureValue(row.enterprise) }}</ng-template>
+          <ng-template #enterpriseText>{{ getFeatureValueKey(row.enterprise) | transloco }}</ng-template>
         </div>
       </div>
     </div>

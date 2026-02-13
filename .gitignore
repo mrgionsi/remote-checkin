@@ -185,3 +185,7 @@ frontend/package-lock.json
 /backend/uploads
 .env.backup
 backend/tests/reports/
+frontend/playwright-report/
+frontend/test-results/
+frontend/coverage/
+uploads/
