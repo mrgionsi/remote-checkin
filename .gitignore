@@ -188,3 +188,4 @@ backend/tests/reports/
 frontend/playwright-report/
 frontend/test-results/
 frontend/coverage/
+uploads/
