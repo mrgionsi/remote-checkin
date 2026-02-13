@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { PricingDetailsComponent } from './pricing-details.component';
-import { TranslocoService } from '@jsverse/transloco';
 
 describe('PricingDetailsComponent', () => {
   let component: PricingDetailsComponent;
@@ -9,25 +8,7 @@ describe('PricingDetailsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PricingDetailsComponent],
-      providers: [
-        {
-          provide: TranslocoService,
-          useValue: {
-            translate: (key: string) => {
-              const map: Record<string, string> = {
-                'pricingDetails.pricing.currencySymbol': '$',
-                'pricingDetails.pricing.perMonth': '/mo',
-                'pricingDetails.pricing.perYear': '/yr',
-                'pricingDetails.pricing.free': 'Free',
-                'pricingDetails.comparison.value.included': 'Included',
-                'pricingDetails.comparison.value.notIncluded': 'Not included'
-              };
-              return map[key] || key;
-            }
-          }
-        }
-      ]
+      imports: [PricingDetailsComponent]
     })
       .overrideComponent(PricingDetailsComponent, { set: { template: '' } })
       .compileComponents();
@@ -41,8 +22,8 @@ describe('PricingDetailsComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should return free label for free plan', () => {
+  it('should return zero amount for free plan', () => {
     const freePlan = component.plans[0];
-    expect(component.getPriceForPlan(freePlan)).toBe('Free');
+    expect(component.getAmountForPlan(freePlan)).toBe(0);
   });
 });
