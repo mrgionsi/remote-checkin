@@ -8,6 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "test:ci": "ng test --watch=false --browsers=ChromeHeadless --code-coverage --include=\"src/app/guards/**/*.spec.ts\" --include=\"src/app/services/**/*.spec.ts\" --include=\"src/app/admin/dashboard/dashboard.component.spec.ts\" --include=\"src/app/admin/room/room.component.spec.ts\" --include=\"src/app/app.component.spec.ts\"",
+    "e2e:smoke": "playwright test --config=playwright.config.ts",
     "serve:ssr:remote-checkin": "node dist/remote-checkin/server/server.mjs"
   },
   "private": true,
@@ -35,6 +36,7 @@
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.55.0",
     "@angular-devkit/build-angular": "^19.1.5",
     "@angular/cli": "^19.1.5",
     "@angular/compiler-cli": "^19.1.3",
