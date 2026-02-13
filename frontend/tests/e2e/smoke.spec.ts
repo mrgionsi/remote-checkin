@@ -1,10 +1,36 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 
 function buildFakeJwt(expirationOffsetSeconds = 3600): string {
   const payload = {
     exp: Math.floor(Date.now() / 1000) + expirationOffsetSeconds
   };
   return `header.${Buffer.from(JSON.stringify(payload)).toString('base64url')}.signature`;
+}
+
+async function seedAuthSession(
+  page: Page,
+  role: 'admin' | 'superadmin',
+  options?: { selectedStructureId?: string | null; structures?: Array<{ id: number; name: string }> }
+): Promise<void> {
+  const token = buildFakeJwt();
+  const selectedStructureId = options?.selectedStructureId === undefined ? '1' : options.selectedStructureId;
+  const structures = options?.structures ?? [{ id: 1, name: 'Smoke Structure' }];
+  await page.addInitScript(({ authToken, authRole, structureId, structureList }) => {
+    localStorage.setItem('admin_token', authToken);
+    localStorage.setItem('appLang', 'en');
+    localStorage.setItem('remote-checkin-lang', 'en');
+    if (structureId) {
+      localStorage.setItem('selected_structure_id', structureId);
+    } else {
+      localStorage.removeItem('selected_structure_id');
+    }
+    localStorage.setItem('user', JSON.stringify({
+      id: 1,
+      username: 'smoke-admin',
+      role: authRole,
+      structures: structureList
+    }));
+  }, { authToken: token, authRole: role, structureId: selectedStructureId, structureList: structures });
 }
 
 test.describe('Frontend smoke', () => {
@@ -39,16 +65,7 @@ test.describe('Frontend smoke', () => {
   });
 
   test('admin dashboard renders for an authenticated session', async ({ page }) => {
-    await page.addInitScript(({ token }) => {
-      localStorage.setItem('admin_token', token);
-      localStorage.setItem('selected_structure_id', '1');
-      localStorage.setItem('user', JSON.stringify({
-        id: 1,
-        username: 'smoke-admin',
-        role: 'admin',
-        structures: [{ id: 1, name: 'Smoke Structure' }]
-      }));
-    }, { token: buildFakeJwt() });
+    await seedAuthSession(page, 'admin');
 
     await page.route('**/api/v1/reservations/structure/*', async (route) => {
       await route.fulfill({
@@ -78,6 +95,122 @@ test.describe('Frontend smoke', () => {
     await expect(page).toHaveURL(/\/admin\/dashboard/);
     await expect(page.locator('.stats-grid')).toBeVisible();
     await expect(page.locator('p-table')).toBeVisible();
+  });
+
+  test('auth guard redirects unauthenticated access from dashboard to login', async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.removeItem('admin_token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('selected_structure_id');
+    });
+
+    await page.goto('/admin/dashboard');
+    await expect(page).toHaveURL(/\/admin\/login/);
+    await expect(page.locator('form')).toBeVisible();
+  });
+
+  test('dashboard shows no-structure state when selected_structure_id is missing', async ({ page }) => {
+    await seedAuthSession(page, 'admin', {
+      selectedStructureId: null,
+      structures: []
+    });
+
+    let reservationCalls = 0;
+    let monthlyCalls = 0;
+    await page.route('**/api/v1/reservations/structure/*', async (route) => {
+      reservationCalls += 1;
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+    });
+    await page.route('**/api/v1/reservations/monthly/*', async (route) => {
+      monthlyCalls += 1;
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ total_reservations: 0 }]) });
+    });
+
+    await page.goto('/admin/dashboard');
+    await expect(page).toHaveURL(/\/admin\/dashboard/);
+    await page.waitForTimeout(300);
+    expect(reservationCalls).toBe(0);
+    expect(monthlyCalls).toBe(0);
+    await expect(page.locator('.stats-grid')).toBeVisible();
+  });
+
+  test('reservation details redirects to dashboard when reservation belongs to another structure', async ({ page }) => {
+    await seedAuthSession(page, 'admin', {
+      selectedStructureId: '1',
+      structures: [{ id: 1, name: 'Main Structure' }]
+    });
+
+    await page.route('**/api/v1/reservations/admin/127', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 127,
+          id_reference: 'RES-127',
+          name_reference: 'Other Structure Guest',
+          status: 'Pending',
+          room: {
+            id: 30,
+            id_structure: 2,
+            name: 'Room X'
+          }
+        })
+      });
+    });
+    await page.route('**/api/v1/rooms**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([])
+      });
+    });
+    await page.route('**/api/v1/reservations/structure/*', async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+    });
+    await page.route('**/api/v1/reservations/monthly/*', async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ total_reservations: 0 }]) });
+    });
+
+    await page.goto('/admin/reservation-details/127');
+    await expect(page).toHaveURL(/\/admin\/dashboard/);
+  });
+
+  test('superadmin route is denied for admin role and allowed for superadmin role', async ({ page }) => {
+    await seedAuthSession(page, 'admin');
+    await page.route('**/api/v1/reservations/structure/*', async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+    });
+    await page.route('**/api/v1/reservations/monthly/*', async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ total_reservations: 0 }]) });
+    });
+
+    await page.goto('/admin/superadmin/dashboard');
+    await expect(page).toHaveURL(/\/admin\/dashboard/);
+
+    await seedAuthSession(page, 'superadmin', {
+      selectedStructureId: null,
+      structures: []
+    });
+    await page.route('**/api/v1/superadmin/dashboard', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          dashboard: {
+            total_structures: 1,
+            active_structures: 1,
+            archived_structures: 0,
+            total_users: 1,
+            unassigned_admins: 0,
+            total_reservations: 5
+          }
+        })
+      });
+    });
+
+    await page.goto('/admin/superadmin/dashboard');
+    await expect(page).toHaveURL(/\/admin\/superadmin\/dashboard/);
+    await expect(page.locator('.dashboard')).toBeVisible();
   });
 
   test('admin login shows error toast on invalid credentials', async ({ page }) => {
