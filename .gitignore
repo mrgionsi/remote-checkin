@@ -187,3 +187,4 @@ frontend/package-lock.json
 backend/tests/reports/
 frontend/playwright-report/
 frontend/test-results/
+frontend/coverage/

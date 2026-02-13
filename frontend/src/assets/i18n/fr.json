@@ -489,5 +489,21 @@
   "rooms-csv-skip-detail": "Impossible d'importer la chambre {{name}}.",
   "rooms-csv-read-error": "Impossible de lire le fichier CSV.",
   "portale-alloggi-not-configured": "Portale Alloggi n'est pas configuré. Configurez-le d'abord dans les Paramètres.",
-  "upload-token-missing": "Impossible de continuer : le jeton de sécurité d'envoi est manquant. Actualisez la page puis réessayez."
+  "upload-token-missing": "Impossible de continuer : le jeton de sécurité d'envoi est manquant. Actualisez la page puis réessayez.",
+  "pricingDetails": {
+    "pricing": {
+      "currencySymbol": "€",
+      "perMonth": "/mois",
+      "perYear": "/an",
+      "free": "Gratuit"
+    },
+    "comparison": {
+      "value": {
+        "unlimited": "Illimité",
+        "limited": "Limité",
+        "included": "Inclus",
+        "notIncluded": "—"
+      }
+    }
+  }
 }

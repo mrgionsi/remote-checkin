@@ -489,5 +489,21 @@
   "rooms-csv-skip-detail": "Zimmer {{name}} konnte nicht importiert werden.",
   "rooms-csv-read-error": "CSV-Datei konnte nicht gelesen werden.",
   "portale-alloggi-not-configured": "Portale Alloggi ist nicht konfiguriert. Bitte konfigurieren Sie es zuerst in den Einstellungen.",
-  "upload-token-missing": "Fortfahren nicht möglich: Sicherheits-Upload-Token fehlt. Bitte aktualisieren und erneut versuchen."
+  "upload-token-missing": "Fortfahren nicht möglich: Sicherheits-Upload-Token fehlt. Bitte aktualisieren und erneut versuchen.",
+  "pricingDetails": {
+    "pricing": {
+      "currencySymbol": "€",
+      "perMonth": "/Monat",
+      "perYear": "/Jahr",
+      "free": "Kostenlos"
+    },
+    "comparison": {
+      "value": {
+        "unlimited": "Unbegrenzt",
+        "limited": "Begrenzt",
+        "included": "Inbegriffen",
+        "notIncluded": "—"
+      }
+    }
+  }
 }
