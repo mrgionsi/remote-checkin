@@ -33,6 +33,59 @@ async function seedAuthSession(
   }, { authToken: token, authRole: role, structureId: selectedStructureId, structureList: structures });
 }
 
+async function populateRemoteCheckinForms(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const host = document.querySelector('app-remote-checkin');
+    const ngRef = (window as any).ng;
+    if (!host || !ngRef?.getComponent) {
+      throw new Error('RemoteCheckin component instance not available');
+    }
+
+    const component = ngRef.getComponent(host);
+    const now = new Date('2026-02-13T10:00:00.000Z');
+    const expiry = new Date('2028-02-13T10:00:00.000Z');
+    const birthday = new Date('1990-01-15T10:00:00.000Z');
+
+    component.clientForm.patchValue({
+      name: 'Mario',
+      surname: 'Rossi',
+      birthday,
+      street: 'Via Roma',
+      number_city: '10',
+      cap: '00100',
+      telephone: '3331234567',
+      document_type: 'PASSPORT',
+      document_number: 'YA1234567',
+      cf: 'RSSMRA90A15H501U',
+      sesso: '1',
+      nazionalita: 'ITA',
+      email: 'mario.rossi@example.com',
+      comune_nascita_code: 'H501',
+      provincia_nascita: 'RM',
+      stato_nascita: 'ITA',
+      cittadinanza: 'ITA',
+      luogo_emissione: 'H501',
+      data_emissione: now,
+      data_scadenza: expiry,
+      autorita_rilascio: 'Questura',
+      comune_residenza_code: 'H501',
+      provincia_residenza: 'RM',
+      stato_residenza: 'ITA'
+    });
+
+    component.uploadForm.patchValue({
+      frontimage: new File(['front'], 'front.jpg', { type: 'image/jpeg' }),
+      backimage: new File(['back'], 'back.jpg', { type: 'image/jpeg' }),
+      selfie: new File(['selfie'], 'selfie.jpg', { type: 'image/jpeg' })
+    });
+
+    component.clientForm.markAllAsTouched();
+    component.uploadForm.markAllAsTouched();
+    component.clientForm.updateValueAndValidity();
+    component.uploadForm.updateValueAndValidity();
+  });
+}
+
 test.describe('Frontend smoke', () => {
   test('landing page renders core sections and CTA links', async ({ page }) => {
     await page.goto('/landing');
@@ -228,5 +281,87 @@ test.describe('Frontend smoke', () => {
     await page.click('button[type="submit"]');
 
     await expect(page.getByText(/username o password errati/i)).toBeVisible();
+  });
+
+  test('remote check-in submit happy path redirects to completion page', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/123', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 123,
+          number_of_people: 2,
+          registered_clients_count: 0,
+          upload_token: 'smoke-upload-token'
+        })
+      });
+    });
+
+    await page.route('**/api/v1/upload', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: 'Upload completed' })
+      });
+    });
+
+    await page.goto('/123/remote-checkin/en');
+    await populateRemoteCheckinForms(page);
+    await page.evaluate(() => {
+      const host = document.querySelector('app-remote-checkin');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('RemoteCheckin component instance not available');
+      }
+      const component = ngRef.getComponent(host);
+      component.reservationId = '123';
+      component.canRegister = true;
+      component.uploadToken = 'smoke-upload-token';
+      component.uploadReservationData();
+    });
+
+    await expect(page).toHaveURL(/\/checkin-complete\/123/);
+  });
+
+  test('remote check-in shows localized error when upload token is missing', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/124', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 124,
+          number_of_people: 2,
+          registered_clients_count: 0,
+          upload_token: null
+        })
+      });
+    });
+
+    await page.goto('/124/remote-checkin/en');
+    await populateRemoteCheckinForms(page);
+    await page.evaluate(() => {
+      const host = document.querySelector('app-remote-checkin');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('RemoteCheckin component instance not available');
+      }
+      const component = ngRef.getComponent(host);
+      component.reservationId = '124';
+      component.canRegister = true;
+      component.uploadToken = null;
+      component.uploadReservationData();
+    });
+
+    await expect(page.getByText('Unable to continue: upload security token missing. Please refresh and try again.')).toBeVisible();
+  });
+
+  test('landing header language switch updates translated labels', async ({ page }) => {
+    await page.goto('/landing');
+    await expect(page.locator('.header__signin')).toHaveText('Sign in');
+
+    await page.hover('.language-menu');
+    await page.click('.language-menu__list button:has-text("Italiano")');
+
+    await expect(page.locator('.header__signin')).toHaveText('Accedi');
   });
 });
