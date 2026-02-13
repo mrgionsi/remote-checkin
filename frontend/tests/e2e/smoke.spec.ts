@@ -283,6 +283,105 @@ test.describe('Frontend smoke', () => {
     await expect(page.getByText(/username o password errati/i)).toBeVisible();
   });
 
+  test('create reservation submits and redirects to dashboard', async ({ page }) => {
+    await seedAuthSession(page, 'admin', {
+      selectedStructureId: '1',
+      structures: [{ id: 1, name: 'Main Structure' }]
+    });
+
+    await page.route('**/api/v1/rooms**', async (route) => {
+      if (route.request().method() === 'GET') {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify([{ id: 11, id_structure: 1, name: 'Room 11', capacity: 3, is_active: true }])
+        });
+        return;
+      }
+      await route.continue();
+    });
+
+    await page.route('**/api/v1/reservations', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ id: 301, id_reference: 'RES301' })
+      });
+    });
+
+    await page.goto('/admin/create-reservation');
+    await page.evaluate(() => {
+      const host = document.querySelector('app-create-reservation');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('CreateReservation component instance not available');
+      }
+      const component = ngRef.getComponent(host);
+      component.reservationForm.patchValue({
+        reservationNumber: 'RES301',
+        startDate: new Date('2026-02-20T10:00:00.000Z'),
+        endDate: new Date('2026-02-22T10:00:00.000Z'),
+        roomName: { id: 11, id_structure: 1, name: 'Room 11', capacity: 3 },
+        nameReference: 'Smoke Guest',
+        email: 'smoke@example.com',
+        telephone: '3331234567',
+        numberOfPeople: 2
+      });
+      component.onSubmit();
+    });
+
+    await expect(page).toHaveURL(/\/admin\/dashboard/);
+  });
+
+  test('rooms page supports search and row status toggle only in edit mode', async ({ page }) => {
+    await seedAuthSession(page, 'admin', {
+      selectedStructureId: '1',
+      structures: [{ id: 1, name: 'Main Structure' }]
+    });
+
+    let editCalls = 0;
+    await page.route('**/api/v1/rooms**', async (route) => {
+      const method = route.request().method();
+      if (method === 'GET') {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify([
+            { id: 1, id_structure: 1, name: 'Blue Room', capacity: 2, is_active: true },
+            { id: 2, id_structure: 1, name: 'Red Room', capacity: 4, is_active: true }
+          ])
+        });
+        return;
+      }
+      if (method === 'PUT') {
+        editCalls += 1;
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: route.request().postData() || '{}'
+        });
+        return;
+      }
+      await route.continue();
+    });
+
+    await page.goto('/admin/rooms');
+    await expect(page.getByText('Blue Room')).toBeVisible();
+    await page.fill('#roomSearch', 'Blue');
+    await expect(page.getByText('Blue Room')).toBeVisible();
+    await expect(page.getByText('Red Room')).not.toBeVisible();
+
+    const firstStatusPill = page.locator('.status-pill').first();
+    await expect(firstStatusPill).toBeDisabled();
+    await firstStatusPill.click({ force: true });
+    expect(editCalls).toBe(0);
+
+    await page.getByRole('button', { name: /edit/i }).first().click();
+    await expect(firstStatusPill).toBeEnabled();
+    await firstStatusPill.click();
+    expect(editCalls).toBe(1);
+  });
+
   test('remote check-in submit happy path redirects to completion page', async ({ page }) => {
     await page.route('**/api/v1/reservations/check/123', async (route) => {
       await route.fulfill({
