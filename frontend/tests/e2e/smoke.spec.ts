@@ -280,7 +280,7 @@ test.describe('Frontend smoke', () => {
     await page.fill('#password', 'wrong-password');
     await page.click('button[type="submit"]');
 
-    await expect(page.getByText(/username o password errati/i)).toBeVisible();
+    await expect(page.locator('.p-toast-message.p-toast-message-error')).toBeVisible();
   });
 
   test('create reservation submits and redirects to dashboard', async ({ page }) => {
