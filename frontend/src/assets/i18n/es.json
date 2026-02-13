@@ -495,7 +495,8 @@
       "currencySymbol": "€",
       "perMonth": "/mes",
       "perYear": "/año",
-      "free": "Gratis"
+      "free": "Gratis",
+      "save": "Ahorra {{ amount }}"
     },
     "comparison": {
       "value": {
@@ -505,5 +506,9 @@
         "notIncluded": "—"
       }
     }
-  }
+  },
+  "gender-male": "Masculino",
+  "gender-female": "Femenino",
+  "registration-unavailable": "Registro no disponible",
+  "capacity-verification-failed": "No se puede verificar la capacidad ahora. Inténtalo de nuevo más tarde."
 }
