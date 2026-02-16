@@ -560,6 +560,188 @@ test.describe('Frontend smoke', () => {
     await expect(page.getByText('Missing one or more required image files')).toBeVisible();
   });
 
+  test('remote check-in restores non-PII draft within TTL and expires stale draft', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/134', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 134,
+          number_of_people: 2,
+          registered_clients_count: 0,
+          upload_token: 'draft-token'
+        })
+      });
+    });
+
+    await page.goto('/134/remote-checkin/en');
+
+    await page.evaluate(() => {
+      const host = document.querySelector('app-remote-checkin');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('RemoteCheckin component instance not available');
+      }
+      const component = ngRef.getComponent(host);
+      localStorage.setItem('checkin-draft:134', JSON.stringify({
+        savedAt: Date.now(),
+        clientForm: {
+          nazionalita: 'ITA',
+          stato_nascita: 'ITA',
+          cittadinanza: 'ITA'
+        }
+      }));
+      component.clientForm.patchValue({
+        nazionalita: '',
+        stato_nascita: '',
+        cittadinanza: ''
+      }, { emitEvent: false });
+      (component as any).restoreDraftIfValid();
+      if (component.clientForm.get('nazionalita')?.value !== 'ITA') {
+        throw new Error('Expected nazionalita to be restored from draft');
+      }
+      if (component.clientForm.get('stato_nascita')?.value !== 'ITA') {
+        throw new Error('Expected stato_nascita to be restored from draft');
+      }
+      if (component.clientForm.get('cittadinanza')?.value !== 'ITA') {
+        throw new Error('Expected cittadinanza to be restored from draft');
+      }
+    });
+
+    await page.evaluate(() => {
+      const host = document.querySelector('app-remote-checkin');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('RemoteCheckin component instance not available');
+      }
+      const component = ngRef.getComponent(host);
+      localStorage.setItem('checkin-draft:134', JSON.stringify({
+        savedAt: Date.now() - (6 * 60 * 1000),
+        clientForm: {
+          nazionalita: 'DEU',
+          stato_nascita: 'DEU',
+          cittadinanza: 'DEU'
+        }
+      }));
+      (component as any).restoreDraftIfValid();
+      component.clientForm.patchValue({
+        nazionalita: '',
+        stato_nascita: '',
+        cittadinanza: ''
+      }, { emitEvent: false });
+      (component as any).restoreDraftIfValid();
+      if (component.clientForm.get('nazionalita')?.value) {
+        throw new Error('Expired draft should not restore values');
+      }
+      if (component.clientForm.get('stato_nascita')?.value) {
+        throw new Error('Expired draft should not restore values');
+      }
+      if (component.clientForm.get('cittadinanza')?.value) {
+        throw new Error('Expired draft should not restore values');
+      }
+      const raw = localStorage.getItem('checkin-draft:134');
+      if (raw) {
+        throw new Error('Expired draft should be removed from localStorage');
+      }
+    });
+  });
+
+  test('remote check-in prevents duplicate upload submissions', async ({ page }) => {
+    let uploadCalls = 0;
+
+    await page.route('**/api/v1/reservations/check/135', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 135,
+          number_of_people: 2,
+          registered_clients_count: 0,
+          upload_token: 'duplicate-submit-token'
+        })
+      });
+    });
+
+    await page.route('**/api/v1/upload', async (route) => {
+      uploadCalls += 1;
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: 'Upload completed' })
+      });
+    });
+
+    await page.goto('/135/remote-checkin/en');
+    await populateRemoteCheckinForms(page);
+    await page.evaluate(() => {
+      const host = document.querySelector('app-remote-checkin');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('RemoteCheckin component instance not available');
+      }
+      const component = ngRef.getComponent(host);
+      component.reservationId = '135';
+      component.canRegister = true;
+      component.uploadToken = 'duplicate-submit-token';
+      component.uploadReservationData();
+      component.uploadReservationData();
+    });
+
+    await expect(page).toHaveURL(/\/checkin-complete\/135/);
+    expect(uploadCalls).toBe(1);
+  });
+
+  test('remote check-in shows registration unavailable when reservation does not exist', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/136', async (route) => {
+      await route.fulfill({
+        status: 404,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'Reservation not found' })
+      });
+    });
+
+    await page.goto('/136/remote-checkin/en');
+    await expect(page.getByText('Registration Unavailable')).toBeVisible();
+    await expect(page.locator('#name').first()).toBeDisabled();
+    await expect(page.locator('button.p-button:has(.pi-arrow-right)').first()).toBeDisabled();
+  });
+
+  test('remote check-in missing upload token message is localized in Italian', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/137', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 137,
+          number_of_people: 2,
+          registered_clients_count: 0,
+          upload_token: null
+        })
+      });
+    });
+
+    await page.goto('/137/remote-checkin/it');
+    await populateRemoteCheckinForms(page);
+    const expectedLocalizedText = await page.evaluate(() => {
+      const host = document.querySelector('app-remote-checkin');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('RemoteCheckin component instance not available');
+      }
+      const component = ngRef.getComponent(host);
+      component.translocoService.setActiveLang('it');
+      const expected = component.translocoService.translate('upload-token-missing');
+      component.reservationId = '137';
+      component.canRegister = true;
+      component.uploadToken = null;
+      component.uploadReservationData();
+      return expected;
+    });
+
+    await expect(page.getByText(expectedLocalizedText)).toBeVisible();
+  });
+
   test('remote check-in complete flow keeps step-2 next disabled until images are uploaded', async ({ page }) => {
     await page.route('**/api/v1/reservations/check/130', async (route) => {
       await route.fulfill({
