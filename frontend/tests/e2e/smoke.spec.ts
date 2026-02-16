@@ -822,6 +822,115 @@ test.describe('Frontend smoke', () => {
     });
   });
 
+  test('remote check-in handles upload 502 and re-enables submit state', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/140', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 140,
+          number_of_people: 2,
+          registered_clients_count: 0,
+          upload_token: 'upload-502-token'
+        })
+      });
+    });
+
+    await page.route('**/api/v1/upload', async (route) => {
+      await route.fulfill({
+        status: 502,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'Bad gateway from upstream' })
+      });
+    });
+
+    await page.goto('/140/remote-checkin/en');
+    await populateRemoteCheckinForms(page);
+    await page.evaluate(() => {
+      const host = document.querySelector('app-remote-checkin');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('RemoteCheckin component instance not available');
+      }
+      const component = ngRef.getComponent(host);
+      component.reservationId = '140';
+      component.canRegister = true;
+      component.uploadToken = 'upload-502-token';
+      component.uploadReservationData();
+    });
+
+    await expect(page.getByText('Bad gateway from upstream')).toBeVisible();
+    await page.evaluate(() => {
+      const host = document.querySelector('app-remote-checkin');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('RemoteCheckin component instance not available');
+      }
+      const component = ngRef.getComponent(host);
+      if (component.isSubmitting) {
+        throw new Error('isSubmitting should be false after upload error');
+      }
+    });
+  });
+
+  test('remote check-in handles reservation edge values for capacity fallback', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/141', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 141,
+          number_of_people: 2,
+          registered_clients_count: 0,
+          upload_token: 'edge-capacity-token'
+        })
+      });
+    });
+
+    await page.goto('/141/remote-checkin/en');
+    await page.evaluate(() => {
+      const host = document.querySelector('app-remote-checkin');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('RemoteCheckin component instance not available');
+      }
+      const component = ngRef.getComponent(host);
+
+      component.reservationDetails = { number_of_people: 0, registered_clients_count: 0 };
+      component.checkRegistrationCapacity();
+      if (!component.canRegister) {
+        throw new Error('number_of_people=0 should fallback to max=1 and allow first registration');
+      }
+
+      component.reservationDetails = { number_of_people: null, registered_clients_count: 0 };
+      component.checkRegistrationCapacity();
+      if (!component.canRegister) {
+        throw new Error('number_of_people=null should fallback to max=1 and allow first registration');
+      }
+
+      component.reservationDetails = { number_of_people: 2, registered_clients_count: 'oops' };
+      component.checkRegistrationCapacity();
+      if (!component.canRegister) {
+        throw new Error('Malformed registered_clients_count should not crash and should keep registration available');
+      }
+    });
+  });
+
+  test('remote check-in route handles invalid reservation id safely', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/invalid-id', async (route) => {
+      await route.fulfill({
+        status: 400,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'Invalid reservation id' })
+      });
+    });
+
+    await page.goto('/invalid-id/remote-checkin/en');
+    await expect(page).toHaveURL(/\/invalid-id\/remote-checkin\/en/);
+    await expect(page.getByText('Registration Unavailable')).toBeVisible();
+    await expect(page.locator('#name').first()).toBeDisabled();
+  });
+
   test('remote check-in complete flow keeps step-2 next disabled until images are uploaded', async ({ page }) => {
     await page.route('**/api/v1/reservations/check/130', async (route) => {
       await route.fulfill({
