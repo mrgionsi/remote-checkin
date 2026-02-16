@@ -742,6 +742,86 @@ test.describe('Frontend smoke', () => {
     await expect(page.getByText(expectedLocalizedText)).toBeVisible();
   });
 
+  test('remote check-in rejects invalid mime type for each required upload field', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/138', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 138,
+          number_of_people: 2,
+          registered_clients_count: 0,
+          upload_token: 'mime-guard-token'
+        })
+      });
+    });
+
+    await page.goto('/138/remote-checkin/en');
+    await populateRemoteCheckinForms(page);
+    await page.locator('button.p-button:has(.pi-arrow-right)').first().click();
+    await expect(page.locator('app-upload-identity')).toBeVisible();
+
+    await page.evaluate(() => {
+      const host = document.querySelector('app-upload-identity');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('UploadIdentity component instance not available');
+      }
+      const uploadComponent = ngRef.getComponent(host);
+      const invalidFile = new File(['bad-content'], 'file.txt', { type: 'text/plain' });
+      const fields = ['frontimage', 'backimage', 'selfie'] as const;
+      fields.forEach((field) => {
+        uploadComponent.onFileSelect({ currentFiles: [invalidFile] }, field);
+        if (uploadComponent.uploadForm.get(field)?.value !== null) {
+          throw new Error(`Field ${field} should remain empty for invalid MIME`);
+        }
+      });
+      if (uploadComponent.getUploadProgress() !== 0) {
+        throw new Error('Invalid mime uploads must not increase upload progress');
+      }
+    });
+  });
+
+  test('remote check-in rejects over-size files for each required upload field', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/139', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 139,
+          number_of_people: 2,
+          registered_clients_count: 0,
+          upload_token: 'size-guard-token'
+        })
+      });
+    });
+
+    await page.goto('/139/remote-checkin/en');
+    await populateRemoteCheckinForms(page);
+    await page.locator('button.p-button:has(.pi-arrow-right)').first().click();
+    await expect(page.locator('app-upload-identity')).toBeVisible();
+
+    await page.evaluate(() => {
+      const host = document.querySelector('app-upload-identity');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('UploadIdentity component instance not available');
+      }
+      const uploadComponent = ngRef.getComponent(host);
+      const hugeFile = new File([new Uint8Array(5_000_001)], 'huge.jpg', { type: 'image/jpeg' });
+      const fields = ['frontimage', 'backimage', 'selfie'] as const;
+      fields.forEach((field) => {
+        uploadComponent.onFileSelect({ currentFiles: [hugeFile] }, field);
+        if (uploadComponent.uploadForm.get(field)?.value !== null) {
+          throw new Error(`Field ${field} should remain empty for over-size file`);
+        }
+      });
+      if (uploadComponent.getUploadProgress() !== 0) {
+        throw new Error('Oversize uploads must not increase upload progress');
+      }
+    });
+  });
+
   test('remote check-in complete flow keeps step-2 next disabled until images are uploaded', async ({ page }) => {
     await page.route('**/api/v1/reservations/check/130', async (route) => {
       await route.fulfill({
