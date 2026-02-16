@@ -931,6 +931,100 @@ test.describe('Frontend smoke', () => {
     await expect(page.locator('#name').first()).toBeDisabled();
   });
 
+  test('remote check-in supports keyboard-only step navigation and submit', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/142', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 142,
+          number_of_people: 2,
+          registered_clients_count: 0,
+          upload_token: 'keyboard-flow-token'
+        })
+      });
+    });
+
+    await page.route('**/api/v1/upload', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: 'Upload completed' })
+      });
+    });
+
+    await page.goto('/142/remote-checkin/en');
+    await populateRemoteCheckinForms(page);
+    await page.evaluate(() => {
+      const host = document.querySelector('app-remote-checkin');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('RemoteCheckin component instance not available');
+      }
+      const component = ngRef.getComponent(host);
+      component.canRegister = true;
+      component.clientForm.enable({ emitEvent: false });
+      component.uploadForm.enable({ emitEvent: false });
+    });
+
+    const nextBtnStep1 = page.locator('button.p-button:has(.pi-arrow-right)').first();
+    await nextBtnStep1.focus();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('app-upload-identity')).toBeVisible();
+
+    const nextBtnStep2 = page.locator('button.p-button:has(.pi-arrow-right)').first();
+    await nextBtnStep2.focus();
+    await page.keyboard.press('Enter');
+
+    const submitBtn = page.locator('button.p-button:has(.pi-check)').first();
+    await submitBtn.focus();
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(/\/checkin-complete\/142/);
+  });
+
+  test('remote check-in keeps focus stable after toast state changes', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/143', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 143,
+          number_of_people: 2,
+          registered_clients_count: 0,
+          upload_token: null
+        })
+      });
+    });
+
+    await page.goto('/143/remote-checkin/en');
+    await populateRemoteCheckinForms(page);
+    const nextBtn = page.locator('button.p-button:has(.pi-arrow-right)').first();
+    await nextBtn.focus();
+    await page.evaluate(() => {
+      const host = document.querySelector('app-remote-checkin');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('RemoteCheckin component instance not available');
+      }
+      const component = ngRef.getComponent(host);
+      component.reservationId = '143';
+      component.canRegister = true;
+      component.uploadToken = null;
+      component.uploadReservationData();
+    });
+
+    await expect(page.getByRole('alert')).toBeVisible();
+    await page.evaluate(() => {
+      const active = document.activeElement as HTMLElement | null;
+      if (!active) {
+        throw new Error('Expected an active element after toast state change');
+      }
+      if (!active.classList.contains('p-button')) {
+        throw new Error('Focus should remain on an interactive button after toast');
+      }
+    });
+  });
+
   test('remote check-in complete flow keeps step-2 next disabled until images are uploaded', async ({ page }) => {
     await page.route('**/api/v1/reservations/check/130', async (route) => {
       await route.fulfill({
