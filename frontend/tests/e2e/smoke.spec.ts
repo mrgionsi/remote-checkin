@@ -1,4 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 function buildFakeJwt(expirationOffsetSeconds = 3600): string {
   const payload = {
@@ -871,6 +873,92 @@ test.describe('Frontend smoke', () => {
         throw new Error('isSubmitting should be false after upload error');
       }
     });
+  });
+
+  test('remote check-in handles upload timeout-like network failure and re-enables submit', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/144', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 144,
+          number_of_people: 2,
+          registered_clients_count: 0,
+          upload_token: 'upload-timeout-token'
+        })
+      });
+    });
+
+    await page.route('**/api/v1/upload', async (route) => {
+      await route.abort('timedout');
+    });
+
+    await page.goto('/144/remote-checkin/en');
+    await populateRemoteCheckinForms(page);
+    await page.evaluate(() => {
+      const host = document.querySelector('app-remote-checkin');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('RemoteCheckin component instance not available');
+      }
+      const component = ngRef.getComponent(host);
+      component.reservationId = '144';
+      component.canRegister = true;
+      component.uploadToken = 'upload-timeout-token';
+      component.uploadReservationData();
+    });
+
+    await expect(page.getByText('Upload failed')).toBeVisible();
+    await page.evaluate(() => {
+      const host = document.querySelector('app-remote-checkin');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('RemoteCheckin component instance not available');
+      }
+      const component = ngRef.getComponent(host);
+      if (component.isSubmitting) {
+        throw new Error('isSubmitting should be false after timeout-like upload failure');
+      }
+    });
+  });
+
+  test('remote check-in degrades safely when reservation check payload is missing required fields', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/145', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 145
+        })
+      });
+    });
+
+    await page.goto('/145/remote-checkin/en');
+    await expect(page.getByText('Registration Unavailable')).toBeVisible();
+    await expect(page.locator('#name').first()).toBeDisabled();
+    await expect(page.locator('button.p-button:has(.pi-arrow-right)').first()).toBeDisabled();
+  });
+
+  test('i18n parity: critical check-in error keys exist in all supported locales', async () => {
+    const localeFiles = ['en.json', 'it.json', 'de.json', 'es.json', 'fr.json'];
+    const criticalKeys = [
+      'upload-token-missing',
+      'registration-unavailable',
+      'capacity-verification-failed',
+      'all-fields-required-error',
+      'document-expiry-date-error'
+    ];
+
+    for (const localeFile of localeFiles) {
+      const filePath = path.resolve(process.cwd(), 'src/assets/i18n', localeFile);
+      const content = fs.readFileSync(filePath, 'utf8');
+      const parsed = JSON.parse(content) as Record<string, unknown>;
+      for (const key of criticalKeys) {
+        const value = parsed[key];
+        expect(typeof value).toBe('string');
+        expect((value as string).trim().length).toBeGreaterThan(0);
+      }
+    }
   });
 
   test('remote check-in handles reservation edge values for capacity fallback', async ({ page }) => {
