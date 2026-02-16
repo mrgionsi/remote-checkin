@@ -457,22 +457,20 @@ test.describe('Frontend smoke', () => {
   });
 
   test('remote check-in blocks registration when reservation is at full capacity', async ({ page }) => {
-    await page.goto('/126/remote-checkin/en');
-    await page.evaluate(() => {
-      const host = document.querySelector('app-remote-checkin');
-      const ngRef = (window as any).ng;
-      if (!host || !ngRef?.getComponent) {
-        throw new Error('RemoteCheckin component instance not available');
-      }
-      const component = ngRef.getComponent(host);
-      component.reservationDetails = {
-        id: 126,
-        number_of_people: 1,
-        registered_clients_count: 1,
-        upload_token: 'capacity-full-token'
-      };
-      component.checkRegistrationCapacity();
+    await page.route('**/api/v1/reservations/check/126', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 126,
+          number_of_people: 1,
+          registered_clients_count: 1,
+          upload_token: 'capacity-full-token'
+        })
+      });
     });
+
+    await page.goto('/126/remote-checkin/en');
 
     await expect(page.getByRole('alert').getByText('Registration Full')).toBeVisible();
     await expect(page.locator('#name').first()).toBeDisabled();
