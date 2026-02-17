@@ -547,16 +547,6 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (!this.documentsValidated || !this.documentValidationToken) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: this.translocoService.translate('error'),
-        detail: 'Validate your document images before final submission.'
-      });
-      this.isSubmitting = false;
-      return;
-    }
-
     const formData = new FormData();
 
     // Append image files
@@ -650,6 +640,16 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
       return;
     }
 
+    if (!this.documentsValidated || !this.documentValidationToken) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: this.translocoService.translate('error'),
+        detail: this.translocoService.translate('checkin-validate-before-submit')
+      });
+      this.isSubmitting = false;
+      return;
+    }
+
     this.uploadService.uploadImages(formData, this.uploadToken, this.documentValidationToken).subscribe({
       next: (response) => {
         // Show success message with API response
@@ -707,7 +707,7 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
       this.messageService.add({
         severity: 'warn',
         summary: this.translocoService.translate('error'),
-        detail: 'Please upload all required images first.'
+        detail: this.translocoService.translate('checkin-upload-all-images-first')
       });
       return;
     }
@@ -735,8 +735,8 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
         this.documentValidationToken = response?.document_validation_token || null;
         this.messageService.add({
           severity: 'success',
-          summary: 'Success',
-          detail: response?.message || 'Documents validated successfully'
+          summary: this.translocoService.translate('success'),
+          detail: response?.message || this.translocoService.translate('checkin-documents-validated-success')
         });
         this.isValidatingDocuments = false;
       },

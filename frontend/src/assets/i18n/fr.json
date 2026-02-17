@@ -489,6 +489,15 @@
   "rooms-csv-skip-detail": "Impossible d'importer la chambre {{name}}.",
   "rooms-csv-read-error": "Impossible de lire le fichier CSV.",
   "portale-alloggi-not-configured": "Portale Alloggi n'est pas configuré. Configurez-le d'abord dans les Paramètres.",
+  "checkin-validate-documents-cta": "Valider les documents",
+  "checkin-documents-validated-ready": "Documents validés avec succès. Vous pouvez continuer.",
+  "checkin-validate-before-submit": "Validez les images des documents avant l'envoi final.",
+  "checkin-upload-all-images-first": "Veuillez d'abord téléverser toutes les images requises.",
+  "checkin-documents-validated-success": "Documents validés avec succès",
+  "upload-file-too-large": "La taille du fichier doit être inférieure à 5 Mo",
+  "upload-invalid-file-type": "Seules les images JPEG et PNG sont autorisées",
+  "upload-image-uploaded-success": "Image téléversée avec succès",
+  "upload-image-removed": "Image supprimée",
   "upload-token-missing": "Impossible de continuer : le jeton de sécurité d'envoi est manquant. Actualisez la page puis réessayez.",
   "pricingDetails": {
     "pricing": {

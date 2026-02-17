@@ -14,6 +14,7 @@ from flask_jwt_extended import JWTManager
 from flask_mail import Mail
 from dotenv import load_dotenv
 from config import Config
+from extensions import limiter
 from app_logging.config import setup_logging
 from app_logging.middleware import setup_request_logging
 from routes.email_config_routes import email_config_bp
@@ -74,6 +75,7 @@ app.config["JWT_REFRESH_TOKEN_EXPIRES"] = 60 * 60 * 24 * 30  # 30 days (in secon
 app.config["JWT_ALGORITHM"] = "HS256"
 
 jwt = JWTManager(app)
+limiter.init_app(app)
 
 # Initialize Flask-Mail after all configuration is set
 mail = Mail(app)

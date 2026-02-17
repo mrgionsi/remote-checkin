@@ -489,6 +489,15 @@
   "rooms-csv-skip-detail": "Zimmer {{name}} konnte nicht importiert werden.",
   "rooms-csv-read-error": "CSV-Datei konnte nicht gelesen werden.",
   "portale-alloggi-not-configured": "Portale Alloggi ist nicht konfiguriert. Bitte konfigurieren Sie es zuerst in den Einstellungen.",
+  "checkin-validate-documents-cta": "Dokumente prüfen",
+  "checkin-documents-validated-ready": "Dokumente erfolgreich geprüft. Sie können fortfahren.",
+  "checkin-validate-before-submit": "Prüfen Sie Ihre Dokumentbilder vor dem endgültigen Senden.",
+  "checkin-upload-all-images-first": "Bitte laden Sie zuerst alle erforderlichen Bilder hoch.",
+  "checkin-documents-validated-success": "Dokumente erfolgreich geprüft",
+  "upload-file-too-large": "Die Dateigröße muss unter 5 MB liegen",
+  "upload-invalid-file-type": "Nur JPEG- und PNG-Bilder sind erlaubt",
+  "upload-image-uploaded-success": "Bild erfolgreich hochgeladen",
+  "upload-image-removed": "Bild entfernt",
   "upload-token-missing": "Fortfahren nicht möglich: Sicherheits-Upload-Token fehlt. Bitte aktualisieren und erneut versuchen.",
   "pricingDetails": {
     "pricing": {

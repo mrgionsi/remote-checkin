@@ -32,7 +32,16 @@ Run these API checks before each beta release to verify cross-structure isolatio
   - Reservation creation is blocked (`403`) unless policy changes.
   - Room/Reservation reads still respect explicit route access controls as implemented.
 
-## 4) Upload token security
+## 4) Upload token security and 2-phase validation
+
+- Prevalidation success path:
+  - `POST /api/v1/upload/validate-documents` with valid files + valid `X-Upload-Token` -> `200` and `document_validation_token`
+- Prevalidation failure path:
+  - `POST /api/v1/upload/validate-documents` with unreadable/invalid front or back document -> `422` + `retryable=true` + `invalid_files`
+- Final upload with validation token:
+  - `POST /api/v1/upload` with valid `X-Upload-Token` and `X-Document-Validation-Token` -> `200`
+- Final upload without validation token:
+  - If OCR fails, endpoint returns `422` with retryable invalid file details.
 
 - Missing token:
   - `POST /api/v1/upload` without `X-Upload-Token` and without `uploadToken` -> `401 Missing upload token`
@@ -43,7 +52,13 @@ Run these API checks before each beta release to verify cross-structure isolatio
 - Mismatch token:
   - Token signed for reservation X, payload has reservation Y -> `403 Upload token does not match reservation`
 
-## 5) Error hardening checks
+## 5) Rate limiting checks
+
+- Burst `POST /api/v1/admin/login` until limit is exceeded -> expect `429` after threshold.
+- Burst `POST /api/v1/upload/validate-documents` -> expect `429`.
+- Burst `POST /api/v1/upload` -> expect `429`.
+
+## 6) Error hardening checks
 
 - Trigger DB failures (invalid FK, unavailable DB).
 - Verify API responses do **not** expose raw Python/SQL exception text.

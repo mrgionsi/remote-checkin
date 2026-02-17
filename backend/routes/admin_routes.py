@@ -33,6 +33,7 @@ from app_logging.config import get_logger
 from app_logging.decorators import log_route, log_database_operation, log_performance
 from app_logging.utils import safe_extra_fields
 from database import SessionLocal
+from extensions import limiter
 
 
 # Blueprint setup
@@ -67,6 +68,7 @@ def _is_valid_password(password: str) -> bool:
 
 @admin_bp.route("/admin/login", methods=["POST"])
 @log_route(include_request_data=False, include_response_data=True)
+@limiter.limit("10 per minute")
 def admin_login():
     """
     Authenticate an admin user and return a JWT access token with the user's profile and associated structures.
@@ -206,6 +208,7 @@ def create_admin_user():
 @jwt_required()
 @log_route(include_request_data=False)
 @log_database_operation("UPDATE")
+@limiter.limit("5 per minute")
 def change_admin_password():
     """
     Change password for the currently authenticated admin user.

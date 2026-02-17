@@ -24,6 +24,7 @@ from routes.email_config_routes import get_encryption_key
 from app_logging.config import get_logger
 from app_logging.decorators import log_route, log_database_operation, log_performance
 from app_logging.utils import safe_extra_fields, log_notification_error
+from extensions import limiter
 
 upload_bp = Blueprint('upload', __name__, url_prefix="/api/v1")
 
@@ -138,6 +139,7 @@ def _get_gender_display(sesso):
 @log_route(include_request_data=False, include_response_data=False)
 @log_database_operation("CREATE")
 @log_performance(threshold_ms=3000)
+@limiter.limit("10 per minute")
 def upload_file():
     """
     Handle POST uploads of identity documents for a reservation.
@@ -410,6 +412,7 @@ def upload_file():
 @log_route(include_request_data=False, include_response_data=False)
 @log_database_operation("READ")
 @log_performance(threshold_ms=2000)
+@limiter.limit("20 per minute")
 def validate_upload_documents():
     """Pre-validate uploaded documents with OCR before full form submission."""
     try:
