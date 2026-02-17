@@ -511,4 +511,6 @@
   "gender-female": "Féminin",
   "registration-unavailable": "Inscription indisponible",
   "capacity-verification-failed": "Impossible de vérifier la capacité pour le moment. Veuillez réessayer plus tard."
+  ,"all-fields-required-error": "Tous les champs et images sont obligatoires"
+  ,"document-expiry-date-error": "La date d'expiration du document doit être postérieure à la date d'émission"
 }

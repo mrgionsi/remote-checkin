@@ -262,6 +262,16 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
 
     this.reservationService.getReservationById(this.reservationId).subscribe({
       next: (reservation) => {
+        if (!this.hasReservationCheckContract(reservation)) {
+          this.canRegister = false;
+          this.disableFormControls();
+          this.messageService.add({
+            severity: 'warn',
+            summary: this.translocoService.translate('registration-unavailable'),
+            detail: this.translocoService.translate('capacity-verification-failed')
+          });
+          return;
+        }
         this.reservationDetails = reservation;
         this.uploadToken = reservation?.upload_token || null;
         this.checkRegistrationCapacity();
@@ -280,6 +290,14 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
         });
       }
     });
+  }
+
+  private hasReservationCheckContract(reservation: any): boolean {
+    if (!reservation || typeof reservation !== 'object') {
+      return false;
+    }
+    const requiredKeys = ['upload_token', 'number_of_people', 'registered_clients_count'];
+    return requiredKeys.every((key) => Object.prototype.hasOwnProperty.call(reservation, key));
   }
 
   // Method to check if registration is still available

@@ -1,4 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 function buildFakeJwt(expirationOffsetSeconds = 3600): string {
   const payload = {
@@ -452,6 +454,864 @@ test.describe('Frontend smoke', () => {
     });
 
     await expect(page.getByText('Unable to continue: upload security token missing. Please refresh and try again.')).toBeVisible();
+  });
+
+  test('remote check-in blocks registration when reservation is at full capacity', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/126', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 126,
+          number_of_people: 1,
+          registered_clients_count: 1,
+          upload_token: 'capacity-full-token'
+        })
+      });
+    });
+
+    await page.goto('/126/remote-checkin/en');
+
+    await expect(page.getByRole('alert').getByText('Registration Full')).toBeVisible();
+    await expect(page.locator('#name').first()).toBeDisabled();
+    await expect(page.locator('button.p-button:has(.pi-arrow-right)').first()).toBeDisabled();
+  });
+
+  test('remote check-in shows warning when reservation check fails', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/127', async (route) => {
+      await route.fulfill({
+        status: 500,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'Internal server error' })
+      });
+    });
+
+    await page.goto('/127/remote-checkin/en');
+    await expect(page.getByText('Registration Unavailable')).toBeVisible();
+    await expect(page.getByText('Unable to verify reservation capacity. Registration is temporarily disabled.')).toBeVisible();
+    await expect(page.locator('#name').first()).toBeDisabled();
+  });
+
+  test('remote check-in submit shows validation error on incomplete form', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/128', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 128,
+          number_of_people: 2,
+          registered_clients_count: 0,
+          upload_token: 'validation-token'
+        })
+      });
+    });
+
+    await page.goto('/128/remote-checkin/en');
+    await page.evaluate(() => {
+      const host = document.querySelector('app-remote-checkin');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('RemoteCheckin component instance not available');
+      }
+      const component = ngRef.getComponent(host);
+      component.uploadReservationData();
+    });
+
+    await expect(page.getByText('All fields and images are required')).toBeVisible();
+  });
+
+  test('remote check-in submit shows API validation error message', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/129', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 129,
+          number_of_people: 2,
+          registered_clients_count: 0,
+          upload_token: 'upload-error-token'
+        })
+      });
+    });
+
+    await page.route('**/api/v1/upload', async (route) => {
+      await route.fulfill({
+        status: 400,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'Missing one or more required image files' })
+      });
+    });
+
+    await page.goto('/129/remote-checkin/en');
+    await populateRemoteCheckinForms(page);
+    await page.evaluate(() => {
+      const host = document.querySelector('app-remote-checkin');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('RemoteCheckin component instance not available');
+      }
+      const component = ngRef.getComponent(host);
+      component.reservationId = '129';
+      component.canRegister = true;
+      component.uploadToken = 'upload-error-token';
+      component.uploadReservationData();
+    });
+
+    await expect(page.getByText('Missing one or more required image files')).toBeVisible();
+  });
+
+  test('remote check-in restores non-PII draft within TTL and expires stale draft', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/134', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 134,
+          number_of_people: 2,
+          registered_clients_count: 0,
+          upload_token: 'draft-token'
+        })
+      });
+    });
+
+    await page.goto('/134/remote-checkin/en');
+
+    await page.evaluate(() => {
+      const host = document.querySelector('app-remote-checkin');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('RemoteCheckin component instance not available');
+      }
+      const component = ngRef.getComponent(host);
+      localStorage.setItem('checkin-draft:134', JSON.stringify({
+        savedAt: Date.now(),
+        clientForm: {
+          nazionalita: 'ITA',
+          stato_nascita: 'ITA',
+          cittadinanza: 'ITA'
+        }
+      }));
+      component.clientForm.patchValue({
+        nazionalita: '',
+        stato_nascita: '',
+        cittadinanza: ''
+      }, { emitEvent: false });
+      (component as any).restoreDraftIfValid();
+      if (component.clientForm.get('nazionalita')?.value !== 'ITA') {
+        throw new Error('Expected nazionalita to be restored from draft');
+      }
+      if (component.clientForm.get('stato_nascita')?.value !== 'ITA') {
+        throw new Error('Expected stato_nascita to be restored from draft');
+      }
+      if (component.clientForm.get('cittadinanza')?.value !== 'ITA') {
+        throw new Error('Expected cittadinanza to be restored from draft');
+      }
+    });
+
+    await page.evaluate(() => {
+      const host = document.querySelector('app-remote-checkin');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('RemoteCheckin component instance not available');
+      }
+      const component = ngRef.getComponent(host);
+      localStorage.setItem('checkin-draft:134', JSON.stringify({
+        savedAt: Date.now() - (6 * 60 * 1000),
+        clientForm: {
+          nazionalita: 'DEU',
+          stato_nascita: 'DEU',
+          cittadinanza: 'DEU'
+        }
+      }));
+      (component as any).restoreDraftIfValid();
+      component.clientForm.patchValue({
+        nazionalita: '',
+        stato_nascita: '',
+        cittadinanza: ''
+      }, { emitEvent: false });
+      (component as any).restoreDraftIfValid();
+      if (component.clientForm.get('nazionalita')?.value) {
+        throw new Error('Expired draft should not restore values');
+      }
+      if (component.clientForm.get('stato_nascita')?.value) {
+        throw new Error('Expired draft should not restore values');
+      }
+      if (component.clientForm.get('cittadinanza')?.value) {
+        throw new Error('Expired draft should not restore values');
+      }
+      const raw = localStorage.getItem('checkin-draft:134');
+      if (raw) {
+        throw new Error('Expired draft should be removed from localStorage');
+      }
+    });
+  });
+
+  test('remote check-in prevents duplicate upload submissions', async ({ page }) => {
+    let uploadCalls = 0;
+
+    await page.route('**/api/v1/reservations/check/135', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 135,
+          number_of_people: 2,
+          registered_clients_count: 0,
+          upload_token: 'duplicate-submit-token'
+        })
+      });
+    });
+
+    await page.route('**/api/v1/upload', async (route) => {
+      uploadCalls += 1;
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: 'Upload completed' })
+      });
+    });
+
+    await page.goto('/135/remote-checkin/en');
+    await populateRemoteCheckinForms(page);
+    await page.evaluate(() => {
+      const host = document.querySelector('app-remote-checkin');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('RemoteCheckin component instance not available');
+      }
+      const component = ngRef.getComponent(host);
+      component.reservationId = '135';
+      component.canRegister = true;
+      component.uploadToken = 'duplicate-submit-token';
+      component.uploadReservationData();
+      component.uploadReservationData();
+    });
+
+    await expect(page).toHaveURL(/\/checkin-complete\/135/);
+    expect(uploadCalls).toBe(1);
+  });
+
+  test('remote check-in shows registration unavailable when reservation does not exist', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/136', async (route) => {
+      await route.fulfill({
+        status: 404,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'Reservation not found' })
+      });
+    });
+
+    await page.goto('/136/remote-checkin/en');
+    await expect(page.getByText('Registration Unavailable')).toBeVisible();
+    await expect(page.locator('#name').first()).toBeDisabled();
+    await expect(page.locator('button.p-button:has(.pi-arrow-right)').first()).toBeDisabled();
+  });
+
+  test('remote check-in missing upload token message is localized in Italian', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/137', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 137,
+          number_of_people: 2,
+          registered_clients_count: 0,
+          upload_token: null
+        })
+      });
+    });
+
+    await page.goto('/137/remote-checkin/it');
+    await populateRemoteCheckinForms(page);
+    const expectedLocalizedText = await page.evaluate(() => {
+      const host = document.querySelector('app-remote-checkin');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('RemoteCheckin component instance not available');
+      }
+      const component = ngRef.getComponent(host);
+      component.translocoService.setActiveLang('it');
+      const expected = component.translocoService.translate('upload-token-missing');
+      component.reservationId = '137';
+      component.canRegister = true;
+      component.uploadToken = null;
+      component.uploadReservationData();
+      return expected;
+    });
+
+    await expect(page.getByText(expectedLocalizedText)).toBeVisible();
+  });
+
+  test('remote check-in rejects invalid mime type for each required upload field', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/138', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 138,
+          number_of_people: 2,
+          registered_clients_count: 0,
+          upload_token: 'mime-guard-token'
+        })
+      });
+    });
+
+    await page.goto('/138/remote-checkin/en');
+    await populateRemoteCheckinForms(page);
+    await page.locator('button.p-button:has(.pi-arrow-right)').first().click();
+    await expect(page.locator('app-upload-identity')).toBeVisible();
+
+    await page.evaluate(() => {
+      const host = document.querySelector('app-upload-identity');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('UploadIdentity component instance not available');
+      }
+      const uploadComponent = ngRef.getComponent(host);
+      const invalidFile = new File(['bad-content'], 'file.txt', { type: 'text/plain' });
+      const fields = ['frontimage', 'backimage', 'selfie'] as const;
+      fields.forEach((field) => {
+        uploadComponent.onFileSelect({ currentFiles: [invalidFile] }, field);
+        if (uploadComponent.uploadForm.get(field)?.value !== null) {
+          throw new Error(`Field ${field} should remain empty for invalid MIME`);
+        }
+      });
+      if (uploadComponent.getUploadProgress() !== 0) {
+        throw new Error('Invalid mime uploads must not increase upload progress');
+      }
+    });
+  });
+
+  test('remote check-in rejects over-size files for each required upload field', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/139', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 139,
+          number_of_people: 2,
+          registered_clients_count: 0,
+          upload_token: 'size-guard-token'
+        })
+      });
+    });
+
+    await page.goto('/139/remote-checkin/en');
+    await populateRemoteCheckinForms(page);
+    await page.locator('button.p-button:has(.pi-arrow-right)').first().click();
+    await expect(page.locator('app-upload-identity')).toBeVisible();
+
+    await page.evaluate(() => {
+      const host = document.querySelector('app-upload-identity');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('UploadIdentity component instance not available');
+      }
+      const uploadComponent = ngRef.getComponent(host);
+      const hugeFile = new File([new Uint8Array(5_000_001)], 'huge.jpg', { type: 'image/jpeg' });
+      const fields = ['frontimage', 'backimage', 'selfie'] as const;
+      fields.forEach((field) => {
+        uploadComponent.onFileSelect({ currentFiles: [hugeFile] }, field);
+        if (uploadComponent.uploadForm.get(field)?.value !== null) {
+          throw new Error(`Field ${field} should remain empty for over-size file`);
+        }
+      });
+      if (uploadComponent.getUploadProgress() !== 0) {
+        throw new Error('Oversize uploads must not increase upload progress');
+      }
+    });
+  });
+
+  test('remote check-in handles upload 502 and re-enables submit state', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/140', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 140,
+          number_of_people: 2,
+          registered_clients_count: 0,
+          upload_token: 'upload-502-token'
+        })
+      });
+    });
+
+    await page.route('**/api/v1/upload', async (route) => {
+      await route.fulfill({
+        status: 502,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'Bad gateway from upstream' })
+      });
+    });
+
+    await page.goto('/140/remote-checkin/en');
+    await populateRemoteCheckinForms(page);
+    await page.evaluate(() => {
+      const host = document.querySelector('app-remote-checkin');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('RemoteCheckin component instance not available');
+      }
+      const component = ngRef.getComponent(host);
+      component.reservationId = '140';
+      component.canRegister = true;
+      component.uploadToken = 'upload-502-token';
+      component.uploadReservationData();
+    });
+
+    await expect(page.getByText('Bad gateway from upstream')).toBeVisible();
+    await page.evaluate(() => {
+      const host = document.querySelector('app-remote-checkin');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('RemoteCheckin component instance not available');
+      }
+      const component = ngRef.getComponent(host);
+      if (component.isSubmitting) {
+        throw new Error('isSubmitting should be false after upload error');
+      }
+    });
+  });
+
+  test('remote check-in handles upload timeout-like network failure and re-enables submit', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/144', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 144,
+          number_of_people: 2,
+          registered_clients_count: 0,
+          upload_token: 'upload-timeout-token'
+        })
+      });
+    });
+
+    await page.route('**/api/v1/upload', async (route) => {
+      await route.abort('timedout');
+    });
+
+    await page.goto('/144/remote-checkin/en');
+    await populateRemoteCheckinForms(page);
+    await page.evaluate(() => {
+      const host = document.querySelector('app-remote-checkin');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('RemoteCheckin component instance not available');
+      }
+      const component = ngRef.getComponent(host);
+      component.reservationId = '144';
+      component.canRegister = true;
+      component.uploadToken = 'upload-timeout-token';
+      component.uploadReservationData();
+    });
+
+    await expect(page.getByText('Upload failed')).toBeVisible();
+    await page.evaluate(() => {
+      const host = document.querySelector('app-remote-checkin');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('RemoteCheckin component instance not available');
+      }
+      const component = ngRef.getComponent(host);
+      if (component.isSubmitting) {
+        throw new Error('isSubmitting should be false after timeout-like upload failure');
+      }
+    });
+  });
+
+  test('remote check-in degrades safely when reservation check payload is missing required fields', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/145', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 145
+        })
+      });
+    });
+
+    await page.goto('/145/remote-checkin/en');
+    await expect(page.getByText('Registration Unavailable')).toBeVisible();
+    await expect(page.locator('#name').first()).toBeDisabled();
+    await expect(page.locator('button.p-button:has(.pi-arrow-right)').first()).toBeDisabled();
+  });
+
+  test('i18n parity: critical check-in error keys exist in all supported locales', async () => {
+    const localeFiles = ['en.json', 'it.json', 'de.json', 'es.json', 'fr.json'];
+    const criticalKeys = [
+      'upload-token-missing',
+      'registration-unavailable',
+      'capacity-verification-failed',
+      'all-fields-required-error',
+      'document-expiry-date-error'
+    ];
+
+    for (const localeFile of localeFiles) {
+      const filePath = path.resolve(process.cwd(), 'src/assets/i18n', localeFile);
+      const content = fs.readFileSync(filePath, 'utf8');
+      const parsed = JSON.parse(content) as Record<string, unknown>;
+      for (const key of criticalKeys) {
+        const value = parsed[key];
+        expect(typeof value).toBe('string');
+        expect((value as string).trim().length).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  test('remote check-in handles reservation edge values for capacity fallback', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/141', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 141,
+          number_of_people: 2,
+          registered_clients_count: 0,
+          upload_token: 'edge-capacity-token'
+        })
+      });
+    });
+
+    await page.goto('/141/remote-checkin/en');
+    await page.evaluate(() => {
+      const host = document.querySelector('app-remote-checkin');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('RemoteCheckin component instance not available');
+      }
+      const component = ngRef.getComponent(host);
+
+      component.reservationDetails = { number_of_people: 0, registered_clients_count: 0 };
+      component.checkRegistrationCapacity();
+      if (!component.canRegister) {
+        throw new Error('number_of_people=0 should fallback to max=1 and allow first registration');
+      }
+
+      component.reservationDetails = { number_of_people: null, registered_clients_count: 0 };
+      component.checkRegistrationCapacity();
+      if (!component.canRegister) {
+        throw new Error('number_of_people=null should fallback to max=1 and allow first registration');
+      }
+
+      component.reservationDetails = { number_of_people: 2, registered_clients_count: 'oops' };
+      component.checkRegistrationCapacity();
+      if (!component.canRegister) {
+        throw new Error('Malformed registered_clients_count should not crash and should keep registration available');
+      }
+    });
+  });
+
+  test('remote check-in route handles invalid reservation id safely', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/invalid-id', async (route) => {
+      await route.fulfill({
+        status: 400,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'Invalid reservation id' })
+      });
+    });
+
+    await page.goto('/invalid-id/remote-checkin/en');
+    await expect(page).toHaveURL(/\/invalid-id\/remote-checkin\/en/);
+    await expect(page.getByText('Registration Unavailable')).toBeVisible();
+    await expect(page.locator('#name').first()).toBeDisabled();
+  });
+
+  test('remote check-in supports keyboard-only step navigation and submit', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/142', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 142,
+          number_of_people: 2,
+          registered_clients_count: 0,
+          upload_token: 'keyboard-flow-token'
+        })
+      });
+    });
+
+    await page.route('**/api/v1/upload', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: 'Upload completed' })
+      });
+    });
+
+    await page.goto('/142/remote-checkin/en');
+    await populateRemoteCheckinForms(page);
+    await page.evaluate(() => {
+      const host = document.querySelector('app-remote-checkin');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('RemoteCheckin component instance not available');
+      }
+      const component = ngRef.getComponent(host);
+      component.canRegister = true;
+      component.clientForm.enable({ emitEvent: false });
+      component.uploadForm.enable({ emitEvent: false });
+    });
+
+    const nextBtnStep1 = page.locator('button.p-button:has(.pi-arrow-right)').first();
+    await nextBtnStep1.focus();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('app-upload-identity')).toBeVisible();
+
+    const nextBtnStep2 = page.locator('button.p-button:has(.pi-arrow-right)').first();
+    await nextBtnStep2.focus();
+    await page.keyboard.press('Enter');
+
+    const submitBtn = page.locator('button.p-button:has(.pi-check)').first();
+    await submitBtn.focus();
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(/\/checkin-complete\/142/);
+  });
+
+  test('remote check-in keeps focus stable after toast state changes', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/143', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 143,
+          number_of_people: 2,
+          registered_clients_count: 0,
+          upload_token: null
+        })
+      });
+    });
+
+    await page.goto('/143/remote-checkin/en');
+    await populateRemoteCheckinForms(page);
+    const nextBtn = page.locator('button.p-button:has(.pi-arrow-right)').first();
+    await nextBtn.focus();
+    await page.evaluate(() => {
+      const host = document.querySelector('app-remote-checkin');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('RemoteCheckin component instance not available');
+      }
+      const component = ngRef.getComponent(host);
+      component.reservationId = '143';
+      component.canRegister = true;
+      component.uploadToken = null;
+      component.uploadReservationData();
+    });
+
+    await expect(page.getByRole('alert')).toBeVisible();
+    await page.evaluate(() => {
+      const active = document.activeElement as HTMLElement | null;
+      if (!active) {
+        throw new Error('Expected an active element after toast state change');
+      }
+      if (!active.classList.contains('p-button')) {
+        throw new Error('Focus should remain on an interactive button after toast');
+      }
+    });
+  });
+
+  test('remote check-in complete flow keeps step-2 next disabled until images are uploaded', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/130', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 130,
+          number_of_people: 2,
+          registered_clients_count: 0,
+          upload_token: 'step2-validation-token'
+        })
+      });
+    });
+
+    await page.goto('/130/remote-checkin/en');
+    await populateRemoteCheckinForms(page);
+    await page.evaluate(() => {
+      const host = document.querySelector('app-remote-checkin');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('RemoteCheckin component instance not available');
+      }
+      const component = ngRef.getComponent(host);
+      component.uploadForm.reset();
+      component.canRegister = true;
+      component.clientForm.enable({ emitEvent: false });
+      component.uploadForm.enable({ emitEvent: false });
+      component.uploadForm.updateValueAndValidity();
+    });
+
+    await page.locator('button.p-button:has(.pi-arrow-right)').first().click();
+    await expect(page.locator('app-upload-identity')).toBeVisible();
+    await expect(page.locator('button.p-button:has(.pi-arrow-right)').first()).toBeDisabled();
+  });
+
+  test('remote check-in complete flow shows document date validation error', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/131', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 131,
+          number_of_people: 2,
+          registered_clients_count: 0,
+          upload_token: 'date-invalid-token'
+        })
+      });
+    });
+
+    await page.goto('/131/remote-checkin/en');
+    await populateRemoteCheckinForms(page);
+    await page.evaluate(() => {
+      const host = document.querySelector('app-remote-checkin');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('RemoteCheckin component instance not available');
+      }
+      const component = ngRef.getComponent(host);
+      component.reservationId = '131';
+      component.canRegister = true;
+      component.uploadToken = 'date-invalid-token';
+      component.clientForm.patchValue({
+        data_emissione: new Date('2028-02-13T10:00:00.000Z'),
+        data_scadenza: new Date('2028-02-13T10:00:00.000Z')
+      });
+      component.uploadReservationData();
+    });
+
+    await expect(page.getByRole('alert').getByText('Document expiry date must be after the issue date')).toBeVisible();
+  });
+
+  test('remote check-in complete flow shows fallback upload error when backend has no detail', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/132', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 132,
+          number_of_people: 2,
+          registered_clients_count: 0,
+          upload_token: 'upload-fallback-error-token'
+        })
+      });
+    });
+
+    await page.route('**/api/v1/upload', async (route) => {
+      await route.fulfill({
+        status: 500,
+        contentType: 'application/json',
+        body: JSON.stringify({})
+      });
+    });
+
+    await page.goto('/132/remote-checkin/en');
+    await populateRemoteCheckinForms(page);
+    await page.evaluate(() => {
+      const host = document.querySelector('app-remote-checkin');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('RemoteCheckin component instance not available');
+      }
+      const component = ngRef.getComponent(host);
+      component.reservationId = '132';
+      component.canRegister = true;
+      component.uploadToken = 'upload-fallback-error-token';
+      component.uploadReservationData();
+    });
+
+    await expect(page.getByText('Upload failed')).toBeVisible();
+  });
+
+  test('remote check-in complete flow blocks submit when registration becomes unavailable', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/133', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 133,
+          number_of_people: 2,
+          registered_clients_count: 0,
+          upload_token: 'registration-closed-token'
+        })
+      });
+    });
+
+    await page.goto('/133/remote-checkin/en');
+    await populateRemoteCheckinForms(page);
+    await page.evaluate(() => {
+      const host = document.querySelector('app-remote-checkin');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('RemoteCheckin component instance not available');
+      }
+      const component = ngRef.getComponent(host);
+      component.reservationId = '133';
+      component.canRegister = false;
+      component.uploadToken = 'registration-closed-token';
+      component.uploadReservationData();
+    });
+
+    await expect(page.getByRole('alert').getByText('This reservation is full and no longer accepting new registrations')).toBeVisible();
+  });
+
+  test('remote check-in complete flow fills data and uploads images', async ({ page }) => {
+    let uploadCalled = false;
+    let uploadTokenHeader = '';
+
+    await page.route('**/api/v1/reservations/check/125', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 125,
+          number_of_people: 2,
+          registered_clients_count: 0,
+          upload_token: 'complete-flow-token'
+        })
+      });
+    });
+
+    await page.route('**/api/v1/upload', async (route) => {
+      uploadCalled = true;
+      uploadTokenHeader = route.request().headers()['x-upload-token'] || '';
+      const postData = route.request().postDataBuffer();
+      expect(postData).toBeTruthy();
+      if (postData) {
+        const payload = postData.toString('utf8');
+        expect(payload).toContain('name="frontimage"');
+        expect(payload).toContain('name="backimage"');
+        expect(payload).toContain('name="selfie"');
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: 'Upload completed' })
+      });
+    });
+
+    await page.goto('/125/remote-checkin/en');
+    await populateRemoteCheckinForms(page);
+    await page.evaluate(() => {
+      const host = document.querySelector('app-remote-checkin');
+      const ngRef = (window as any).ng;
+      if (!host || !ngRef?.getComponent) {
+        throw new Error('RemoteCheckin component instance not available');
+      }
+      const component = ngRef.getComponent(host);
+      component.canRegister = true;
+      component.clientForm.enable({ emitEvent: false });
+      component.uploadForm.enable({ emitEvent: false });
+    });
+
+    await page.locator('button.p-button:has(.pi-arrow-right)').first().click();
+    await expect(page.locator('app-upload-identity')).toBeVisible();
+
+    await page.locator('button.p-button:has(.pi-arrow-right)').first().click();
+    await page.locator('button.p-button:has(.pi-check)').first().click();
+
+    await expect(page).toHaveURL(/\/checkin-complete\/125/);
+    expect(uploadCalled).toBe(true);
+    expect(uploadTokenHeader).toBe('complete-flow-token');
   });
 
   test('landing header language switch updates translated labels', async ({ page }) => {

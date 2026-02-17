@@ -511,4 +511,6 @@
   "gender-female": "Weiblich",
   "registration-unavailable": "Registrierung nicht verfügbar",
   "capacity-verification-failed": "Die Kapazität kann derzeit nicht geprüft werden. Bitte versuchen Sie es später erneut."
+  ,"all-fields-required-error": "Alle Felder und Bilder sind erforderlich"
+  ,"document-expiry-date-error": "Das Ablaufdatum des Dokuments muss nach dem Ausstellungsdatum liegen"
 }

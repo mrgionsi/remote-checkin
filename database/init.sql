@@ -1,10 +1,19 @@
 -- Adminer 5.4.1 PostgreSQL 17.7 dump
+-- NOTE:
+-- - \connect is a psql meta-command and fails in Adminer.
+-- - PostgreSQL has no plain-SQL `CREATE DATABASE IF NOT EXISTS`.
+-- - Bootstrap in Adminer:
+--   1) Connect to database `postgres`
+--   2) Run once: CREATE DATABASE "remotecheckin";
+--   3) Switch connection to database `remotecheckin`
+--   4) Run the rest of this script
 
-DROP DATABASE IF EXISTS "remotecheckin";
-CREATE DATABASE "remotecheckin";
-\connect "remotecheckin";
+-- psql only:
+-- \connect "remotecheckin"
 
-DROP TABLE IF EXISTS "admin_structure";
+DROP VIEW IF EXISTS "structure_reservations" CASCADE;
+
+DROP TABLE IF EXISTS "admin_structure" CASCADE;
 CREATE TABLE "public"."admin_structure" (
     "id_user" bigint NOT NULL,
     "id_structure" bigint NOT NULL,
@@ -13,8 +22,8 @@ CREATE TABLE "public"."admin_structure" (
 WITH (oids = false);
 
 
-DROP TABLE IF EXISTS "client";
-DROP SEQUENCE IF EXISTS client_id_seq;
+DROP TABLE IF EXISTS "client" CASCADE;
+DROP SEQUENCE IF EXISTS client_id_seq CASCADE;
 CREATE SEQUENCE client_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1;
 
 CREATE TABLE "public"."client" (
@@ -93,7 +102,7 @@ CREATE INDEX idx_client_provincia_nascita ON public.client USING btree (provinci
 CREATE INDEX idx_client_provincia_residenza ON public.client USING btree (provincia_residenza);
 
 
-DROP TABLE IF EXISTS "client_reservations";
+DROP TABLE IF EXISTS "client_reservations" CASCADE;
 CREATE TABLE "public"."client_reservations" (
     "id_reservation" bigint NOT NULL,
     "id_client" bigint NOT NULL,
@@ -102,8 +111,8 @@ CREATE TABLE "public"."client_reservations" (
 WITH (oids = false);
 
 
-DROP TABLE IF EXISTS "email_config";
-DROP SEQUENCE IF EXISTS email_config_id_seq;
+DROP TABLE IF EXISTS "email_config" CASCADE;
+DROP SEQUENCE IF EXISTS email_config_id_seq CASCADE;
 CREATE SEQUENCE email_config_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1;
 
 CREATE TABLE "public"."email_config" (
@@ -120,8 +129,8 @@ CREATE TABLE "public"."email_config" (
     "provider_type" character varying DEFAULT 'smtp' NOT NULL,
     "provider_config" text,
     "is_active" boolean DEFAULT true NOT NULL,
-    "created_at" timestamp DEFAULT '(now() AT TIME ZONE ''utc'')' NOT NULL,
-    "updated_at" timestamp DEFAULT '(now() AT TIME ZONE ''utc'')' NOT NULL,
+    "created_at" timestamp DEFAULT (now() AT TIME ZONE 'utc') NOT NULL,
+    "updated_at" timestamp DEFAULT (now() AT TIME ZONE 'utc') NOT NULL,
     CONSTRAINT "email_config_pkey" PRIMARY KEY ("id")
 )
 WITH (oids = false);
@@ -133,8 +142,8 @@ CREATE INDEX ix_email_config_is_active ON public.email_config USING btree (is_ac
 CREATE INDEX ix_email_config_provider_type ON public.email_config USING btree (provider_type);
 
 
-DROP TABLE IF EXISTS "reservation";
-DROP SEQUENCE IF EXISTS reservation_id_seq;
+DROP TABLE IF EXISTS "reservation" CASCADE;
+DROP SEQUENCE IF EXISTS reservation_id_seq CASCADE;
 CREATE SEQUENCE reservation_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1;
 
 CREATE TABLE "public"."reservation" (
@@ -147,7 +156,7 @@ CREATE TABLE "public"."reservation" (
     "name_reference" text DEFAULT 'Not available',
     "email" text,
     "telephone" text,
-    "number_of_people" integer DEFAULT '1',
+    "number_of_people" integer DEFAULT 1,
     "portale_alloggi_sent" boolean DEFAULT false NOT NULL,
     "portale_alloggi_sent_at" timestamp,
     "portale_alloggi_response" text,
@@ -166,7 +175,7 @@ CREATE INDEX reservation_id_reference ON public.reservation USING btree (id_refe
 CREATE INDEX idx_reservation_portale_sent ON public.reservation USING btree (portale_alloggi_sent);
 
 
-DROP TABLE IF EXISTS "role";
+DROP TABLE IF EXISTS "role" CASCADE;
 CREATE TABLE "public"."role" (
     "id" integer NOT NULL,
     "name" character varying,
@@ -174,9 +183,12 @@ CREATE TABLE "public"."role" (
 )
 WITH (oids = false);
 
+INSERT INTO "role" ("id", "name") VALUES
+(2, 'superadmin');
 
-DROP TABLE IF EXISTS "room";
-DROP SEQUENCE IF EXISTS room_id_seq;
+
+DROP TABLE IF EXISTS "room" CASCADE;
+DROP SEQUENCE IF EXISTS room_id_seq CASCADE;
 CREATE SEQUENCE room_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1;
 
 CREATE TABLE "public"."room" (
@@ -191,13 +203,8 @@ WITH (oids = false);
 
 CREATE INDEX ix_room_id ON public.room USING btree (id);
 
-INSERT INTO "room" ("id", "name", "capacity", "id_structure", "is_active") VALUES
-(2,	'Giungla',	4,	1,	true),
-(3,	'Savana',	2,	1,	true),
-(1,	'SPA',	2,	1,	true);
-
-DROP TABLE IF EXISTS "structure";
-DROP SEQUENCE IF EXISTS structure_id_seq;
+DROP TABLE IF EXISTS "structure" CASCADE;
+DROP SEQUENCE IF EXISTS structure_id_seq CASCADE;
 CREATE SEQUENCE structure_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1;
 
 CREATE TABLE "public"."structure" (
@@ -217,13 +224,24 @@ CREATE INDEX ix_structure_id ON public.structure USING btree (id);
 
 CREATE INDEX idx_structure_cin ON public.structure USING btree (cin);
 
+INSERT INTO "structure" ("id", "name", "street", "city", "cin", "is_active") VALUES
+(1, 'Default Structure', NULL, NULL, NULL, true);
 
-DROP VIEW IF EXISTS "structure_reservations";
-CREATE TABLE "structure_reservations" ("structure_id" bigint, "structure_name" character varying, "reservation_id" bigint, "id_reference" character varying(500), "name_reference" text, "start_date" date, "end_date" date, "status" text, "room_id" bigint, "room_name" character varying);
+SELECT setval('structure_id_seq', 1, true);
+
+INSERT INTO "room" ("id", "name", "capacity", "id_structure", "is_active") VALUES
+(2, 'Room 2', 4, 1, true),
+(3, 'Room 3', 2, 1, true),
+(1, 'Room 1', 2, 1, true);
+
+SELECT setval('room_id_seq', 3, true);
 
 
-DROP TABLE IF EXISTS "user";
-DROP SEQUENCE IF EXISTS user_id_seq;
+DROP TABLE IF EXISTS "structure_reservations" CASCADE;
+
+
+DROP TABLE IF EXISTS "user" CASCADE;
+DROP SEQUENCE IF EXISTS user_id_seq CASCADE;
 CREATE SEQUENCE user_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1;
 
 CREATE TABLE "public"."user" (
@@ -258,6 +276,11 @@ CREATE INDEX idx_user_email ON public."user" USING btree (email);
 
 CREATE INDEX ix_user_portale_username ON public."user" USING btree (portale_username);
 
+INSERT INTO "user" ("id", "name", "surname", "password", "username", "id_role", "email", "telephone", "portale_username", "portale_password", "portale_wskey") VALUES
+(1, 'Admin', 'User', 'scrypt:32768:8:1$JSTCdcjvXvmsobaT$ddce21e49fed8dcbef901023c1c5c22ebb7f3a6fc5606d4000986174ccf313d0069dc609ca39e745c1bb30f87107401755ee10e4ee7b4768899f3603bcb23540', 'superadmin', 2, 'superadmin@example.com', NULL, NULL, NULL, NULL);
+
+SELECT setval('user_id_seq', 2, true);
+
 
 ALTER TABLE ONLY "public"."admin_structure" ADD CONSTRAINT "admin_structure_id_structure_fkey" FOREIGN KEY (id_structure) REFERENCES structure(id) NOT DEFERRABLE;
 ALTER TABLE ONLY "public"."admin_structure" ADD CONSTRAINT "admin_structure_id_user_fkey" FOREIGN KEY (id_user) REFERENCES "user"(id) NOT DEFERRABLE;
@@ -273,7 +296,8 @@ ALTER TABLE ONLY "public"."room" ADD CONSTRAINT "room_id_structure_fkey" FOREIGN
 
 ALTER TABLE ONLY "public"."user" ADD CONSTRAINT "user_id_role_fkey" FOREIGN KEY (id_role) REFERENCES role(id) NOT DEFERRABLE;
 
-DROP TABLE IF EXISTS "structure_reservations";
+DROP TABLE IF EXISTS "structure_reservations" CASCADE;
+DROP VIEW IF EXISTS "structure_reservations" CASCADE;
 CREATE VIEW "structure_reservations" AS SELECT s.id AS structure_id,
     s.name AS structure_name,
     r.id AS reservation_id,
@@ -287,5 +311,3 @@ CREATE VIEW "structure_reservations" AS SELECT s.id AS structure_id,
    FROM ((reservation r
      JOIN room rm ON ((r.id_room = rm.id)))
      JOIN structure s ON ((rm.id_structure = s.id)));
-
--- 2025-03-02 12:41:05.596171+00
