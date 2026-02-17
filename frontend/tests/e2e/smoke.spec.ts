@@ -418,6 +418,8 @@ test.describe('Frontend smoke', () => {
       component.reservationId = '123';
       component.canRegister = true;
       component.uploadToken = 'smoke-upload-token';
+      component.documentsValidated = true;
+      component.documentValidationToken = 'smoke-doc-validation-token';
       component.uploadReservationData();
     });
 
@@ -450,6 +452,8 @@ test.describe('Frontend smoke', () => {
       component.reservationId = '124';
       component.canRegister = true;
       component.uploadToken = null;
+      component.documentsValidated = true;
+      component.documentValidationToken = 'smoke-doc-validation-token';
       component.uploadReservationData();
     });
 
@@ -554,6 +558,8 @@ test.describe('Frontend smoke', () => {
       component.reservationId = '129';
       component.canRegister = true;
       component.uploadToken = 'upload-error-token';
+      component.documentsValidated = true;
+      component.documentValidationToken = 'smoke-doc-validation-token';
       component.uploadReservationData();
     });
 
@@ -684,6 +690,8 @@ test.describe('Frontend smoke', () => {
       component.reservationId = '135';
       component.canRegister = true;
       component.uploadToken = 'duplicate-submit-token';
+      component.documentsValidated = true;
+      component.documentValidationToken = 'smoke-doc-validation-token';
       component.uploadReservationData();
       component.uploadReservationData();
     });
@@ -735,6 +743,8 @@ test.describe('Frontend smoke', () => {
       component.reservationId = '137';
       component.canRegister = true;
       component.uploadToken = null;
+      component.documentsValidated = true;
+      component.documentValidationToken = 'smoke-doc-validation-token';
       component.uploadReservationData();
       return expected;
     });
@@ -856,6 +866,8 @@ test.describe('Frontend smoke', () => {
       component.reservationId = '140';
       component.canRegister = true;
       component.uploadToken = 'upload-502-token';
+      component.documentsValidated = true;
+      component.documentValidationToken = 'smoke-doc-validation-token';
       component.uploadReservationData();
     });
 
@@ -903,6 +915,8 @@ test.describe('Frontend smoke', () => {
       component.reservationId = '144';
       component.canRegister = true;
       component.uploadToken = 'upload-timeout-token';
+      component.documentsValidated = true;
+      component.documentValidationToken = 'smoke-doc-validation-token';
       component.uploadReservationData();
     });
 
@@ -1051,6 +1065,8 @@ test.describe('Frontend smoke', () => {
       component.canRegister = true;
       component.clientForm.enable({ emitEvent: false });
       component.uploadForm.enable({ emitEvent: false });
+      component.documentsValidated = true;
+      component.documentValidationToken = 'keyboard-doc-token';
     });
 
     const nextBtnStep1 = page.locator('button.p-button:has(.pi-arrow-right)').first();
@@ -1096,6 +1112,8 @@ test.describe('Frontend smoke', () => {
       component.reservationId = '143';
       component.canRegister = true;
       component.uploadToken = null;
+      component.documentsValidated = true;
+      component.documentValidationToken = 'smoke-doc-validation-token';
       component.uploadReservationData();
     });
 
@@ -1216,6 +1234,8 @@ test.describe('Frontend smoke', () => {
       component.reservationId = '132';
       component.canRegister = true;
       component.uploadToken = 'upload-fallback-error-token';
+      component.documentsValidated = true;
+      component.documentValidationToken = 'smoke-doc-validation-token';
       component.uploadReservationData();
     });
 
@@ -1248,6 +1268,8 @@ test.describe('Frontend smoke', () => {
       component.reservationId = '133';
       component.canRegister = false;
       component.uploadToken = 'registration-closed-token';
+      component.documentsValidated = true;
+      component.documentValidationToken = 'smoke-doc-validation-token';
       component.uploadReservationData();
     });
 
@@ -1257,6 +1279,7 @@ test.describe('Frontend smoke', () => {
   test('remote check-in complete flow fills data and uploads images', async ({ page }) => {
     let uploadCalled = false;
     let uploadTokenHeader = '';
+    let validationTokenHeader = '';
 
     await page.route('**/api/v1/reservations/check/125', async (route) => {
       await route.fulfill({
@@ -1274,6 +1297,7 @@ test.describe('Frontend smoke', () => {
     await page.route('**/api/v1/upload', async (route) => {
       uploadCalled = true;
       uploadTokenHeader = route.request().headers()['x-upload-token'] || '';
+      validationTokenHeader = route.request().headers()['x-document-validation-token'] || '';
       const postData = route.request().postDataBuffer();
       expect(postData).toBeTruthy();
       if (postData) {
@@ -1286,6 +1310,17 @@ test.describe('Frontend smoke', () => {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({ message: 'Upload completed' })
+      });
+    });
+
+    await page.route('**/api/v1/upload/validate-documents', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          message: 'Document validation successful',
+          document_validation_token: 'complete-flow-doc-validation-token'
+        })
       });
     });
 
@@ -1306,12 +1341,51 @@ test.describe('Frontend smoke', () => {
     await page.locator('button.p-button:has(.pi-arrow-right)').first().click();
     await expect(page.locator('app-upload-identity')).toBeVisible();
 
+    await page.getByRole('button', { name: 'Validate documents' }).click();
+    await expect(page.getByText('Documents validated successfully. You can proceed.')).toBeVisible();
     await page.locator('button.p-button:has(.pi-arrow-right)').first().click();
     await page.locator('button.p-button:has(.pi-check)').first().click();
 
     await expect(page).toHaveURL(/\/checkin-complete\/125/);
     expect(uploadCalled).toBe(true);
     expect(uploadTokenHeader).toBe('complete-flow-token');
+    expect(validationTokenHeader).toBe('complete-flow-doc-validation-token');
+  });
+
+  test('remote check-in blocks step advance when document prevalidation fails', async ({ page }) => {
+    await page.route('**/api/v1/reservations/check/145', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 145,
+          number_of_people: 2,
+          registered_clients_count: 0,
+          upload_token: 'prevalidation-fail-token'
+        })
+      });
+    });
+
+    await page.route('**/api/v1/upload/validate-documents', async (route) => {
+      await route.fulfill({
+        status: 422,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          error: 'Document validation failed',
+          retryable: true,
+          invalid_files: [{ field: 'frontimage', reason: 'No valid text detected' }]
+        })
+      });
+    });
+
+    await page.goto('/145/remote-checkin/en');
+    await populateRemoteCheckinForms(page);
+    await page.locator('button.p-button:has(.pi-arrow-right)').first().click();
+    await expect(page.locator('app-upload-identity')).toBeVisible();
+
+    await page.getByRole('button', { name: 'Validate documents' }).click();
+    await expect(page.getByText('Document validation failed')).toBeVisible();
+    await expect(page.locator('button.p-button:has(.pi-arrow-right)').first()).toBeDisabled();
   });
 
   test('landing header language switch updates translated labels', async ({ page }) => {
