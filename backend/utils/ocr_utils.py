@@ -17,10 +17,52 @@ Dependencies:
     - Pytesseract for optical character recognition (OCR).
 
 """
-
-
 import cv2
+import numpy as np
 import pytesseract
+from pytesseract import TesseractNotFoundError
+
+
+MIN_TEXT_LENGTH = 10
+MIN_OCR_CONFIDENCE = 45.0
+
+
+def _preprocess_variants(image):
+    """Generate OCR-friendly image variants."""
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    denoised = cv2.fastNlMeansDenoising(gray, h=11)
+
+    adaptive = cv2.adaptiveThreshold(
+        denoised, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, 9
+    )
+    otsu = cv2.threshold(denoised, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+
+    return {
+        "gray": gray,
+        "adaptive": adaptive,
+        "otsu": otsu,
+    }
+
+
+def _extract_with_confidence(image_variant):
+    """Run OCR and return extracted text and average confidence."""
+    config = "--oem 3 --psm 6"
+    text = pytesseract.image_to_string(image_variant, config=config)
+    data = pytesseract.image_to_data(
+        image_variant, config=config, output_type=pytesseract.Output.DICT
+    )
+
+    confidences = []
+    for conf in data.get("conf", []):
+        try:
+            conf_val = float(conf)
+        except (TypeError, ValueError):
+            continue
+        if conf_val >= 0:
+            confidences.append(conf_val)
+
+    average_confidence = float(np.mean(confidences)) if confidences else 0.0
+    return text, average_confidence
 
 def validate_document(image_path):
     """
@@ -44,17 +86,65 @@ def validate_document(image_path):
     image = cv2.imread(image_path)
 
     if image is None:
-        return False, "Error: Could not load image. File may be corrupted or unsupported format."
+        return {
+            "valid": False,
+            "error": "Error: Could not load image. File may be corrupted or unsupported format.",
+            "extracted_text": "",
+            "confidence": 0.0,
+            "variant": None,
+        }
 
-    # Convert to grayscale for better OCR accuracy
-    # Convert to grayscale for better OCR accuracy
     try:
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    except Exception as e:  # More generic
-        return False, f"Error: Failed to process image. {str(e)}"
-    # Extract text using OCR
+        variants = _preprocess_variants(image)
+    except Exception as e:  # pylint: disable=W0718
+        return {
+            "valid": False,
+            "error": f"Error: Failed to process image. {str(e)}",
+            "extracted_text": "",
+            "confidence": 0.0,
+            "variant": None,
+        }
+
+    best = {
+        "valid": False,
+        "error": "No valid text detected",
+        "extracted_text": "",
+        "confidence": 0.0,
+        "variant": None,
+    }
+
     try:
-        text = pytesseract.image_to_string(gray)
+        for variant_name, variant_image in variants.items():
+            text, confidence = _extract_with_confidence(variant_image)
+            stripped_text = text.strip()
+            is_valid = len(stripped_text) >= MIN_TEXT_LENGTH and confidence >= MIN_OCR_CONFIDENCE
+
+            if confidence > best["confidence"] or (is_valid and not best["valid"]):
+                best = {
+                    "valid": is_valid,
+                    "error": "" if is_valid else "No valid text detected",
+                    "extracted_text": text,
+                    "confidence": round(confidence, 2),
+                    "variant": variant_name,
+                }
+
+            if is_valid:
+                return best
+    except TesseractNotFoundError:
+        return {
+            "valid": False,
+            "error": "OCR engine not available. Please try again later.",
+            "extracted_text": "",
+            "confidence": 0.0,
+            "variant": None,
+        }
     except pytesseract.TesseractError as e:
-        return False, f"OCR processing error: {str(e)}"
-    return (True, text) if len(text.strip()) > 10 else (False, "No valid text detected")
+        return {
+            "valid": False,
+            "error": f"OCR processing error: {str(e)}",
+            "extracted_text": "",
+            "confidence": 0.0,
+            "variant": None,
+        }
+
+    return best
