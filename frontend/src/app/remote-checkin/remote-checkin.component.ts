@@ -93,6 +93,9 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
   reservationId: string | null = '';
   reservationDetails: any = null;
   uploadToken: string | null = null;
+  documentValidationToken: string | null = null;
+  documentsValidated = false;
+  isValidatingDocuments = false;
   registeredClientsCount: number = 0;
   canRegister: boolean = true;
 
@@ -498,6 +501,8 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
   handleFormData(formData: FormGroup) {
     // Here you can do anything with the received FormData
     this.uploadForm = formData;
+    this.documentsValidated = false;
+    this.documentValidationToken = null;
     console.log(this.uploadForm.get('frontimage'))
     /*     this.messageService.add({
           severity: 'success',
@@ -538,6 +543,16 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
       } else {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: this.translocoService.translate('all-fields-required-error') });
       }
+      this.isSubmitting = false;
+      return;
+    }
+
+    if (!this.documentsValidated || !this.documentValidationToken) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: this.translocoService.translate('error'),
+        detail: 'Validate your document images before final submission.'
+      });
       this.isSubmitting = false;
       return;
     }
@@ -635,7 +650,7 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.uploadService.uploadImages(formData, this.uploadToken).subscribe({
+    this.uploadService.uploadImages(formData, this.uploadToken, this.documentValidationToken).subscribe({
       next: (response) => {
         // Show success message with API response
         console.log(response)
@@ -653,7 +668,25 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
       error: (error) => {
         // Handle error response
         console.log(error)
-        const errorMessage = error.error?.error || 'Upload failed';
+        const invalidFiles = (error?.error?.invalid_files || []) as Array<{ field: string; reason?: string }>;
+        const retryable = !!error?.error?.retryable;
+        if (invalidFiles.length > 0) {
+          invalidFiles.forEach(({ field }) => {
+            const control = this.uploadForm.get(field);
+            if (control) {
+              control.setErrors({ serverInvalid: true });
+              control.markAsTouched();
+            }
+          });
+        }
+
+        let errorMessage = error.error?.error || 'Upload failed';
+        if (retryable && invalidFiles.length > 0) {
+          const failedFields = invalidFiles.map((f) => f.field).join(', ');
+          errorMessage = `Document check failed for: ${failedFields}. Replace the image(s) and try again.`;
+          this.documentsValidated = false;
+          this.documentValidationToken = null;
+        }
 
         this.messageService.add({
           severity: 'error',
@@ -664,6 +697,69 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
       }
     });
 
+  }
+
+  validateDocumentsBeforeSubmit(): void {
+    if (this.isValidatingDocuments) {
+      return;
+    }
+    if (this.uploadForm.invalid) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: this.translocoService.translate('error'),
+        detail: 'Please upload all required images first.'
+      });
+      return;
+    }
+    if (!this.uploadToken) {
+      this.messageService.add({
+        severity: 'error',
+        summary: this.translocoService.translate('error'),
+        detail: this.translocoService.translate('upload-token-missing')
+      });
+      return;
+    }
+
+    this.isValidatingDocuments = true;
+    const formData = new FormData();
+    if (this.reservationId) {
+      formData.append('reservationId', this.reservationId.toString());
+    }
+    formData.append('frontimage', this.uploadForm.get('frontimage')?.value);
+    formData.append('backimage', this.uploadForm.get('backimage')?.value);
+    formData.append('selfie', this.uploadForm.get('selfie')?.value);
+
+    this.uploadService.validateDocuments(formData, this.uploadToken).subscribe({
+      next: (response) => {
+        this.documentsValidated = true;
+        this.documentValidationToken = response?.document_validation_token || null;
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: response?.message || 'Documents validated successfully'
+        });
+        this.isValidatingDocuments = false;
+      },
+      error: (error) => {
+        const invalidFiles = (error?.error?.invalid_files || []) as Array<{ field: string }>;
+        invalidFiles.forEach(({ field }) => {
+          const control = this.uploadForm.get(field);
+          if (control) {
+            control.setErrors({ serverInvalid: true });
+            control.markAsTouched();
+          }
+        });
+
+        this.documentsValidated = false;
+        this.documentValidationToken = null;
+        this.messageService.add({
+          severity: 'error',
+          summary: this.translocoService.translate('error'),
+          detail: error?.error?.error || 'Document validation failed'
+        });
+        this.isValidatingDocuments = false;
+      }
+    });
   }
 
   /**

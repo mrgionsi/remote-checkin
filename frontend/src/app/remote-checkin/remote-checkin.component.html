@@ -414,12 +414,20 @@
                     <div class="step-content" [class.opacity-50]="!canRegister">
                         <app-upload-identity (formDataEmitter)="handleFormData($event)"></app-upload-identity>
                     </div>
+                    <div class="flex justify-content-end pt-3">
+                        <p-button label="Validate documents" icon="pi pi-shield" iconPos="left"
+                            [loading]="isValidatingDocuments" [disabled]="uploadForm.invalid || !canRegister"
+                            (onClick)="validateDocumentsBeforeSubmit()" />
+                    </div>
+                    <div class="pt-2 text-sm" *ngIf="documentsValidated">
+                        <span class="text-green-600 font-medium">Documents validated successfully. You can proceed.</span>
+                    </div>
                     <div class="flex justify-space-between w-full pt-6">
                         <p-button [label]="'back' | transloco" severity="secondary" icon="pi pi-arrow-left"
                             (onClick)="goToStep(1, activateCallback)" />
 
                         <p-button [label]="'next' | transloco" icon="pi pi-arrow-right" iconPos="right"
-                            [disabled]="uploadForm.invalid || !canRegister"
+                            [disabled]="uploadForm.invalid || !canRegister || !documentsValidated"
                             (onClick)="goToStep(3, activateCallback)" />
                     </div>
                 </ng-template>

@@ -48,12 +48,12 @@ export class UploadIdentityComponent {
       }
 
       // Validate file type
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+      const allowedTypes = ['image/jpeg', 'image/png'];
       if (!allowedTypes.includes(file.type)) {
         this.messageService.add({
           severity: 'error',
           summary: 'Invalid File Type',
-          detail: 'Only JPEG, PNG, and GIF images are allowed'
+          detail: 'Only JPEG and PNG images are allowed'
         });
         return;
       }
@@ -67,6 +67,7 @@ export class UploadIdentityComponent {
       reader.readAsDataURL(file);
 
       this.uploadForm.patchValue({ [type]: file });
+      this.uploadForm.get(type)?.setErrors(null);
       this.formDataEmitter.emit(this.uploadForm);
 
       // Show success message
