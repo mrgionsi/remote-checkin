@@ -27,6 +27,20 @@ def _get_int_env(name: str, default: int) -> int:
         return default
 
 
+def _get_database_url():
+    """Return DATABASE_URL when valid, otherwise compose from DB_* variables."""
+    database_url = os.getenv("DATABASE_URL")
+    if database_url:
+        raw = str(database_url).strip()
+        if raw and "os.getenv(" not in raw and "{os.getenv(" not in raw:
+            return raw
+
+    return (
+        f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}"
+        f"@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
+    )
+
+
 class Config:
     """
     Base configuration class for production environment.
@@ -38,10 +52,7 @@ class Config:
 
     # Normal configuration for production
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    DATABASE_URL = (
-        f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}"
-        f"@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
-    )
+    DATABASE_URL = _get_database_url()
 
     # Email configuration
     #MAIL_SERVER = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
