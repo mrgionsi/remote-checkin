@@ -2,6 +2,9 @@ name: Build Flask and Angular with Docker
 
 on:
   push:
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
     branches:
       - dev
   workflow_call:
