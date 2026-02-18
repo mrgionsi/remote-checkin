@@ -67,7 +67,7 @@ PII_HASH_SALT=your_pii_hash_salt_here
 $ docker-compose up -d
 ```
 
-The application will be available at [localhost:80](localhost:80).
+The application will be available at [http://localhost:80](http://localhost:80).
 
 You can fetch both the backend and frontend Container Images from the [GitHub Container Registry](https://github.com/mrgionsi?tab=packages&repo_name=remote-checkin).
 
