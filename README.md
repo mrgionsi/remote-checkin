@@ -64,7 +64,7 @@ PII_HASH_SALT=your_pii_hash_salt_here
 2. Use the following [`docker-compose.yaml`](docker-compose.yaml) to spin up a `remote-checkin` instance:
 
 ```shell
-$ docker-compose up -d
+docker compose up -d
 ```
 
 The application will be available at [http://localhost:80](http://localhost:80).
