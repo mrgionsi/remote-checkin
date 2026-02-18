@@ -5,119 +5,99 @@ Remote check-in is a self-hosted to handle the check-in for a B&B remotely.
 
 Setting up your structures (B&Bs) and relative rooms, you can add a reservation and ask clients to fill in mandatory informations and upload documents and selfie. 
 
+## Getting Started
 
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
+### Prerequisites
 
-## Documentation
+- Python
+- Docker / Podman
+- NodeJs
 
-[Documentation](https://tbd)
+### Installing
 
+Follow the steps below to setup the development environment:
 
-## Environment Variables
+- 🚧 W.I.P.
 
-To run this project, you will need to add the following environment variables to your .env file
+## Deployment
 
-`DATABASE_IP`
+Using containers makes the `remote-checkin` installation easy.
 
-`DATABASE_PORT`
+1. Create an `.env` file with the following variables:
 
-`DATABASE_USERNAME`
+```
+# Database Configuration
+DB_USER=remotecheckin
+DB_PASSWORD=your_secure_password_here
+DB_NAME=remotecheckin
+DB_HOST=postgres
+DB_PORT=5432
 
-`DATABASE_PASSWORD`
+# Application Configuration
+FLASK_ENV=production
+BACKEND_PORT=8000
+FRONTEND_PORT=80
+
+# JWT Configuration
+JWT_SECRET_KEY=your_jwt_secret_key_here
+
+# Email Configuration
+MAIL_SERVER=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=your_email@gmail.com
+MAIL_PASSWORD=your_app_password
+MAIL_USE_TLS=true
+MAIL_USE_SSL=false
+
+# Logging Configuration
+LOG_TO_FILE=true
+LOG_LEVEL=INFO
+LOG_DIRECTORY=logs
+MAX_LOG_FILE_SIZE=10485760
+LOG_BACKUP_COUNT=5
+
+# PII Protection
+PII_HASH_SALT=your_pii_hash_salt_here
+```
+
+2. Use the following [`docker-compose.yaml`](docker-compose.yaml) to spin up a `remote-checkin` instance:
+
+```shell
+$ docker-compose up -d
+```
+
+The application will be available at [localhost:80](localhost:80).
+
+You can fetch both the backend and frontend Container Images from the [GitHub Container Registry](https://github.com/mrgionsi?tab=packages&repo_name=remote-checkin).
+
+## Built With
+
+* [PostgreSQL](https://www.postgresql.org/)
+* [Flask](https://flask.palletsprojects.com/en/stable/)
+* [Angular](https://angular.dev/)
+
 ## Contributing
 
-Contributions are always welcome!
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
 
-See `contributing.md` for ways to get started.
+## Versioning
 
-Please adhere to this project's `code of conduct`.
+We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/mrgionsi/remote-checkin/tags). 
 
+## Authors
 
-## Run Locally
+* **Giovanni Pasquariello** - *Initial work* - [mrgionsi](https://github.com/mrgionsi)
 
-Clone the project
+See also the list of [contributors](https://github.com/mrgionsi/remote-checkin/contributors) who participated in this project.
 
-```bash
-  git clone https://github.com/mrgionsi/remote-checkin.git
-```
+## License
 
-Go to the project directory
+This project is licensed under the AGPL-3.0 license - see the [LICENSE](LICENSE) file for details.
 
-```bash
-  cd remote-checkin/frontend
-  npm install remote-checkin
-  npm start
-```
-```bash
-  cd remote-checkin/backend
-  pip install -r requirements.txt
-  python main.py
-```
+<!-- ## Acknowledgments
 
-
-## Running Tests
-
-To run tests, run the following command
-
-```bash
-  npm run test
-```
-
-
-## Usage/Examples
-
-```javascript
-import Component from 'my-project'
-
-function App() {
-  return <Component />
-}
-```
-
-
-## Add Pre-commit hooks
-1. Install Pre-Commit
-```bash
-pip install pre-commit
-```
-
-2. Create the Validation Script
-Save the following as .git/hooks/commit-msg-check.py and make it executable:
-```python
-#!/usr/bin/env python3
-import sys
-import re
-
-# Allowed commit types
-ALLOWED_TYPES = {"feat", "fix", "perf", "refactor", "style", "test", "build", "ops", "docs", "merge"}
-
-# Commit message pattern
-COMMIT_REGEX = re.compile(rf"^({'|'.join(ALLOWED_TYPES)})(\(.+\))?: .+")
-
-# Read the commit message
-commit_msg_file = sys.argv[1]
-with open(commit_msg_file, "r") as file:
-    commit_msg = file.readline().strip()
-
-if not COMMIT_REGEX.match(commit_msg):
-    print(f"❌ ERROR: Invalid commit message format.\n")
-    print("✅ Allowed format: `<type>(<scope>): <description>`")
-    print(f"✅ Allowed types: {', '.join(ALLOWED_TYPES)}")
-    print("💡 Example: `feat(ui): add dark mode toggle`")
-    sys.exit(1)
-
-sys.exit(0)
-
-```
-
-4. Make the Script Executable
-Run:
-```bash
-chmod +x .git/hooks/commit-msg-check.py
-```
-
-5. Install the Hook
-Run:
-```bash
-pre-commit install --hook-type commit-msg
-```
+* Hat tip to anyone whose code was used
+* Inspiration
+* etc -->
