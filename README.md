@@ -1,9 +1,8 @@
+# 🪪 Remote Check-in
 
-# Remote Check-in
+Remote Check-in solution is self-hosted and designed to handle check-ins for a bed and breakfast remotely. 
 
-Remote check-in is a self-hosted to handle the check-in for a B&B remotely. 
-
-Setting up your structures (B&Bs) and relative rooms, you can add a reservation and ask clients to fill in mandatory informations and upload documents and selfie. 
+After setting up your B&B and its rooms, you can add a reservation and ask clients to fill in required information and upload documents and selfies.  
 
 ## Getting Started
 
