@@ -26,7 +26,7 @@ Using containers makes the `remote-checkin` installation easy.
 
 1. Create an `.env` file with the following variables:
 
-```
+```dotenv
 # Database Configuration
 DB_USER=remotecheckin
 DB_PASSWORD=your_secure_password_here
