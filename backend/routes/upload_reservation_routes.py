@@ -10,6 +10,7 @@ Functions:
 
 #pylint: disable=C0301,E0401,R0914,W0718,W0612,E0611,R0912,R0915,R1702,R0911
 import os
+import hashlib
 from datetime import datetime
 from flask import Blueprint, request, jsonify, current_app
 from werkzeug.exceptions import BadRequest
@@ -63,6 +64,21 @@ def _validate_upload_file(uploaded_file, field_name):
     if mime_type not in ALLOWED_UPLOAD_MIME_TYPES:
         return f"Invalid MIME type for {field_name}"
 
+    stream = getattr(uploaded_file, "stream", None)
+    if stream is None:
+        return f"Invalid file type for {field_name}"
+    current_position = stream.tell()
+    header = stream.read(16)
+    stream.seek(current_position, os.SEEK_SET)
+
+    detected_mime = None
+    if header.startswith(b"\xff\xd8\xff"):
+        detected_mime = "image/jpeg"
+    elif header.startswith(b"\x89PNG\r\n\x1a\n"):
+        detected_mime = "image/png"
+    if detected_mime not in ALLOWED_UPLOAD_MIME_TYPES:
+        return f"Invalid MIME type for {field_name}"
+
     if _get_uploaded_file_size(uploaded_file) > MAX_UPLOAD_FILE_SIZE_BYTES:
         return f"File too large for {field_name}"
 
@@ -96,6 +112,13 @@ def _validate_documents_payload(reservation_id, files_payload):
     invalid_files = []
 
     try:
+        selfie = files_payload.get("selfie")
+        if not selfie:
+            raise BadRequest("Missing one or more required image files")
+        selfie_error = _validate_upload_file(selfie, "selfie")
+        if selfie_error:
+            raise BadRequest(selfie_error)
+
         for key in ['frontimage', 'backimage']:
             file = files_payload[key]
             file_error = _validate_upload_file(file, key)
@@ -115,10 +138,6 @@ def _validate_documents_payload(reservation_id, files_payload):
                     "reason": validation_result.get("error", "Invalid document"),
                     "confidence": validation_result.get("confidence", 0.0),
                 })
-
-        selfie_error = _validate_upload_file(files_payload["selfie"], "selfie")
-        if selfie_error:
-            raise BadRequest(selfie_error)
     finally:
         try:
             for filename in os.listdir(reservation_folder):
@@ -129,6 +148,20 @@ def _validate_documents_payload(reservation_id, files_payload):
 
     return validation_results, invalid_files
 
+
+def _build_documents_fingerprint(front_file, back_file):
+    """Build deterministic SHA-256 fingerprint from front/back image bytes."""
+    hasher = hashlib.sha256()
+    for uploaded_file in (front_file, back_file):
+        stream = getattr(uploaded_file, "stream", None)
+        if stream is None:
+            raise BadRequest("Missing one or more required image files")
+        current_position = stream.tell()
+        stream.seek(0, os.SEEK_SET)
+        hasher.update(stream.read())
+        stream.seek(current_position, os.SEEK_SET)
+    return hasher.hexdigest()
+
 def _get_gender_display(sesso):
     """Convert gender code to display string."""
     if sesso == '1':
@@ -138,10 +171,10 @@ def _get_gender_display(sesso):
     return 'N/A'
 
 @upload_bp.route('/upload', methods=['POST'])
+@limiter.limit("10 per minute")
 @log_route(include_request_data=False, include_response_data=False)
 @log_database_operation("CREATE")
 @log_performance(threshold_ms=3000)
-@limiter.limit("10 per minute")
 def upload_file():
     """
     Handle POST uploads of identity documents for a reservation.
@@ -196,6 +229,14 @@ def upload_file():
         if str(payload.get("reservation_ref", "")) != reservation_id:
             return jsonify({"error": "Upload token does not match reservation"}), 403
 
+        try:
+            documents_fingerprint = _build_documents_fingerprint(
+                request.files["frontimage"],
+                request.files["backimage"],
+            )
+        except BadRequest as e:
+            return jsonify({"error": getattr(e, "description", None) or str(e)}), 400
+
         validation_token = (
             request.headers.get("X-Document-Validation-Token")
             or request.form.get("documentValidationToken")
@@ -210,6 +251,10 @@ def upload_file():
                 )
                 if str(validation_payload.get("reservation_ref", "")) != reservation_id:
                     return jsonify({"error": "Document validation token does not match reservation"}), 403
+                if validation_payload.get("fingerprint", "") != documents_fingerprint:
+                    return jsonify({
+                        "error": "Document validation token does not match uploaded document content"
+                    }), 403
                 skip_ocr = True
             except SignatureExpired:
                 return jsonify({"error": "Document validation token expired"}), 401
@@ -354,7 +399,7 @@ def upload_file():
 
                     if email_result.get('status') == 'success':
                         logger.info("Admin notification sent successfully", extra=safe_extra_fields({
-                            'admin_email': admin_email,
+                            'admin_email_domain': admin_email.split("@")[1] if "@" in admin_email else "unknown",
                             'reservation_id': reservation_id,
                             'client_name': f"{form_data['name']} {form_data['surname']}",
                             'notification_result': 'success'
@@ -411,10 +456,10 @@ def upload_file():
 
 
 @upload_bp.route('/upload/validate-documents', methods=['POST'])
+@limiter.limit("20 per minute")
 @log_route(include_request_data=False, include_response_data=False)
 @log_database_operation("READ")
 @log_performance(threshold_ms=2000)
-@limiter.limit("20 per minute")
 def validate_upload_documents():
     """Pre-validate uploaded documents with OCR before full form submission."""
     try:
@@ -439,6 +484,10 @@ def validate_upload_documents():
             return jsonify({"error": "Reservation not found"}), 404
 
         files_payload = {file_key: request.files[file_key] for file_key in required_files}
+        fingerprint = _build_documents_fingerprint(
+            files_payload["frontimage"],
+            files_payload["backimage"],
+        )
         validation_results, invalid_files = _validate_documents_payload(reservation_id, files_payload)
         if invalid_files:
             return jsonify({
@@ -449,7 +498,7 @@ def validate_upload_documents():
             }), 422
 
         validation_token = serializer.dumps(
-            {"reservation_ref": reservation_id},
+            {"reservation_ref": reservation_id, "fingerprint": fingerprint},
             salt=DOCUMENT_VALIDATION_TOKEN_SALT,
         )
         return jsonify({

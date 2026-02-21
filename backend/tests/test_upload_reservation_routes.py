@@ -5,8 +5,9 @@ from pathlib import Path
 from sqlalchemy import text
 from itsdangerous import URLSafeTimedSerializer
 from routes.upload_reservation_routes import upload_bp
+from extensions import limiter
 from database import engine, Base, SessionLocal
-from models import Reservation
+from models import Reservation, ClientReservations
 from routes.upload_reservation_routes import UPLOAD_TOKEN_SALT
 
 # Disable pylint warnings
@@ -22,6 +23,7 @@ def app():
     app.config.from_object("config.TestConfig")
     app.config["JWT_SECRET_KEY"] = "test-secret"
     app.register_blueprint(upload_bp)
+    limiter.init_app(app)
     Base.metadata.create_all(bind=engine)
     yield app
     with engine.connect() as conn:
@@ -110,6 +112,9 @@ def init_db():
     db.commit()
     db.refresh(reservation)
     yield db
+    db.query(ClientReservations).filter_by(id_reservation=reservation.id).delete()
+    db.query(Reservation).filter_by(id_reference="12345").delete()
+    db.commit()
     db.close()
 
 def test_successful_upload(client, init_db):
@@ -128,8 +133,6 @@ def test_successful_upload(client, init_db):
             data=data,
             content_type='multipart/form-data'
         )
-
-        print("PRINTING ", response.json)  # Debugging
 
         assert response.status_code == 200
 
@@ -167,7 +170,6 @@ def test_upload_nonexistent_reservation(client):
         data["backimage"] = (back_file, "back.jpeg", "image/jpeg")
         data["selfie"] = (selfie_file, "selfie.jpeg", "image/jpeg")
         response = client.post("/api/v1/upload", data=data, content_type='multipart/form-data')
-        print(response.json)
         assert response.status_code == 404
         assert "Reservation not found" in response.get_json()["error"]
 
@@ -332,7 +334,7 @@ def test_upload_without_validation_token_returns_422_on_ocr_failure(client, init
     assert payload["invalid_files"][0]["field"] == "frontimage"
 
 
-def test_upload_invalid_mime_type_returns_validation_error(client):
+def test_upload_invalid_mime_type_returns_validation_error(client, init_db):
     """Validation: non-image MIME type should return 400."""
     token = _build_upload_token(client.application, "12345")
     with open(TEST_IMAGES_DIR / "front.jpeg", "rb") as front_file, \
@@ -348,14 +350,14 @@ def test_upload_invalid_mime_type_returns_validation_error(client):
     assert response.get_json()["error"] == "Invalid MIME type for frontimage"
 
 
-def test_upload_oversized_file_returns_validation_error(client, monkeypatch):
+def test_upload_oversized_file_returns_validation_error(client, init_db, monkeypatch):
     """Validation: oversized image should be rejected before OCR processing."""
     monkeypatch.setattr("routes.upload_reservation_routes.MAX_UPLOAD_FILE_SIZE_BYTES", 32)
     token = _build_upload_token(client.application, "12345")
     data = _base_upload_form("12345", token)
-    data["frontimage"] = (BytesIO(b"x" * 128), "front.jpeg", "image/jpeg")
-    data["backimage"] = (BytesIO(b"ok"), "back.jpeg", "image/jpeg")
-    data["selfie"] = (BytesIO(b"ok"), "selfie.jpeg", "image/jpeg")
+    data["frontimage"] = (BytesIO(b"\xff\xd8\xff" + b"x" * 128), "front.jpeg", "image/jpeg")
+    data["backimage"] = (BytesIO(b"\xff\xd8\xff" + b"ok"), "back.jpeg", "image/jpeg")
+    data["selfie"] = (BytesIO(b"\xff\xd8\xff" + b"ok"), "selfie.jpeg", "image/jpeg")
 
     response = client.post("/api/v1/upload", data=data, content_type="multipart/form-data")
 

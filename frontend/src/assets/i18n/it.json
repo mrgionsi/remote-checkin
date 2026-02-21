@@ -1387,5 +1387,7 @@
   "upload-invalid-file-type": "Sono consentite solo immagini JPEG e PNG",
   "upload-image-uploaded-success": "Immagine caricata con successo",
   "upload-image-removed": "Immagine rimossa",
-  "upload-token-missing": "Impossibile continuare: token di sicurezza upload mancante. Aggiorna la pagina e riprova."
+  "upload-token-missing": "Impossibile continuare: token di sicurezza upload mancante. Aggiorna la pagina e riprova.",
+  "document-validation-token-missing": "Token di validazione documenti mancante. Valida di nuovo i documenti.",
+  "checkin-document-check-failed": "Controllo documento non riuscito per: {{fields}}. Sostituisci le immagini e riprova."
 }

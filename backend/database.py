@@ -32,9 +32,10 @@ def _resolve_database_url():
     if runtime_database_url and str(runtime_database_url).strip().lower() != "none":
         try:
             make_url(runtime_database_url)
-            return runtime_database_url
         except ArgumentError:
             pass
+        else:
+            return runtime_database_url
 
     if _is_test_context():
         test_database_url = os.getenv("TEST_DATABASE_URL")

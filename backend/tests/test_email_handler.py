@@ -60,7 +60,7 @@ def flask_app_context():
         MAIL_SERVER="smtp.example.com",
         MAIL_PORT=587,
         MAIL_USERNAME="test@example.com",
-        MAIL_PASSWORD="test_password",
+        MAIL_PASSWORD="test_password",  # noqa: S106 - test-only fake secret
         MAIL_DEFAULT_SENDER=("Test Sender", "test@example.com"),
     )
     with app.app_context():

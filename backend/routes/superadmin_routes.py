@@ -477,9 +477,9 @@ def get_users():
 
 
 @superadmin_bp.route("/superadmin/users", methods=["POST"])
+@limiter.limit("10 per minute")
 @jwt_required()
 @log_route(include_request_data=False)
-@limiter.limit("10 per minute")
 def create_user():  # pylint: disable=too-many-return-statements
     """
     Create a new admin user.
@@ -667,9 +667,9 @@ def change_user_role(user_id):  # pylint: disable=too-many-return-statements
 
 
 @superadmin_bp.route("/superadmin/users/<int:user_id>/reset-password", methods=["POST"])
+@limiter.limit("5 per minute")
 @jwt_required()
 @log_route(include_request_data=False)
-@limiter.limit("5 per minute")
 def reset_user_password(user_id):
     """
     Reset a user's password.

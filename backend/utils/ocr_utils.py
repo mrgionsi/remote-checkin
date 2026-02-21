@@ -45,11 +45,15 @@ def _preprocess_variants(image):
 
 
 def _extract_with_confidence(image_variant):
-    """Run OCR and return extracted text and average confidence."""
+    """Run OCR once and return extracted text and average confidence."""
     config = "--oem 3 --psm 6"
-    text = pytesseract.image_to_string(image_variant, config=config)
     data = pytesseract.image_to_data(
         image_variant, config=config, output_type=pytesseract.Output.DICT
+    )
+    text = " ".join(
+        str(token).strip()
+        for token in data.get("text", [])
+        if str(token).strip()
     )
 
     confidences = []
@@ -80,7 +84,12 @@ def validate_document(image_path):
         image_path (str): Path to the image file to validate and OCR.
     
     Returns:
-        tuple: (is_valid: bool, result: str) — is_valid indicates success; result is extracted text or an error message.
+        dict: Validation payload with:
+            - valid (bool): True when OCR text and confidence pass validation.
+            - error (str | None): Error message when invalid, empty when valid.
+            - extracted_text (str): OCR text extracted from the best variant.
+            - confidence (float | None): Average OCR confidence for the chosen variant.
+            - variant (str | None): Image preprocessing variant used for the result.
     """
     # Load the image
     image = cv2.imread(image_path)

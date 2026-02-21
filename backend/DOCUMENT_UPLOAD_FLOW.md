@@ -39,11 +39,14 @@ Client should ask the guest to replace only failed images and retry phase 1.
 - Endpoint: `POST /api/v1/upload`
 - Required headers:
   - `X-Upload-Token: <signed-upload-token>`
-  - `X-Document-Validation-Token: <phase-1-token>`
+  - `X-Document-Validation-Token: <phase-1-token>` (optional, recommended)
 - Required multipart fields:
   - all form fields + image files
 
-When `X-Document-Validation-Token` is valid, OCR is skipped in final submit.
+Behavior:
+- If `X-Document-Validation-Token` is valid and matches uploaded front/back content, OCR is skipped.
+- If token is omitted, server performs inline OCR on submitted documents.
+- If inline OCR fails, endpoint can return `422` with retryable `invalid_files` payload.
 
 ## Token rules
 

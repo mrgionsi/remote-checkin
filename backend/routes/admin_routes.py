@@ -67,8 +67,8 @@ def _is_valid_password(password: str) -> bool:
 
 
 @admin_bp.route("/admin/login", methods=["POST"])
-@log_route(include_request_data=False, include_response_data=True)
 @limiter.limit("10 per minute")
+@log_route(include_request_data=False, include_response_data=True)
 def admin_login():
     """
     Authenticate an admin user and return a JWT access token with the user's profile and associated structures.
@@ -205,10 +205,10 @@ def create_admin_user():
 
 
 @admin_bp.route("/admin/change-password", methods=["POST"])
+@limiter.limit("5 per minute")
 @jwt_required()
 @log_route(include_request_data=False)
 @log_database_operation("UPDATE")
-@limiter.limit("5 per minute")
 def change_admin_password():
     """
     Change password for the currently authenticated admin user.

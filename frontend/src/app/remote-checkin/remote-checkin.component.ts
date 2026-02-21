@@ -683,7 +683,9 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
         let errorMessage = error.error?.error || 'Upload failed';
         if (retryable && invalidFiles.length > 0) {
           const failedFields = invalidFiles.map((f) => f.field).join(', ');
-          errorMessage = `Document check failed for: ${failedFields}. Replace the image(s) and try again.`;
+          errorMessage = this.translocoService.translate('checkin-document-check-failed', {
+            fields: failedFields
+          });
           this.documentsValidated = false;
           this.documentValidationToken = null;
         }
@@ -701,6 +703,9 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
 
   validateDocumentsBeforeSubmit(): void {
     if (this.isValidatingDocuments) {
+      return;
+    }
+    if (!this.canRegister) {
       return;
     }
     if (this.uploadForm.invalid) {
@@ -725,14 +730,38 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
     if (this.reservationId) {
       formData.append('reservationId', this.reservationId.toString());
     }
-    formData.append('frontimage', this.uploadForm.get('frontimage')?.value);
-    formData.append('backimage', this.uploadForm.get('backimage')?.value);
-    formData.append('selfie', this.uploadForm.get('selfie')?.value);
+    const frontImage = this.uploadForm.get('frontimage')!.value as File | null;
+    const backImage = this.uploadForm.get('backimage')!.value as File | null;
+    const selfieImage = this.uploadForm.get('selfie')!.value as File | null;
+    if (!frontImage || !backImage || !selfieImage) {
+      this.isValidatingDocuments = false;
+      this.messageService.add({
+        severity: 'warn',
+        summary: this.translocoService.translate('error'),
+        detail: this.translocoService.translate('checkin-upload-all-images-first')
+      });
+      return;
+    }
+    formData.append('frontimage', frontImage);
+    formData.append('backimage', backImage);
+    formData.append('selfie', selfieImage);
 
-    this.uploadService.validateDocuments(formData, this.uploadToken).subscribe({
+    const validateSub = this.uploadService.validateDocuments(formData, this.uploadToken).subscribe({
       next: (response) => {
+        const validationToken = response?.document_validation_token;
+        if (!validationToken) {
+          this.documentsValidated = false;
+          this.documentValidationToken = null;
+          this.messageService.add({
+            severity: 'error',
+            summary: this.translocoService.translate('error'),
+            detail: this.translocoService.translate('document-validation-token-missing')
+          });
+          this.isValidatingDocuments = false;
+          return;
+        }
         this.documentsValidated = true;
-        this.documentValidationToken = response?.document_validation_token || null;
+        this.documentValidationToken = validationToken;
         this.messageService.add({
           severity: 'success',
           summary: this.translocoService.translate('success'),
@@ -760,6 +789,7 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
         this.isValidatingDocuments = false;
       }
     });
+    this.formSubscriptions.push(validateSub);
   }
 
   /**

@@ -1465,5 +1465,7 @@
   "upload-invalid-file-type": "Only JPEG and PNG images are allowed",
   "upload-image-uploaded-success": "Image uploaded successfully",
   "upload-image-removed": "Image removed",
-  "upload-token-missing": "Unable to continue: upload security token missing. Please refresh and try again."
+  "upload-token-missing": "Unable to continue: upload security token missing. Please refresh and try again.",
+  "document-validation-token-missing": "Document validation token is missing. Please validate documents again.",
+  "checkin-document-check-failed": "Document check failed for: {{fields}}. Replace the image(s) and try again."
 }

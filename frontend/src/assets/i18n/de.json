@@ -499,6 +499,8 @@
   "upload-image-uploaded-success": "Bild erfolgreich hochgeladen",
   "upload-image-removed": "Bild entfernt",
   "upload-token-missing": "Fortfahren nicht möglich: Sicherheits-Upload-Token fehlt. Bitte aktualisieren und erneut versuchen.",
+  "document-validation-token-missing": "Token zur Dokumentprüfung fehlt. Bitte prüfen Sie die Dokumente erneut.",
+  "checkin-document-check-failed": "Dokumentenprüfung fehlgeschlagen für: {{fields}}. Ersetzen Sie die Bilder und versuchen Sie es erneut.",
   "pricingDetails": {
     "pricing": {
       "currencySymbol": "€",

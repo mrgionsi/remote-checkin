@@ -35,6 +35,14 @@ def _get_database_url():
         if raw and "os.getenv(" not in raw and "{os.getenv(" not in raw:
             return raw
 
+    required_vars = ["DB_USER", "DB_PASSWORD", "DB_HOST", "DB_PORT", "DB_NAME"]
+    missing_vars = [name for name in required_vars if not str(os.getenv(name, "")).strip()]
+    if missing_vars:
+        raise ValueError(
+            "Missing required database environment variables: "
+            + ", ".join(missing_vars)
+        )
+
     return (
         f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}"
         f"@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
