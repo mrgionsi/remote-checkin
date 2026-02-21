@@ -28,6 +28,7 @@ MIN_TEXT_LENGTH = 10
 MIN_OCR_CONFIDENCE = 30.0
 OCR_TIMEOUT_SECONDS = float(os.getenv("OCR_TIMEOUT_SECONDS", "8"))
 MAX_OCR_IMAGE_SIDE = int(os.getenv("MAX_OCR_IMAGE_SIDE", "2200"))
+MIN_OCR_IMAGE_SIDE = int(os.getenv("MIN_OCR_IMAGE_SIDE", "1200"))
 
 
 def _preprocess_variants(image):
@@ -37,12 +38,19 @@ def _preprocess_variants(image):
     if largest_side > MAX_OCR_IMAGE_SIDE:
         scale = MAX_OCR_IMAGE_SIDE / float(largest_side)
         image = cv2.resize(image, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA)
+        height, width = image.shape[:2]
+        largest_side = max(height, width)
 
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    denoised = cv2.fastNlMeansDenoising(gray, h=11)
-    # Upscale small inputs so OCR can better resolve characters.
-    upscaled = cv2.resize(denoised, None, fx=2.0, fy=2.0, interpolation=cv2.INTER_CUBIC)
-    normalized = cv2.convertScaleAbs(upscaled, alpha=1.3, beta=10)
+    denoised = cv2.fastNlMeansDenoising(gray, h=9)
+    # Upscale only small inputs to a target side to avoid huge OCR matrices.
+    normalized_input = denoised
+    if largest_side < MIN_OCR_IMAGE_SIDE and largest_side > 0:
+        scale = MIN_OCR_IMAGE_SIDE / float(largest_side)
+        normalized_input = cv2.resize(
+            denoised, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC
+        )
+    normalized = cv2.convertScaleAbs(normalized_input, alpha=1.25, beta=8)
 
     adaptive = cv2.adaptiveThreshold(
         normalized, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, 9
