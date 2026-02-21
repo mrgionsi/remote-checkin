@@ -32,8 +32,8 @@ from utils.route_helpers import (
 from app_logging.config import get_logger
 from app_logging.decorators import log_route, log_database_operation, log_performance
 from app_logging.utils import safe_extra_fields
-from database import SessionLocal
 from extensions import limiter
+from database import SessionLocal
 
 
 # Blueprint setup

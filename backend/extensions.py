@@ -10,4 +10,3 @@ limiter = Limiter(
     storage_uri=os.getenv("RATELIMIT_STORAGE_URI", "memory://"),
     default_limits=[],
 )
-

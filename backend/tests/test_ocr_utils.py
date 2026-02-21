@@ -52,4 +52,3 @@ def test_validate_document_handles_missing_tesseract(monkeypatch):
     result = validate_document("doc.jpg")
     assert result["valid"] is False
     assert "OCR engine not available" in result["error"]
-

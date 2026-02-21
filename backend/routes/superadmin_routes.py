@@ -21,8 +21,8 @@ from app_logging.decorators import log_route
 from utils.authz import verify_superadmin_access
 from utils.route_helpers import handle_database_error, create_user_response_data, build_user_brief
 from models import User, AdminStructure, Structure, Reservation, Role
-from database import SessionLocal
 from extensions import limiter
+from database import SessionLocal
 
 logger = logging.getLogger(__name__)
 
