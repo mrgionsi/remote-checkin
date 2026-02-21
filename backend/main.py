@@ -77,7 +77,7 @@ app.config["JWT_REFRESH_TOKEN_EXPIRES"] = 60 * 60 * 24 * 30  # 30 days (in secon
 app.config["JWT_ALGORITHM"] = "HS256"
 
 jwt = JWTManager(app)
-validate_limiter_storage()
+validate_limiter_storage(app)
 limiter.init_app(app)
 
 # Initialize Flask-Mail after all configuration is set
