@@ -784,7 +784,7 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
         this.messageService.add({
           severity: 'error',
           summary: this.translocoService.translate('error'),
-          detail: error?.error?.error || 'Document validation failed'
+          detail: error?.error?.error || this.translocoService.translate('checkin-document-validation-failed')
         });
         this.isValidatingDocuments = false;
       }

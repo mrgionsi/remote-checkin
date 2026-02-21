@@ -500,6 +500,7 @@
   "upload-image-removed": "Imagen eliminada",
   "upload-token-missing": "No se puede continuar: falta el token de seguridad de carga. Actualiza la página e inténtalo de nuevo.",
   "document-validation-token-missing": "Falta el token de validación de documentos. Vuelve a validar los documentos.",
+  "checkin-document-validation-failed": "La validación de documentos falló",
   "checkin-document-check-failed": "La verificación del documento falló para: {{fields}}. Sustituye las imágenes e inténtalo de nuevo.",
   "pricingDetails": {
     "pricing": {

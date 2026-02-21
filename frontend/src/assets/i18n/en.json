@@ -1467,5 +1467,6 @@
   "upload-image-removed": "Image removed",
   "upload-token-missing": "Unable to continue: upload security token missing. Please refresh and try again.",
   "document-validation-token-missing": "Document validation token is missing. Please validate documents again.",
+  "checkin-document-validation-failed": "Document validation failed",
   "checkin-document-check-failed": "Document check failed for: {{fields}}. Replace the image(s) and try again."
 }
