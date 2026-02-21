@@ -419,9 +419,6 @@
                             [loading]="isValidatingDocuments" [disabled]="uploadForm.invalid || !canRegister"
                             (onClick)="validateDocumentsBeforeSubmit()" />
                     </div>
-                    <div class="pt-2 text-sm" *ngIf="documentsValidated" aria-live="polite" aria-atomic="true">
-                        <span class="text-green-600 font-medium">{{ 'checkin-documents-validated-ready' | transloco }}</span>
-                    </div>
                     <div class="flex justify-space-between w-full pt-6">
                         <p-button [label]="'back' | transloco" severity="secondary" icon="pi pi-arrow-left"
                             (onClick)="goToStep(1, activateCallback)" />
