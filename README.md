@@ -1,123 +1,91 @@
-
 # Remote Check-in
 
-Remote check-in is a self-hosted to handle the check-in for a B&B remotely. 
+Remote Check-in is a self-hosted app to manage B&B/hospitality check-ins, rooms, reservations, and guest document upload.
 
-Setting up your structures (B&Bs) and relative rooms, you can add a reservation and ask clients to fill in mandatory informations and upload documents and selfie. 
+## Stack
 
+- Frontend: Angular
+- Backend: Flask + SQLAlchemy
+- Database: PostgreSQL (runtime), SQLite (test mode for selected suites)
 
+## Quick Start
 
-
-## Documentation
-
-[Documentation](https://tbd)
-
-
-## Environment Variables
-
-To run this project, you will need to add the following environment variables to your .env file
-
-`DATABASE_IP`
-
-`DATABASE_PORT`
-
-`DATABASE_USERNAME`
-
-`DATABASE_PASSWORD`
-## Contributing
-
-Contributions are always welcome!
-
-See `contributing.md` for ways to get started.
-
-Please adhere to this project's `code of conduct`.
-
-
-## Run Locally
-
-Clone the project
-
+1. Clone repository:
 ```bash
-  git clone https://github.com/mrgionsi/remote-checkin.git
+git clone https://github.com/mrgionsi/remote-checkin.git
+cd remote-checkin
 ```
 
-Go to the project directory
-
+2. Start backend:
 ```bash
-  cd remote-checkin/frontend
-  npm install remote-checkin
-  npm start
+cd backend
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python main.py
 ```
+
+3. Start frontend (new terminal):
 ```bash
-  cd remote-checkin/backend
-  pip install -r requirements.txt
-  python main.py
+cd frontend
+npm install
+npm start
 ```
 
+Frontend runs on `http://localhost:4200`.
 
-## Running Tests
+## Required Backend Environment Variables
 
-To run tests, run the following command
+Set these in `backend/.env` (or shell env):
 
+- `DB_USER`
+- `DB_PASSWORD`
+- `DB_HOST`
+- `DB_PORT`
+- `DB_NAME`
+- `JWT_SECRET_KEY`
+
+Optional:
+
+- `DATABASE_URL` (if set and valid, used directly)
+- `ALLOWED_CORS`
+- `APP_ENV` (`production` enables strict production checks)
+- `RATELIMIT_STORAGE_URI` (required when `APP_ENV=production`, use shared backend such as Redis)
+
+## Upload Flow (Guest Check-in)
+
+The backend supports two-phase document upload:
+
+1. `POST /api/v1/upload/validate-documents`
+2. `POST /api/v1/upload`
+
+Use:
+
+- `X-Upload-Token`
+- `X-Document-Validation-Token` (optional but recommended for phase 2)
+
+When validation token is provided and matches uploaded document fingerprint, OCR is skipped on final submit.  
+Full contract is documented in `backend/DOCUMENT_UPLOAD_FLOW.md`.
+
+## Testing
+
+Frontend:
 ```bash
-  npm run test
+cd frontend
+npm test
+npm run test:ci
+npm run e2e:smoke
 ```
 
-
-## Usage/Examples
-
-```javascript
-import Component from 'my-project'
-
-function App() {
-  return <Component />
-}
-```
-
-
-## Add Pre-commit hooks
-1. Install Pre-Commit
+Backend:
 ```bash
-pip install pre-commit
+cd backend
+source .venv/bin/activate
+PYTHONPATH=backend python -m pytest
 ```
 
-2. Create the Validation Script
-Save the following as .git/hooks/commit-msg-check.py and make it executable:
-```python
-#!/usr/bin/env python3
-import sys
-import re
+## Additional Docs
 
-# Allowed commit types
-ALLOWED_TYPES = {"feat", "fix", "perf", "refactor", "style", "test", "build", "ops", "docs", "merge"}
-
-# Commit message pattern
-COMMIT_REGEX = re.compile(rf"^({'|'.join(ALLOWED_TYPES)})(\(.+\))?: .+")
-
-# Read the commit message
-commit_msg_file = sys.argv[1]
-with open(commit_msg_file, "r") as file:
-    commit_msg = file.readline().strip()
-
-if not COMMIT_REGEX.match(commit_msg):
-    print(f"❌ ERROR: Invalid commit message format.\n")
-    print("✅ Allowed format: `<type>(<scope>): <description>`")
-    print(f"✅ Allowed types: {', '.join(ALLOWED_TYPES)}")
-    print("💡 Example: `feat(ui): add dark mode toggle`")
-    sys.exit(1)
-
-sys.exit(0)
-
-```
-
-4. Make the Script Executable
-Run:
-```bash
-chmod +x .git/hooks/commit-msg-check.py
-```
-
-5. Install the Hook
-Run:
-```bash
-pre-commit install --hook-type commit-msg
-```
+- Backend API/notes: `backend/Readme.md`
+- Upload contract: `backend/DOCUMENT_UPLOAD_FLOW.md`
+- Regression checklist: `backend/QA_TENANT_BOUNDARY_REGRESSION.md`
