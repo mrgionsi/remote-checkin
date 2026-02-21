@@ -7,10 +7,9 @@ This module provides functions for validating documents by extracting text using
 It uses the Tesseract OCR engine and OpenCV for image processing.
 
 Functions:
-    - validate_document(image_path: str) -> tuple:
+    - validate_document(image_path: str) -> dict:
         Extracts text from an image and validates if the document contains sufficient text.
-        Returns a tuple containing a boolean value indicating the validity of the document
-        and a string with either the extracted text or an error message.
+        Returns a dictionary with validity flag, extracted text, confidence and error details.
 
 Dependencies:
     - OpenCV (cv2) for image manipulation.
@@ -99,11 +98,10 @@ def _extract_with_confidence(image_variant):
 
 def validate_document(image_path):
     """
-    Validate a document image by running OCR and return extracted text or an error message.
+    Validate a document image by running OCR and return a structured validation payload.
     
     Attempts to load an image from image_path, convert it to grayscale, and extract text using pytesseract.
-    Returns a tuple (bool, str): the boolean is True when OCR produced more than 10 non-whitespace characters; otherwise False.
-    On failure the string contains a concise error message such as:
+    On failure the payload contains a concise error message such as:
     - "Error: Could not load image. File may be corrupted or unsupported format." (image read failed)
     - "Error: Failed to process image. <exception message>" (cv2 conversion failure)
     - "OCR processing error: <error message>" (pytesseract failure)

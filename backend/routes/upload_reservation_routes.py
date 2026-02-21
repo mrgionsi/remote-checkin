@@ -11,6 +11,7 @@ Functions:
 #pylint: disable=C0301,E0401,R0914,W0718,W0612,E0611,R0912,R0915,R1702,R0911
 import os
 import hashlib
+import shutil
 from datetime import datetime
 from flask import Blueprint, request, jsonify, current_app
 from werkzeug.exceptions import BadRequest
@@ -59,10 +60,6 @@ def _validate_upload_file(uploaded_file, field_name):
     """Validate extension, MIME type and size for an uploaded image file."""
     if not uploaded_file or not allowed_file(uploaded_file.filename):
         return f"Invalid file type for {field_name}"
-
-    mime_type = (uploaded_file.mimetype or "").lower().strip()
-    if mime_type not in ALLOWED_UPLOAD_MIME_TYPES:
-        return f"Invalid MIME type for {field_name}"
 
     stream = getattr(uploaded_file, "stream", None)
     if stream is None:
@@ -139,12 +136,7 @@ def _validate_documents_payload(reservation_id, files_payload):
                     "confidence": validation_result.get("confidence", 0.0),
                 })
     finally:
-        try:
-            for filename in os.listdir(reservation_folder):
-                os.remove(os.path.join(reservation_folder, filename))
-            os.rmdir(reservation_folder)
-        except OSError:
-            pass
+        shutil.rmtree(reservation_folder, ignore_errors=True)
 
     return validation_results, invalid_files
 
@@ -280,18 +272,18 @@ def upload_file():
         except ValueError as e:
             raise BadRequest(f"Invalid date format: {str(e)}") from e
 
+        # Check reservation existence before OCR-heavy processing
+        reservation = get_reservation_by_id(reservation_id)
+        if not reservation:
+            return jsonify({"error": "Reservation not found"}), 404
+
         cf = form_data['cf']
-        # Create a folder for the reservation if it doesn't exist
+        # Create a folder for the reservation only after reservation existence is confirmed.
         reservation_folder = os.path.join(UPLOAD_FOLDER, reservation_id)
         os.makedirs(reservation_folder, exist_ok=True)
 
         files = {}
         validation_results = {}
-
-        # Check reservation existence before OCR-heavy processing
-        reservation = get_reservation_by_id(reservation_id)
-        if not reservation:
-            return jsonify({"error": "Reservation not found"}), 404
 
         # Process images
         invalid_files = []
@@ -321,6 +313,11 @@ def upload_file():
                     })
 
         if invalid_files:
+            for saved_filename in files.values():
+                try:
+                    os.remove(os.path.join(reservation_folder, saved_filename))
+                except OSError:
+                    pass
             return jsonify({
                 "error": "Document validation failed",
                 "retryable": True,
@@ -406,7 +403,7 @@ def upload_file():
                         }))
                     else:
                         logger.warning("Admin notification failed", extra=safe_extra_fields({
-                            'admin_email': admin_email if 'admin_email' in locals() else 'unknown',
+                            'admin_email': admin_email or 'unknown',
                             'error_message': email_result.get('message', 'Unknown error') if email_result else 'Unknown error',
                             'notification_result': 'failed'
                         }))

@@ -680,7 +680,7 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
           });
         }
 
-        let errorMessage = error.error?.error || 'Upload failed';
+        let errorMessage = error.error?.error || this.translocoService.translate('images-uploaded-fail');
         if (retryable && invalidFiles.length > 0) {
           errorMessage = this.translocoService.translate('checkin-document-check-failed-with-reasons', {
             details: this.formatInvalidFileErrors(invalidFiles)
