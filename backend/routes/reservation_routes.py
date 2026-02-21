@@ -17,7 +17,7 @@ from sqlalchemy.sql import extract
 from flask_jwt_extended import jwt_required
 from itsdangerous import URLSafeTimedSerializer
 
-from models import Reservation, Room, Structure, StructureReservationsView, EmailConfig,Client, ClientReservations
+from models import Reservation, Room, Structure, StructureReservationsView, EmailConfig, ClientReservations
 from email_handler import EmailService
 from routes.email_config_routes import get_encryption_key
 from utils.email_utils import get_admin_email_config
