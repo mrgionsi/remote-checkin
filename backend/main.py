@@ -12,8 +12,10 @@ from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_mail import Mail
+from werkzeug.middleware.proxy_fix import ProxyFix
 from dotenv import load_dotenv
 from config import Config
+from extensions import limiter, validate_limiter_storage
 from app_logging.config import setup_logging
 from app_logging.middleware import setup_request_logging
 from routes.email_config_routes import email_config_bp
@@ -30,6 +32,7 @@ load_dotenv()
 
 
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
 # Setup comprehensive logging system
 setup_logging('remote-checkin')
@@ -74,6 +77,8 @@ app.config["JWT_REFRESH_TOKEN_EXPIRES"] = 60 * 60 * 24 * 30  # 30 days (in secon
 app.config["JWT_ALGORITHM"] = "HS256"
 
 jwt = JWTManager(app)
+validate_limiter_storage(app)
+limiter.init_app(app)
 
 # Initialize Flask-Mail after all configuration is set
 mail = Mail(app)
@@ -87,7 +92,15 @@ CORS(
     origins=allowed_origins,
     supports_credentials=True,
     methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization", "Accept", "Origin", "X-Requested-With", "X-Upload-Token"],
+    allow_headers=[
+        "Content-Type",
+        "Authorization",
+        "Accept",
+        "Origin",
+        "X-Requested-With",
+        "X-Upload-Token",
+        "X-Document-Validation-Token",
+    ],
     expose_headers=["Content-Type", "Authorization"],
     max_age=3600,  # Cache preflight response for 1 hour
 )

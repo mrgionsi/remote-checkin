@@ -1,102 +1,89 @@
-# 🪪 Remote Check-in
+# Remote Check-in
 
-Remote Check-in solution is self-hosted and designed to handle check-ins for a bed and breakfast remotely. 
+Remote Check-in is a self-hosted app to manage B&B/hospitality check-ins, rooms, reservations, and guest document upload.
 
-After setting up your B&B and its rooms, you can add a reservation and ask clients to fill in required information and upload documents and selfies.  
+## Stack
 
-## Getting Started
+- Frontend: Angular
+- Backend: Flask + SQLAlchemy
+- Database: PostgreSQL (runtime), SQLite (test mode for selected suites)
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+## Quick Start
 
-### Prerequisites
-
-- Python
-- Docker / Podman
-- NodeJs
-
-### Installing
-
-Follow the steps below to setup the development environment:
-
-- 🚧 W.I.P.
-
-## Deployment
-
-Using containers makes the `remote-checkin` installation easy.
-
-1. Create an `.env` file with the following variables:
-
-```dotenv
-# Database Configuration
-DB_USER=remotecheckin
-DB_PASSWORD=your_secure_password_here
-DB_NAME=remotecheckin
-DB_HOST=postgres
-DB_PORT=5432
-
-# Application Configuration
-FLASK_ENV=production
-BACKEND_PORT=8000
-FRONTEND_PORT=80
-
-# JWT Configuration
-JWT_SECRET_KEY=your_jwt_secret_key_here
-
-# Email Configuration
-MAIL_SERVER=smtp.gmail.com
-MAIL_PORT=587
-MAIL_USERNAME=your_email@gmail.com
-MAIL_PASSWORD=your_app_password
-MAIL_USE_TLS=true
-MAIL_USE_SSL=false
-
-# Logging Configuration
-LOG_TO_FILE=true
-LOG_LEVEL=INFO
-LOG_DIRECTORY=logs
-MAX_LOG_FILE_SIZE=10485760
-LOG_BACKUP_COUNT=5
-
-# PII Protection
-PII_HASH_SALT=your_pii_hash_salt_here
+1. Clone repository:
+```bash
+git clone https://github.com/mrgionsi/remote-checkin.git
+cd remote-checkin
 ```
 
-2. Use the following [`docker-compose.yaml`](docker-compose.yaml) to spin up a `remote-checkin` instance:
-
-```shell
-docker compose up -d
+2. Start backend:
+```bash
+cd backend
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python main.py
 ```
 
-The application will be available at [http://localhost:80](http://localhost:80).
+3. Start frontend (new terminal):
+```bash
+cd frontend
+npm install
+npm start
+```
 
-You can fetch both the backend and frontend Container Images from the [GitHub Container Registry](https://github.com/mrgionsi?tab=packages&repo_name=remote-checkin).
+Frontend runs on `http://localhost:4200`.
 
-## Built With
+## Required Backend Environment Variables
 
-* [PostgreSQL](https://www.postgresql.org/)
-* [Flask](https://flask.palletsprojects.com/en/stable/)
-* [Angular](https://angular.dev/)
+Set these in `backend/.env` (or shell env):
 
-## Contributing
+- `DB_USER`
+- `DB_PASSWORD`
+- `DB_HOST`
+- `DB_PORT`
+- `DB_NAME`
+- `JWT_SECRET_KEY`
 
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
+Optional:
 
-## Versioning
+- `DATABASE_URL` (if set and valid, used directly)
+- `ALLOWED_CORS`
+- `APP_ENV` (`production` enables strict production checks)
+- `RATELIMIT_STORAGE_URI` (required when `APP_ENV=production`, use shared backend such as Redis)
 
-We use [SemVer](https://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/mrgionsi/remote-checkin/tags). 
+## Upload Flow (Guest Check-in)
 
-## Authors
+The backend supports two-phase document upload:
 
-* **Giovanni Pasquariello** - *Initial work* - [mrgionsi](https://github.com/mrgionsi)
+1. `POST /api/v1/upload/validate-documents`
+2. `POST /api/v1/upload`
 
-See also the list of [contributors](https://github.com/mrgionsi/remote-checkin/contributors) who participated in this project.
+Use:
 
-## License
+- `X-Upload-Token`
+- `X-Document-Validation-Token` (optional but recommended for phase 2)
 
-This project is licensed under the AGPL-3.0 license - see the [LICENSE](LICENSE) file for details.
+When validation token is provided and matches uploaded document fingerprint, OCR is skipped on final submit.  
+Full contract is documented in `backend/DOCUMENT_UPLOAD_FLOW.md`.
 
-<!-- ## Acknowledgments
+## Testing
 
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc -->
+Frontend:
+```bash
+cd frontend
+npm test
+npm run test:ci
+npm run e2e:smoke
+```
+
+Backend:
+```bash
+PYTHONPATH=backend pytest backend/tests
+```
+
+## Additional Docs
+
+- Backend API/notes: `backend/Readme.md`
+- Upload contract: `backend/DOCUMENT_UPLOAD_FLOW.md`
+- Regression checklist: `backend/QA_TENANT_BOUNDARY_REGRESSION.md`

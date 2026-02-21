@@ -1456,5 +1456,18 @@
   "rooms-csv-read-error": "Could not read CSV file.",
   "access-restricted": "Access restricted",
   "reservation-structure-mismatch": "Selected structure does not match this reservation.",
-  "upload-token-missing": "Unable to continue: upload security token missing. Please refresh and try again."
+  "checkin-validate-documents-cta": "Validate documents",
+  "checkin-documents-validated-ready": "Documents validated successfully. You can proceed.",
+  "checkin-validate-before-submit": "Validate your document images before final submission.",
+  "checkin-upload-all-images-first": "Please upload all required images first.",
+  "checkin-documents-validated-success": "Documents validated successfully",
+  "upload-file-too-large": "File size must be less than 5MB",
+  "upload-invalid-file-type": "Only JPEG and PNG images are allowed",
+  "upload-image-uploaded-success": "Image uploaded successfully",
+  "upload-image-removed": "Image removed",
+  "upload-token-missing": "Unable to continue: upload security token missing. Please refresh and try again.",
+  "document-validation-token-missing": "Document validation token is missing. Please validate documents again.",
+  "checkin-document-validation-failed": "Document validation failed",
+  "checkin-document-check-failed": "Document check failed for: {{fields}}. Replace the image(s) and try again.",
+  "checkin-document-check-failed-with-reasons": "Document check failed: {{details}}. Replace the image(s) and try again."
 }

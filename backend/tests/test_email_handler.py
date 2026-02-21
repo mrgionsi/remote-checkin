@@ -6,6 +6,7 @@ This module tests the EmailService class and related functionality.
 #pylint: disable=C0301,E0611,E0401,W0718,R0914,E0401,C0411,W0212,E1101
 from unittest.mock import Mock, patch
 import pytest
+from flask import Flask
 from flask_mail import Mail
 from email_handler import (
     EmailService,
@@ -49,6 +50,21 @@ class TestEmailData:
         assert email_data.html_body == "<p>Test HTML</p>"
         assert email_data.cc == ["cc@example.com"]
         assert email_data.bcc == ["bcc@example.com"]
+
+
+@pytest.fixture(autouse=True)
+def flask_app_context():
+    """Provide Flask app context so `current_app` LocalProxy is always bound."""
+    app = Flask(__name__)
+    app.config.update(
+        MAIL_SERVER="smtp.example.com",
+        MAIL_PORT=587,
+        MAIL_USERNAME="test@example.com",
+        MAIL_PASSWORD="test_password",  # noqa: S106 - test-only fake secret
+        MAIL_DEFAULT_SENDER=("Test Sender", "test@example.com"),
+    )
+    with app.app_context():
+        yield
 
 
 class TestEmailService:

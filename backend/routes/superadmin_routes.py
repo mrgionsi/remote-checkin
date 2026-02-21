@@ -21,6 +21,7 @@ from app_logging.decorators import log_route
 from utils.authz import verify_superadmin_access
 from utils.route_helpers import handle_database_error, create_user_response_data, build_user_brief
 from models import User, AdminStructure, Structure, Reservation, Role
+from extensions import limiter
 from database import SessionLocal
 
 logger = logging.getLogger(__name__)
@@ -476,6 +477,7 @@ def get_users():
 
 
 @superadmin_bp.route("/superadmin/users", methods=["POST"])
+@limiter.limit("10 per minute")
 @jwt_required()
 @log_route(include_request_data=False)
 def create_user():  # pylint: disable=too-many-return-statements
@@ -665,6 +667,7 @@ def change_user_role(user_id):  # pylint: disable=too-many-return-statements
 
 
 @superadmin_bp.route("/superadmin/users/<int:user_id>/reset-password", methods=["POST"])
+@limiter.limit("5 per minute")
 @jwt_required()
 @log_route(include_request_data=False)
 def reset_user_password(user_id):

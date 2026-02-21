@@ -32,6 +32,7 @@ from utils.route_helpers import (
 from app_logging.config import get_logger
 from app_logging.decorators import log_route, log_database_operation, log_performance
 from app_logging.utils import safe_extra_fields
+from extensions import limiter
 from database import SessionLocal
 
 
@@ -66,6 +67,7 @@ def _is_valid_password(password: str) -> bool:
 
 
 @admin_bp.route("/admin/login", methods=["POST"])
+@limiter.limit("10 per minute")
 @log_route(include_request_data=False, include_response_data=True)
 def admin_login():
     """
@@ -203,6 +205,7 @@ def create_admin_user():
 
 
 @admin_bp.route("/admin/change-password", methods=["POST"])
+@limiter.limit("5 per minute")
 @jwt_required()
 @log_route(include_request_data=False)
 @log_database_operation("UPDATE")
