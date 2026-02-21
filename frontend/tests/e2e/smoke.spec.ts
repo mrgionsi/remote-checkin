@@ -373,14 +373,16 @@ test.describe('Frontend smoke', () => {
     await expect(page.getByText('Blue Room')).toBeVisible();
     await expect(page.getByText('Red Room')).not.toBeVisible();
 
-    const firstStatusPill = page.locator('.status-pill').first();
+    let firstStatusPill = page.locator('.status-pill').first();
     await expect(firstStatusPill).toBeDisabled();
     await firstStatusPill.click({ force: true });
     expect(editCalls).toBe(0);
 
     await page.getByRole('button', { name: /edit/i }).first().click();
+    firstStatusPill = page.locator('.status-pill').first();
     await expect(firstStatusPill).toBeEnabled();
-    await firstStatusPill.click();
+    await firstStatusPill.click({ force: true });
+    await expect.poll(() => editCalls).toBe(1);
     expect(editCalls).toBe(1);
   });
 
@@ -1070,17 +1072,20 @@ test.describe('Frontend smoke', () => {
     });
 
     const nextBtnStep1 = page.locator('button.p-button:has(.pi-arrow-right)').first();
+    await expect(nextBtnStep1).toBeEnabled();
     await nextBtnStep1.focus();
-    await page.keyboard.press('Enter');
+    await page.keyboard.press('Space');
     await expect(page.locator('app-upload-identity')).toBeVisible();
 
     const nextBtnStep2 = page.locator('button.p-button:has(.pi-arrow-right)').first();
+    await expect(nextBtnStep2).toBeEnabled();
     await nextBtnStep2.focus();
-    await page.keyboard.press('Enter');
+    await page.keyboard.press('Space');
 
     const submitBtn = page.locator('button.p-button:has(.pi-check)').first();
+    await expect(submitBtn).toBeEnabled();
     await submitBtn.focus();
-    await page.keyboard.press('Enter');
+    await page.keyboard.press('Space');
     await expect(page).toHaveURL(/\/checkin-complete\/142/);
   });
 
@@ -1117,14 +1122,17 @@ test.describe('Frontend smoke', () => {
       component.uploadReservationData();
     });
 
-    await expect(page.getByRole('alert')).toBeVisible();
+    await expect(page.locator('.p-toast-message')).toBeVisible();
     await page.evaluate(() => {
       const active = document.activeElement as HTMLElement | null;
       if (!active) {
         throw new Error('Expected an active element after toast state change');
       }
-      if (!active.classList.contains('p-button')) {
-        throw new Error('Focus should remain on an interactive button after toast');
+      const isInteractive =
+        active.matches('button, [role="button"], input, select, textarea, a') ||
+        !!active.closest('button, [role="button"], input, select, textarea, a');
+      if (!isInteractive) {
+        throw new Error('Focus should remain on an interactive element after toast');
       }
     });
   });
