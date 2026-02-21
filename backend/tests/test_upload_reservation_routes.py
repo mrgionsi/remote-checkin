@@ -334,14 +334,13 @@ def test_upload_without_validation_token_returns_422_on_ocr_failure(client, init
     assert payload["invalid_files"][0]["field"] == "frontimage"
 
 
-def test_upload_invalid_mime_type_returns_validation_error(client, init_db):
-    """Validation: non-image MIME type should return 400."""
+def test_upload_invalid_file_signature_returns_validation_error(client, init_db):
+    """Validation: spoofed non-image payload should return 400."""
     token = _build_upload_token(client.application, "12345")
-    with open(TEST_IMAGES_DIR / "front.jpeg", "rb") as front_file, \
-         open(TEST_IMAGES_DIR / "back.jpeg", "rb") as back_file, \
+    with open(TEST_IMAGES_DIR / "back.jpeg", "rb") as back_file, \
          open(TEST_IMAGES_DIR / "selfie.jpeg", "rb") as selfie_file:
         data = _base_upload_form("12345", token)
-        data["frontimage"] = (front_file, "front.jpeg", "text/plain")
+        data["frontimage"] = (BytesIO(b"not-an-image"), "front.jpeg", "image/jpeg")
         data["backimage"] = (back_file, "back.jpeg", "image/jpeg")
         data["selfie"] = (selfie_file, "selfie.jpeg", "image/jpeg")
         response = client.post("/api/v1/upload", data=data, content_type="multipart/form-data")
