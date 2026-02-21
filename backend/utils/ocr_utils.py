@@ -16,11 +16,12 @@ Dependencies:
     - Pytesseract for optical character recognition (OCR).
 
 """
+import os
+
 import cv2
 import numpy as np
 import pytesseract
 from pytesseract import TesseractNotFoundError
-import os
 
 
 MIN_TEXT_LENGTH = 10
@@ -44,7 +45,7 @@ def _preprocess_variants(image):
     denoised = cv2.fastNlMeansDenoising(gray, h=9)
     # Upscale only small inputs to a target side to avoid huge OCR matrices.
     normalized_input = denoised
-    if largest_side < MIN_OCR_IMAGE_SIDE and largest_side > 0:
+    if 0 < largest_side < MIN_OCR_IMAGE_SIDE:
         scale = MIN_OCR_IMAGE_SIDE / float(largest_side)
         normalized_input = cv2.resize(
             denoised, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC
@@ -163,29 +164,17 @@ def validate_document(image_path):
                     "confidence": round(confidence, 2),
                     "variant": variant_name,
                 }
-
             if is_valid:
-                return best
-    except TesseractNotFoundError:
-        return {
+                break
+    except (TesseractNotFoundError, pytesseract.TesseractError, RuntimeError) as exc:
+        error_message = "OCR engine not available. Please try again later."
+        if isinstance(exc, pytesseract.TesseractError):
+            error_message = f"OCR processing error: {str(exc)}"
+        elif isinstance(exc, RuntimeError):
+            error_message = "OCR timeout. Please upload a clearer or smaller image."
+        best = {
             "valid": False,
-            "error": "OCR engine not available. Please try again later.",
-            "extracted_text": "",
-            "confidence": 0.0,
-            "variant": None,
-        }
-    except pytesseract.TesseractError as e:
-        return {
-            "valid": False,
-            "error": f"OCR processing error: {str(e)}",
-            "extracted_text": "",
-            "confidence": 0.0,
-            "variant": None,
-        }
-    except RuntimeError:
-        return {
-            "valid": False,
-            "error": "OCR timeout. Please upload a clearer or smaller image.",
+            "error": error_message,
             "extracted_text": "",
             "confidence": 0.0,
             "variant": None,

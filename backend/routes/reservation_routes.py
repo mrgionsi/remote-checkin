@@ -658,10 +658,10 @@ def check_get_reservations_by_id(reservation_id):
         if not reservation:
             return error_response(f"Reservation with ID {reservation_id} not found", 404)
 
-        # Get count of clients linked to the reservation
+        # Get count of links for this reservation.
+        # Counting directly on link rows is more resilient than joining Client records.
         client_count = (
-            db.query(Client)
-            .join(ClientReservations, Client.id == ClientReservations.id_client)
+            db.query(ClientReservations)
             .filter(ClientReservations.id_reservation == reservation.id)
             .count()
         )
