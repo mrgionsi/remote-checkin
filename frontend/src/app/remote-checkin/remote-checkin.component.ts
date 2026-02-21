@@ -682,9 +682,8 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
 
         let errorMessage = error.error?.error || 'Upload failed';
         if (retryable && invalidFiles.length > 0) {
-          const failedFields = invalidFiles.map((f) => f.field).join(', ');
-          errorMessage = this.translocoService.translate('checkin-document-check-failed', {
-            fields: failedFields
+          errorMessage = this.translocoService.translate('checkin-document-check-failed-with-reasons', {
+            details: this.formatInvalidFileErrors(invalidFiles)
           });
           this.documentsValidated = false;
           this.documentValidationToken = null;
@@ -770,7 +769,7 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
         this.isValidatingDocuments = false;
       },
       error: (error) => {
-        const invalidFiles = (error?.error?.invalid_files || []) as Array<{ field: string }>;
+        const invalidFiles = (error?.error?.invalid_files || []) as Array<{ field: string; reason?: string }>;
         invalidFiles.forEach(({ field }) => {
           const control = this.uploadForm.get(field);
           if (control) {
@@ -781,10 +780,16 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
 
         this.documentsValidated = false;
         this.documentValidationToken = null;
+        let errorMessage = error?.error?.error || this.translocoService.translate('checkin-document-validation-failed');
+        if (invalidFiles.length > 0) {
+          errorMessage = this.translocoService.translate('checkin-document-check-failed-with-reasons', {
+            details: this.formatInvalidFileErrors(invalidFiles)
+          });
+        }
         this.messageService.add({
           severity: 'error',
           summary: this.translocoService.translate('error'),
-          detail: error?.error?.error || this.translocoService.translate('checkin-document-validation-failed')
+          detail: errorMessage
         });
         this.isValidatingDocuments = false;
       }
@@ -801,6 +806,12 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  }
+
+  private formatInvalidFileErrors(invalidFiles: Array<{ field: string; reason?: string }>): string {
+    return invalidFiles
+      .map((item) => item.reason ? `${item.field}: ${item.reason}` : item.field)
+      .join(', ');
   }
 
   getImagePreview(type: 'frontimage' | 'backimage' | 'selfie'): string | null {

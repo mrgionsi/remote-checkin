@@ -1390,5 +1390,6 @@
   "upload-token-missing": "Impossibile continuare: token di sicurezza upload mancante. Aggiorna la pagina e riprova.",
   "document-validation-token-missing": "Token di validazione documenti mancante. Valida di nuovo i documenti.",
   "checkin-document-validation-failed": "Validazione documenti non riuscita",
-  "checkin-document-check-failed": "Controllo documento non riuscito per: {{fields}}. Sostituisci le immagini e riprova."
+  "checkin-document-check-failed": "Controllo documento non riuscito per: {{fields}}. Sostituisci le immagini e riprova.",
+  "checkin-document-check-failed-with-reasons": "Controllo documento non riuscito: {{details}}. Sostituisci le immagini e riprova."
 }

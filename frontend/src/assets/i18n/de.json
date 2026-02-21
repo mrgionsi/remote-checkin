@@ -502,6 +502,7 @@
   "document-validation-token-missing": "Token zur Dokumentprüfung fehlt. Bitte prüfen Sie die Dokumente erneut.",
   "checkin-document-validation-failed": "Dokumentenprüfung fehlgeschlagen",
   "checkin-document-check-failed": "Dokumentenprüfung fehlgeschlagen für: {{fields}}. Ersetzen Sie die Bilder und versuchen Sie es erneut.",
+  "checkin-document-check-failed-with-reasons": "Dokumentenprüfung fehlgeschlagen: {{details}}. Ersetzen Sie die Bilder und versuchen Sie es erneut.",
   "pricingDetails": {
     "pricing": {
       "currencySymbol": "€",

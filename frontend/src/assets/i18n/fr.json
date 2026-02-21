@@ -502,6 +502,7 @@
   "document-validation-token-missing": "Le jeton de validation des documents est manquant. Veuillez valider les documents à nouveau.",
   "checkin-document-validation-failed": "La validation des documents a échoué",
   "checkin-document-check-failed": "La vérification du document a échoué pour : {{fields}}. Remplacez les images et réessayez.",
+  "checkin-document-check-failed-with-reasons": "La vérification du document a échoué : {{details}}. Remplacez les images et réessayez.",
   "pricingDetails": {
     "pricing": {
       "currencySymbol": "€",
