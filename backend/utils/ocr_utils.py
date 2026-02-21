@@ -21,14 +21,23 @@ import cv2
 import numpy as np
 import pytesseract
 from pytesseract import TesseractNotFoundError
+import os
 
 
 MIN_TEXT_LENGTH = 10
 MIN_OCR_CONFIDENCE = 30.0
+OCR_TIMEOUT_SECONDS = float(os.getenv("OCR_TIMEOUT_SECONDS", "8"))
+MAX_OCR_IMAGE_SIDE = int(os.getenv("MAX_OCR_IMAGE_SIDE", "2200"))
 
 
 def _preprocess_variants(image):
     """Generate OCR-friendly image variants."""
+    height, width = image.shape[:2]
+    largest_side = max(height, width)
+    if largest_side > MAX_OCR_IMAGE_SIDE:
+        scale = MAX_OCR_IMAGE_SIDE / float(largest_side)
+        image = cv2.resize(image, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA)
+
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     denoised = cv2.fastNlMeansDenoising(gray, h=11)
     # Upscale small inputs so OCR can better resolve characters.
@@ -53,7 +62,10 @@ def _extract_with_confidence(image_variant):
     best_confidence = 0.0
     for config in ("--oem 3 --psm 6", "--oem 3 --psm 11"):
         data = pytesseract.image_to_data(
-            image_variant, config=config, output_type=pytesseract.Output.DICT
+            image_variant,
+            config=config,
+            output_type=pytesseract.Output.DICT,
+            timeout=OCR_TIMEOUT_SECONDS,
         )
         text = " ".join(
             str(token).strip()
@@ -160,6 +172,14 @@ def validate_document(image_path):
         return {
             "valid": False,
             "error": f"OCR processing error: {str(e)}",
+            "extracted_text": "",
+            "confidence": 0.0,
+            "variant": None,
+        }
+    except RuntimeError:
+        return {
+            "valid": False,
+            "error": "OCR timeout. Please upload a clearer or smaller image.",
             "extracted_text": "",
             "confidence": 0.0,
             "variant": None,
