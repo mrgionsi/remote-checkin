@@ -24,49 +24,58 @@ from pytesseract import TesseractNotFoundError
 
 
 MIN_TEXT_LENGTH = 10
-MIN_OCR_CONFIDENCE = 45.0
+MIN_OCR_CONFIDENCE = 30.0
 
 
 def _preprocess_variants(image):
     """Generate OCR-friendly image variants."""
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     denoised = cv2.fastNlMeansDenoising(gray, h=11)
+    # Upscale small inputs so OCR can better resolve characters.
+    upscaled = cv2.resize(denoised, None, fx=2.0, fy=2.0, interpolation=cv2.INTER_CUBIC)
+    normalized = cv2.convertScaleAbs(upscaled, alpha=1.3, beta=10)
 
     adaptive = cv2.adaptiveThreshold(
-        denoised, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, 9
+        normalized, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, 9
     )
-    otsu = cv2.threshold(denoised, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+    otsu = cv2.threshold(normalized, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
 
     return {
-        "gray": gray,
+        "gray": normalized,
         "adaptive": adaptive,
         "otsu": otsu,
     }
 
 
 def _extract_with_confidence(image_variant):
-    """Run OCR once and return extracted text and average confidence."""
-    config = "--oem 3 --psm 6"
-    data = pytesseract.image_to_data(
-        image_variant, config=config, output_type=pytesseract.Output.DICT
-    )
-    text = " ".join(
-        str(token).strip()
-        for token in data.get("text", [])
-        if str(token).strip()
-    )
+    """Run OCR with multiple page segmentation modes and keep the best result."""
+    best_text = ""
+    best_confidence = 0.0
+    for config in ("--oem 3 --psm 6", "--oem 3 --psm 11"):
+        data = pytesseract.image_to_data(
+            image_variant, config=config, output_type=pytesseract.Output.DICT
+        )
+        text = " ".join(
+            str(token).strip()
+            for token in data.get("text", [])
+            if str(token).strip()
+        )
 
-    confidences = []
-    for conf in data.get("conf", []):
-        try:
-            conf_val = float(conf)
-        except (TypeError, ValueError):
-            continue
-        if conf_val >= 0:
-            confidences.append(conf_val)
+        confidences = []
+        for conf in data.get("conf", []):
+            try:
+                conf_val = float(conf)
+            except (TypeError, ValueError):
+                continue
+            if conf_val >= 0:
+                confidences.append(conf_val)
 
-    average_confidence = float(np.mean(confidences)) if confidences else 0.0
-    return text, average_confidence
+        average_confidence = float(np.mean(confidences)) if confidences else 0.0
+        if average_confidence > best_confidence:
+            best_confidence = average_confidence
+            best_text = text
+
+    return best_text, best_confidence
 
 def validate_document(image_path):
     """
