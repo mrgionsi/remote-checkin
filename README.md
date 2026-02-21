@@ -79,9 +79,7 @@ npm run e2e:smoke
 
 Backend:
 ```bash
-cd backend
-source .venv/bin/activate
-PYTHONPATH=backend python -m pytest
+PYTHONPATH=backend pytest backend/tests
 ```
 
 ## Additional Docs

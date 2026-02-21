@@ -642,7 +642,7 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
 
     if (!this.documentsValidated || !this.documentValidationToken) {
       this.messageService.add({
-        severity: 'warn',
+        severity: 'error',
         summary: this.translocoService.translate('error'),
         detail: this.translocoService.translate('checkin-validate-before-submit')
       });
@@ -681,12 +681,14 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
         }
 
         let errorMessage = error.error?.error || this.translocoService.translate('images-uploaded-fail');
+        if (invalidFiles.length > 0) {
+          this.documentsValidated = false;
+          this.documentValidationToken = null;
+        }
         if (retryable && invalidFiles.length > 0) {
           errorMessage = this.translocoService.translate('checkin-document-check-failed-with-reasons', {
             details: this.formatInvalidFileErrors(invalidFiles)
           });
-          this.documentsValidated = false;
-          this.documentValidationToken = null;
         }
 
         this.messageService.add({
@@ -709,7 +711,7 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
     }
     if (this.uploadForm.invalid) {
       this.messageService.add({
-        severity: 'warn',
+        severity: 'error',
         summary: this.translocoService.translate('error'),
         detail: this.translocoService.translate('checkin-upload-all-images-first')
       });
@@ -735,7 +737,7 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
     if (!frontImage || !backImage || !selfieImage) {
       this.isValidatingDocuments = false;
       this.messageService.add({
-        severity: 'warn',
+        severity: 'error',
         summary: this.translocoService.translate('error'),
         detail: this.translocoService.translate('checkin-upload-all-images-first')
       });
