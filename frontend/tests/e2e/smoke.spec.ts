@@ -1350,7 +1350,7 @@ test.describe('Frontend smoke', () => {
     await expect(page.locator('app-upload-identity')).toBeVisible();
 
     await page.getByRole('button', { name: 'Validate documents' }).click();
-    await expect(page.getByText('Documents validated successfully. You can proceed.')).toBeVisible();
+    await expect(page.locator('.p-toast-message .p-toast-detail')).toContainText('Document validation successful');
     await page.locator('button.p-button:has(.pi-arrow-right)').first().click();
     await page.locator('button.p-button:has(.pi-check)').first().click();
 
@@ -1392,7 +1392,7 @@ test.describe('Frontend smoke', () => {
     await expect(page.locator('app-upload-identity')).toBeVisible();
 
     await page.getByRole('button', { name: 'Validate documents' }).click();
-    await expect(page.getByText('Document validation failed')).toBeVisible();
+    await expect(page.locator('.p-toast-message .p-toast-detail')).toContainText('Document check failed');
     await expect(page.locator('button.p-button:has(.pi-arrow-right)').first()).toBeDisabled();
   });
 
