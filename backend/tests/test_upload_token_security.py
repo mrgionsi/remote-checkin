@@ -9,6 +9,7 @@ import pytest
 from flask import Flask
 from itsdangerous import URLSafeTimedSerializer
 
+from extensions import limiter
 from routes.upload_reservation_routes import (
     upload_bp,
     UPLOAD_TOKEN_SALT,
@@ -60,7 +61,9 @@ def app():
     app = Flask(__name__)
     app.config["TESTING"] = True
     app.config["JWT_SECRET_KEY"] = "test-secret"
+    app.config["RATELIMIT_ENABLED"] = False
     app.register_blueprint(upload_bp)
+    limiter.init_app(app)
     return app
 
 
