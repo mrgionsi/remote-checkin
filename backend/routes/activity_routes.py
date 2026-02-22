@@ -8,7 +8,6 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app_logging.config import get_logger
 from app_logging.decorators import log_route
-from database import SessionLocal
 from models import ActivityEvent
 from utils.authz import is_superadmin
 from utils.route_helpers import (
@@ -17,6 +16,7 @@ from utils.route_helpers import (
     get_user_structure_ids,
     require_structure_access,
 )
+from database import SessionLocal
 
 logger = get_logger(__name__)
 
@@ -26,7 +26,7 @@ activity_bp = Blueprint("activity", __name__, url_prefix="/api/v1")
 @activity_bp.route("/activity/recent", methods=["GET"])
 @jwt_required()
 @log_route(include_request_data=True)
-def get_recent_activity():
+def get_recent_activity():  # pylint: disable=too-many-locals,too-many-return-statements,too-many-branches,broad-exception-caught
     """Return most recent timeline items scoped by role and structure access."""
     db = SessionLocal()
     try:
@@ -116,7 +116,7 @@ def get_recent_activity():
     except SQLAlchemyError:
         logger.exception("Database error while fetching activity timeline")
         return error_response("Database error", 500)
-    except Exception:
+    except Exception:  # pylint: disable=broad-exception-caught
         logger.exception("Unexpected error while fetching activity timeline")
         return error_response("Internal server error", 500)
     finally:

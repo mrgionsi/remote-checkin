@@ -13,10 +13,8 @@ from __future__ import annotations
 import os
 from datetime import datetime, timedelta
 
-from sqlalchemy import func
-
-from database import SessionLocal
 from models import ActivityEvent
+from database import SessionLocal
 
 
 def _int_env(name: str, default: int) -> int:
@@ -48,9 +46,9 @@ def cleanup_activity_events() -> dict[str, int | str]:
         )
         db.commit()
 
-        total_after_age = db.query(func.count(ActivityEvent.id)).scalar() or 0
+        total_after_age = db.query(ActivityEvent.id).count()
 
-        if max_rows > 0 and total_after_age > max_rows:
+        if max_rows and total_after_age > max_rows:
             overflow = total_after_age - max_rows
             oldest_ids = [
                 row[0]
@@ -69,7 +67,7 @@ def cleanup_activity_events() -> dict[str, int | str]:
                 )
                 db.commit()
 
-        total_after = db.query(func.count(ActivityEvent.id)).scalar() or 0
+        total_after = db.query(ActivityEvent.id).count()
 
         return {
             "status": "ok",

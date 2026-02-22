@@ -11,7 +11,7 @@ from models import ActivityEvent
 logger = get_logger(__name__)
 
 
-def log_activity(
+def log_activity(  # pylint: disable=too-many-arguments,broad-exception-caught
     db_session,
     *,
     event_type,
