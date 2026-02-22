@@ -51,6 +51,8 @@ Optional:
 - `ALLOWED_CORS`
 - `APP_ENV` (`production` enables strict production checks)
 - `RATELIMIT_STORAGE_URI` (required when `APP_ENV=production`, use shared backend such as Redis)
+- `ACTIVITY_RETENTION_DAYS` (default `180`, used by activity cleanup job)
+- `ACTIVITY_MAX_ROWS` (default `5000000`, set `0` to disable max-row cap)
 
 ## Upload Flow (Guest Check-in)
 
@@ -87,3 +89,4 @@ PYTHONPATH=backend pytest backend/tests
 - Backend API/notes: `backend/Readme.md`
 - Upload contract: `backend/DOCUMENT_UPLOAD_FLOW.md`
 - Regression checklist: `backend/QA_TENANT_BOUNDARY_REGRESSION.md`
+- Activity retention policy: `docs/ACTIVITY_RETENTION.md`
