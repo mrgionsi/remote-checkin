@@ -264,7 +264,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   loadTimeline(structureId: number): void {
     this.loadingTimeline = true;
-    const timelineSub = this.activityService.getRecentActivity(20, structureId, 'administrator,admin').subscribe({
+    const timelineSub = this.activityService.getRecentActivity(20, structureId, 'administrator,admin,superadmin').subscribe({
       next: (response) => {
         this.timelineItems = response.items || [];
         this.loadingTimeline = false;
