@@ -22,6 +22,7 @@ def app():
     app = Flask(__name__)
     app.config.from_object("config.TestConfig")
     app.config["JWT_SECRET_KEY"] = "test-secret"
+    app.config["RATELIMIT_ENABLED"] = False
     app.register_blueprint(upload_bp)
     limiter.init_app(app)
     Base.metadata.create_all(bind=engine)
@@ -174,6 +175,23 @@ def test_upload_nonexistent_reservation(client):
         assert "Reservation not found" in response.get_json()["error"]
 
 
+def test_upload_nonexistent_reservation_does_not_create_folder(client, tmp_path, monkeypatch):
+    """Reservation folder must not be created when reservation does not exist."""
+    monkeypatch.setattr("routes.upload_reservation_routes.UPLOAD_FOLDER", str(tmp_path))
+    token = _build_upload_token(client.application, "99999")
+    with open(TEST_IMAGES_DIR / "front.jpeg", "rb") as front_file, \
+         open(TEST_IMAGES_DIR / "back.jpeg", "rb") as back_file, \
+         open(TEST_IMAGES_DIR / "selfie.jpeg", "rb") as selfie_file:
+        data = _base_upload_form("99999", token)
+        data["frontimage"] = (front_file, "front.jpeg", "image/jpeg")
+        data["backimage"] = (back_file, "back.jpeg", "image/jpeg")
+        data["selfie"] = (selfie_file, "selfie.jpeg", "image/jpeg")
+        response = client.post("/api/v1/upload", data=data, content_type="multipart/form-data")
+
+    assert response.status_code == 404
+    assert not (tmp_path / "99999").exists()
+
+
 def test_upload_invalid_gender_returns_validation_error(client):
     """Validation: invalid gender value should return a 400 with safe error payload."""
     token = _build_upload_token(client.application, "12345")
@@ -251,6 +269,35 @@ def test_validate_documents_invalid_returns_422(client, init_db, monkeypatch):
     payload = response.get_json()
     assert payload["retryable"] is True
     assert payload["invalid_files"][0]["field"] == "frontimage"
+
+
+def test_upload_invalid_ocr_cleans_saved_document_files(client, init_db, monkeypatch, tmp_path):
+    """When OCR fails, previously saved front/back files should be removed."""
+    monkeypatch.setattr("routes.upload_reservation_routes.UPLOAD_FOLDER", str(tmp_path))
+    monkeypatch.setattr(
+        "routes.upload_reservation_routes.validate_document",
+        lambda *_: {
+            "valid": False,
+            "error": "No valid text detected",
+            "extracted_text": "",
+            "confidence": 12.0,
+            "variant": "gray",
+        },
+    )
+    token = _build_upload_token(client.application, "12345")
+    with open(TEST_IMAGES_DIR / "front.jpeg", "rb") as front_file, \
+         open(TEST_IMAGES_DIR / "back.jpeg", "rb") as back_file, \
+         open(TEST_IMAGES_DIR / "selfie.jpeg", "rb") as selfie_file:
+        data = _base_upload_form("12345", token)
+        data["frontimage"] = (front_file, "front.jpeg", "image/jpeg")
+        data["backimage"] = (back_file, "back.jpeg", "image/jpeg")
+        data["selfie"] = (selfie_file, "selfie.jpeg", "image/jpeg")
+        response = client.post("/api/v1/upload", data=data, content_type="multipart/form-data")
+
+    assert response.status_code == 422
+    reservation_dir = tmp_path / "12345"
+    assert reservation_dir.exists()
+    assert list(reservation_dir.iterdir()) == []
 
 
 def test_upload_with_document_validation_token_skips_ocr(client, init_db, monkeypatch):
