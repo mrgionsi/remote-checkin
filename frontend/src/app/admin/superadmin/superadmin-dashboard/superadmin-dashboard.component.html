@@ -109,7 +109,7 @@
         <span class="panel-caption">{{ 'timeline-subtitle' | transloco }}</span>
       </div>
       <ul class="panel-list" *ngIf="!loadingTimeline && timelineItems.length > 0">
-        <li *ngFor="let item of timelineItems" class="timeline-event">{{ item.description }}</li>
+        <li *ngFor="let item of timelineItems" class="timeline-event">{{ getTimelineDescription(item) }}</li>
       </ul>
       <p class="panel-caption" *ngIf="!loadingTimeline && timelineItems.length === 0">
         {{ 'timeline-empty' | transloco }}

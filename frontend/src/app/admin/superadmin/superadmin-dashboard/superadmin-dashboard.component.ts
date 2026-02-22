@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { SuperadminService, DashboardData } from '../../../services/superadmin.service';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { ActivityItem } from '../../../services/activity.service';
 
 @Component({
@@ -19,7 +19,10 @@ export class SuperadminDashboardComponent implements OnInit {
   loadingTimeline = true;
   error: string | null = null;
 
-  constructor(private superadminService: SuperadminService) { }
+  constructor(
+    private superadminService: SuperadminService,
+    private translocoService: TranslocoService
+  ) { }
 
   ngOnInit(): void {
     this.loadDashboardData();
@@ -54,5 +57,10 @@ export class SuperadminDashboardComponent implements OnInit {
         this.loadingTimeline = false;
       }
     });
+  }
+
+  getTimelineDescription(item: ActivityItem): string {
+    const key = `timeline-event-${item.eventType.replaceAll('.', '-')}`;
+    return this.translocoService.translate(key, item.metadata || {});
   }
 }

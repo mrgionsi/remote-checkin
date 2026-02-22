@@ -37,6 +37,7 @@ def get_recent_activity():
         limit = request.args.get("limit", default=20, type=int)
         limit = max(1, min(limit, 100))
         requested_structure_id = request.args.get("structure_id", type=int)
+        requested_actor_role = request.args.get("actor_role", type=str)
 
         query = db.query(ActivityEvent)
 
@@ -56,6 +57,15 @@ def get_recent_activity():
                 if not allowed_structure_ids:
                     return jsonify({"items": []}), 200
                 query = query.filter(ActivityEvent.structure_id.in_(allowed_structure_ids))
+
+        if requested_actor_role:
+            normalized_roles = [
+                role.strip().lower()
+                for role in requested_actor_role.split(",")
+                if role.strip()
+            ]
+            if normalized_roles:
+                query = query.filter(ActivityEvent.actor_role.in_(normalized_roles))
 
         events = query.order_by(ActivityEvent.created_at.desc()).limit(limit).all()
 

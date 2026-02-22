@@ -25,7 +25,7 @@ export class ActivityService {
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
-  getRecentActivity(limit = 20, structureId?: number): Observable<{ items: ActivityItem[] }> {
+  getRecentActivity(limit = 20, structureId?: number, actorRole?: string): Observable<{ items: ActivityItem[] }> {
     if (!this.authService.checkAuthAndRedirect()) {
       return throwError(() => new Error('Authentication failed'));
     }
@@ -34,6 +34,9 @@ export class ActivityService {
     queryParams.set('limit', String(limit));
     if (structureId !== undefined && structureId !== null) {
       queryParams.set('structure_id', String(structureId));
+    }
+    if (actorRole) {
+      queryParams.set('actor_role', actorRole);
     }
 
     const url = `${this.apiUrl}?${queryParams.toString()}`;

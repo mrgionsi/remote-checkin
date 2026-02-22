@@ -84,11 +84,11 @@
                     <div>
                         <div class="recent-name">
                             <i [class]="getTimelineIcon(item.eventType)"></i>
-                            {{ item.description }}
+                            {{ getTimelineDescription(item) }}
                         </div>
                         <div class="recent-meta">{{ getTimelineWhen(item.createdAt) }}</div>
                     </div>
-                    <span class="recent-status">{{ item.eventType }}</span>
+                    <span class="recent-status">{{ ('timeline-event-label-' + item.entityType) | transloco }}</span>
                 </div>
             </div>
             <div class="recent-empty" *ngIf="!loadingTimeline && timelineItems.length === 0">

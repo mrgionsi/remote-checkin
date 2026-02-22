@@ -45,7 +45,7 @@ def log_activity(
             entity_id=entity_id,
             structure_id=structure_id,
             actor_user_id=actor_user_id,
-            actor_role=str(actor_role) if actor_role is not None else None,
+            actor_role=str(actor_role).lower() if actor_role is not None else None,
             description=description,
             metadata_json=json.dumps(metadata or {}, ensure_ascii=False),
         )

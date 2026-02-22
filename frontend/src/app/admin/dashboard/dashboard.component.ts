@@ -264,7 +264,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   loadTimeline(structureId: number): void {
     this.loadingTimeline = true;
-    const timelineSub = this.activityService.getRecentActivity(20, structureId).subscribe({
+    const timelineSub = this.activityService.getRecentActivity(20, structureId, 'administrator,admin').subscribe({
       next: (response) => {
         this.timelineItems = response.items || [];
         this.loadingTimeline = false;
@@ -296,6 +296,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (deltaHours < 24) return this.translocoService.translate('timeline-hours-ago', { count: deltaHours });
     const deltaDays = Math.floor(deltaHours / 24);
     return this.translocoService.translate('timeline-days-ago', { count: deltaDays });
+  }
+
+  getTimelineDescription(item: ActivityItem): string {
+    const key = `timeline-event-${item.eventType.replaceAll('.', '-')}`;
+    return this.translocoService.translate(key, item.metadata || {});
   }
 
   updateChartData(): void {
