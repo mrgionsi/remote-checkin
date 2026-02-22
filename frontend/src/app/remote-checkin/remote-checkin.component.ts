@@ -187,7 +187,7 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
 
       return null;
     } catch (_error) {
-      console.error('Error in date validation');
+      console.error('Error in date validation', _error);
       return null; // Don't block submission on validation errors
     }
   }
@@ -364,7 +364,7 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
         }
       }
     } catch (_error) {
-      console.error('Error loading countries');
+      console.error('Error loading countries', _error);
       // Use centralized fallback data
       this.countryOptions = [...FALLBACK_COUNTRY_OPTIONS];
       this.countryMappings = { ...FALLBACK_COUNTRY_MAPPINGS };
@@ -390,7 +390,7 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
       this.dataLoaded = true;
       this.isLoadingData = false;
     } catch (_error) {
-      console.error('Error loading reference data');
+      console.error('Error loading reference data', _error);
       this.isLoadingData = false;
     }
   }
@@ -418,7 +418,7 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
         }
       }
     } catch (_error) {
-      console.error('Error loading document types');
+      console.error('Error loading document types', _error);
       // Use centralized fallback data
       this.documentTypeOptions = [...FALLBACK_DOCUMENT_TYPE_OPTIONS];
       this.documentTypeMappings = { ...FALLBACK_DOCUMENT_TYPE_MAPPINGS };
@@ -439,7 +439,7 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
         this.provinceMappings = provinceAcronyms;
       }
     } catch (_error) {
-      console.error('Error loading province acronyms');
+      console.error('Error loading province acronyms', _error);
     }
   }
 
@@ -482,7 +482,7 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
         this.loadingLuogoEmissioneOptions = false;
       }
     } catch (_error) {
-      console.error('Error loading municipalities data');
+      console.error('Error loading municipalities data', _error);
       // Use centralized fallback data
       this.municipalityOptions = [...FALLBACK_MUNICIPALITY_OPTIONS];
       this.luogoEmissioneOptions = [...FALLBACK_MUNICIPALITY_OPTIONS];
