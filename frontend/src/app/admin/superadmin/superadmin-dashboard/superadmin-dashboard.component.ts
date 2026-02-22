@@ -47,7 +47,7 @@ export class SuperadminDashboardComponent implements OnInit {
 
   loadTimeline(): void {
     this.loadingTimeline = true;
-    this.superadminService.getActivityTimeline().subscribe({
+    this.superadminService.getActivityTimeline(5).subscribe({
       next: (response) => {
         this.timelineItems = response.items || [];
         this.loadingTimeline = false;
