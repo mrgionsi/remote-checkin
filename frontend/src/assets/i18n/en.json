@@ -1192,6 +1192,7 @@
   "dashboard-recent-empty": "No recent activity yet.",
   "timeline-title": "Activity timeline",
   "timeline-subtitle": "What changed most recently",
+  "timeline-retention-hint": "Timeline keeps the latest 180 days of events.",
   "timeline-view-all": "View all activity",
   "timeline-empty": "No timeline events yet.",
   "timeline-just-now": "Just now",

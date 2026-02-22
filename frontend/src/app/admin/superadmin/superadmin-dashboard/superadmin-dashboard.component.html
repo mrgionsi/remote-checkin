@@ -107,6 +107,7 @@
       <div class="panel-header">
         <h3>{{ 'timeline-title' | transloco }}</h3>
         <span class="panel-caption">{{ 'timeline-subtitle' | transloco }}</span>
+        <span class="panel-caption">{{ 'timeline-retention-hint' | transloco }}</span>
         <a class="panel-action" routerLink="/admin/superadmin/activity">{{ 'timeline-view-all' | transloco }}</a>
       </div>
       <ul class="panel-list" *ngIf="!loadingTimeline && timelineItems.length > 0">

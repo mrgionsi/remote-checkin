@@ -226,6 +226,7 @@
   "dashboard-recent-empty": "Aucune activité récente.",
   "timeline-title": "Chronologie d'activité",
   "timeline-subtitle": "Ce qui a changé récemment",
+  "timeline-retention-hint": "La chronologie conserve les 180 derniers jours d'événements.",
   "timeline-view-all": "Voir toute l'activité",
   "timeline-empty": "Aucun événement de chronologie.",
   "timeline-just-now": "À l'instant",
