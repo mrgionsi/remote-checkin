@@ -186,8 +186,8 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
       }
 
       return null;
-    } catch (error) {
-      console.error('Error in date validation:', error);
+    } catch (_error) {
+      console.error('Error in date validation');
       return null; // Don't block submission on validation errors
     }
   }
@@ -280,8 +280,6 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
         this.checkRegistrationCapacity();
       },
       error: (error) => {
-        console.warn('Error loading reservation details:', error);
-
         // Block registration when capacity cannot be verified
         this.canRegister = false;
         this.disableFormControls();
@@ -365,8 +363,8 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
           }));
         }
       }
-    } catch (error) {
-      console.error('Error loading countries:', error);
+    } catch (_error) {
+      console.error('Error loading countries');
       // Use centralized fallback data
       this.countryOptions = [...FALLBACK_COUNTRY_OPTIONS];
       this.countryMappings = { ...FALLBACK_COUNTRY_MAPPINGS };
@@ -391,8 +389,8 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
 
       this.dataLoaded = true;
       this.isLoadingData = false;
-    } catch (error) {
-      console.error('Error loading reference data:', error);
+    } catch (_error) {
+      console.error('Error loading reference data');
       this.isLoadingData = false;
     }
   }
@@ -419,8 +417,8 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
           }));
         }
       }
-    } catch (error) {
-      console.error('Error loading document types:', error);
+    } catch (_error) {
+      console.error('Error loading document types');
       // Use centralized fallback data
       this.documentTypeOptions = [...FALLBACK_DOCUMENT_TYPE_OPTIONS];
       this.documentTypeMappings = { ...FALLBACK_DOCUMENT_TYPE_MAPPINGS };
@@ -440,8 +438,8 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
         }));
         this.provinceMappings = provinceAcronyms;
       }
-    } catch (error) {
-      console.error('Error loading province acronyms:', error);
+    } catch (_error) {
+      console.error('Error loading province acronyms');
     }
   }
 
@@ -483,8 +481,8 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
         // Set loading states to false
         this.loadingLuogoEmissioneOptions = false;
       }
-    } catch (error) {
-      console.error('Error loading municipalities data:', error);
+    } catch (_error) {
+      console.error('Error loading municipalities data');
       // Use centralized fallback data
       this.municipalityOptions = [...FALLBACK_MUNICIPALITY_OPTIONS];
       this.luogoEmissioneOptions = [...FALLBACK_MUNICIPALITY_OPTIONS];
@@ -503,7 +501,6 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
     this.uploadForm = formData;
     this.documentsValidated = false;
     this.documentValidationToken = null;
-    console.log(this.uploadForm.get('frontimage'))
     /*     this.messageService.add({
           severity: 'success',
           summary: 'Success',
@@ -512,11 +509,8 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
   }
 
   uploadReservationData() {
-    console.log("uploadReservationData called");  // For debugging
-
     // Prevent duplicate submissions immediately
     if (this.isSubmitting) {
-      console.log("Submission already in progress");
       return;
     }
     this.isSubmitting = true;
@@ -653,7 +647,6 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
     this.uploadService.uploadImages(formData, this.uploadToken, this.documentValidationToken).subscribe({
       next: (response) => {
         // Show success message with API response
-        console.log(response)
         this.clearDraft();
         this.messageService.add({
           severity: 'success',
@@ -667,7 +660,6 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         // Handle error response
-        console.log(error)
         const invalidFiles = (error?.error?.invalid_files || []) as Array<{ field: string; reason?: string }>;
         const retryable = !!error?.error?.retryable;
         if (invalidFiles.length > 0) {
