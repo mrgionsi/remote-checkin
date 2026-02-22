@@ -178,6 +178,25 @@ def test_rooms_structure_scope(client, app, seed_data):
     assert resp_denied.status_code == 403
 
 
+def test_room_detail_and_write_scope(client, app, seed_data):
+    """Room detail/update/delete enforce structure boundaries for mapped admin."""
+    mapped = _auth_header(app, seed_data["mapped_admin_id"], "administrator")
+
+    own_room = client.get(f"/api/v1/rooms/{seed_data['room_a_id']}", headers=mapped)
+    foreign_room = client.get(f"/api/v1/rooms/{seed_data['room_b_id']}", headers=mapped)
+    assert own_room.status_code == 200
+    assert foreign_room.status_code == 403
+
+    forbidden_update = client.put(
+        f"/api/v1/rooms/{seed_data['room_b_id']}",
+        headers=mapped,
+        json={"name": "Should Not Update", "capacity": 3, "id_structure": seed_data["structure_b_id"]},
+    )
+    forbidden_delete = client.delete(f"/api/v1/rooms/{seed_data['room_b_id']}", headers=mapped)
+    assert forbidden_update.status_code == 403
+    assert forbidden_delete.status_code == 403
+
+
 def test_rooms_unmapped_admin_gets_empty_list(client, app, seed_data):
     """Unmapped admin gets empty list on generic rooms query."""
     unmapped = _auth_header(app, seed_data["unmapped_admin_id"], "administrator")
@@ -212,6 +231,45 @@ def test_reservation_structure_scope(client, app, seed_data):
     assert ok.status_code == 200
     assert forbidden.status_code == 403
 
+
+def test_reservation_admin_detail_scope(client, app, seed_data):
+    """Admin reservation-detail endpoint enforces structure boundaries."""
+    mapped = _auth_header(app, seed_data["mapped_admin_id"], "administrator")
+    allowed = client.get(f"/api/v1/reservations/admin/{seed_data['reservation_a_id']}", headers=mapped)
+    forbidden = client.get(f"/api/v1/reservations/admin/{seed_data['reservation_b_id']}", headers=mapped)
+    assert allowed.status_code == 200
+    assert forbidden.status_code == 403
+
+
+def test_reservation_write_scope(client, app, seed_data):
+    """Reservation update/delete and create enforce structure boundaries."""
+    mapped = _auth_header(app, seed_data["mapped_admin_id"], "administrator")
+
+    forbidden_patch = client.patch(
+        f"/api/v1/reservations/{seed_data['reservation_b_id']}",
+        headers=mapped,
+        json={"status": "Approved"},
+    )
+    forbidden_delete = client.delete(
+        f"/api/v1/reservations/{seed_data['reservation_b_id']}",
+        headers=mapped,
+    )
+    assert forbidden_patch.status_code == 403
+    assert forbidden_delete.status_code == 403
+
+    forbidden_create = client.post(
+        "/api/v1/reservations",
+        headers=mapped,
+        json={
+            "reservationNumber": "RES-CROSS-SCOPE",
+            "startDate": "2026-02-20",
+            "endDate": "2026-02-23",
+            "roomId": seed_data["room_b_id"],
+            "structureId": seed_data["structure_b_id"],
+            "email": "cross@example.com",
+        },
+    )
+    assert forbidden_create.status_code == 403
 
 def test_clients_endpoint_scope(client, app, seed_data):
     """Clients-by-reservation endpoint only allows authorized users."""
