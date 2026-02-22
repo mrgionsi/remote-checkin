@@ -76,22 +76,25 @@
 
         <div class="insight-card">
             <div class="insight-card__header">
-                <h3>{{ 'dashboard-recent-title' | transloco }}</h3>
-                <span class="insight-card__hint">{{ 'dashboard-recent-subtitle' | transloco }}</span>
+                <h3>{{ 'timeline-title' | transloco }}</h3>
+                <span class="insight-card__hint">{{ 'timeline-subtitle' | transloco }}</span>
             </div>
-            <div class="recent-list" *ngIf="recentReservations.length > 0">
-                <div class="recent-item" *ngFor="let item of recentReservations">
+            <div class="recent-list" *ngIf="timelineItems.length > 0">
+                <div class="recent-item" *ngFor="let item of timelineItems">
                     <div>
-                        <div class="recent-name">{{ item.name_reference }}</div>
-                        <div class="recent-meta">{{ item.room_name }} · {{ item.start_date }}</div>
+                        <div class="recent-name">
+                            <i [class]="getTimelineIcon(item.eventType)"></i>
+                            {{ item.description }}
+                        </div>
+                        <div class="recent-meta">{{ getTimelineWhen(item.createdAt) }}</div>
                     </div>
-                    <span class="recent-status">{{ item.status }}</span>
+                    <span class="recent-status">{{ item.eventType }}</span>
                 </div>
             </div>
-            <div class="recent-empty" *ngIf="!loadingReservations && recentReservations.length === 0">
-                {{ 'dashboard-recent-empty' | transloco }}
+            <div class="recent-empty" *ngIf="!loadingTimeline && timelineItems.length === 0">
+                {{ 'timeline-empty' | transloco }}
             </div>
-            <div class="health-skeleton" *ngIf="loadingReservations">
+            <div class="health-skeleton" *ngIf="loadingTimeline">
                 <div class="skeleton-line" *ngFor="let n of [1,2,3]"></div>
             </div>
         </div>

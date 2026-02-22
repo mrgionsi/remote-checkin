@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AuthService } from './auth.service';
 import { environment } from '../../environments/environments';
+import { ActivityItem } from './activity.service';
 
 export interface Structure {
   id: number;
@@ -161,5 +162,12 @@ export class SuperadminService {
   // Dashboard
   getDashboardData(): Observable<{ dashboard: DashboardData }> {
     return this.http.get<{ dashboard: DashboardData }>(`${this.baseUrl}/dashboard`, { headers: this.getHeaders() });
+  }
+
+  getActivityTimeline(limit = 20): Observable<{ items: ActivityItem[] }> {
+    return this.http.get<{ items: ActivityItem[] }>(
+      `${environment.apiBaseUrl}/api/v1/activity/recent?limit=${limit}`,
+      { headers: this.getHeaders() }
+    );
   }
 }

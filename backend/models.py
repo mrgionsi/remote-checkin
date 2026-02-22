@@ -7,7 +7,7 @@ including Room, Client, Reservation, and others.
 """
 
 from datetime import date, datetime
-from sqlalchemy import Column, Integer, BigInteger, String, Date, ForeignKey, Sequence, Boolean, DateTime
+from sqlalchemy import Column, Integer, BigInteger, String, Date, ForeignKey, Sequence, Boolean, DateTime, Text
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -546,3 +546,35 @@ class EmailConfig(Base):
             str: Representation in the form "<EmailConfig(id=<id>, user_id=<user_id>, provider_type=<provider_type>)>"
         """
         return f"<EmailConfig(id={self.id}, user_id={self.user_id}, provider_type={self.provider_type})>"
+
+
+class ActivityEvent(Base):
+    """Audit-style activity event used by admin/superadmin timeline widgets."""
+
+    __tablename__ = "activity_event"
+
+    id = Column(Integer, Sequence("activity_event_id_seq"), primary_key=True, index=True)
+    event_type = Column(String(64), nullable=False, index=True)
+    entity_type = Column(String(64), nullable=False)
+    entity_id = Column(BigInteger, nullable=True)
+    structure_id = Column(BigInteger, nullable=True, index=True)
+    actor_user_id = Column(BigInteger, nullable=True, index=True)
+    actor_role = Column(String(32), nullable=True)
+    description = Column(String(255), nullable=False)
+    metadata_json = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+    def to_dict(self):
+        """Serialize activity event for API responses."""
+        return {
+            "id": self.id,
+            "event_type": self.event_type,
+            "entity_type": self.entity_type,
+            "entity_id": self.entity_id,
+            "structure_id": self.structure_id,
+            "actor_user_id": self.actor_user_id,
+            "actor_role": self.actor_role,
+            "description": self.description,
+            "metadata": self.metadata_json,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+        }
