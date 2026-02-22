@@ -17,6 +17,16 @@ export interface ActivityItem {
   createdAt: string;
 }
 
+export interface ActivityResponse {
+  items: ActivityItem[];
+  pagination?: {
+    page: number;
+    per_page: number;
+    total: number;
+    pages: number;
+  };
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -25,7 +35,12 @@ export class ActivityService {
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
-  getRecentActivity(limit = 20, structureId?: number, actorRole?: string): Observable<{ items: ActivityItem[] }> {
+  getRecentActivity(
+    limit = 20,
+    structureId?: number,
+    actorRole?: string,
+    page = 1
+  ): Observable<ActivityResponse> {
     if (!this.authService.checkAuthAndRedirect()) {
       return throwError(() => new Error('Authentication failed'));
     }
@@ -38,9 +53,10 @@ export class ActivityService {
     if (actorRole) {
       queryParams.set('actor_role', actorRole);
     }
+    queryParams.set('page', String(page));
 
     const url = `${this.apiUrl}?${queryParams.toString()}`;
-    return this.http.get<{ items: ActivityItem[] }>(url, {
+    return this.http.get<ActivityResponse>(url, {
       headers: this.authService.getAuthHeaders(),
     });
   }

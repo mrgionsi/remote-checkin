@@ -136,6 +136,13 @@ h2 {
     color: var(--ink-500);
 }
 
+.timeline-all-link {
+    font-size: 0.8rem;
+    color: var(--ink-700);
+    text-decoration: none;
+    margin-top: 0.4rem;
+}
+
 .health-list,
 .recent-list {
     display: flex;

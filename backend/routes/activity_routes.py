@@ -36,6 +36,9 @@ def get_recent_activity():
 
         limit = request.args.get("limit", default=20, type=int)
         limit = max(1, min(limit, 100))
+        page = request.args.get("page", default=1, type=int)
+        page = max(1, page)
+        offset = (page - 1) * limit
         requested_structure_id = request.args.get("structure_id", type=int)
         requested_actor_role = request.args.get("actor_role", type=str)
 
@@ -67,7 +70,8 @@ def get_recent_activity():
             if normalized_roles:
                 query = query.filter(ActivityEvent.actor_role.in_(normalized_roles))
 
-        events = query.order_by(ActivityEvent.created_at.desc()).limit(limit).all()
+        total = query.count()
+        events = query.order_by(ActivityEvent.created_at.desc()).offset(offset).limit(limit).all()
 
         payload = []
         for event in events:
@@ -93,7 +97,17 @@ def get_recent_activity():
                 }
             )
 
-        return jsonify({"items": payload}), 200
+        return jsonify(
+            {
+                "items": payload,
+                "pagination": {
+                    "page": page,
+                    "per_page": limit,
+                    "total": total,
+                    "pages": (total + limit - 1) // limit if total else 0,
+                },
+            }
+        ), 200
     except SQLAlchemyError:
         logger.exception("Database error while fetching activity timeline")
         return error_response("Database error", 500)

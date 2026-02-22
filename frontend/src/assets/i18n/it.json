@@ -1116,6 +1116,7 @@
   "dashboard-recent-empty": "Non c'è ancora attività recente.",
   "timeline-title": "Timeline attività",
   "timeline-subtitle": "Cosa è cambiato di recente",
+  "timeline-view-all": "Vedi tutta l'attività",
   "timeline-empty": "Nessun evento nella timeline.",
   "timeline-just-now": "Proprio ora",
   "timeline-minutes-ago": "{{count}}m fa",

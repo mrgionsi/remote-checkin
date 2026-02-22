@@ -78,6 +78,7 @@
             <div class="insight-card__header">
                 <h3>{{ 'timeline-title' | transloco }}</h3>
                 <span class="insight-card__hint">{{ 'timeline-subtitle' | transloco }}</span>
+                <a class="timeline-all-link" routerLink="/admin/activity">{{ 'timeline-view-all' | transloco }}</a>
             </div>
             <div class="recent-list" *ngIf="timelineItems.length > 0">
                 <div class="recent-item" *ngFor="let item of timelineItems">

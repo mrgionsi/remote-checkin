@@ -226,6 +226,7 @@
   "dashboard-recent-empty": "Aún no hay actividad reciente.",
   "timeline-title": "Cronología de actividad",
   "timeline-subtitle": "Qué cambió más recientemente",
+  "timeline-view-all": "Ver toda la actividad",
   "timeline-empty": "Aún no hay eventos en la cronología.",
   "timeline-just-now": "Ahora mismo",
   "timeline-minutes-ago": "hace {{count}} min",
