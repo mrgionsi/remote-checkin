@@ -96,6 +96,15 @@ export class ActivityTimelineComponent implements OnInit {
     return this.translocoService.translate(key, item.metadata || {});
   }
 
+  getTimelineIcon(eventType: string): string {
+    if (eventType.startsWith('reservation.')) return 'pi pi-calendar';
+    if (eventType.startsWith('room.')) return 'pi pi-home';
+    if (eventType.startsWith('structure.')) return 'pi pi-building';
+    if (eventType.startsWith('user.')) return 'pi pi-user';
+    if (eventType.startsWith('association.')) return 'pi pi-link';
+    return 'pi pi-clock';
+  }
+
   private getStructureIdForAdmin(): number | undefined {
     if (this.isSuperadmin) return undefined;
     const raw = localStorage.getItem('selected_structure_id');

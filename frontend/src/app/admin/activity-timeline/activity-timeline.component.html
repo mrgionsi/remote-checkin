@@ -6,7 +6,10 @@
 
   <div class="timeline-list" *ngIf="!loading && items.length > 0">
     <div class="timeline-item" *ngFor="let item of items">
-      <div class="timeline-item__description">{{ getTimelineDescription(item) }}</div>
+      <div class="timeline-item__description">
+        <i [class]="getTimelineIcon(item.eventType)"></i>
+        {{ getTimelineDescription(item) }}
+      </div>
       <div class="timeline-item__meta">{{ getTimelineWhen(item.createdAt) }}</div>
     </div>
   </div>
