@@ -88,7 +88,34 @@ async function populateRemoteCheckinForms(page: Page): Promise<void> {
   });
 }
 
+async function mockReservationCheck(
+  page: Page,
+  reservationId: string | number,
+  payload: Record<string, unknown>,
+  status = 200
+): Promise<void> {
+  await page.route(`**/api/v1/reservations/check/${reservationId}`, async (route) => {
+    await route.fulfill({
+      status,
+      contentType: 'application/json',
+      body: JSON.stringify(payload)
+    });
+  });
+}
+
 test.describe('Frontend smoke', () => {
+  test.beforeEach(async ({ page }) => {
+    // Safety net for smoke runs: if a test forgets a specific reservation/check mock,
+    // never hit a real backend.
+    await page.route('**/api/v1/reservations/check/*', async (route) => {
+      await route.fulfill({
+        status: 404,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'Reservation not found (smoke fallback)' })
+      });
+    });
+  });
+
   test('landing page renders core sections and CTA links', async ({ page }) => {
     await page.goto('/landing');
     await expect(page.locator('app-header .app-header')).toBeVisible();
@@ -1289,17 +1316,11 @@ test.describe('Frontend smoke', () => {
     let uploadTokenHeader = '';
     let validationTokenHeader = '';
 
-    await page.route('**/api/v1/reservations/check/125', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 125,
-          number_of_people: 2,
-          registered_clients_count: 0,
-          upload_token: 'complete-flow-token'
-        })
-      });
+    await mockReservationCheck(page, 125, {
+      id: 125,
+      number_of_people: 2,
+      registered_clients_count: 0,
+      upload_token: 'complete-flow-token'
     });
 
     await page.route('**/api/v1/upload', async (route) => {
@@ -1361,17 +1382,11 @@ test.describe('Frontend smoke', () => {
   });
 
   test('remote check-in blocks step advance when document prevalidation fails', async ({ page }) => {
-    await page.route('**/api/v1/reservations/check/145', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 145,
-          number_of_people: 2,
-          registered_clients_count: 0,
-          upload_token: 'prevalidation-fail-token'
-        })
-      });
+    await mockReservationCheck(page, 145, {
+      id: 145,
+      number_of_people: 2,
+      registered_clients_count: 0,
+      upload_token: 'prevalidation-fail-token'
     });
 
     await page.route('**/api/v1/upload/validate-documents', async (route) => {
