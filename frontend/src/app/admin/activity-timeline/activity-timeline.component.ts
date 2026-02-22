@@ -38,6 +38,8 @@ export class ActivityTimelineComponent implements OnInit {
     const structureId = this.getStructureIdForAdmin();
     const actorRole = this.isSuperadmin ? undefined : 'administrator,admin,superadmin';
     const actorUserId = this.isSuperadmin ? undefined : Number(this.authService.getUser()?.id || 0);
+    const scopedActorUserId =
+      actorUserId !== undefined && actorUserId > 0 ? actorUserId : undefined;
 
     this.activityService
       .getRecentActivity(
@@ -45,7 +47,7 @@ export class ActivityTimelineComponent implements OnInit {
         structureId,
         actorRole,
         this.page,
-        actorUserId > 0 ? actorUserId : undefined
+        scopedActorUserId
       )
       .subscribe({
         next: (response: ActivityResponse) => {
