@@ -31,7 +31,7 @@ def app():
     """Build a Flask app with reservation routes for check-endpoint tests."""
     flask_app = Flask(__name__)
     flask_app.config.from_object("config.TestConfig")
-    flask_app.config["JWT_SECRET_KEY"] = "test-secret"
+    flask_app.config["JWT_SECRET_KEY"] = "test-secret"  # noqa: S105 – test-only secret
     flask_app.register_blueprint(reservation_bp)
     Base.metadata.create_all(bind=engine)
     yield flask_app
