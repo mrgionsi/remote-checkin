@@ -37,9 +37,16 @@ export class ActivityTimelineComponent implements OnInit {
     this.loading = true;
     const structureId = this.getStructureIdForAdmin();
     const actorRole = this.isSuperadmin ? undefined : 'administrator,admin,superadmin';
+    const actorUserId = this.isSuperadmin ? undefined : Number(this.authService.getUser()?.id || 0);
 
     this.activityService
-      .getRecentActivity(this.perPage, structureId, actorRole, this.page)
+      .getRecentActivity(
+        this.perPage,
+        structureId,
+        actorRole,
+        this.page,
+        actorUserId > 0 ? actorUserId : undefined
+      )
       .subscribe({
         next: (response: ActivityResponse) => {
           this.items = response.items || [];

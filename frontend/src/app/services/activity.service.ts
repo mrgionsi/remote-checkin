@@ -39,7 +39,8 @@ export class ActivityService {
     limit = 20,
     structureId?: number,
     actorRole?: string,
-    page = 1
+    page = 1,
+    actorUserId?: number
   ): Observable<ActivityResponse> {
     if (!this.authService.checkAuthAndRedirect()) {
       return throwError(() => new Error('Authentication failed'));
@@ -52,6 +53,9 @@ export class ActivityService {
     }
     if (actorRole) {
       queryParams.set('actor_role', actorRole);
+    }
+    if (actorUserId !== undefined && actorUserId !== null) {
+      queryParams.set('actor_user_id', String(actorUserId));
     }
     queryParams.set('page', String(page));
 

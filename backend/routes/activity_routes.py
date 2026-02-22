@@ -41,6 +41,7 @@ def get_recent_activity():
         offset = (page - 1) * limit
         requested_structure_id = request.args.get("structure_id", type=int)
         requested_actor_role = request.args.get("actor_role", type=str)
+        requested_actor_user_id = request.args.get("actor_user_id", type=int)
 
         query = db.query(ActivityEvent)
 
@@ -60,6 +61,8 @@ def get_recent_activity():
                 if not allowed_structure_ids:
                     return jsonify({"items": []}), 200
                 query = query.filter(ActivityEvent.structure_id.in_(allowed_structure_ids))
+            if requested_actor_user_id is not None and requested_actor_user_id != current_user_id:
+                return error_response("Access denied for this user scope", 403)
 
         if requested_actor_role:
             normalized_roles = [
@@ -69,6 +72,8 @@ def get_recent_activity():
             ]
             if normalized_roles:
                 query = query.filter(ActivityEvent.actor_role.in_(normalized_roles))
+        if requested_actor_user_id is not None:
+            query = query.filter(ActivityEvent.actor_user_id == requested_actor_user_id)
 
         total = query.count()
         events = query.order_by(ActivityEvent.created_at.desc()).offset(offset).limit(limit).all()
