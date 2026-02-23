@@ -20,11 +20,13 @@ import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
 import { DialogModule } from 'primeng/dialog';
+import { RouterLink } from '@angular/router';
+import { ActivityService, ActivityItem } from '../../services/activity.service';
 
 
 @Component({
   selector: 'app-dashboard',
-  imports: [ToastModule, IconFieldModule, InputIconModule, Toast, ChartModule, TableModule, InputTextModule, TagModule, CommonModule, TranslocoPipe, ButtonModule, SelectModule, FormsModule, CardModule, DialogModule],
+  imports: [ToastModule, IconFieldModule, InputIconModule, Toast, ChartModule, TableModule, InputTextModule, TagModule, CommonModule, TranslocoPipe, ButtonModule, SelectModule, FormsModule, CardModule, DialogModule, RouterLink],
   providers: [MessageService],
   host: { ngSkipHydration: 'true' },
   templateUrl: './dashboard.component.html',
@@ -62,6 +64,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   roomFilter: string = '';
   globalSearchTerm: string = '';
   recentReservations: any[] = [];
+  timelineItems: ActivityItem[] = [];
   healthItems: Array<{ label: string; value: number; tone: 'neutral' | 'warning' | 'success' }> = [];
 
   // Filter options
@@ -74,6 +77,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // Loading and error states
   loadingReservations: boolean = false;
   loadingChart: boolean = false;
+  loadingTimeline: boolean = false;
   errorReservations: string | null = null;
   errorChart: string | null = null;
 
@@ -89,7 +93,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     @Inject(PLATFORM_ID) private platformId: object,
     private messageService: MessageService,
-    private translocoService: TranslocoService
+    private translocoService: TranslocoService,
+    private activityService: ActivityService
   ) {
 
   }
@@ -219,6 +224,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           }
         });
         this.subscriptions.push(reservationSub);
+        this.loadTimeline(structureId);
 
         // Subscribe to monthly reservations and store subscription
         this.loadingChart = true;
@@ -252,8 +258,57 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.subscriptions.push(monthlySub);
       } else {
         this.handleNoStructureSelected();
+        this.timelineItems = [];
       }
     }
+  }
+
+  loadTimeline(structureId: number): void {
+    this.loadingTimeline = true;
+    const currentUserId = Number(this.authService.getUser()?.id || 0);
+    const timelineSub = this.activityService.getRecentActivity(
+      5,
+      structureId,
+      'administrator,admin,superadmin',
+      1,
+      currentUserId > 0 ? currentUserId : undefined
+    ).subscribe({
+      next: (response) => {
+        this.timelineItems = response.items || [];
+        this.loadingTimeline = false;
+      },
+      error: () => {
+        this.timelineItems = [];
+        this.loadingTimeline = false;
+      }
+    });
+    this.subscriptions.push(timelineSub);
+  }
+
+  getTimelineIcon(eventType: string): string {
+    if (eventType.startsWith('reservation.')) return 'pi pi-calendar';
+    if (eventType.startsWith('room.')) return 'pi pi-home';
+    if (eventType.startsWith('structure.')) return 'pi pi-building';
+    if (eventType.startsWith('user.')) return 'pi pi-user';
+    if (eventType.startsWith('association.')) return 'pi pi-link';
+    return 'pi pi-clock';
+  }
+
+  getTimelineWhen(isoDate: string): string {
+    const eventDate = new Date(isoDate);
+    if (isNaN(eventDate.getTime())) return '';
+    const deltaMinutes = Math.max(0, Math.floor((Date.now() - eventDate.getTime()) / 60000));
+    if (deltaMinutes < 1) return this.translocoService.translate('timeline-just-now');
+    if (deltaMinutes < 60) return this.translocoService.translate('timeline-minutes-ago', { count: deltaMinutes });
+    const deltaHours = Math.floor(deltaMinutes / 60);
+    if (deltaHours < 24) return this.translocoService.translate('timeline-hours-ago', { count: deltaHours });
+    const deltaDays = Math.floor(deltaHours / 24);
+    return this.translocoService.translate('timeline-days-ago', { count: deltaDays });
+  }
+
+  getTimelineDescription(item: ActivityItem): string {
+    const key = `timeline-event-${item.eventType.replaceAll('.', '-')}`;
+    return this.translocoService.translate(key, item.metadata || {});
   }
 
   updateChartData(): void {

@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { SuperadminService, DashboardData } from '../../../services/superadmin.service';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { ActivityItem } from '../../../services/activity.service';
 
 @Component({
   selector: 'app-superadmin-dashboard',
@@ -13,10 +14,15 @@ import { TranslocoPipe } from '@jsverse/transloco';
 })
 export class SuperadminDashboardComponent implements OnInit {
   dashboardData: DashboardData | null = null;
+  timelineItems: ActivityItem[] = [];
   loading = true;
+  loadingTimeline = true;
   error: string | null = null;
 
-  constructor(private superadminService: SuperadminService) { }
+  constructor(
+    private superadminService: SuperadminService,
+    private translocoService: TranslocoService
+  ) { }
 
   ngOnInit(): void {
     this.loadDashboardData();
@@ -30,11 +36,31 @@ export class SuperadminDashboardComponent implements OnInit {
       next: (response) => {
         this.dashboardData = response.dashboard;
         this.loading = false;
+        this.loadTimeline();
       },
       error: (error) => {
         this.error = error.message || 'Failed to load dashboard data';
         this.loading = false;
       }
     });
+  }
+
+  loadTimeline(): void {
+    this.loadingTimeline = true;
+    this.superadminService.getActivityTimeline(5).subscribe({
+      next: (response) => {
+        this.timelineItems = response.items || [];
+        this.loadingTimeline = false;
+      },
+      error: () => {
+        this.timelineItems = [];
+        this.loadingTimeline = false;
+      }
+    });
+  }
+
+  getTimelineDescription(item: ActivityItem): string {
+    const key = `timeline-event-${item.eventType.replaceAll('.', '-')}`;
+    return this.translocoService.translate(key, item.metadata || {});
   }
 }

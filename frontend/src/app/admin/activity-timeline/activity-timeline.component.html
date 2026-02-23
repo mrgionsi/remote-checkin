@@ -1,0 +1,30 @@
+<div class="timeline-page">
+  <div class="timeline-header">
+    <h2>{{ 'timeline-title' | transloco }}</h2>
+    <p>{{ 'timeline-subtitle' | transloco }}</p>
+  </div>
+
+  <div class="timeline-list" *ngIf="!loading && items.length > 0">
+    <div class="timeline-item" *ngFor="let item of items">
+      <div class="timeline-item__description">
+        <i [class]="getTimelineIcon(item.eventType)"></i>
+        {{ getTimelineDescription(item) }}
+      </div>
+      <div class="timeline-item__meta">{{ getTimelineWhen(item.createdAt) }}</div>
+    </div>
+  </div>
+
+  <div class="timeline-empty" *ngIf="!loading && items.length === 0">
+    {{ 'timeline-empty' | transloco }}
+  </div>
+
+  <div class="timeline-loading" *ngIf="loading">
+    {{ 'loading-label' | transloco }}
+  </div>
+
+  <div class="timeline-pagination" *ngIf="!loading && totalPages > 1">
+    <p-button icon="pi pi-chevron-left" [disabled]="page <= 1" (onClick)="prevPage()"></p-button>
+    <span>{{ page }} / {{ totalPages }} ({{ total }})</span>
+    <p-button icon="pi pi-chevron-right" [disabled]="page >= totalPages" (onClick)="nextPage()"></p-button>
+  </div>
+</div>

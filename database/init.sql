@@ -142,6 +142,64 @@ CREATE INDEX ix_email_config_is_active ON public.email_config USING btree (is_ac
 CREATE INDEX ix_email_config_provider_type ON public.email_config USING btree (provider_type);
 
 
+DROP TABLE IF EXISTS "activity_event" CASCADE;
+DROP SEQUENCE IF EXISTS activity_event_id_seq CASCADE;
+CREATE SEQUENCE activity_event_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1;
+
+CREATE TABLE "public"."activity_event" (
+    "id" bigint DEFAULT nextval('activity_event_id_seq') NOT NULL,
+    "event_type" character varying(64) NOT NULL,
+    "entity_type" character varying(64) NOT NULL,
+    "entity_id" bigint,
+    "structure_id" bigint,
+    "actor_user_id" bigint,
+    "actor_role" character varying(32),
+    "description" character varying(255) NOT NULL,
+    "metadata_json" text,
+    "created_at" timestamp DEFAULT (now() AT TIME ZONE 'utc') NOT NULL,
+    CONSTRAINT "activity_event_pkey" PRIMARY KEY ("id")
+)
+WITH (oids = false);
+
+CREATE INDEX ix_activity_event_created_at ON public.activity_event USING btree (created_at);
+CREATE INDEX ix_activity_event_structure_id ON public.activity_event USING btree (structure_id);
+CREATE INDEX ix_activity_event_actor_user_id ON public.activity_event USING btree (actor_user_id);
+CREATE INDEX ix_activity_event_event_type ON public.activity_event USING btree (event_type);
+
+DROP TABLE IF EXISTS "background_job" CASCADE;
+DROP SEQUENCE IF EXISTS background_job_id_seq CASCADE;
+CREATE SEQUENCE background_job_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1;
+
+CREATE TABLE "public"."background_job" (
+    "id" bigint DEFAULT nextval('background_job_id_seq') NOT NULL,
+    "job_type" character varying(64) NOT NULL,
+    "status" character varying(32) NOT NULL,
+    "payload_json" text NOT NULL,
+    "result_json" text,
+    "error_message" text,
+    "attempts" integer DEFAULT 0 NOT NULL,
+    "max_attempts" integer DEFAULT 3 NOT NULL,
+    "available_at" timestamp DEFAULT (now() AT TIME ZONE 'utc') NOT NULL,
+    "started_at" timestamp,
+    "finished_at" timestamp,
+    "created_by_user_id" bigint,
+    "structure_id" bigint,
+    "worker_id" character varying(128),
+    "created_at" timestamp DEFAULT (now() AT TIME ZONE 'utc') NOT NULL,
+    "updated_at" timestamp DEFAULT (now() AT TIME ZONE 'utc') NOT NULL,
+    CONSTRAINT "background_job_pkey" PRIMARY KEY ("id")
+)
+WITH (oids = false);
+
+CREATE INDEX ix_background_job_job_type ON public.background_job USING btree (job_type);
+CREATE INDEX ix_background_job_status ON public.background_job USING btree (status);
+CREATE INDEX ix_background_job_available_at ON public.background_job USING btree (available_at);
+CREATE INDEX ix_background_job_status_available_at ON public.background_job USING btree (status, available_at);
+CREATE INDEX ix_background_job_created_by_user_id ON public.background_job USING btree (created_by_user_id);
+CREATE INDEX ix_background_job_structure_id ON public.background_job USING btree (structure_id);
+CREATE INDEX ix_background_job_created_at ON public.background_job USING btree (created_at);
+
+
 DROP TABLE IF EXISTS "reservation" CASCADE;
 DROP SEQUENCE IF EXISTS reservation_id_seq CASCADE;
 CREATE SEQUENCE reservation_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1;
