@@ -4,6 +4,7 @@ import { of } from 'rxjs';
 import { DashboardComponent } from './dashboard.component';
 import { ReservationService } from '../../services/reservation.service';
 import { AuthService } from '../../services/auth.service';
+import { ActivityService } from '../../services/activity.service';
 import { MessageService } from 'primeng/api';
 import { TranslocoService } from '@jsverse/transloco';
 
@@ -17,7 +18,10 @@ describe('DashboardComponent', () => {
     'getMonthlyReservation'
   ]);
   const authServiceStub = {
-    getUser: () => ({ structures: [{ id: 1, name: 'Main' }] })
+    getUser: () => ({ id: 1, structures: [{ id: 1, name: 'Main' }] })
+  };
+  const activityServiceStub = {
+    getRecentActivity: () => of({ items: [] })
   };
   const translocoStub = {
     translate: (key: string) => key,
@@ -34,6 +38,7 @@ describe('DashboardComponent', () => {
       providers: [
         { provide: ReservationService, useValue: reservationServiceStub },
         { provide: AuthService, useValue: authServiceStub },
+        { provide: ActivityService, useValue: activityServiceStub },
         { provide: MessageService, useValue: messageService },
         { provide: TranslocoService, useValue: translocoStub }
       ]
