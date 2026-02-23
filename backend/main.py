@@ -25,6 +25,7 @@ from routes.room_routes import room_bp
 from routes.reservation_routes import reservation_bp
 from routes.upload_reservation_routes import upload_bp
 from routes.client_reservation_routes import client_reservation_bp
+from routes.activity_routes import activity_bp
 
 # Load environment variables BEFORE setting up logging
 load_dotenv()
@@ -116,6 +117,7 @@ app.register_blueprint(reservation_bp)
 app.register_blueprint(upload_bp)
 app.register_blueprint(client_reservation_bp)
 app.register_blueprint(email_config_bp)
+app.register_blueprint(activity_bp)
 
 @app.route("/")
 def home():

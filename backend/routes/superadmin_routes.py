@@ -20,6 +20,7 @@ from werkzeug.security import generate_password_hash
 from app_logging.decorators import log_route
 from utils.authz import verify_superadmin_access
 from utils.route_helpers import handle_database_error, create_user_response_data, build_user_brief
+from utils.activity_logger import log_activity
 from models import User, AdminStructure, Structure, Reservation, Role
 from extensions import limiter
 from database import SessionLocal
@@ -230,6 +231,16 @@ def create_structure():
         )
 
         db_session.add(new_structure)
+        db_session.flush()
+        log_activity(
+            db_session,
+            event_type="structure.created",
+            entity_type="structure",
+            entity_id=new_structure.id,
+            structure_id=new_structure.id,
+            description=f"Structure {new_structure.name} created",
+            metadata={"structureName": new_structure.name, "city": new_structure.city},
+        )
         db_session.commit()
 
         return jsonify({
@@ -290,6 +301,15 @@ def update_structure(structure_id):
         if not structure.name or not structure.city:
             return jsonify({"error": "Name and city are required"}), 400
 
+        log_activity(
+            db_session,
+            event_type="structure.updated",
+            entity_type="structure",
+            entity_id=structure.id,
+            structure_id=structure.id,
+            description=f"Structure {structure.name} updated",
+            metadata={"structureName": structure.name, "city": structure.city},
+        )
         db_session.commit()
 
         return jsonify({
@@ -330,7 +350,17 @@ def delete_structure(structure_id):
         if not structure:
             return jsonify({"error": STRUCTURE_NOT_FOUND}), 404
 
+        structure_name = structure.name
         structure.is_active = False
+        log_activity(
+            db_session,
+            event_type="structure.archived",
+            entity_type="structure",
+            entity_id=structure.id,
+            structure_id=structure.id,
+            description=f"Structure {structure_name} archived",
+            metadata={"structureName": structure_name},
+        )
         db_session.commit()
 
         return jsonify({
@@ -370,7 +400,17 @@ def restore_structure(structure_id):
         if not structure:
             return jsonify({"error": STRUCTURE_NOT_FOUND}), 404
 
+        structure_name = structure.name
         structure.is_active = True
+        log_activity(
+            db_session,
+            event_type="structure.restored",
+            entity_type="structure",
+            entity_id=structure.id,
+            structure_id=structure.id,
+            description=f"Structure {structure_name} restored",
+            metadata={"structureName": structure_name},
+        )
         db_session.commit()
 
         return jsonify({
@@ -524,6 +564,15 @@ def create_user():  # pylint: disable=too-many-return-statements
         )
 
         db_session.add(new_user)
+        db_session.flush()
+        log_activity(
+            db_session,
+            event_type="user.created",
+            entity_type="user",
+            entity_id=new_user.id,
+            description=f"User {new_user.username} created",
+            metadata={"username": new_user.username, "role": role.name},
+        )
         db_session.commit()
 
         return jsonify(create_user_response_data(new_user, role)), 201
@@ -586,6 +635,14 @@ def update_user(user_id):
                 return jsonify({"error": "Username already exists"}), 400
             user.username = new_username
 
+        log_activity(
+            db_session,
+            event_type="user.updated",
+            entity_type="user",
+            entity_id=user.id,
+            description=f"User {user.username} updated",
+            metadata={"username": user.username},
+        )
         db_session.commit()
 
         return jsonify({
@@ -647,6 +704,14 @@ def change_user_role(user_id):  # pylint: disable=too-many-return-statements
         # Update user role
         old_role_name = user.role.name if user.role else None
         user.id_role = new_role_id
+        log_activity(
+            db_session,
+            event_type="user.role.changed",
+            entity_type="user",
+            entity_id=user.id,
+            description=f"User {user.username} role changed to {new_role.name}",
+            metadata={"oldRole": old_role_name, "newRole": new_role.name},
+        )
         db_session.commit()
 
         user_brief = build_user_brief(user)
@@ -888,6 +953,14 @@ def create_association():  # pylint: disable=too-many-return-statements
         # Create association
         new_association = AdminStructure(id_user=user_id, id_structure=structure_id)
         db_session.add(new_association)
+        log_activity(
+            db_session,
+            event_type="association.created",
+            entity_type="association",
+            structure_id=structure_id,
+            description=f"Association created for {user.username} -> {structure.name}",
+            metadata={"username": user.username, "structureName": structure.name},
+        )
         db_session.commit()
 
         logger.info(
@@ -952,7 +1025,20 @@ def delete_association():
         if not association:
             return jsonify({"error": "Association not found"}), 404
 
+        user = db_session.query(User).filter(User.id == user_id).first()
+        structure = db_session.query(Structure).filter(Structure.id == structure_id).first()
         db_session.delete(association)
+        log_activity(
+            db_session,
+            event_type="association.deleted",
+            entity_type="association",
+            structure_id=structure_id,
+            description="Association removed",
+            metadata={
+                "username": user.username if user else str(user_id),
+                "structureName": structure.name if structure else str(structure_id),
+            },
+        )
         db_session.commit()
 
         return jsonify({

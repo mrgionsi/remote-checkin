@@ -30,6 +30,7 @@ from utils.route_helpers import (
     get_current_user_id,
     require_structure_access,
 )
+from utils.activity_logger import log_activity
 from database import get_db  # Use absolute import
 
 # Configure logging
@@ -109,6 +110,16 @@ def add_room():  # pylint: disable=R0911
         # Add to DB and commit
         try:
             db.add(new_room)
+            db.flush()
+            log_activity(
+                db,
+                event_type="room.created",
+                entity_type="room",
+                entity_id=new_room.id,
+                structure_id=new_room.id_structure,
+                description=f"Room {new_room.name} created",
+                metadata={"roomName": new_room.name, "capacity": new_room.capacity},
+            )
             db.commit()
             db.refresh(new_room)
             logger.info("Room created successfully", extra={
@@ -355,6 +366,16 @@ def update_room(room_id):  # pylint: disable=too-many-branches
                 updated_fields['is_active'] = {'old': room.is_active, 'new': data["is_active"]}
                 room.is_active = data["is_active"]
 
+            log_activity(
+                db,
+                event_type="room.updated",
+                entity_type="room",
+                entity_id=room.id,
+                structure_id=room.id_structure,
+                description=f"Room {room.name} updated",
+                metadata={"updatedFields": list(updated_fields.keys())},
+            )
+
             db.commit()
             logger.info("Room updated successfully", extra=safe_extra_fields({
                 'room_id': room_id,
@@ -437,7 +458,17 @@ def delete_room(room_id):  # pylint: disable=too-many-return-statements
             }
             logger.info("Attempting room deletion", extra=room_details)
 
+            deleted_name = room.name
             db.delete(room)
+            log_activity(
+                db,
+                event_type="room.deleted",
+                entity_type="room",
+                entity_id=room_id,
+                structure_id=room.id_structure,
+                description=f"Room {deleted_name} deleted",
+                metadata={"roomName": deleted_name},
+            )
             db.commit()
             logger.info("Room deleted successfully", extra={
                 **room_details,

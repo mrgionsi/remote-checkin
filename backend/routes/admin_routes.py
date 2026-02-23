@@ -11,14 +11,15 @@ All routes are registered under the '/api/v1/admin' URL prefix and require appro
 (e.g., admin, superadmin) for access.
 """
 
-from datetime import timedelta,datetime,timezone
+from datetime import timedelta, datetime, timezone
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from models import User, Reservation, Client, ClientReservations, Room
+from models import User, Reservation, Client, ClientReservations, Room, BackgroundJob
 from services.portale_alloggi_service import PortaleAlloggiService
+from services.background_job_handlers import PORTALE_ALLOGGI_SUBMIT_JOB
 from utils.encryption_utils import encrypt_password, decrypt_password
 from utils.authz import verify_admin_access
 from utils.route_helpers import (
@@ -29,6 +30,7 @@ from utils.route_helpers import (
     get_current_user_id,
     require_structure_access,
 )
+from utils.job_queue import enqueue_job, get_visible_jobs_query
 from app_logging.config import get_logger
 from app_logging.decorators import log_route, log_database_operation, log_performance
 from app_logging.utils import safe_extra_fields
@@ -48,6 +50,7 @@ INTERNAL_SERVER_ERROR = "Internal server error"
 PORTALE_CREDENTIALS_NOT_CONFIGURED = "Portale Alloggi credentials not configured"
 RESERVATION_NOT_FOUND = "Reservation not found"
 USER_CREATION_OPERATION = "user creation"
+JOB_TYPE_PORTALE_ALLOGGI_SUBMIT = PORTALE_ALLOGGI_SUBMIT_JOB
 
 
 def _is_valid_password(password: str) -> bool:
@@ -522,6 +525,22 @@ def _prepare_reservation_data(reservation):
     }
 
 
+def _enqueue_portale_alloggi_submit_job(db_session, *, reservation_id, user_id, structure_id):
+    """Create background job for Portale Alloggi real submission."""
+    job = enqueue_job(
+        db_session,
+        job_type=JOB_TYPE_PORTALE_ALLOGGI_SUBMIT,
+        payload={
+            "reservation_id": reservation_id,
+            "user_id": user_id,
+        },
+        created_by_user_id=user_id,
+        structure_id=structure_id,
+        max_attempts=5,
+    )
+    return job
+
+
 @admin_bp.route("/admin/reservations/<int:reservation_id>/send-to-portale-alloggi", methods=["POST"])
 @jwt_required()
 @log_route(include_request_data=True, include_response_data=True)
@@ -734,6 +753,91 @@ def send_reservation_to_portale_alloggi_real(reservation_id):  # pylint: disable
         db_session.close()
 
 
+@admin_bp.route("/admin/reservations/<int:reservation_id>/queue-portale-alloggi-real", methods=["POST"])
+@jwt_required()
+@log_route(include_request_data=True, include_response_data=True)
+@log_database_operation("INSERT")
+def queue_reservation_to_portale_alloggi_real(reservation_id):  # pylint: disable=too-many-locals
+    """Queue an async Portale Alloggi production submission job for a reservation."""
+    error_response, error_code = verify_admin_access()
+    if error_response:
+        return error_response, error_code
+
+    db_session = SessionLocal()
+    try:
+        user_id, user_error = get_current_user_id()
+        if user_error:
+            return user_error
+
+        user = db_session.query(User).filter(User.id == user_id).first()
+        if not user:
+            return jsonify({"error": USER_NOT_FOUND}), 404
+
+        if not user.portale_username or not user.portale_password or not user.portale_wskey:
+            return jsonify(
+                {
+                    "error": PORTALE_CREDENTIALS_NOT_CONFIGURED,
+                    "details": "Please configure Portale Alloggi credentials in Settings first",
+                }
+            ), 400
+
+        reservation = db_session.query(Reservation).filter(Reservation.id == reservation_id).first()
+        if not reservation:
+            return jsonify({"error": RESERVATION_NOT_FOUND}), 404
+
+        room = db_session.query(Room).filter(Room.id == reservation.id_room).first()
+        if not room:
+            return jsonify({"error": "Room not found"}), 404
+        _, structure_error = require_structure_access(db_session, room.id_structure, user_id=user_id)
+        if structure_error:
+            return structure_error
+
+        if reservation.status != "Approved":
+            return jsonify(
+                {
+                    "error": "Reservation not approved",
+                    "details": "Only approved reservations can be sent to Portale Alloggi",
+                }
+            ), 400
+
+        clients_count = (
+            db_session.query(ClientReservations.id_client)
+            .filter(ClientReservations.id_reservation == reservation_id)
+            .count()
+        )
+        if clients_count == 0:
+            return jsonify(
+                {
+                    "error": "No guests found",
+                    "details": "No guest data available for this reservation",
+                }
+            ), 400
+
+        job = _enqueue_portale_alloggi_submit_job(
+            db_session,
+            reservation_id=reservation_id,
+            user_id=user_id,
+            structure_id=room.id_structure,
+        )
+        db_session.commit()
+
+        return jsonify(
+            {
+                "message": "Portale Alloggi submission queued",
+                "job": job.to_dict(),
+            }
+        ), 202
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        db_session.rollback()
+        return handle_database_error(
+            e,
+            "queue Portale Alloggi reservation submission",
+            reservation_id=reservation_id,
+        )
+    finally:
+        db_session.close()
+
+
 @admin_bp.route("/admin/reservations/<int:reservation_id>/portale-alloggi-status", methods=["GET"])
 @jwt_required()
 @log_route(include_request_data=True)
@@ -777,5 +881,72 @@ def get_portale_alloggi_status(reservation_id):
 
     except Exception as e:
         return handle_database_error(e, "Portale Alloggi status retrieval", reservation_id=reservation_id)
+    finally:
+        db_session.close()
+
+
+@admin_bp.route("/admin/jobs/recent", methods=["GET"])
+@jwt_required()
+@log_route(include_request_data=True, include_response_data=False)
+@log_database_operation("READ")
+def get_recent_background_jobs():  # pylint: disable=too-many-locals
+    """Return recent background jobs visible to current admin/superadmin."""  # pylint: disable=too-many-locals
+    error_response, error_code = verify_admin_access()
+    if error_response:
+        return error_response, error_code
+
+    db_session = SessionLocal()
+    try:
+        user_id, user_error = get_current_user_id()
+        if user_error:
+            return user_error
+
+        claims = get_jwt()
+        role = str(claims.get("role", "")).lower() if isinstance(claims, dict) else ""
+        is_current_user_superadmin = role == "superadmin"
+
+        limit = min(max(int(request.args.get("limit", 20)), 1), 100)
+        offset = max(int(request.args.get("offset", 0)), 0)
+        status_filter = str(request.args.get("status", "")).strip().lower()
+        job_type_filter = str(request.args.get("jobType", "")).strip()
+
+        allowed_structure_ids = [
+            row.id_structure
+            for row in get_user_structures_query(db_session, user_id).all()
+        ]
+
+        query = get_visible_jobs_query(
+            db_session,
+            user_id=user_id,
+            is_superadmin=is_current_user_superadmin,
+            allowed_structure_ids=allowed_structure_ids,
+        )
+        if status_filter:
+            query = query.filter(BackgroundJob.status == status_filter)
+        if job_type_filter:
+            query = query.filter(BackgroundJob.job_type == job_type_filter)
+
+        total = query.count()
+        rows = (
+            query.order_by(BackgroundJob.created_at.desc())
+            .offset(offset)
+            .limit(limit)
+            .all()
+        )
+
+        return jsonify(
+            {
+                "items": [row.to_dict() for row in rows],
+                "pagination": {
+                    "total": total,
+                    "limit": limit,
+                    "offset": offset,
+                },
+            }
+        ), 200
+    except (TypeError, ValueError):
+        return jsonify({"error": "Invalid pagination filters"}), 400
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        return handle_database_error(e, "background jobs retrieval", user_id=user_id if "user_id" in locals() else None)
     finally:
         db_session.close()
