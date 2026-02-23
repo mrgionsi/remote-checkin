@@ -90,3 +90,4 @@ PYTHONPATH=backend pytest backend/tests
 - Upload contract: `backend/DOCUMENT_UPLOAD_FLOW.md`
 - Regression checklist: `backend/QA_TENANT_BOUNDARY_REGRESSION.md`
 - Activity retention policy: `docs/ACTIVITY_RETENTION.md`
+- Background jobs: `docs/BACKGROUND_JOBS.md`
