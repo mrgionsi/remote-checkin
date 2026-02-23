@@ -1,0 +1,66 @@
+<section class="jobs-page">
+  <header class="jobs-page__header">
+    <div>
+      <h2>{{ 'dashboard-jobs-title' | transloco }}</h2>
+      <p>{{ 'dashboard-jobs-subtitle' | transloco }}</p>
+    </div>
+    <div class="jobs-page__meta">
+      <span>{{ offset + 1 }}-{{ offset + items.length }} / {{ total }}</span>
+    </div>
+  </header>
+
+  <div class="jobs-filters">
+    <select [(ngModel)]="statusFilter">
+      <option value="">{{ 'dashboard-jobs-filter-all-status' | transloco }}</option>
+      <option *ngFor="let status of statusOptions" [value]="status">{{ getJobStatusLabelKey(status) | transloco }}</option>
+    </select>
+    <input type="text" [(ngModel)]="jobTypeFilter" [placeholder]="'dashboard-jobs-filter-job-type' | transloco" />
+    <button type="button" (click)="applyFilters()">{{ 'dashboard-jobs-filter-apply' | transloco }}</button>
+    <button type="button" class="secondary" (click)="clearFilters()">{{ 'dashboard-jobs-filter-clear' | transloco }}</button>
+  </div>
+
+  <div class="jobs-error" *ngIf="!loading && error">{{ error }}</div>
+
+  <div class="jobs-empty" *ngIf="!loading && !error && items.length === 0">
+    {{ 'dashboard-jobs-empty' | transloco }}
+  </div>
+
+  <div class="jobs-table" *ngIf="!loading && items.length > 0">
+    <table>
+      <thead>
+        <tr>
+          <th>{{ 'dashboard-jobs-col-id' | transloco }}</th>
+          <th>{{ 'dashboard-jobs-col-job-type' | transloco }}</th>
+          <th>{{ 'dashboard-jobs-col-status' | transloco }}</th>
+          <th>{{ 'dashboard-jobs-col-attempts' | transloco }}</th>
+          <th>{{ 'dashboard-jobs-col-structure' | transloco }}</th>
+          <th>{{ 'dashboard-jobs-col-created-at' | transloco }}</th>
+          <th>{{ 'dashboard-jobs-col-error' | transloco }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of items">
+          <td>#{{ item.id }}</td>
+          <td>{{ item.jobType }}</td>
+          <td>
+            <p-tag [value]="getJobStatusLabelKey(item.status) | transloco"
+              [severity]="getJobStatusSeverity(item.status)"></p-tag>
+          </td>
+          <td>{{ item.attempts }} / {{ item.maxAttempts }}</td>
+          <td>{{ item.structureId ?? '-' }}</td>
+          <td>{{ item.createdAt | date:'short' }}</td>
+          <td>{{ item.errorMessage || '-' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="jobs-pagination">
+    <p-button [label]="'dashboard-jobs-prev' | transloco" icon="pi pi-angle-left" [outlined]="true"
+      [disabled]="offset === 0 || loading" (onClick)="previousPage()"></p-button>
+    <p-button [label]="'dashboard-jobs-next' | transloco" icon="pi pi-angle-right" iconPos="right" [outlined]="true"
+      [disabled]="offset + limit >= total || loading" (onClick)="nextPage()"></p-button>
+  </div>
+
+  <div class="jobs-loading" *ngIf="loading">{{ 'dashboard-jobs-loading' | transloco }}</div>
+</section>

@@ -213,6 +213,33 @@ h2 {
     font-size: 0.9rem;
 }
 
+.jobs-filters {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto auto;
+    gap: 0.5rem;
+    margin-bottom: 0.9rem;
+    align-items: center;
+
+    input {
+        width: 100%;
+    }
+}
+
+.jobs-filter-btn {
+    border: 1px solid var(--ink-300);
+    background: var(--ink-900);
+    color: #fff;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    padding: 0.5rem 0.7rem;
+    cursor: pointer;
+}
+
+.jobs-filter-btn.is-secondary {
+    background: #fff;
+    color: var(--ink-700);
+}
+
 .chart-section {
     background: #ffffff;
     border-radius: 16px;
@@ -603,6 +630,10 @@ h2 {
 }
 
 @media (max-width: 768px) {
+    .jobs-filters {
+        grid-template-columns: 1fr;
+    }
+
     .stats-grid {
         grid-template-columns: 1fr;
         gap: 1rem;

@@ -55,7 +55,7 @@
     </div>
 
     <div class="insights-grid">
-        <div class="insight-card">
+        <div class="insight-card" *ngIf="enableJobsMonitor">
             <div class="insight-card__header">
                 <h3>{{ 'dashboard-health-title' | transloco }}</h3>
                 <span class="insight-card__hint">{{ 'dashboard-health-subtitle' | transloco }}</span>
@@ -97,6 +97,50 @@
                 {{ 'timeline-empty' | transloco }}
             </div>
             <div class="health-skeleton" *ngIf="loadingTimeline">
+                <div class="skeleton-line" *ngFor="let n of [1,2,3]"></div>
+            </div>
+        </div>
+
+        <div class="insight-card">
+            <div class="insight-card__header">
+                <h3>{{ 'dashboard-jobs-title' | transloco }}</h3>
+                <span class="insight-card__hint">{{ 'dashboard-jobs-subtitle' | transloco }}</span>
+            </div>
+            <div class="jobs-filters">
+                <p-select [(ngModel)]="jobStatusFilter" [options]="jobStatusOptions" (onChange)="applyJobFilters()"
+                    [placeholder]="'dashboard-jobs-filter-all-status' | transloco" styleClass="filter-select">
+                </p-select>
+                <input pInputText type="text" [(ngModel)]="jobTypeFilter"
+                    [placeholder]="'dashboard-jobs-filter-job-type' | transloco" />
+                <button class="jobs-filter-btn" type="button" (click)="applyJobFilters()">
+                    {{ 'dashboard-jobs-filter-apply' | transloco }}
+                </button>
+                <button class="jobs-filter-btn is-secondary" type="button" (click)="clearJobFilters()">
+                    {{ 'dashboard-jobs-filter-clear' | transloco }}
+                </button>
+            </div>
+            <div class="recent-list" *ngIf="!loadingJobs && recentJobs.length > 0">
+                <div class="recent-item" *ngFor="let item of recentJobs">
+                    <div>
+                        <div class="recent-name">
+                            <i class="pi pi-cog"></i>
+                            {{ item.jobType }}
+                        </div>
+                        <div class="recent-meta">
+                            {{ 'dashboard-jobs-attempts' | transloco:{ attempts: item.attempts, max: item.maxAttempts } }}
+                        </div>
+                    </div>
+                    <p-tag [value]="getJobStatusLabelKey(item.status) | transloco"
+                        [severity]="getJobStatusSeverity(item.status)"></p-tag>
+                </div>
+            </div>
+            <div class="recent-empty" *ngIf="!loadingJobs && !errorJobs && recentJobs.length === 0">
+                {{ 'dashboard-jobs-empty' | transloco }}
+            </div>
+            <div class="recent-empty" *ngIf="!loadingJobs && errorJobs">
+                {{ errorJobs }}
+            </div>
+            <div class="health-skeleton" *ngIf="loadingJobs">
                 <div class="skeleton-line" *ngFor="let n of [1,2,3]"></div>
             </div>
         </div>
