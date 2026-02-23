@@ -194,6 +194,7 @@ def test_recent_jobs_scope_filters_by_admin_visibility(client, app, seeded_entit
     db.flush()
 
     visible_job = BackgroundJob(
+        id=int(uuid4().int % 1_000_000_000),
         job_type="portale_alloggi_submit",
         status="queued",
         payload_json=json.dumps({"reservation_id": seeded_entities["reservation_id"]}),
@@ -201,6 +202,7 @@ def test_recent_jobs_scope_filters_by_admin_visibility(client, app, seeded_entit
         structure_id=seeded_entities["structure_id"],
     )
     hidden_job = BackgroundJob(
+        id=int(uuid4().int % 1_000_000_000),
         job_type="portale_alloggi_submit",
         status="queued",
         payload_json=json.dumps({"reservation_id": 999999}),

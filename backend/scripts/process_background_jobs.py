@@ -7,6 +7,7 @@ Usage:
 import argparse
 import json
 from socket import gethostname
+import time
 
 # pylint: disable=C0411
 from app_logging.config import get_logger
@@ -85,16 +86,34 @@ def main():
 
     worker_id = f"{gethostname()}-job-worker"
     processed = 0
+    max_jobs = max(1, args.max_jobs)
 
-    while processed < max(1, args.max_jobs):
-        has_processed = _process_one(worker_id)
-        if not has_processed:
-            break
-        processed += 1
-        if args.once and processed >= args.max_jobs:
-            break
+    if args.once:
+        while processed < max_jobs:
+            has_processed = _process_one(worker_id)
+            if not has_processed:
+                break
+            processed += 1
+        logger.info("Background job processor finished", extra={"processed_jobs": processed, "mode": "once"})
+        return
 
-    logger.info("Background job processor finished", extra={"processed_jobs": processed})
+    idle_sleep_seconds = 1
+    max_idle_sleep_seconds = 30
+    try:
+        while True:
+            has_processed = _process_one(worker_id)
+            if has_processed:
+                processed += 1
+                idle_sleep_seconds = 1
+                continue
+
+            time.sleep(idle_sleep_seconds)
+            idle_sleep_seconds = min(idle_sleep_seconds * 2, max_idle_sleep_seconds)
+    except KeyboardInterrupt:
+        logger.info(
+            "Background job processor stopped by signal",
+            extra={"processed_jobs": processed, "mode": "continuous"},
+        )
 
 
 if __name__ == "__main__":

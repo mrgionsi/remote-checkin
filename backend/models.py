@@ -553,7 +553,7 @@ class ActivityEvent(Base):
 
     __tablename__ = "activity_event"
 
-    id = Column(Integer, Sequence("activity_event_id_seq"), primary_key=True, index=True)
+    id = Column(BigInteger, Sequence("activity_event_id_seq"), primary_key=True, index=True)
     event_type = Column(String(64), nullable=False, index=True)
     entity_type = Column(String(64), nullable=False)
     entity_id = Column(BigInteger, nullable=True)
@@ -592,7 +592,7 @@ class BackgroundJob(Base):
 
     __tablename__ = "background_job"
 
-    id = Column(Integer, Sequence("background_job_id_seq"), primary_key=True, index=True)
+    id = Column(BigInteger, Sequence("background_job_id_seq"), primary_key=True, index=True)
     job_type = Column(String(64), nullable=False, index=True)
     status = Column(String(32), nullable=False, index=True)
     payload_json = Column(Text, nullable=False)

@@ -7,7 +7,7 @@ CREATE SEQUENCE IF NOT EXISTS activity_event_id_seq
     CACHE 1;
 
 CREATE TABLE IF NOT EXISTS public.activity_event (
-    id integer DEFAULT nextval('activity_event_id_seq') NOT NULL,
+    id bigint DEFAULT nextval('activity_event_id_seq') NOT NULL,
     event_type character varying(64) NOT NULL,
     entity_type character varying(64) NOT NULL,
     entity_id bigint,
@@ -23,3 +23,4 @@ CREATE TABLE IF NOT EXISTS public.activity_event (
 CREATE INDEX IF NOT EXISTS ix_activity_event_created_at ON public.activity_event USING btree (created_at);
 CREATE INDEX IF NOT EXISTS ix_activity_event_structure_id ON public.activity_event USING btree (structure_id);
 CREATE INDEX IF NOT EXISTS ix_activity_event_actor_user_id ON public.activity_event USING btree (actor_user_id);
+CREATE INDEX IF NOT EXISTS ix_activity_event_event_type ON public.activity_event USING btree (event_type);

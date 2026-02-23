@@ -3,7 +3,7 @@
 import json
 from datetime import datetime, timedelta, timezone
 
-from sqlalchemy import or_
+from sqlalchemy import func, or_
 
 from models import BackgroundJob
 
@@ -32,7 +32,13 @@ def enqueue_job(
     available_at=None,
 ):  # pylint: disable=too-many-arguments
     """Persist a new queued background job."""
+    next_id = None
+    bind = db_session.get_bind()
+    if bind is not None and bind.dialect.name == "sqlite":
+        next_id = (db_session.query(func.max(BackgroundJob.id)).scalar() or 0) + 1
+
     job = BackgroundJob(
+        id=next_id,
         job_type=job_type,
         status=JOB_STATUS_QUEUED,
         payload_json=json.dumps(payload, ensure_ascii=False),

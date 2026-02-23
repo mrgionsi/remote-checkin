@@ -7,7 +7,7 @@ CREATE SEQUENCE IF NOT EXISTS background_job_id_seq
     CACHE 1;
 
 CREATE TABLE IF NOT EXISTS public.background_job (
-    id integer DEFAULT nextval('background_job_id_seq') NOT NULL,
+    id bigint DEFAULT nextval('background_job_id_seq') NOT NULL,
     job_type character varying(64) NOT NULL,
     status character varying(32) NOT NULL,
     payload_json text NOT NULL,
@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS public.background_job (
 CREATE INDEX IF NOT EXISTS ix_background_job_job_type ON public.background_job USING btree (job_type);
 CREATE INDEX IF NOT EXISTS ix_background_job_status ON public.background_job USING btree (status);
 CREATE INDEX IF NOT EXISTS ix_background_job_available_at ON public.background_job USING btree (available_at);
+CREATE INDEX IF NOT EXISTS ix_background_job_status_available_at ON public.background_job USING btree (status, available_at);
 CREATE INDEX IF NOT EXISTS ix_background_job_created_by_user_id ON public.background_job USING btree (created_by_user_id);
 CREATE INDEX IF NOT EXISTS ix_background_job_structure_id ON public.background_job USING btree (structure_id);
 CREATE INDEX IF NOT EXISTS ix_background_job_created_at ON public.background_job USING btree (created_at);

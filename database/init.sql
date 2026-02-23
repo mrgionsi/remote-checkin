@@ -147,7 +147,7 @@ DROP SEQUENCE IF EXISTS activity_event_id_seq CASCADE;
 CREATE SEQUENCE activity_event_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1;
 
 CREATE TABLE "public"."activity_event" (
-    "id" integer DEFAULT nextval('activity_event_id_seq') NOT NULL,
+    "id" bigint DEFAULT nextval('activity_event_id_seq') NOT NULL,
     "event_type" character varying(64) NOT NULL,
     "entity_type" character varying(64) NOT NULL,
     "entity_id" bigint,
@@ -164,13 +164,14 @@ WITH (oids = false);
 CREATE INDEX ix_activity_event_created_at ON public.activity_event USING btree (created_at);
 CREATE INDEX ix_activity_event_structure_id ON public.activity_event USING btree (structure_id);
 CREATE INDEX ix_activity_event_actor_user_id ON public.activity_event USING btree (actor_user_id);
+CREATE INDEX ix_activity_event_event_type ON public.activity_event USING btree (event_type);
 
 DROP TABLE IF EXISTS "background_job" CASCADE;
 DROP SEQUENCE IF EXISTS background_job_id_seq CASCADE;
 CREATE SEQUENCE background_job_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1;
 
 CREATE TABLE "public"."background_job" (
-    "id" integer DEFAULT nextval('background_job_id_seq') NOT NULL,
+    "id" bigint DEFAULT nextval('background_job_id_seq') NOT NULL,
     "job_type" character varying(64) NOT NULL,
     "status" character varying(32) NOT NULL,
     "payload_json" text NOT NULL,
@@ -193,6 +194,7 @@ WITH (oids = false);
 CREATE INDEX ix_background_job_job_type ON public.background_job USING btree (job_type);
 CREATE INDEX ix_background_job_status ON public.background_job USING btree (status);
 CREATE INDEX ix_background_job_available_at ON public.background_job USING btree (available_at);
+CREATE INDEX ix_background_job_status_available_at ON public.background_job USING btree (status, available_at);
 CREATE INDEX ix_background_job_created_by_user_id ON public.background_job USING btree (created_by_user_id);
 CREATE INDEX ix_background_job_structure_id ON public.background_job USING btree (structure_id);
 CREATE INDEX ix_background_job_created_at ON public.background_job USING btree (created_at);

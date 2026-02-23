@@ -7,6 +7,7 @@ from services.portale_alloggi_service import PortaleAlloggiService
 from utils.encryption_utils import decrypt_password
 
 PORTALE_ALLOGGI_SUBMIT_JOB = "portale_alloggi_submit"
+RESERVATION_STATUS_APPROVED = "Approved"
 
 
 class JobExecutionError(Exception):
@@ -39,6 +40,8 @@ def handle_portale_alloggi_submit(db_session, payload):
     reservation = db_session.query(Reservation).filter(Reservation.id == reservation_id).first()
     if not reservation:
         raise JobExecutionError("Reservation not found")
+    if reservation.status != RESERVATION_STATUS_APPROVED:
+        raise JobExecutionError("Reservation is no longer approved")
 
     room = db_session.query(Room).filter(Room.id == reservation.id_room).first()
     if not room:
