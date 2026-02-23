@@ -578,3 +578,47 @@ class ActivityEvent(Base):
             "metadata": self.metadata_json,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }
+
+
+class BackgroundJob(Base):
+    """Persisted background job used for retryable async processing."""
+
+    __tablename__ = "background_job"
+
+    id = Column(Integer, Sequence("background_job_id_seq"), primary_key=True, index=True)
+    job_type = Column(String(64), nullable=False, index=True)
+    status = Column(String(32), nullable=False, index=True)
+    payload_json = Column(Text, nullable=False)
+    result_json = Column(Text, nullable=True)
+    error_message = Column(Text, nullable=True)
+    attempts = Column(Integer, nullable=False, default=0)
+    max_attempts = Column(Integer, nullable=False, default=3)
+    available_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    started_at = Column(DateTime, nullable=True)
+    finished_at = Column(DateTime, nullable=True)
+    created_by_user_id = Column(BigInteger, nullable=True, index=True)
+    structure_id = Column(BigInteger, nullable=True, index=True)
+    worker_id = Column(String(128), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    def to_dict(self):
+        """Serialize background job for API responses."""
+        return {
+            "id": self.id,
+            "job_type": self.job_type,
+            "status": self.status,
+            "payload": self.payload_json,
+            "result": self.result_json,
+            "error_message": self.error_message,
+            "attempts": self.attempts,
+            "max_attempts": self.max_attempts,
+            "available_at": self.available_at.isoformat() if self.available_at else None,
+            "started_at": self.started_at.isoformat() if self.started_at else None,
+            "finished_at": self.finished_at.isoformat() if self.finished_at else None,
+            "created_by_user_id": self.created_by_user_id,
+            "structure_id": self.structure_id,
+            "worker_id": self.worker_id,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }
