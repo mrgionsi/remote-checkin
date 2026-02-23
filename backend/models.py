@@ -579,6 +579,13 @@ class ActivityEvent(Base):
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }
 
+    def __repr__(self):
+        """Return concise debug representation for activity events."""
+        return (
+            f"<ActivityEvent(id={self.id}, event_type={self.event_type}, "
+            f"entity_type={self.entity_type}, entity_id={self.entity_id})>"
+        )
+
 
 class BackgroundJob(Base):
     """Persisted background job used for retryable async processing."""
@@ -622,3 +629,10 @@ class BackgroundJob(Base):
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }
+
+    def __repr__(self):
+        """Return concise debug representation for background jobs."""
+        return (
+            f"<BackgroundJob(id={self.id}, job_type={self.job_type}, "
+            f"status={self.status}, attempts={self.attempts}/{self.max_attempts})>"
+        )
