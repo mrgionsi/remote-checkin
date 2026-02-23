@@ -374,7 +374,8 @@ def test_upload_invalid_file_signature_returns_validation_error(client, init_db)
     assert response.get_json()["error"] == "Invalid MIME type for frontimage"
 
 
-def test_validate_documents_invalid_file_signature_returns_validation_error(client, init_db):
+@pytest.mark.usefixtures("init_db")
+def test_validate_documents_invalid_file_signature_returns_validation_error(client):
     """Pre-validation endpoint should reject spoofed image signatures."""
     token = _build_upload_token(client.application, "12345")
     data = {
@@ -394,7 +395,8 @@ def test_validate_documents_invalid_file_signature_returns_validation_error(clie
     assert response.get_json()["error"] == "Invalid MIME type for frontimage"
 
 
-def test_upload_document_validation_token_fingerprint_mismatch_returns_403(client, init_db):
+@pytest.mark.usefixtures("init_db")
+def test_upload_document_validation_token_fingerprint_mismatch_returns_403(client):
     """Final upload should reject validation tokens bound to different file bytes."""
     token = _build_upload_token(client.application, "12345")
 
@@ -434,7 +436,8 @@ def test_upload_document_validation_token_fingerprint_mismatch_returns_403(clien
     assert response.get_json()["error"] == "Document validation token does not match uploaded document content"
 
 
-def test_upload_document_validation_token_replay_across_reservations_returns_403(client, init_db):
+@pytest.mark.usefixtures("init_db")
+def test_upload_document_validation_token_replay_across_reservations_returns_403(client):
     """Validation token from reservation A must not authorize reservation B upload."""
     token_res_a = _build_upload_token(client.application, "12345")
     token_res_b = _build_upload_token(client.application, "67890")

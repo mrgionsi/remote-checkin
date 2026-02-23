@@ -1,6 +1,6 @@
 """Contract tests for GET /api/v1/reservations/check/<reservation_id>."""
 
-# pylint: disable=redefined-outer-name
+# pylint: disable=redefined-outer-name,C0411
 
 from datetime import date
 
@@ -19,6 +19,7 @@ class _FailingSession:
     """Session stub that raises SQLAlchemyError on query usage."""
 
     def query(self, *_args, **_kwargs):
+        """Simulate a query that always raises a SQLAlchemyError."""
         raise SQLAlchemyError("db down")
 
     def close(self):
