@@ -7,7 +7,7 @@ including Room, Client, Reservation, and others.
 """
 
 from datetime import date, datetime
-from sqlalchemy import Column, Integer, BigInteger, String, Date, ForeignKey, Sequence, Boolean, DateTime
+from sqlalchemy import Column, Integer, BigInteger, String, Date, ForeignKey, Sequence, Boolean, DateTime, Text
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -546,3 +546,93 @@ class EmailConfig(Base):
             str: Representation in the form "<EmailConfig(id=<id>, user_id=<user_id>, provider_type=<provider_type>)>"
         """
         return f"<EmailConfig(id={self.id}, user_id={self.user_id}, provider_type={self.provider_type})>"
+
+
+class ActivityEvent(Base):
+    """Audit-style activity event used by admin/superadmin timeline widgets."""
+
+    __tablename__ = "activity_event"
+
+    id = Column(BigInteger, Sequence("activity_event_id_seq"), primary_key=True, index=True)
+    event_type = Column(String(64), nullable=False, index=True)
+    entity_type = Column(String(64), nullable=False)
+    entity_id = Column(BigInteger, nullable=True)
+    structure_id = Column(BigInteger, nullable=True, index=True)
+    actor_user_id = Column(BigInteger, nullable=True, index=True)
+    actor_role = Column(String(32), nullable=True)
+    description = Column(String(255), nullable=False)
+    metadata_json = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+    def to_dict(self):
+        """Serialize activity event for API responses."""
+        return {
+            "id": self.id,
+            "event_type": self.event_type,
+            "entity_type": self.entity_type,
+            "entity_id": self.entity_id,
+            "structure_id": self.structure_id,
+            "actor_user_id": self.actor_user_id,
+            "actor_role": self.actor_role,
+            "description": self.description,
+            "metadata": self.metadata_json,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+        }
+
+    def __repr__(self):
+        """Return concise debug representation for activity events."""
+        return (
+            f"<ActivityEvent(id={self.id}, event_type={self.event_type}, "
+            f"entity_type={self.entity_type}, entity_id={self.entity_id})>"
+        )
+
+
+class BackgroundJob(Base):
+    """Persisted background job used for retryable async processing."""
+
+    __tablename__ = "background_job"
+
+    id = Column(BigInteger, Sequence("background_job_id_seq"), primary_key=True, index=True)
+    job_type = Column(String(64), nullable=False, index=True)
+    status = Column(String(32), nullable=False, index=True)
+    payload_json = Column(Text, nullable=False)
+    result_json = Column(Text, nullable=True)
+    error_message = Column(Text, nullable=True)
+    attempts = Column(Integer, nullable=False, default=0)
+    max_attempts = Column(Integer, nullable=False, default=3)
+    available_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    started_at = Column(DateTime, nullable=True)
+    finished_at = Column(DateTime, nullable=True)
+    created_by_user_id = Column(BigInteger, nullable=True, index=True)
+    structure_id = Column(BigInteger, nullable=True, index=True)
+    worker_id = Column(String(128), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    def to_dict(self):
+        """Serialize background job for API responses."""
+        return {
+            "id": self.id,
+            "job_type": self.job_type,
+            "status": self.status,
+            "payload": self.payload_json,
+            "result": self.result_json,
+            "error_message": self.error_message,
+            "attempts": self.attempts,
+            "max_attempts": self.max_attempts,
+            "available_at": self.available_at.isoformat() if self.available_at else None,
+            "started_at": self.started_at.isoformat() if self.started_at else None,
+            "finished_at": self.finished_at.isoformat() if self.finished_at else None,
+            "created_by_user_id": self.created_by_user_id,
+            "structure_id": self.structure_id,
+            "worker_id": self.worker_id,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }
+
+    def __repr__(self):
+        """Return concise debug representation for background jobs."""
+        return (
+            f"<BackgroundJob(id={self.id}, job_type={self.job_type}, "
+            f"status={self.status}, attempts={self.attempts}/{self.max_attempts})>"
+        )

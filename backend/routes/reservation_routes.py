@@ -17,7 +17,7 @@ from sqlalchemy.sql import extract
 from flask_jwt_extended import jwt_required
 from itsdangerous import URLSafeTimedSerializer
 
-from models import Reservation, Room, Structure, StructureReservationsView, EmailConfig,Client, ClientReservations
+from models import Reservation, Room, Structure, StructureReservationsView, EmailConfig, ClientReservations
 from email_handler import EmailService
 from routes.email_config_routes import get_encryption_key
 from utils.email_utils import get_admin_email_config
@@ -27,6 +27,7 @@ from utils.route_helpers import (
     get_current_user_id,
     require_structure_access,
 )
+from utils.activity_logger import log_activity
 from app_logging.config import get_logger
 from app_logging.decorators import log_route, log_database_operation, log_performance
 from app_logging.utils import safe_extra_fields, log_notification_error
@@ -198,6 +199,20 @@ def create_reservation():
 
         session.add(new_reservation)
         session.flush()  # Generate reservation ID
+
+        log_activity(
+            session,
+            event_type="reservation.created",
+            entity_type="reservation",
+            entity_id=new_reservation.id,
+            structure_id=room.id_structure,
+            description=f"Reservation {new_reservation.id_reference} created",
+            metadata={
+                "reservationReference": new_reservation.id_reference,
+                "roomName": room.name,
+                "guestName": data.get("nameReference") or "Guest",
+            },
+        )
 
         # Commit transaction
         session.commit()
@@ -436,6 +451,19 @@ def update_reservation(reservation_id):
         if "room" in data and isinstance(data["room"], dict) and "id" in data["room"]:
             reservation.id_room = target_room.id
 
+        log_activity(
+            db,
+            event_type="reservation.updated",
+            entity_type="reservation",
+            entity_id=reservation.id,
+            structure_id=target_room.id_structure,
+            description=f"Reservation {reservation.id_reference} updated",
+            metadata={
+                "reservationReference": reservation.id_reference,
+                "roomName": target_room.name,
+            },
+        )
+
         db.commit()
 
         return jsonify({
@@ -498,7 +526,17 @@ def delete_reservation(reservation_id):
         if structure_error:
             return structure_error
 
+        deleted_reference = reservation.id_reference
         db.delete(reservation)
+        log_activity(
+            db,
+            event_type="reservation.deleted",
+            entity_type="reservation",
+            entity_id=reservation_id,
+            structure_id=room.id_structure,
+            description=f"Reservation {deleted_reference} deleted",
+            metadata={"reservationReference": deleted_reference, "roomName": room.name},
+        )
         db.commit()
 
         return jsonify({"message": f"Reservation {reservation_id} deleted successfully"}), 200
@@ -658,10 +696,10 @@ def check_get_reservations_by_id(reservation_id):
         if not reservation:
             return error_response(f"Reservation with ID {reservation_id} not found", 404)
 
-        # Get count of clients linked to the reservation
+        # Get count of links for this reservation.
+        # Counting directly on link rows is more resilient than joining Client records.
         client_count = (
-            db.query(Client)
-            .join(ClientReservations, Client.id == ClientReservations.id_client)
+            db.query(ClientReservations)
             .filter(ClientReservations.id_reservation == reservation.id)
             .count()
         )

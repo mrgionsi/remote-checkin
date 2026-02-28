@@ -88,7 +88,34 @@ async function populateRemoteCheckinForms(page: Page): Promise<void> {
   });
 }
 
+async function mockReservationCheck(
+  page: Page,
+  reservationId: string | number,
+  payload: Record<string, unknown>,
+  status = 200
+): Promise<void> {
+  await page.route(`**/api/v1/reservations/check/${reservationId}`, async (route) => {
+    await route.fulfill({
+      status,
+      contentType: 'application/json',
+      body: JSON.stringify(payload)
+    });
+  });
+}
+
 test.describe('Frontend smoke', () => {
+  test.beforeEach(async ({ page }) => {
+    // Safety net for smoke runs: if a test forgets a specific reservation/check mock,
+    // never hit a real backend.
+    await page.route('**/api/v1/reservations/check/*', async (route) => {
+      await route.fulfill({
+        status: 404,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'Reservation not found (smoke fallback)' })
+      });
+    });
+  });
+
   test('landing page renders core sections and CTA links', async ({ page }) => {
     await page.goto('/landing');
     await expect(page.locator('app-header .app-header')).toBeVisible();
@@ -373,29 +400,25 @@ test.describe('Frontend smoke', () => {
     await expect(page.getByText('Blue Room')).toBeVisible();
     await expect(page.getByText('Red Room')).not.toBeVisible();
 
-    const firstStatusPill = page.locator('.status-pill').first();
+    let firstStatusPill = page.locator('.status-pill').first();
     await expect(firstStatusPill).toBeDisabled();
     await firstStatusPill.click({ force: true });
     expect(editCalls).toBe(0);
 
     await page.getByRole('button', { name: /edit/i }).first().click();
+    firstStatusPill = page.locator('.status-pill').first();
     await expect(firstStatusPill).toBeEnabled();
-    await firstStatusPill.click();
+    await firstStatusPill.click({ force: true });
+    await expect.poll(() => editCalls).toBe(1);
     expect(editCalls).toBe(1);
   });
 
   test('remote check-in submit happy path redirects to completion page', async ({ page }) => {
-    await page.route('**/api/v1/reservations/check/123', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 123,
-          number_of_people: 2,
-          registered_clients_count: 0,
-          upload_token: 'smoke-upload-token'
-        })
-      });
+    await mockReservationCheck(page, 123, {
+      id: 123,
+      number_of_people: 2,
+      registered_clients_count: 0,
+      upload_token: 'smoke-upload-token'
     });
 
     await page.route('**/api/v1/upload', async (route) => {
@@ -418,6 +441,8 @@ test.describe('Frontend smoke', () => {
       component.reservationId = '123';
       component.canRegister = true;
       component.uploadToken = 'smoke-upload-token';
+      component.documentsValidated = true;
+      component.documentValidationToken = 'smoke-doc-validation-token';
       component.uploadReservationData();
     });
 
@@ -425,17 +450,11 @@ test.describe('Frontend smoke', () => {
   });
 
   test('remote check-in shows localized error when upload token is missing', async ({ page }) => {
-    await page.route('**/api/v1/reservations/check/124', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 124,
-          number_of_people: 2,
-          registered_clients_count: 0,
-          upload_token: null
-        })
-      });
+    await mockReservationCheck(page, 124, {
+      id: 124,
+      number_of_people: 2,
+      registered_clients_count: 0,
+      upload_token: null
     });
 
     await page.goto('/124/remote-checkin/en');
@@ -450,6 +469,8 @@ test.describe('Frontend smoke', () => {
       component.reservationId = '124';
       component.canRegister = true;
       component.uploadToken = null;
+      component.documentsValidated = true;
+      component.documentValidationToken = 'smoke-doc-validation-token';
       component.uploadReservationData();
     });
 
@@ -457,17 +478,11 @@ test.describe('Frontend smoke', () => {
   });
 
   test('remote check-in blocks registration when reservation is at full capacity', async ({ page }) => {
-    await page.route('**/api/v1/reservations/check/126', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 126,
-          number_of_people: 1,
-          registered_clients_count: 1,
-          upload_token: 'capacity-full-token'
-        })
-      });
+    await mockReservationCheck(page, 126, {
+      id: 126,
+      number_of_people: 1,
+      registered_clients_count: 1,
+      upload_token: 'capacity-full-token'
     });
 
     await page.goto('/126/remote-checkin/en');
@@ -478,13 +493,7 @@ test.describe('Frontend smoke', () => {
   });
 
   test('remote check-in shows warning when reservation check fails', async ({ page }) => {
-    await page.route('**/api/v1/reservations/check/127', async (route) => {
-      await route.fulfill({
-        status: 500,
-        contentType: 'application/json',
-        body: JSON.stringify({ error: 'Internal server error' })
-      });
-    });
+    await mockReservationCheck(page, 127, { error: 'Internal server error' }, 500);
 
     await page.goto('/127/remote-checkin/en');
     await expect(page.getByText('Registration Unavailable')).toBeVisible();
@@ -493,17 +502,11 @@ test.describe('Frontend smoke', () => {
   });
 
   test('remote check-in submit shows validation error on incomplete form', async ({ page }) => {
-    await page.route('**/api/v1/reservations/check/128', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 128,
-          number_of_people: 2,
-          registered_clients_count: 0,
-          upload_token: 'validation-token'
-        })
-      });
+    await mockReservationCheck(page, 128, {
+      id: 128,
+      number_of_people: 2,
+      registered_clients_count: 0,
+      upload_token: 'validation-token'
     });
 
     await page.goto('/128/remote-checkin/en');
@@ -521,17 +524,11 @@ test.describe('Frontend smoke', () => {
   });
 
   test('remote check-in submit shows API validation error message', async ({ page }) => {
-    await page.route('**/api/v1/reservations/check/129', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 129,
-          number_of_people: 2,
-          registered_clients_count: 0,
-          upload_token: 'upload-error-token'
-        })
-      });
+    await mockReservationCheck(page, 129, {
+      id: 129,
+      number_of_people: 2,
+      registered_clients_count: 0,
+      upload_token: 'upload-error-token'
     });
 
     await page.route('**/api/v1/upload', async (route) => {
@@ -554,6 +551,8 @@ test.describe('Frontend smoke', () => {
       component.reservationId = '129';
       component.canRegister = true;
       component.uploadToken = 'upload-error-token';
+      component.documentsValidated = true;
+      component.documentValidationToken = 'smoke-doc-validation-token';
       component.uploadReservationData();
     });
 
@@ -561,17 +560,11 @@ test.describe('Frontend smoke', () => {
   });
 
   test('remote check-in restores non-PII draft within TTL and expires stale draft', async ({ page }) => {
-    await page.route('**/api/v1/reservations/check/134', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 134,
-          number_of_people: 2,
-          registered_clients_count: 0,
-          upload_token: 'draft-token'
-        })
-      });
+    await mockReservationCheck(page, 134, {
+      id: 134,
+      number_of_people: 2,
+      registered_clients_count: 0,
+      upload_token: 'draft-token'
     });
 
     await page.goto('/134/remote-checkin/en');
@@ -649,17 +642,11 @@ test.describe('Frontend smoke', () => {
   test('remote check-in prevents duplicate upload submissions', async ({ page }) => {
     let uploadCalls = 0;
 
-    await page.route('**/api/v1/reservations/check/135', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 135,
-          number_of_people: 2,
-          registered_clients_count: 0,
-          upload_token: 'duplicate-submit-token'
-        })
-      });
+    await mockReservationCheck(page, 135, {
+      id: 135,
+      number_of_people: 2,
+      registered_clients_count: 0,
+      upload_token: 'duplicate-submit-token'
     });
 
     await page.route('**/api/v1/upload', async (route) => {
@@ -684,6 +671,8 @@ test.describe('Frontend smoke', () => {
       component.reservationId = '135';
       component.canRegister = true;
       component.uploadToken = 'duplicate-submit-token';
+      component.documentsValidated = true;
+      component.documentValidationToken = 'smoke-doc-validation-token';
       component.uploadReservationData();
       component.uploadReservationData();
     });
@@ -693,13 +682,7 @@ test.describe('Frontend smoke', () => {
   });
 
   test('remote check-in shows registration unavailable when reservation does not exist', async ({ page }) => {
-    await page.route('**/api/v1/reservations/check/136', async (route) => {
-      await route.fulfill({
-        status: 404,
-        contentType: 'application/json',
-        body: JSON.stringify({ error: 'Reservation not found' })
-      });
-    });
+    await mockReservationCheck(page, 136, { error: 'Reservation not found' }, 404);
 
     await page.goto('/136/remote-checkin/en');
     await expect(page.getByText('Registration Unavailable')).toBeVisible();
@@ -708,17 +691,11 @@ test.describe('Frontend smoke', () => {
   });
 
   test('remote check-in missing upload token message is localized in Italian', async ({ page }) => {
-    await page.route('**/api/v1/reservations/check/137', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 137,
-          number_of_people: 2,
-          registered_clients_count: 0,
-          upload_token: null
-        })
-      });
+    await mockReservationCheck(page, 137, {
+      id: 137,
+      number_of_people: 2,
+      registered_clients_count: 0,
+      upload_token: null
     });
 
     await page.goto('/137/remote-checkin/it');
@@ -735,6 +712,8 @@ test.describe('Frontend smoke', () => {
       component.reservationId = '137';
       component.canRegister = true;
       component.uploadToken = null;
+      component.documentsValidated = true;
+      component.documentValidationToken = 'smoke-doc-validation-token';
       component.uploadReservationData();
       return expected;
     });
@@ -743,17 +722,11 @@ test.describe('Frontend smoke', () => {
   });
 
   test('remote check-in rejects invalid mime type for each required upload field', async ({ page }) => {
-    await page.route('**/api/v1/reservations/check/138', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 138,
-          number_of_people: 2,
-          registered_clients_count: 0,
-          upload_token: 'mime-guard-token'
-        })
-      });
+    await mockReservationCheck(page, 138, {
+      id: 138,
+      number_of_people: 2,
+      registered_clients_count: 0,
+      upload_token: 'mime-guard-token'
     });
 
     await page.goto('/138/remote-checkin/en');
@@ -783,17 +756,11 @@ test.describe('Frontend smoke', () => {
   });
 
   test('remote check-in rejects over-size files for each required upload field', async ({ page }) => {
-    await page.route('**/api/v1/reservations/check/139', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 139,
-          number_of_people: 2,
-          registered_clients_count: 0,
-          upload_token: 'size-guard-token'
-        })
-      });
+    await mockReservationCheck(page, 139, {
+      id: 139,
+      number_of_people: 2,
+      registered_clients_count: 0,
+      upload_token: 'size-guard-token'
     });
 
     await page.goto('/139/remote-checkin/en');
@@ -823,17 +790,11 @@ test.describe('Frontend smoke', () => {
   });
 
   test('remote check-in handles upload 502 and re-enables submit state', async ({ page }) => {
-    await page.route('**/api/v1/reservations/check/140', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 140,
-          number_of_people: 2,
-          registered_clients_count: 0,
-          upload_token: 'upload-502-token'
-        })
-      });
+    await mockReservationCheck(page, 140, {
+      id: 140,
+      number_of_people: 2,
+      registered_clients_count: 0,
+      upload_token: 'upload-502-token'
     });
 
     await page.route('**/api/v1/upload', async (route) => {
@@ -856,6 +817,8 @@ test.describe('Frontend smoke', () => {
       component.reservationId = '140';
       component.canRegister = true;
       component.uploadToken = 'upload-502-token';
+      component.documentsValidated = true;
+      component.documentValidationToken = 'smoke-doc-validation-token';
       component.uploadReservationData();
     });
 
@@ -874,17 +837,11 @@ test.describe('Frontend smoke', () => {
   });
 
   test('remote check-in handles upload timeout-like network failure and re-enables submit', async ({ page }) => {
-    await page.route('**/api/v1/reservations/check/144', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 144,
-          number_of_people: 2,
-          registered_clients_count: 0,
-          upload_token: 'upload-timeout-token'
-        })
-      });
+    await mockReservationCheck(page, 144, {
+      id: 144,
+      number_of_people: 2,
+      registered_clients_count: 0,
+      upload_token: 'upload-timeout-token'
     });
 
     await page.route('**/api/v1/upload', async (route) => {
@@ -903,6 +860,8 @@ test.describe('Frontend smoke', () => {
       component.reservationId = '144';
       component.canRegister = true;
       component.uploadToken = 'upload-timeout-token';
+      component.documentsValidated = true;
+      component.documentValidationToken = 'smoke-doc-validation-token';
       component.uploadReservationData();
     });
 
@@ -921,15 +880,7 @@ test.describe('Frontend smoke', () => {
   });
 
   test('remote check-in degrades safely when reservation check payload is missing required fields', async ({ page }) => {
-    await page.route('**/api/v1/reservations/check/145', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 145
-        })
-      });
-    });
+    await mockReservationCheck(page, 145, { id: 145 });
 
     await page.goto('/145/remote-checkin/en');
     await expect(page.getByText('Registration Unavailable')).toBeVisible();
@@ -960,17 +911,11 @@ test.describe('Frontend smoke', () => {
   });
 
   test('remote check-in handles reservation edge values for capacity fallback', async ({ page }) => {
-    await page.route('**/api/v1/reservations/check/141', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 141,
-          number_of_people: 2,
-          registered_clients_count: 0,
-          upload_token: 'edge-capacity-token'
-        })
-      });
+    await mockReservationCheck(page, 141, {
+      id: 141,
+      number_of_people: 2,
+      registered_clients_count: 0,
+      upload_token: 'edge-capacity-token'
     });
 
     await page.goto('/141/remote-checkin/en');
@@ -1003,13 +948,7 @@ test.describe('Frontend smoke', () => {
   });
 
   test('remote check-in route handles invalid reservation id safely', async ({ page }) => {
-    await page.route('**/api/v1/reservations/check/invalid-id', async (route) => {
-      await route.fulfill({
-        status: 400,
-        contentType: 'application/json',
-        body: JSON.stringify({ error: 'Invalid reservation id' })
-      });
-    });
+    await mockReservationCheck(page, 'invalid-id', { error: 'Invalid reservation id' }, 400);
 
     await page.goto('/invalid-id/remote-checkin/en');
     await expect(page).toHaveURL(/\/invalid-id\/remote-checkin\/en/);
@@ -1018,17 +957,11 @@ test.describe('Frontend smoke', () => {
   });
 
   test('remote check-in supports keyboard-only step navigation and submit', async ({ page }) => {
-    await page.route('**/api/v1/reservations/check/142', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 142,
-          number_of_people: 2,
-          registered_clients_count: 0,
-          upload_token: 'keyboard-flow-token'
-        })
-      });
+    await mockReservationCheck(page, 142, {
+      id: 142,
+      number_of_people: 2,
+      registered_clients_count: 0,
+      upload_token: 'keyboard-flow-token'
     });
 
     await page.route('**/api/v1/upload', async (route) => {
@@ -1051,35 +984,34 @@ test.describe('Frontend smoke', () => {
       component.canRegister = true;
       component.clientForm.enable({ emitEvent: false });
       component.uploadForm.enable({ emitEvent: false });
+      component.documentsValidated = true;
+      component.documentValidationToken = 'keyboard-doc-token';
     });
 
     const nextBtnStep1 = page.locator('button.p-button:has(.pi-arrow-right)').first();
+    await expect(nextBtnStep1).toBeEnabled();
     await nextBtnStep1.focus();
-    await page.keyboard.press('Enter');
+    await page.keyboard.press('Space');
     await expect(page.locator('app-upload-identity')).toBeVisible();
 
     const nextBtnStep2 = page.locator('button.p-button:has(.pi-arrow-right)').first();
+    await expect(nextBtnStep2).toBeEnabled();
     await nextBtnStep2.focus();
-    await page.keyboard.press('Enter');
+    await page.keyboard.press('Space');
 
     const submitBtn = page.locator('button.p-button:has(.pi-check)').first();
+    await expect(submitBtn).toBeEnabled();
     await submitBtn.focus();
-    await page.keyboard.press('Enter');
+    await page.keyboard.press('Space');
     await expect(page).toHaveURL(/\/checkin-complete\/142/);
   });
 
   test('remote check-in keeps focus stable after toast state changes', async ({ page }) => {
-    await page.route('**/api/v1/reservations/check/143', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 143,
-          number_of_people: 2,
-          registered_clients_count: 0,
-          upload_token: null
-        })
-      });
+    await mockReservationCheck(page, 143, {
+      id: 143,
+      number_of_people: 2,
+      registered_clients_count: 0,
+      upload_token: null
     });
 
     await page.goto('/143/remote-checkin/en');
@@ -1096,33 +1028,32 @@ test.describe('Frontend smoke', () => {
       component.reservationId = '143';
       component.canRegister = true;
       component.uploadToken = null;
+      component.documentsValidated = true;
+      component.documentValidationToken = 'smoke-doc-validation-token';
       component.uploadReservationData();
     });
 
-    await expect(page.getByRole('alert')).toBeVisible();
+    await expect(page.locator('.p-toast-message')).toBeVisible();
     await page.evaluate(() => {
       const active = document.activeElement as HTMLElement | null;
       if (!active) {
         throw new Error('Expected an active element after toast state change');
       }
-      if (!active.classList.contains('p-button')) {
-        throw new Error('Focus should remain on an interactive button after toast');
+      const isInteractive =
+        active.matches('button, [role="button"], input, select, textarea, a') ||
+        !!active.closest('button, [role="button"], input, select, textarea, a');
+      if (!isInteractive) {
+        throw new Error('Focus should remain on an interactive element after toast');
       }
     });
   });
 
   test('remote check-in complete flow keeps step-2 next disabled until images are uploaded', async ({ page }) => {
-    await page.route('**/api/v1/reservations/check/130', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 130,
-          number_of_people: 2,
-          registered_clients_count: 0,
-          upload_token: 'step2-validation-token'
-        })
-      });
+    await mockReservationCheck(page, 130, {
+      id: 130,
+      number_of_people: 2,
+      registered_clients_count: 0,
+      upload_token: 'step2-validation-token'
     });
 
     await page.goto('/130/remote-checkin/en');
@@ -1147,17 +1078,11 @@ test.describe('Frontend smoke', () => {
   });
 
   test('remote check-in complete flow shows document date validation error', async ({ page }) => {
-    await page.route('**/api/v1/reservations/check/131', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 131,
-          number_of_people: 2,
-          registered_clients_count: 0,
-          upload_token: 'date-invalid-token'
-        })
-      });
+    await mockReservationCheck(page, 131, {
+      id: 131,
+      number_of_people: 2,
+      registered_clients_count: 0,
+      upload_token: 'date-invalid-token'
     });
 
     await page.goto('/131/remote-checkin/en');
@@ -1183,17 +1108,11 @@ test.describe('Frontend smoke', () => {
   });
 
   test('remote check-in complete flow shows fallback upload error when backend has no detail', async ({ page }) => {
-    await page.route('**/api/v1/reservations/check/132', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 132,
-          number_of_people: 2,
-          registered_clients_count: 0,
-          upload_token: 'upload-fallback-error-token'
-        })
-      });
+    await mockReservationCheck(page, 132, {
+      id: 132,
+      number_of_people: 2,
+      registered_clients_count: 0,
+      upload_token: 'upload-fallback-error-token'
     });
 
     await page.route('**/api/v1/upload', async (route) => {
@@ -1216,6 +1135,8 @@ test.describe('Frontend smoke', () => {
       component.reservationId = '132';
       component.canRegister = true;
       component.uploadToken = 'upload-fallback-error-token';
+      component.documentsValidated = true;
+      component.documentValidationToken = 'smoke-doc-validation-token';
       component.uploadReservationData();
     });
 
@@ -1223,17 +1144,11 @@ test.describe('Frontend smoke', () => {
   });
 
   test('remote check-in complete flow blocks submit when registration becomes unavailable', async ({ page }) => {
-    await page.route('**/api/v1/reservations/check/133', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 133,
-          number_of_people: 2,
-          registered_clients_count: 0,
-          upload_token: 'registration-closed-token'
-        })
-      });
+    await mockReservationCheck(page, 133, {
+      id: 133,
+      number_of_people: 2,
+      registered_clients_count: 0,
+      upload_token: 'registration-closed-token'
     });
 
     await page.goto('/133/remote-checkin/en');
@@ -1248,6 +1163,8 @@ test.describe('Frontend smoke', () => {
       component.reservationId = '133';
       component.canRegister = false;
       component.uploadToken = 'registration-closed-token';
+      component.documentsValidated = true;
+      component.documentValidationToken = 'smoke-doc-validation-token';
       component.uploadReservationData();
     });
 
@@ -1257,23 +1174,19 @@ test.describe('Frontend smoke', () => {
   test('remote check-in complete flow fills data and uploads images', async ({ page }) => {
     let uploadCalled = false;
     let uploadTokenHeader = '';
+    let validationTokenHeader = '';
 
-    await page.route('**/api/v1/reservations/check/125', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 125,
-          number_of_people: 2,
-          registered_clients_count: 0,
-          upload_token: 'complete-flow-token'
-        })
-      });
+    await mockReservationCheck(page, 125, {
+      id: 125,
+      number_of_people: 2,
+      registered_clients_count: 0,
+      upload_token: 'complete-flow-token'
     });
 
     await page.route('**/api/v1/upload', async (route) => {
       uploadCalled = true;
       uploadTokenHeader = route.request().headers()['x-upload-token'] || '';
+      validationTokenHeader = route.request().headers()['x-document-validation-token'] || '';
       const postData = route.request().postDataBuffer();
       expect(postData).toBeTruthy();
       if (postData) {
@@ -1286,6 +1199,17 @@ test.describe('Frontend smoke', () => {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({ message: 'Upload completed' })
+      });
+    });
+
+    await page.route('**/api/v1/upload/validate-documents', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          message: 'Document validation successful',
+          document_validation_token: 'complete-flow-doc-validation-token'
+        })
       });
     });
 
@@ -1306,12 +1230,45 @@ test.describe('Frontend smoke', () => {
     await page.locator('button.p-button:has(.pi-arrow-right)').first().click();
     await expect(page.locator('app-upload-identity')).toBeVisible();
 
+    await page.getByRole('button', { name: 'Validate documents' }).click();
+    await expect(page.locator('.p-toast-message .p-toast-detail')).toContainText('Document validation successful');
     await page.locator('button.p-button:has(.pi-arrow-right)').first().click();
     await page.locator('button.p-button:has(.pi-check)').first().click();
 
     await expect(page).toHaveURL(/\/checkin-complete\/125/);
     expect(uploadCalled).toBe(true);
     expect(uploadTokenHeader).toBe('complete-flow-token');
+    expect(validationTokenHeader).toBe('complete-flow-doc-validation-token');
+  });
+
+  test('remote check-in blocks step advance when document prevalidation fails', async ({ page }) => {
+    await mockReservationCheck(page, 146, {
+      id: 146,
+      number_of_people: 2,
+      registered_clients_count: 0,
+      upload_token: 'prevalidation-fail-token'
+    });
+
+    await page.route('**/api/v1/upload/validate-documents', async (route) => {
+      await route.fulfill({
+        status: 422,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          error: 'Document validation failed',
+          retryable: true,
+          invalid_files: [{ field: 'frontimage', reason: 'No valid text detected' }]
+        })
+      });
+    });
+
+    await page.goto('/146/remote-checkin/en');
+    await populateRemoteCheckinForms(page);
+    await page.locator('button.p-button:has(.pi-arrow-right)').first().click();
+    await expect(page.locator('app-upload-identity')).toBeVisible();
+
+    await page.getByRole('button', { name: 'Validate documents' }).click();
+    await expect(page.locator('.p-toast-message .p-toast-detail')).toContainText('Document check failed');
+    await expect(page.locator('button.p-button:has(.pi-arrow-right)').first()).toBeDisabled();
   });
 
   test('landing header language switch updates translated labels', async ({ page }) => {

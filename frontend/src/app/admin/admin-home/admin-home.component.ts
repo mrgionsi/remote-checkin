@@ -14,6 +14,7 @@ import { FormsModule } from '@angular/forms';
 import { Menu } from 'primeng/menu';
 import { Subscription } from 'rxjs';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { environment } from '../../../environments/environments';
 
 @Component({
   selector: 'app-admin-home',
@@ -32,6 +33,7 @@ export class AdminHomeComponent implements OnInit, OnDestroy {
   selectedStructureId: number | null = null;
   isAuthenticated: boolean = false;
   isInitialized: boolean = false;
+  readonly enableJobsMonitor = environment.enableJobsMonitor;
 
   @ViewChild('userMenu') userMenu!: Menu;
   private userSubscription!: Subscription;
@@ -100,6 +102,7 @@ export class AdminHomeComponent implements OnInit, OnDestroy {
           'dashboard-label',
           'add-reservation-label',
           'rooms-label',
+          'admin-jobs-label',
           'settings-label',
           'user-info-label',
           'change-password-label'
@@ -116,10 +119,13 @@ export class AdminHomeComponent implements OnInit, OnDestroy {
             {
               label: translations[1],
               items: [
-                { label: translations[8], icon: 'pi pi-cog', routerLink: '/admin/settings' }
+                { label: translations[9], icon: 'pi pi-cog', routerLink: '/admin/settings' }
               ]
             }
           ];
+          if (this.enableJobsMonitor) {
+            this.menuItems[0].items?.push({ label: translations[8], icon: 'pi pi-briefcase', routerLink: '/admin/jobs' });
+          }
           if (this.authService.isSuperAdmin()) {
             this.menuItems.push({
               label: translations[2],
@@ -130,12 +136,12 @@ export class AdminHomeComponent implements OnInit, OnDestroy {
           }
           this.userMenuItems = [
             {
-              label: translations[9],
+              label: translations[10],
               icon: 'pi pi-user',
               command: () => this.showUserInfo()
             },
             {
-              label: translations[10],
+              label: translations[11],
               icon: 'pi pi-key',
               routerLink: '/admin/change-password'
             },

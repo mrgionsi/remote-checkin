@@ -1,9 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
 import { DashboardComponent } from './dashboard.component';
 import { ReservationService } from '../../services/reservation.service';
 import { AuthService } from '../../services/auth.service';
+import { ActivityService } from '../../services/activity.service';
 import { MessageService } from 'primeng/api';
 import { TranslocoService } from '@jsverse/transloco';
 
@@ -11,22 +12,42 @@ describe('DashboardComponent', () => {
   let component: DashboardComponent;
   let fixture: ComponentFixture<DashboardComponent>;
   let messageService: jasmine.SpyObj<MessageService>;
+  let activityServiceStub: jasmine.SpyObj<ActivityService>;
 
   const reservationServiceStub = jasmine.createSpyObj('ReservationService', [
     'getReservationByStructureId',
     'getMonthlyReservation'
   ]);
   const authServiceStub = {
-    getUser: () => ({ structures: [{ id: 1, name: 'Main' }] })
+    getUser: () => ({ id: 1, structures: [{ id: 1, name: 'Main' }] })
   };
   const translocoStub = {
     translate: (key: string) => key,
-    selectTranslateObject: () => of([])
+    selectTranslateObject: () => of([
+      'All statuses',
+      'Pending',
+      'Approved',
+      'Declined',
+      'Sent back',
+      'All dates',
+      'Today',
+      'Week',
+      'Month',
+      'All job statuses',
+      'Queued',
+      'Running',
+      'Retrying',
+      'Succeeded',
+      'Failed'
+    ])
   };
 
   beforeEach(async () => {
     reservationServiceStub.getReservationByStructureId.and.returnValue(of([]));
     reservationServiceStub.getMonthlyReservation.and.returnValue(of([]));
+    activityServiceStub = jasmine.createSpyObj('ActivityService', ['getRecentActivity', 'getRecentJobs']);
+    activityServiceStub.getRecentActivity.and.returnValue(of({ items: [] }));
+    activityServiceStub.getRecentJobs.and.returnValue(of({ items: [], pagination: { total: 0, limit: 5, offset: 0 } }));
     messageService = jasmine.createSpyObj('MessageService', ['add']);
 
     await TestBed.configureTestingModule({
@@ -34,6 +55,7 @@ describe('DashboardComponent', () => {
       providers: [
         { provide: ReservationService, useValue: reservationServiceStub },
         { provide: AuthService, useValue: authServiceStub },
+        { provide: ActivityService, useValue: activityServiceStub },
         { provide: MessageService, useValue: messageService },
         { provide: TranslocoService, useValue: translocoStub }
       ]
@@ -110,5 +132,44 @@ describe('DashboardComponent', () => {
     expect(component.dateRangeFilter).toBe('');
     expect(component.roomFilter).toBe('');
     expect(component.globalSearchTerm).toBe('');
+  });
+
+  it('should map job statuses to translated labels', () => {
+    expect(component.getJobStatusLabelKey('queued')).toBe('dashboard-jobs-status-queued');
+    expect(component.getJobStatusLabelKey('running')).toBe('dashboard-jobs-status-running');
+    expect(component.getJobStatusLabelKey('retrying')).toBe('dashboard-jobs-status-retrying');
+    expect(component.getJobStatusLabelKey('succeeded')).toBe('dashboard-jobs-status-succeeded');
+    expect(component.getJobStatusLabelKey('failed')).toBe('dashboard-jobs-status-failed');
+    expect(component.getJobStatusLabelKey('unknown')).toBe('unknown');
+  });
+
+  it('should map job statuses to severities', () => {
+    expect(component.getJobStatusSeverity('queued')).toBe('secondary');
+    expect(component.getJobStatusSeverity('running')).toBe('warn');
+    expect(component.getJobStatusSeverity('retrying')).toBe('warn');
+    expect(component.getJobStatusSeverity('succeeded')).toBe('success');
+    expect(component.getJobStatusSeverity('failed')).toBe('danger');
+    expect(component.getJobStatusSeverity('other')).toBe('info');
+  });
+
+  it('should clear job filters and reload jobs', () => {
+    component.jobStatusFilter = 'failed';
+    component.jobTypeFilter = 'portale.submit';
+
+    component.clearJobFilters();
+
+    expect(component.jobStatusFilter).toBe('');
+    expect(component.jobTypeFilter).toBe('');
+    expect(activityServiceStub.getRecentJobs).toHaveBeenCalled();
+  });
+
+  it('should set jobs error when jobs loading fails', () => {
+    activityServiceStub.getRecentJobs.and.returnValue(throwError(() => ({ status: 500 })));
+
+    component.loadRecentJobs();
+
+    expect(component.recentJobs).toEqual([]);
+    expect(component.errorJobs).toBe('dashboard-jobs-error');
+    expect(component.loadingJobs).toBeFalse();
   });
 });

@@ -10,6 +10,8 @@ Functions:
 
 #pylint: disable=C0301,E0401,R0914,W0718,W0612,E0611,R0912,R0915,R1702,R0911
 import os
+import hashlib
+import shutil
 from datetime import datetime
 from flask import Blueprint, request, jsonify, current_app
 from werkzeug.exceptions import BadRequest
@@ -24,6 +26,7 @@ from routes.email_config_routes import get_encryption_key
 from app_logging.config import get_logger
 from app_logging.decorators import log_route, log_database_operation, log_performance
 from app_logging.utils import safe_extra_fields, log_notification_error
+from extensions import limiter
 
 upload_bp = Blueprint('upload', __name__, url_prefix="/api/v1")
 
@@ -32,6 +35,124 @@ logger = get_logger(__name__)
 UPLOAD_FOLDER = 'uploads/'
 UPLOAD_TOKEN_SALT = "reservation-upload"
 UPLOAD_TOKEN_MAX_AGE_SECONDS = 60 * 60 * 2
+DOCUMENT_VALIDATION_TOKEN_SALT = "reservation-document-validation"
+DOCUMENT_VALIDATION_TOKEN_MAX_AGE_SECONDS = 60 * 15
+MAX_UPLOAD_FILE_SIZE_BYTES = int(
+    os.getenv("MAX_UPLOAD_FILE_SIZE_BYTES", str(5 * 1024 * 1024))
+)
+ALLOWED_UPLOAD_MIME_TYPES = {"image/jpeg", "image/png"}
+
+
+def _get_uploaded_file_size(uploaded_file):
+    """Return uploaded file size in bytes without consuming the stream."""
+    stream = getattr(uploaded_file, "stream", None)
+    if stream is None:
+        return 0
+
+    current_position = stream.tell()
+    stream.seek(0, os.SEEK_END)
+    size_bytes = stream.tell()
+    stream.seek(current_position, os.SEEK_SET)
+    return size_bytes
+
+
+def _validate_upload_file(uploaded_file, field_name):
+    """Validate extension, MIME type and size for an uploaded image file."""
+    if not uploaded_file or not allowed_file(uploaded_file.filename):
+        return f"Invalid file type for {field_name}"
+
+    stream = getattr(uploaded_file, "stream", None)
+    if stream is None:
+        return f"Invalid file type for {field_name}"
+    current_position = stream.tell()
+    header = stream.read(16)
+    stream.seek(current_position, os.SEEK_SET)
+
+    detected_mime = None
+    if header.startswith(b"\xff\xd8\xff"):
+        detected_mime = "image/jpeg"
+    elif header.startswith(b"\x89PNG\r\n\x1a\n"):
+        detected_mime = "image/png"
+    if detected_mime not in ALLOWED_UPLOAD_MIME_TYPES:
+        return f"Invalid MIME type for {field_name}"
+
+    if _get_uploaded_file_size(uploaded_file) > MAX_UPLOAD_FILE_SIZE_BYTES:
+        return f"File too large for {field_name}"
+
+    return None
+
+
+def _build_serializer():
+    return URLSafeTimedSerializer(current_app.config["JWT_SECRET_KEY"])
+
+
+def _parse_upload_token(serializer, upload_token):
+    if not upload_token:
+        return None, (jsonify({"error": "Missing upload token"}), 401)
+    try:
+        payload = serializer.loads(
+            upload_token,
+            salt=UPLOAD_TOKEN_SALT,
+            max_age=UPLOAD_TOKEN_MAX_AGE_SECONDS
+        )
+        return payload, None
+    except SignatureExpired:
+        return None, (jsonify({"error": "Upload token expired"}), 401)
+    except BadSignature:
+        return None, (jsonify({"error": "Invalid upload token"}), 401)
+
+
+def _validate_documents_payload(reservation_id, files_payload):
+    reservation_folder = os.path.join(UPLOAD_FOLDER, reservation_id, "validation_tmp")
+    os.makedirs(reservation_folder, exist_ok=True)
+    validation_results = {}
+    invalid_files = []
+
+    try:
+        selfie = files_payload.get("selfie")
+        if not selfie:
+            raise BadRequest("Missing one or more required image files")
+        selfie_error = _validate_upload_file(selfie, "selfie")
+        if selfie_error:
+            raise BadRequest(selfie_error)
+
+        for key in ['frontimage', 'backimage']:
+            file = files_payload[key]
+            file_error = _validate_upload_file(file, key)
+            if file_error:
+                raise BadRequest(file_error)
+
+            filename = sanitize_filename("validation", reservation_id, "tmp", key)
+            filepath = save_file(file, reservation_folder, filename)
+            if not filepath:
+                raise BadRequest(f"Failed to save {key}")
+
+            validation_result = validate_document(filepath)
+            validation_results[key] = validation_result
+            if not validation_result.get("valid", False):
+                invalid_files.append({
+                    "field": key,
+                    "reason": validation_result.get("error", "Invalid document"),
+                    "confidence": validation_result.get("confidence", 0.0),
+                })
+    finally:
+        shutil.rmtree(reservation_folder, ignore_errors=True)
+
+    return validation_results, invalid_files
+
+
+def _build_documents_fingerprint(front_file, back_file):
+    """Build deterministic SHA-256 fingerprint from front/back image bytes."""
+    hasher = hashlib.sha256()
+    for uploaded_file in (front_file, back_file):
+        stream = getattr(uploaded_file, "stream", None)
+        if stream is None:
+            raise BadRequest("Missing one or more required image files")
+        current_position = stream.tell()
+        stream.seek(0, os.SEEK_SET)
+        hasher.update(stream.read())
+        stream.seek(current_position, os.SEEK_SET)
+    return hasher.hexdigest()
 
 def _get_gender_display(sesso):
     """Convert gender code to display string."""
@@ -42,6 +163,7 @@ def _get_gender_display(sesso):
     return 'N/A'
 
 @upload_bp.route('/upload', methods=['POST'])
+@limiter.limit("10 per minute")
 @log_route(include_request_data=False, include_response_data=False)
 @log_database_operation("CREATE")
 @log_performance(threshold_ms=3000)
@@ -91,20 +213,45 @@ def upload_file():
         if not upload_token:
             return jsonify({"error": "Missing upload token"}), 401
 
-        serializer = URLSafeTimedSerializer(current_app.config["JWT_SECRET_KEY"])
-        try:
-            payload = serializer.loads(
-                upload_token,
-                salt=UPLOAD_TOKEN_SALT,
-                max_age=UPLOAD_TOKEN_MAX_AGE_SECONDS
-            )
-        except SignatureExpired:
-            return jsonify({"error": "Upload token expired"}), 401
-        except BadSignature:
-            return jsonify({"error": "Invalid upload token"}), 401
+        serializer = _build_serializer()
+        payload, upload_error = _parse_upload_token(serializer, upload_token)
+        if upload_error:
+            return upload_error
 
         if str(payload.get("reservation_ref", "")) != reservation_id:
             return jsonify({"error": "Upload token does not match reservation"}), 403
+
+        try:
+            documents_fingerprint = _build_documents_fingerprint(
+                request.files["frontimage"],
+                request.files["backimage"],
+            )
+        except BadRequest as e:
+            return jsonify({"error": getattr(e, "description", None) or str(e)}), 400
+
+        validation_token = (
+            request.headers.get("X-Document-Validation-Token")
+            or request.form.get("documentValidationToken")
+        )
+        skip_ocr = False
+        if validation_token:
+            try:
+                validation_payload = serializer.loads(
+                    validation_token,
+                    salt=DOCUMENT_VALIDATION_TOKEN_SALT,
+                    max_age=DOCUMENT_VALIDATION_TOKEN_MAX_AGE_SECONDS,
+                )
+                if str(validation_payload.get("reservation_ref", "")) != reservation_id:
+                    return jsonify({"error": "Document validation token does not match reservation"}), 403
+                if validation_payload.get("fingerprint", "") != documents_fingerprint:
+                    return jsonify({
+                        "error": "Document validation token does not match uploaded document content"
+                    }), 403
+                skip_ocr = True
+            except SignatureExpired:
+                return jsonify({"error": "Document validation token expired"}), 401
+            except BadSignature:
+                return jsonify({"error": "Invalid document validation token"}), 401
 
         # Validate Portale Alloggi specific fields
         try:
@@ -125,8 +272,13 @@ def upload_file():
         except ValueError as e:
             raise BadRequest(f"Invalid date format: {str(e)}") from e
 
+        # Check reservation existence before OCR-heavy processing
+        reservation = get_reservation_by_id(reservation_id)
+        if not reservation:
+            return jsonify({"error": "Reservation not found"}), 404
+
         cf = form_data['cf']
-        # Create a folder for the reservation if it doesn't exist
+        # Create a folder for the reservation only after reservation existence is confirmed.
         reservation_folder = os.path.join(UPLOAD_FOLDER, reservation_id)
         os.makedirs(reservation_folder, exist_ok=True)
 
@@ -134,38 +286,56 @@ def upload_file():
         validation_results = {}
 
         # Process images
+        invalid_files = []
         for key in ['frontimage', 'backimage']:
             file = request.files[key]
-            if file and allowed_file(file.filename):
-                filename = sanitize_filename(form_data['name'], form_data['surname'], cf, key)
-                filepath = save_file(file, reservation_folder, filename)
-                if not filepath:
-                    raise BadRequest(f"Failed to save {key}")
-                files[key] = filename
+            file_error = _validate_upload_file(file, key)
+            if file_error:
+                raise BadRequest(file_error)
 
-                # Validate document text
-                is_valid, text = validate_document(filepath)
-                validation_results[key] = {"valid": is_valid, "extracted_text": text}
-                if not is_valid:
-                    raise BadRequest(f"Invalid document for {key}")
+            filename = sanitize_filename(form_data['name'], form_data['surname'], cf, key)
+            filepath = save_file(file, reservation_folder, filename)
+            if not filepath:
+                raise BadRequest(f"Failed to save {key}")
+            files[key] = filename
+
+            # Validate document text
+            if skip_ocr:
+                validation_results[key] = {"valid": True, "skipped": True}
             else:
-                raise BadRequest(f"Invalid file type for {key}")
+                validation_result = validate_document(filepath)
+                validation_results[key] = validation_result
+                if not validation_result.get("valid", False):
+                    invalid_files.append({
+                        "field": key,
+                        "reason": validation_result.get("error", "Invalid document"),
+                        "confidence": validation_result.get("confidence", 0.0),
+                    })
+
+        if invalid_files:
+            for saved_filename in files.values():
+                try:
+                    os.remove(os.path.join(reservation_folder, saved_filename))
+                except OSError:
+                    pass
+            return jsonify({
+                "error": "Document validation failed",
+                "retryable": True,
+                "invalid_files": invalid_files,
+                "validation": validation_results,
+            }), 422
 
         # Process selfie
         selfie = request.files['selfie']
-        if selfie and allowed_file(selfie.filename):
-            selfie_filename = sanitize_filename(form_data['name'], form_data['surname'], cf, "selfie")
-            selfie_path = save_file(selfie, reservation_folder, selfie_filename)
-            if not selfie_path:
-                raise BadRequest("Failed to save selfie")
-            files['selfie'] = selfie_filename
-        else:
-            raise BadRequest("Invalid file type for selfie")
+        selfie_error = _validate_upload_file(selfie, "selfie")
+        if selfie_error:
+            raise BadRequest(selfie_error)
 
-        # Handle client and reservation
-        reservation = get_reservation_by_id(reservation_id)
-        if not reservation:
-            return jsonify({"error": "Reservation not found"}), 404
+        selfie_filename = sanitize_filename(form_data['name'], form_data['surname'], cf, "selfie")
+        selfie_path = save_file(selfie, reservation_folder, selfie_filename)
+        if not selfie_path:
+            raise BadRequest("Failed to save selfie")
+        files['selfie'] = selfie_filename
 
         client = get_client_by_cf(cf)
         client = add_or_update_client(form_data, client)
@@ -226,14 +396,14 @@ def upload_file():
 
                     if email_result.get('status') == 'success':
                         logger.info("Admin notification sent successfully", extra=safe_extra_fields({
-                            'admin_email': admin_email,
+                            'admin_email_domain': admin_email.split("@")[1] if "@" in admin_email else "unknown",
                             'reservation_id': reservation_id,
                             'client_name': f"{form_data['name']} {form_data['surname']}",
                             'notification_result': 'success'
                         }))
                     else:
                         logger.warning("Admin notification failed", extra=safe_extra_fields({
-                            'admin_email': admin_email if 'admin_email' in locals() else 'unknown',
+                            'admin_email': admin_email or 'unknown',
                             'error_message': email_result.get('message', 'Unknown error') if email_result else 'Unknown error',
                             'notification_result': 'failed'
                         }))
@@ -279,4 +449,62 @@ def upload_file():
     except Exception:
         # General exception for unexpected errors
         logger.exception("Unexpected error during reservation upload")
+        return jsonify({"error": "Internal server error"}), 500
+
+
+@upload_bp.route('/upload/validate-documents', methods=['POST'])
+@limiter.limit("20 per minute")
+@log_route(include_request_data=False, include_response_data=False)
+@log_database_operation("READ")
+@log_performance(threshold_ms=2000)
+def validate_upload_documents():
+    """Pre-validate uploaded documents with OCR before full form submission."""
+    try:
+        required_files = ['frontimage', 'backimage', 'selfie']
+        if any(file_key not in request.files for file_key in required_files):
+            raise BadRequest("Missing one or more required image files")
+
+        reservation_id = str(request.form.get("reservationId", "")).strip()
+        if not reservation_id:
+            raise BadRequest("Missing reservationId")
+
+        serializer = _build_serializer()
+        upload_token = request.headers.get("X-Upload-Token") or request.form.get("uploadToken")
+        payload, upload_error = _parse_upload_token(serializer, upload_token)
+        if upload_error:
+            return upload_error
+        if str(payload.get("reservation_ref", "")) != reservation_id:
+            return jsonify({"error": "Upload token does not match reservation"}), 403
+
+        reservation = get_reservation_by_id(reservation_id)
+        if not reservation:
+            return jsonify({"error": "Reservation not found"}), 404
+
+        files_payload = {file_key: request.files[file_key] for file_key in required_files}
+        fingerprint = _build_documents_fingerprint(
+            files_payload["frontimage"],
+            files_payload["backimage"],
+        )
+        validation_results, invalid_files = _validate_documents_payload(reservation_id, files_payload)
+        if invalid_files:
+            return jsonify({
+                "error": "Document validation failed",
+                "retryable": True,
+                "invalid_files": invalid_files,
+                "validation": validation_results,
+            }), 422
+
+        validation_token = serializer.dumps(
+            {"reservation_ref": reservation_id, "fingerprint": fingerprint},
+            salt=DOCUMENT_VALIDATION_TOKEN_SALT,
+        )
+        return jsonify({
+            "message": "Document validation successful",
+            "validation": validation_results,
+            "document_validation_token": validation_token,
+        }), 200
+    except BadRequest as e:
+        return jsonify({"error": getattr(e, "description", None) or str(e)}), 400
+    except Exception:
+        logger.exception("Unexpected error during document pre-validation")
         return jsonify({"error": "Internal server error"}), 500

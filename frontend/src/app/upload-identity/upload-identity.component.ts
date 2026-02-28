@@ -8,7 +8,7 @@ import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { ToastModule } from 'primeng/toast';
 import { ProgressBarModule } from 'primeng/progressbar';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-upload-identity',
@@ -25,7 +25,11 @@ export class UploadIdentityComponent {
   selfiePreview: string | ArrayBuffer | null = null;
   @Output() formDataEmitter = new EventEmitter<FormGroup>();
 
-  constructor(private fb: FormBuilder, private messageService: MessageService) {
+  constructor(
+    private fb: FormBuilder,
+    private messageService: MessageService,
+    private readonly translocoService: TranslocoService
+  ) {
     this.uploadForm = this.fb.group({
       frontimage: [null, Validators.required],
       backimage: [null, Validators.required],
@@ -41,19 +45,19 @@ export class UploadIdentityComponent {
       if (file.size > 5000000) {
         this.messageService.add({
           severity: 'error',
-          summary: 'File Too Large',
-          detail: 'File size must be less than 5MB'
+          summary: this.translocoService.translate('error'),
+          detail: this.translocoService.translate('upload-file-too-large')
         });
         return;
       }
 
       // Validate file type
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+      const allowedTypes = ['image/jpeg', 'image/png'];
       if (!allowedTypes.includes(file.type)) {
         this.messageService.add({
           severity: 'error',
-          summary: 'Invalid File Type',
-          detail: 'Only JPEG, PNG, and GIF images are allowed'
+          summary: this.translocoService.translate('error'),
+          detail: this.translocoService.translate('upload-invalid-file-type')
         });
         return;
       }
@@ -67,13 +71,14 @@ export class UploadIdentityComponent {
       reader.readAsDataURL(file);
 
       this.uploadForm.patchValue({ [type]: file });
+      this.uploadForm.get(type)?.setErrors(null);
       this.formDataEmitter.emit(this.uploadForm);
 
       // Show success message
       this.messageService.add({
         severity: 'success',
-        summary: 'Image Uploaded',
-        detail: `${type} image uploaded successfully`
+        summary: this.translocoService.translate('success'),
+        detail: this.translocoService.translate('upload-image-uploaded-success')
       });
     }
   }
@@ -90,8 +95,8 @@ export class UploadIdentityComponent {
 
     this.messageService.add({
       severity: 'info',
-      summary: 'Image Removed',
-      detail: `${type} image removed`
+      summary: this.translocoService.translate('success'),
+      detail: this.translocoService.translate('upload-image-removed')
     });
   }
 

@@ -7,6 +7,9 @@ on:
 #      - completed
 
   push:
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
     branches:
       - dev  # This ensures it runs only when changes are pushed to dev (e.g., after a PR merge)
   workflow_dispatch:
@@ -15,8 +18,6 @@ jobs:
   compile:
     name: Compile Angular and Flask
     uses: ./.github/workflows/build.yml
-
-
 
   deploy-images:
     environment: pre-prod
@@ -34,7 +35,6 @@ jobs:
 #          run-id: ${{ github.event.workflow_run.id }}
 #          github-token: ${{ secrets.GITHUB_TOKEN }}
 
-
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -50,8 +50,7 @@ jobs:
           else
             echo "TAG=alpha" >> $GITHUB_ENV
           fi
-
-          
+ 
       - name: Create folder
         run: mkdir -p frontend/dist/remote-checkin
 

@@ -1,11 +1,13 @@
 import pytest
+from io import BytesIO
 from flask import Flask
 from pathlib import Path
 from sqlalchemy import text
 from itsdangerous import URLSafeTimedSerializer
 from routes.upload_reservation_routes import upload_bp
+from extensions import limiter
 from database import engine, Base, SessionLocal
-from models import Reservation
+from models import Reservation, ClientReservations
 from routes.upload_reservation_routes import UPLOAD_TOKEN_SALT
 
 # Disable pylint warnings
@@ -20,7 +22,9 @@ def app():
     app = Flask(__name__)
     app.config.from_object("config.TestConfig")
     app.config["JWT_SECRET_KEY"] = "test-secret"
+    app.config["RATELIMIT_ENABLED"] = False
     app.register_blueprint(upload_bp)
+    limiter.init_app(app)
     Base.metadata.create_all(bind=engine)
     yield app
     with engine.connect() as conn:
@@ -41,6 +45,21 @@ def client(app):
     Return a test client for simulating API requests on a Flask application.
     """
     return app.test_client()
+
+
+@pytest.fixture(autouse=True)
+def mock_ocr_validation(monkeypatch):
+    """Avoid dependence on local tesseract binary for route tests."""
+    monkeypatch.setattr(
+        "routes.upload_reservation_routes.validate_document",
+        lambda *_: {
+            "valid": True,
+            "error": "",
+            "extracted_text": "Valid OCR text",
+            "confidence": 80.0,
+            "variant": "gray",
+        },
+    )
 
 
 def _build_upload_token(app, reservation_reference: str):
@@ -90,10 +109,22 @@ def init_db():
         end_date="2024-06-10",
         email="guest@example.com"
     )
-    db.add(reservation)
+    second_reservation = Reservation(
+        id_reference="67890",
+        start_date="2024-07-01",
+        end_date="2024-07-10",
+        email="guest2@example.com"
+    )
+    db.add_all([reservation, second_reservation])
     db.commit()
     db.refresh(reservation)
+    db.refresh(second_reservation)
     yield db
+    db.query(ClientReservations).filter_by(id_reservation=reservation.id).delete()
+    db.query(ClientReservations).filter_by(id_reservation=second_reservation.id).delete()
+    db.query(Reservation).filter_by(id_reference="12345").delete()
+    db.query(Reservation).filter_by(id_reference="67890").delete()
+    db.commit()
     db.close()
 
 def test_successful_upload(client, init_db):
@@ -112,8 +143,6 @@ def test_successful_upload(client, init_db):
             data=data,
             content_type='multipart/form-data'
         )
-
-        print("PRINTING ", response.json)  # Debugging
 
         assert response.status_code == 200
 
@@ -151,9 +180,25 @@ def test_upload_nonexistent_reservation(client):
         data["backimage"] = (back_file, "back.jpeg", "image/jpeg")
         data["selfie"] = (selfie_file, "selfie.jpeg", "image/jpeg")
         response = client.post("/api/v1/upload", data=data, content_type='multipart/form-data')
-        print(response.json)
         assert response.status_code == 404
         assert "Reservation not found" in response.get_json()["error"]
+
+
+def test_upload_nonexistent_reservation_does_not_create_folder(client, tmp_path, monkeypatch):
+    """Reservation folder must not be created when reservation does not exist."""
+    monkeypatch.setattr("routes.upload_reservation_routes.UPLOAD_FOLDER", str(tmp_path))
+    token = _build_upload_token(client.application, "99999")
+    with open(TEST_IMAGES_DIR / "front.jpeg", "rb") as front_file, \
+         open(TEST_IMAGES_DIR / "back.jpeg", "rb") as back_file, \
+         open(TEST_IMAGES_DIR / "selfie.jpeg", "rb") as selfie_file:
+        data = _base_upload_form("99999", token)
+        data["frontimage"] = (front_file, "front.jpeg", "image/jpeg")
+        data["backimage"] = (back_file, "back.jpeg", "image/jpeg")
+        data["selfie"] = (selfie_file, "selfie.jpeg", "image/jpeg")
+        response = client.post("/api/v1/upload", data=data, content_type="multipart/form-data")
+
+    assert response.status_code == 404
+    assert not (tmp_path / "99999").exists()
 
 
 def test_upload_invalid_gender_returns_validation_error(client):
@@ -173,3 +218,322 @@ def test_upload_invalid_gender_returns_validation_error(client):
     payload = response.get_json()
     assert "error" in payload
     assert "Traceback" not in payload["error"]
+
+
+def test_validate_documents_success_returns_token(client, init_db):
+    """Pre-validation should return a reusable validation token."""
+    token = _build_upload_token(client.application, "12345")
+    with open(TEST_IMAGES_DIR / "front.jpeg", "rb") as front_file, \
+         open(TEST_IMAGES_DIR / "back.jpeg", "rb") as back_file, \
+         open(TEST_IMAGES_DIR / "selfie.jpeg", "rb") as selfie_file:
+        data = {
+            "reservationId": "12345",
+            "frontimage": (front_file, "front.jpeg", "image/jpeg"),
+            "backimage": (back_file, "back.jpeg", "image/jpeg"),
+            "selfie": (selfie_file, "selfie.jpeg", "image/jpeg"),
+        }
+        response = client.post(
+            "/api/v1/upload/validate-documents",
+            data=data,
+            content_type="multipart/form-data",
+            headers={"X-Upload-Token": token},
+        )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["message"] == "Document validation successful"
+    assert "document_validation_token" in payload
+
+
+def test_validate_documents_invalid_returns_422(client, init_db, monkeypatch):
+    """Pre-validation should report invalid files without saving client data."""
+    monkeypatch.setattr(
+        "routes.upload_reservation_routes.validate_document",
+        lambda *_: {
+            "valid": False,
+            "error": "No valid text detected",
+            "extracted_text": "",
+            "confidence": 12.0,
+            "variant": "gray",
+        },
+    )
+    token = _build_upload_token(client.application, "12345")
+    with open(TEST_IMAGES_DIR / "front.jpeg", "rb") as front_file, \
+         open(TEST_IMAGES_DIR / "back.jpeg", "rb") as back_file, \
+         open(TEST_IMAGES_DIR / "selfie.jpeg", "rb") as selfie_file:
+        data = {
+            "reservationId": "12345",
+            "frontimage": (front_file, "front.jpeg", "image/jpeg"),
+            "backimage": (back_file, "back.jpeg", "image/jpeg"),
+            "selfie": (selfie_file, "selfie.jpeg", "image/jpeg"),
+        }
+        response = client.post(
+            "/api/v1/upload/validate-documents",
+            data=data,
+            content_type="multipart/form-data",
+            headers={"X-Upload-Token": token},
+        )
+
+    assert response.status_code == 422
+    payload = response.get_json()
+    assert payload["retryable"] is True
+    assert payload["invalid_files"][0]["field"] == "frontimage"
+
+
+def test_upload_invalid_ocr_cleans_saved_document_files(client, init_db, monkeypatch, tmp_path):
+    """When OCR fails, previously saved front/back files should be removed."""
+    monkeypatch.setattr("routes.upload_reservation_routes.UPLOAD_FOLDER", str(tmp_path))
+    monkeypatch.setattr(
+        "routes.upload_reservation_routes.validate_document",
+        lambda *_: {
+            "valid": False,
+            "error": "No valid text detected",
+            "extracted_text": "",
+            "confidence": 12.0,
+            "variant": "gray",
+        },
+    )
+    token = _build_upload_token(client.application, "12345")
+    with open(TEST_IMAGES_DIR / "front.jpeg", "rb") as front_file, \
+         open(TEST_IMAGES_DIR / "back.jpeg", "rb") as back_file, \
+         open(TEST_IMAGES_DIR / "selfie.jpeg", "rb") as selfie_file:
+        data = _base_upload_form("12345", token)
+        data["frontimage"] = (front_file, "front.jpeg", "image/jpeg")
+        data["backimage"] = (back_file, "back.jpeg", "image/jpeg")
+        data["selfie"] = (selfie_file, "selfie.jpeg", "image/jpeg")
+        response = client.post("/api/v1/upload", data=data, content_type="multipart/form-data")
+
+    assert response.status_code == 422
+    reservation_dir = tmp_path / "12345"
+    assert reservation_dir.exists()
+    assert list(reservation_dir.iterdir()) == []
+
+
+def test_upload_with_document_validation_token_skips_ocr(client, init_db, monkeypatch):
+    """Final upload should accept prevalidated token and skip OCR pass."""
+    token = _build_upload_token(client.application, "12345")
+    with open(TEST_IMAGES_DIR / "front.jpeg", "rb") as front_file, \
+         open(TEST_IMAGES_DIR / "back.jpeg", "rb") as back_file, \
+         open(TEST_IMAGES_DIR / "selfie.jpeg", "rb") as selfie_file:
+        validation_data = {
+            "reservationId": "12345",
+            "frontimage": (front_file, "front.jpeg", "image/jpeg"),
+            "backimage": (back_file, "back.jpeg", "image/jpeg"),
+            "selfie": (selfie_file, "selfie.jpeg", "image/jpeg"),
+        }
+        validate_resp = client.post(
+            "/api/v1/upload/validate-documents",
+            data=validation_data,
+            content_type="multipart/form-data",
+            headers={"X-Upload-Token": token},
+        )
+
+    assert validate_resp.status_code == 200
+    validation_token = validate_resp.get_json()["document_validation_token"]
+
+    calls = {"count": 0}
+
+    def failing_ocr(*_args, **_kwargs):
+        calls["count"] += 1
+        return {"valid": False, "error": "Should not run", "confidence": 0.0, "variant": None, "extracted_text": ""}
+
+    monkeypatch.setattr("routes.upload_reservation_routes.validate_document", failing_ocr)
+
+    with open(TEST_IMAGES_DIR / "front.jpeg", "rb") as front_file, \
+         open(TEST_IMAGES_DIR / "back.jpeg", "rb") as back_file, \
+         open(TEST_IMAGES_DIR / "selfie.jpeg", "rb") as selfie_file:
+        data = _base_upload_form("12345", token)
+        data["frontimage"] = (front_file, "front.jpeg", "image/jpeg")
+        data["backimage"] = (back_file, "back.jpeg", "image/jpeg")
+        data["selfie"] = (selfie_file, "selfie.jpeg", "image/jpeg")
+        response = client.post(
+            "/api/v1/upload",
+            data=data,
+            content_type="multipart/form-data",
+            headers={"X-Upload-Token": token, "X-Document-Validation-Token": validation_token},
+        )
+
+    assert response.status_code == 200
+    assert calls["count"] == 0
+
+
+def test_upload_without_validation_token_returns_422_on_ocr_failure(client, init_db, monkeypatch):
+    """Final upload should fail when OCR fails and no prevalidation token is supplied."""
+    monkeypatch.setattr(
+        "routes.upload_reservation_routes.validate_document",
+        lambda *_: {
+            "valid": False,
+            "error": "No valid text detected",
+            "extracted_text": "",
+            "confidence": 5.0,
+            "variant": "gray",
+        },
+    )
+    token = _build_upload_token(client.application, "12345")
+    with open(TEST_IMAGES_DIR / "front.jpeg", "rb") as front_file, \
+         open(TEST_IMAGES_DIR / "back.jpeg", "rb") as back_file, \
+         open(TEST_IMAGES_DIR / "selfie.jpeg", "rb") as selfie_file:
+        data = _base_upload_form("12345", token)
+        data["frontimage"] = (front_file, "front.jpeg", "image/jpeg")
+        data["backimage"] = (back_file, "back.jpeg", "image/jpeg")
+        data["selfie"] = (selfie_file, "selfie.jpeg", "image/jpeg")
+        response = client.post(
+            "/api/v1/upload",
+            data=data,
+            content_type="multipart/form-data",
+            headers={"X-Upload-Token": token},
+        )
+
+    assert response.status_code == 422
+    payload = response.get_json()
+    assert payload["retryable"] is True
+    assert payload["invalid_files"][0]["field"] == "frontimage"
+
+
+def test_upload_ignores_client_mime_when_signature_is_valid(client, init_db):
+    """Validation should rely on file signature even if client MIME is wrong."""
+    token = _build_upload_token(client.application, "12345")
+    with open(TEST_IMAGES_DIR / "front.jpeg", "rb") as front_file, \
+         open(TEST_IMAGES_DIR / "back.jpeg", "rb") as back_file, \
+         open(TEST_IMAGES_DIR / "selfie.jpeg", "rb") as selfie_file:
+        data = _base_upload_form("12345", token)
+        data["frontimage"] = (front_file, "front.jpeg", "text/plain")
+        data["backimage"] = (back_file, "back.jpeg", "image/jpeg")
+        data["selfie"] = (selfie_file, "selfie.jpeg", "image/jpeg")
+        response = client.post("/api/v1/upload", data=data, content_type="multipart/form-data")
+
+    assert response.status_code == 200
+
+
+def test_upload_invalid_file_signature_returns_validation_error(client, init_db):
+    """Validation: spoofed non-image payload should return 400."""
+    token = _build_upload_token(client.application, "12345")
+    with open(TEST_IMAGES_DIR / "back.jpeg", "rb") as back_file, \
+         open(TEST_IMAGES_DIR / "selfie.jpeg", "rb") as selfie_file:
+        data = _base_upload_form("12345", token)
+        data["frontimage"] = (BytesIO(b"not-an-image"), "front.jpeg", "image/jpeg")
+        data["backimage"] = (back_file, "back.jpeg", "image/jpeg")
+        data["selfie"] = (selfie_file, "selfie.jpeg", "image/jpeg")
+        response = client.post("/api/v1/upload", data=data, content_type="multipart/form-data")
+
+    assert response.status_code == 400
+    assert response.get_json()["error"] == "Invalid MIME type for frontimage"
+
+
+@pytest.mark.usefixtures("init_db")
+def test_validate_documents_invalid_file_signature_returns_validation_error(client):
+    """Pre-validation endpoint should reject spoofed image signatures."""
+    token = _build_upload_token(client.application, "12345")
+    data = {
+        "reservationId": "12345",
+        "frontimage": (BytesIO(b"not-an-image"), "front.jpeg", "image/jpeg"),
+        "backimage": (BytesIO(b"\xff\xd8\xff" + b"ok"), "back.jpeg", "image/jpeg"),
+        "selfie": (BytesIO(b"\xff\xd8\xff" + b"ok"), "selfie.jpeg", "image/jpeg"),
+    }
+
+    response = client.post(
+        "/api/v1/upload/validate-documents",
+        data=data,
+        content_type="multipart/form-data",
+        headers={"X-Upload-Token": token},
+    )
+    assert response.status_code == 400
+    assert response.get_json()["error"] == "Invalid MIME type for frontimage"
+
+
+@pytest.mark.usefixtures("init_db")
+def test_upload_document_validation_token_fingerprint_mismatch_returns_403(client):
+    """Final upload should reject validation tokens bound to different file bytes."""
+    token = _build_upload_token(client.application, "12345")
+
+    with open(TEST_IMAGES_DIR / "front.jpeg", "rb") as front_file, \
+         open(TEST_IMAGES_DIR / "back.jpeg", "rb") as back_file, \
+         open(TEST_IMAGES_DIR / "selfie.jpeg", "rb") as selfie_file:
+        validate_resp = client.post(
+            "/api/v1/upload/validate-documents",
+            data={
+                "reservationId": "12345",
+                "frontimage": (front_file, "front.jpeg", "image/jpeg"),
+                "backimage": (back_file, "back.jpeg", "image/jpeg"),
+                "selfie": (selfie_file, "selfie.jpeg", "image/jpeg"),
+            },
+            content_type="multipart/form-data",
+            headers={"X-Upload-Token": token},
+        )
+
+    assert validate_resp.status_code == 200
+    validation_token = validate_resp.get_json()["document_validation_token"]
+
+    altered_front = BytesIO(b"\xff\xd8\xff" + b"altered-content")
+    with open(TEST_IMAGES_DIR / "back.jpeg", "rb") as back_file, \
+         open(TEST_IMAGES_DIR / "selfie.jpeg", "rb") as selfie_file:
+        data = _base_upload_form("12345", token)
+        data["frontimage"] = (altered_front, "front.jpeg", "image/jpeg")
+        data["backimage"] = (back_file, "back.jpeg", "image/jpeg")
+        data["selfie"] = (selfie_file, "selfie.jpeg", "image/jpeg")
+        response = client.post(
+            "/api/v1/upload",
+            data=data,
+            content_type="multipart/form-data",
+            headers={"X-Upload-Token": token, "X-Document-Validation-Token": validation_token},
+        )
+
+    assert response.status_code == 403
+    assert response.get_json()["error"] == "Document validation token does not match uploaded document content"
+
+
+@pytest.mark.usefixtures("init_db")
+def test_upload_document_validation_token_replay_across_reservations_returns_403(client):
+    """Validation token from reservation A must not authorize reservation B upload."""
+    token_res_a = _build_upload_token(client.application, "12345")
+    token_res_b = _build_upload_token(client.application, "67890")
+
+    with open(TEST_IMAGES_DIR / "front.jpeg", "rb") as front_file, \
+         open(TEST_IMAGES_DIR / "back.jpeg", "rb") as back_file, \
+         open(TEST_IMAGES_DIR / "selfie.jpeg", "rb") as selfie_file:
+        validate_resp = client.post(
+            "/api/v1/upload/validate-documents",
+            data={
+                "reservationId": "12345",
+                "frontimage": (front_file, "front.jpeg", "image/jpeg"),
+                "backimage": (back_file, "back.jpeg", "image/jpeg"),
+                "selfie": (selfie_file, "selfie.jpeg", "image/jpeg"),
+            },
+            content_type="multipart/form-data",
+            headers={"X-Upload-Token": token_res_a},
+        )
+
+    assert validate_resp.status_code == 200
+    validation_token = validate_resp.get_json()["document_validation_token"]
+
+    with open(TEST_IMAGES_DIR / "front.jpeg", "rb") as front_file, \
+         open(TEST_IMAGES_DIR / "back.jpeg", "rb") as back_file, \
+         open(TEST_IMAGES_DIR / "selfie.jpeg", "rb") as selfie_file:
+        data = _base_upload_form("67890", token_res_b)
+        data["frontimage"] = (front_file, "front.jpeg", "image/jpeg")
+        data["backimage"] = (back_file, "back.jpeg", "image/jpeg")
+        data["selfie"] = (selfie_file, "selfie.jpeg", "image/jpeg")
+        response = client.post(
+            "/api/v1/upload",
+            data=data,
+            content_type="multipart/form-data",
+            headers={"X-Upload-Token": token_res_b, "X-Document-Validation-Token": validation_token},
+        )
+
+    assert response.status_code == 403
+    assert response.get_json()["error"] == "Document validation token does not match reservation"
+
+
+def test_upload_oversized_file_returns_validation_error(client, init_db, monkeypatch):
+    """Validation: oversized image should be rejected before OCR processing."""
+    monkeypatch.setattr("routes.upload_reservation_routes.MAX_UPLOAD_FILE_SIZE_BYTES", 32)
+    token = _build_upload_token(client.application, "12345")
+    data = _base_upload_form("12345", token)
+    data["frontimage"] = (BytesIO(b"\xff\xd8\xff" + b"x" * 128), "front.jpeg", "image/jpeg")
+    data["backimage"] = (BytesIO(b"\xff\xd8\xff" + b"ok"), "back.jpeg", "image/jpeg")
+    data["selfie"] = (BytesIO(b"\xff\xd8\xff" + b"ok"), "selfie.jpeg", "image/jpeg")
+
+    response = client.post("/api/v1/upload", data=data, content_type="multipart/form-data")
+
+    assert response.status_code == 400
+    assert response.get_json()["error"] == "File too large for frontimage"

@@ -93,6 +93,9 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
   reservationId: string | null = '';
   reservationDetails: any = null;
   uploadToken: string | null = null;
+  documentValidationToken: string | null = null;
+  documentsValidated = false;
+  isValidatingDocuments = false;
   registeredClientsCount: number = 0;
   canRegister: boolean = true;
 
@@ -183,8 +186,8 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
       }
 
       return null;
-    } catch (error) {
-      console.error('Error in date validation:', error);
+    } catch (_error) {
+      console.error('Error in date validation', _error);
       return null; // Don't block submission on validation errors
     }
   }
@@ -277,8 +280,6 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
         this.checkRegistrationCapacity();
       },
       error: (error) => {
-        console.warn('Error loading reservation details:', error);
-
         // Block registration when capacity cannot be verified
         this.canRegister = false;
         this.disableFormControls();
@@ -362,8 +363,8 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
           }));
         }
       }
-    } catch (error) {
-      console.error('Error loading countries:', error);
+    } catch (_error) {
+      console.error('Error loading countries', _error);
       // Use centralized fallback data
       this.countryOptions = [...FALLBACK_COUNTRY_OPTIONS];
       this.countryMappings = { ...FALLBACK_COUNTRY_MAPPINGS };
@@ -388,8 +389,8 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
 
       this.dataLoaded = true;
       this.isLoadingData = false;
-    } catch (error) {
-      console.error('Error loading reference data:', error);
+    } catch (_error) {
+      console.error('Error loading reference data', _error);
       this.isLoadingData = false;
     }
   }
@@ -416,8 +417,8 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
           }));
         }
       }
-    } catch (error) {
-      console.error('Error loading document types:', error);
+    } catch (_error) {
+      console.error('Error loading document types', _error);
       // Use centralized fallback data
       this.documentTypeOptions = [...FALLBACK_DOCUMENT_TYPE_OPTIONS];
       this.documentTypeMappings = { ...FALLBACK_DOCUMENT_TYPE_MAPPINGS };
@@ -437,8 +438,8 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
         }));
         this.provinceMappings = provinceAcronyms;
       }
-    } catch (error) {
-      console.error('Error loading province acronyms:', error);
+    } catch (_error) {
+      console.error('Error loading province acronyms', _error);
     }
   }
 
@@ -480,8 +481,8 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
         // Set loading states to false
         this.loadingLuogoEmissioneOptions = false;
       }
-    } catch (error) {
-      console.error('Error loading municipalities data:', error);
+    } catch (_error) {
+      console.error('Error loading municipalities data', _error);
       // Use centralized fallback data
       this.municipalityOptions = [...FALLBACK_MUNICIPALITY_OPTIONS];
       this.luogoEmissioneOptions = [...FALLBACK_MUNICIPALITY_OPTIONS];
@@ -498,7 +499,8 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
   handleFormData(formData: FormGroup) {
     // Here you can do anything with the received FormData
     this.uploadForm = formData;
-    console.log(this.uploadForm.get('frontimage'))
+    this.documentsValidated = false;
+    this.documentValidationToken = null;
     /*     this.messageService.add({
           severity: 'success',
           summary: 'Success',
@@ -507,11 +509,8 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
   }
 
   uploadReservationData() {
-    console.log("uploadReservationData called");  // For debugging
-
     // Prevent duplicate submissions immediately
     if (this.isSubmitting) {
-      console.log("Submission already in progress");
       return;
     }
     this.isSubmitting = true;
@@ -635,10 +634,19 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.uploadService.uploadImages(formData, this.uploadToken).subscribe({
+    if (!this.documentsValidated || !this.documentValidationToken) {
+      this.messageService.add({
+        severity: 'error',
+        summary: this.translocoService.translate('error'),
+        detail: this.translocoService.translate('checkin-validate-before-submit')
+      });
+      this.isSubmitting = false;
+      return;
+    }
+
+    this.uploadService.uploadImages(formData, this.uploadToken, this.documentValidationToken).subscribe({
       next: (response) => {
         // Show success message with API response
-        console.log(response)
         this.clearDraft();
         this.messageService.add({
           severity: 'success',
@@ -652,8 +660,28 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         // Handle error response
-        console.log(error)
-        const errorMessage = error.error?.error || 'Upload failed';
+        const invalidFiles = (error?.error?.invalid_files || []) as Array<{ field: string; reason?: string }>;
+        const retryable = !!error?.error?.retryable;
+        if (invalidFiles.length > 0) {
+          invalidFiles.forEach(({ field }) => {
+            const control = this.uploadForm.get(field);
+            if (control) {
+              control.setErrors({ serverInvalid: true });
+              control.markAsTouched();
+            }
+          });
+        }
+
+        let errorMessage = error.error?.error || this.translocoService.translate('images-uploaded-fail');
+        if (invalidFiles.length > 0) {
+          this.documentsValidated = false;
+          this.documentValidationToken = null;
+        }
+        if (retryable && invalidFiles.length > 0) {
+          errorMessage = this.translocoService.translate('checkin-document-check-failed-with-reasons', {
+            details: this.formatInvalidFileErrors(invalidFiles)
+          });
+        }
 
         this.messageService.add({
           severity: 'error',
@@ -666,6 +694,103 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
 
   }
 
+  validateDocumentsBeforeSubmit(): void {
+    if (this.isValidatingDocuments) {
+      return;
+    }
+    if (!this.canRegister) {
+      return;
+    }
+    if (this.uploadForm.invalid) {
+      this.messageService.add({
+        severity: 'error',
+        summary: this.translocoService.translate('error'),
+        detail: this.translocoService.translate('checkin-upload-all-images-first')
+      });
+      return;
+    }
+    if (!this.uploadToken) {
+      this.messageService.add({
+        severity: 'error',
+        summary: this.translocoService.translate('error'),
+        detail: this.translocoService.translate('upload-token-missing')
+      });
+      return;
+    }
+
+    this.isValidatingDocuments = true;
+    const formData = new FormData();
+    if (this.reservationId) {
+      formData.append('reservationId', this.reservationId.toString());
+    }
+    const frontImage = this.uploadForm.get('frontimage')!.value as File | null;
+    const backImage = this.uploadForm.get('backimage')!.value as File | null;
+    const selfieImage = this.uploadForm.get('selfie')!.value as File | null;
+    if (!frontImage || !backImage || !selfieImage) {
+      this.isValidatingDocuments = false;
+      this.messageService.add({
+        severity: 'error',
+        summary: this.translocoService.translate('error'),
+        detail: this.translocoService.translate('checkin-upload-all-images-first')
+      });
+      return;
+    }
+    formData.append('frontimage', frontImage);
+    formData.append('backimage', backImage);
+    formData.append('selfie', selfieImage);
+
+    const validateSub = this.uploadService.validateDocuments(formData, this.uploadToken).subscribe({
+      next: (response) => {
+        const validationToken = response?.document_validation_token;
+        if (!validationToken) {
+          this.documentsValidated = false;
+          this.documentValidationToken = null;
+          this.messageService.add({
+            severity: 'error',
+            summary: this.translocoService.translate('error'),
+            detail: this.translocoService.translate('document-validation-token-missing')
+          });
+          this.isValidatingDocuments = false;
+          return;
+        }
+        this.documentsValidated = true;
+        this.documentValidationToken = validationToken;
+        this.messageService.add({
+          severity: 'success',
+          summary: this.translocoService.translate('success'),
+          detail: response?.message || this.translocoService.translate('checkin-documents-validated-success')
+        });
+        this.isValidatingDocuments = false;
+      },
+      error: (error) => {
+        const invalidFiles = (error?.error?.invalid_files || []) as Array<{ field: string; reason?: string }>;
+        invalidFiles.forEach(({ field }) => {
+          const control = this.uploadForm.get(field);
+          if (control) {
+            control.setErrors({ serverInvalid: true });
+            control.markAsTouched();
+          }
+        });
+
+        this.documentsValidated = false;
+        this.documentValidationToken = null;
+        let errorMessage = error?.error?.error || this.translocoService.translate('checkin-document-validation-failed');
+        if (invalidFiles.length > 0) {
+          errorMessage = this.translocoService.translate('checkin-document-check-failed-with-reasons', {
+            details: this.formatInvalidFileErrors(invalidFiles)
+          });
+        }
+        this.messageService.add({
+          severity: 'error',
+          summary: this.translocoService.translate('error'),
+          detail: errorMessage
+        });
+        this.isValidatingDocuments = false;
+      }
+    });
+    this.formSubscriptions.push(validateSub);
+  }
+
   /**
    * Format a Date object to YYYY-MM-DD string using local timezone
    * This avoids timezone shift issues that occur with toISOString()
@@ -675,6 +800,12 @@ export class RemoteCheckinComponent implements OnInit, OnDestroy {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  }
+
+  private formatInvalidFileErrors(invalidFiles: Array<{ field: string; reason?: string }>): string {
+    return invalidFiles
+      .map((item) => item.reason ? `${item.field}: ${item.reason}` : item.field)
+      .join(', ');
   }
 
   getImagePreview(type: 'frontimage' | 'backimage' | 'selfie'): string | null {

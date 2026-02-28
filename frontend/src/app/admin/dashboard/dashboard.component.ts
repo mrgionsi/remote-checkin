@@ -20,11 +20,14 @@ import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
 import { DialogModule } from 'primeng/dialog';
+import { RouterLink } from '@angular/router';
+import { ActivityService, ActivityItem, BackgroundJobItem } from '../../services/activity.service';
+import { environment } from '../../../environments/environments';
 
 
 @Component({
   selector: 'app-dashboard',
-  imports: [ToastModule, IconFieldModule, InputIconModule, Toast, ChartModule, TableModule, InputTextModule, TagModule, CommonModule, TranslocoPipe, ButtonModule, SelectModule, FormsModule, CardModule, DialogModule],
+  imports: [ToastModule, IconFieldModule, InputIconModule, Toast, ChartModule, TableModule, InputTextModule, TagModule, CommonModule, TranslocoPipe, ButtonModule, SelectModule, FormsModule, CardModule, DialogModule, RouterLink],
   providers: [MessageService],
   host: { ngSkipHydration: 'true' },
   templateUrl: './dashboard.component.html',
@@ -62,7 +65,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
   roomFilter: string = '';
   globalSearchTerm: string = '';
   recentReservations: any[] = [];
+  timelineItems: ActivityItem[] = [];
+  recentJobs: BackgroundJobItem[] = [];
   healthItems: Array<{ label: string; value: number; tone: 'neutral' | 'warning' | 'success' }> = [];
+  jobStatusFilter: string = '';
+  jobTypeFilter: string = '';
+  jobStatusOptions: Array<{ label: string; value: string }> = [];
 
   // Filter options
   statusOptions: Array<{ label: string; value: string }> = [];
@@ -74,14 +82,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // Loading and error states
   loadingReservations: boolean = false;
   loadingChart: boolean = false;
+  loadingTimeline: boolean = false;
+  loadingJobs: boolean = false;
   errorReservations: string | null = null;
   errorChart: string | null = null;
+  errorJobs: string | null = null;
 
   // Keyboard shortcuts
   showShortcuts: boolean = false;
 
   private subscriptions: Subscription[] = [];
   private componentId = Math.random().toString(36).substr(2, 9);
+  readonly enableJobsMonitor = environment.enableJobsMonitor;
 
   constructor(
     private reservationService: ReservationService,
@@ -89,7 +101,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     @Inject(PLATFORM_ID) private platformId: object,
     private messageService: MessageService,
-    private translocoService: TranslocoService
+    private translocoService: TranslocoService,
+    private activityService: ActivityService
   ) {
 
   }
@@ -104,7 +117,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
       'dashboard-filter-date-all',
       'dashboard-date-today',
       'dashboard-date-week',
-      'dashboard-date-month'
+      'dashboard-date-month',
+      'dashboard-jobs-filter-all-status',
+      'dashboard-jobs-status-queued',
+      'dashboard-jobs-status-running',
+      'dashboard-jobs-status-retrying',
+      'dashboard-jobs-status-succeeded',
+      'dashboard-jobs-status-failed'
     ];
 
     const sub = this.translocoService.selectTranslateObject(keys).subscribe((translations: any) => {
@@ -121,6 +140,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
         { label: translations[6], value: 'today' },
         { label: translations[7], value: 'week' },
         { label: translations[8], value: 'month' }
+      ];
+
+      this.jobStatusOptions = [
+        { label: translations[9], value: '' },
+        { label: translations[10], value: 'queued' },
+        { label: translations[11], value: 'running' },
+        { label: translations[12], value: 'retrying' },
+        { label: translations[13], value: 'succeeded' },
+        { label: translations[14], value: 'failed' }
       ];
     });
 
@@ -219,6 +247,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
           }
         });
         this.subscriptions.push(reservationSub);
+        this.loadTimeline(structureId);
+        if (this.enableJobsMonitor) {
+          this.loadRecentJobs();
+        }
 
         // Subscribe to monthly reservations and store subscription
         this.loadingChart = true;
@@ -252,8 +284,131 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.subscriptions.push(monthlySub);
       } else {
         this.handleNoStructureSelected();
+        this.timelineItems = [];
+        if (this.enableJobsMonitor) {
+          this.loadRecentJobs();
+        }
       }
     }
+  }
+
+  loadTimeline(structureId: number): void {
+    this.loadingTimeline = true;
+    const currentUserId = Number(this.authService.getUser()?.id || 0);
+    const timelineSub = this.activityService.getRecentActivity(
+      5,
+      structureId,
+      'administrator,admin,superadmin',
+      1,
+      currentUserId > 0 ? currentUserId : undefined
+    ).subscribe({
+      next: (response) => {
+        this.timelineItems = response.items || [];
+        this.loadingTimeline = false;
+      },
+      error: () => {
+        this.timelineItems = [];
+        this.loadingTimeline = false;
+      }
+    });
+    this.subscriptions.push(timelineSub);
+  }
+
+  loadRecentJobs(): void {
+    this.loadingJobs = true;
+    this.errorJobs = null;
+    const jobsSub = this.activityService.getRecentJobs(
+      5,
+      this.jobStatusFilter || undefined,
+      this.jobTypeFilter || undefined,
+      0
+    ).subscribe({
+      next: (response) => {
+        this.recentJobs = response.items || [];
+        this.loadingJobs = false;
+      },
+      error: (error) => {
+        if (error?.status === 404) {
+          this.recentJobs = [];
+          this.errorJobs = null;
+          this.loadingJobs = false;
+          return;
+        }
+        this.recentJobs = [];
+        this.loadingJobs = false;
+        this.errorJobs = this.translocoService.translate('dashboard-jobs-error');
+      }
+    });
+    this.subscriptions.push(jobsSub);
+  }
+
+  applyJobFilters(): void {
+    this.loadRecentJobs();
+  }
+
+  clearJobFilters(): void {
+    this.jobStatusFilter = '';
+    this.jobTypeFilter = '';
+    this.loadRecentJobs();
+  }
+
+  getJobStatusLabelKey(status: string): string {
+    switch ((status || '').toLowerCase()) {
+      case 'queued':
+        return 'dashboard-jobs-status-queued';
+      case 'running':
+        return 'dashboard-jobs-status-running';
+      case 'retrying':
+        return 'dashboard-jobs-status-retrying';
+      case 'succeeded':
+        return 'dashboard-jobs-status-succeeded';
+      case 'failed':
+        return 'dashboard-jobs-status-failed';
+      default:
+        return status;
+    }
+  }
+
+  getJobStatusSeverity(status: string): 'warn' | 'info' | 'success' | 'danger' | 'secondary' {
+    switch ((status || '').toLowerCase()) {
+      case 'queued':
+        return 'secondary';
+      case 'running':
+      case 'retrying':
+        return 'warn';
+      case 'succeeded':
+        return 'success';
+      case 'failed':
+        return 'danger';
+      default:
+        return 'info';
+    }
+  }
+
+  getTimelineIcon(eventType: string): string {
+    if (eventType.startsWith('reservation.')) return 'pi pi-calendar';
+    if (eventType.startsWith('room.')) return 'pi pi-home';
+    if (eventType.startsWith('structure.')) return 'pi pi-building';
+    if (eventType.startsWith('user.')) return 'pi pi-user';
+    if (eventType.startsWith('association.')) return 'pi pi-link';
+    return 'pi pi-clock';
+  }
+
+  getTimelineWhen(isoDate: string): string {
+    const eventDate = new Date(isoDate);
+    if (isNaN(eventDate.getTime())) return '';
+    const deltaMinutes = Math.max(0, Math.floor((Date.now() - eventDate.getTime()) / 60000));
+    if (deltaMinutes < 1) return this.translocoService.translate('timeline-just-now');
+    if (deltaMinutes < 60) return this.translocoService.translate('timeline-minutes-ago', { count: deltaMinutes });
+    const deltaHours = Math.floor(deltaMinutes / 60);
+    if (deltaHours < 24) return this.translocoService.translate('timeline-hours-ago', { count: deltaHours });
+    const deltaDays = Math.floor(deltaHours / 24);
+    return this.translocoService.translate('timeline-days-ago', { count: deltaDays });
+  }
+
+  getTimelineDescription(item: ActivityItem): string {
+    const key = `timeline-event-${item.eventType.replaceAll('.', '-')}`;
+    return this.translocoService.translate(key, item.metadata || {});
   }
 
   updateChartData(): void {

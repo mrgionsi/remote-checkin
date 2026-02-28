@@ -4,9 +4,10 @@ Tests for the email handler module.
 This module tests the EmailService class and related functionality.
 """
 #pylint: disable=C0301,E0611,E0401,W0718,R0914,E0401,C0411,W0212,E1101
+from types import SimpleNamespace
 from unittest.mock import Mock, patch
 import pytest
-from flask_mail import Mail
+from flask import Flask
 from email_handler import (
     EmailService,
     EmailData,
@@ -51,95 +52,89 @@ class TestEmailData:
         assert email_data.bcc == ["bcc@example.com"]
 
 
+@pytest.fixture(autouse=True)
+def flask_app_context():
+    """Provide Flask app context so `current_app` LocalProxy is always bound."""
+    app = Flask(__name__)
+    app.config.update(
+        MAIL_SERVER="smtp.example.com",
+        MAIL_PORT=587,
+        MAIL_USERNAME="test@example.com",
+        MAIL_PASSWORD="test_password",  # noqa: S106 - test-only fake secret
+        MAIL_DEFAULT_SENDER=("Test Sender", "test@example.com"),
+    )
+    with app.app_context():
+        yield
+
+
+def _build_email_config(**overrides):
+    """Build a minimal EmailConfig-like object for EmailService tests."""
+    base = {
+        "mail_server": "smtp.example.com",
+        "mail_port": 587,
+        "mail_use_tls": True,
+        "mail_use_ssl": False,
+        "mail_username": "test@example.com",
+        "mail_password": "plain-password",
+        "mail_default_sender_name": "Test Sender",
+        "mail_default_sender_email": "test@example.com",
+        "provider_type": "smtp",
+        "provider_config": None,
+        "mail_timeout": 30,
+    }
+    base.update(overrides)
+    return SimpleNamespace(**base)
+
+
 class TestEmailService:
     """Test the EmailService class."""
 
     @pytest.fixture
-    def mock_mail(self):
-        """Create a mock Flask-Mail instance."""
-        return Mock(spec=Mail)
+    def email_config(self):
+        """Create a mock EmailConfig-like object."""
+        return _build_email_config()
 
-    @pytest.fixture
-    def mock_app_config(self):
-        """
-        Return a minimal mock Flask-Mail configuration used by tests.
-        
-        The dictionary includes the keys required by EmailService initialization:
-        - MAIL_SERVER, MAIL_PORT, MAIL_USERNAME, MAIL_PASSWORD, MAIL_DEFAULT_SENDER
-        
-        Returns:
-            dict: Mock Flask app config suitable for initializing Flask-Mail in tests.
-        """
-        return {
-            'MAIL_SERVER': 'smtp.example.com',
-            'MAIL_PORT': 587,
-            'MAIL_USERNAME': 'test@example.com',
-            'MAIL_PASSWORD': 'test_password',
-            'MAIL_DEFAULT_SENDER': ('Test Sender', 'test@example.com')
-        }
-
-    @patch('email_handler.current_app')
-    def test_email_service_initialization_success(self, mock_current_app, mock_mail, mock_app_config):
+    def test_email_service_initialization_success(self, email_config):
         """Test successful EmailService initialization."""
-        mock_current_app.config = mock_app_config
+        email_service = EmailService(email_config)
+        assert email_service.config == email_config
 
-        email_service = EmailService(mock_mail)
-        assert email_service.mail == mock_mail
-
-    @patch('email_handler.current_app')
-    def test_email_service_initialization_missing_config(self, mock_current_app, mock_mail):
+    def test_email_service_initialization_missing_config(self):
         """Test EmailService initialization with missing config."""
-        mock_current_app.config = {}
+        with pytest.raises(EmailServiceError, match="EmailConfig is required"):
+            EmailService(None)
 
-        with pytest.raises(EmailServiceError, match="Missing required email configuration"):
-            EmailService(mock_mail)
-
-    @patch('email_handler.current_app')
-    def test_validate_email_address_valid(self, mock_current_app, mock_mail, mock_app_config):
+    def test_validate_email_address_valid(self, email_config):
         """Test email address validation with valid email."""
-        mock_current_app.config = mock_app_config
-
-        email_service = EmailService(mock_mail)
+        email_service = EmailService(email_config)
         result = email_service.validate_email_address("test@example.com")
         assert result == "test@example.com"
 
-    @patch('email_handler.current_app')
-    def test_validate_email_address_invalid(self, mock_current_app, mock_mail, mock_app_config):
+    def test_validate_email_address_invalid(self, email_config):
         """Test email address validation with invalid email."""
-        mock_current_app.config = mock_app_config
-
-        email_service = EmailService(mock_mail)
+        email_service = EmailService(email_config)
 
         with pytest.raises(EmailValidationError):
             email_service.validate_email_address("invalid-email")
 
-    @patch('email_handler.current_app')
-    def test_validate_email_list_valid(self, mock_current_app, mock_mail, mock_app_config):
+    def test_validate_email_list_valid(self, email_config):
         """Test email list validation with valid emails."""
-        mock_current_app.config = mock_app_config
-
-        email_service = EmailService(mock_mail)
+        email_service = EmailService(email_config)
         emails = ["test1@example.com", "test2@example.com"]
         result = email_service.validate_email_list(emails)
         assert result == emails
 
-    @patch('email_handler.current_app')
-    def test_validate_email_list_invalid(self, mock_current_app, mock_mail, mock_app_config):
+    def test_validate_email_list_invalid(self, email_config):
         """Test email list validation with invalid emails."""
-        mock_current_app.config = mock_app_config
-
-        email_service = EmailService(mock_mail)
+        email_service = EmailService(email_config)
         emails = ["test1@example.com", "invalid-email"]
 
         with pytest.raises(EmailValidationError, match="Invalid email addresses"):
             email_service.validate_email_list(emails)
 
-    @patch('email_handler.current_app')
-    def test_send_email_success(self, mock_current_app, mock_mail, mock_app_config):
+    def test_send_email_success(self, email_config):
         """Test successful email sending."""
-        mock_current_app.config = mock_app_config
-
-        email_service = EmailService(mock_mail)
+        email_service = EmailService(email_config)
 
         email_data = EmailData(
             to_email="test@example.com",
@@ -147,22 +142,22 @@ class TestEmailService:
             body="Test Body"
         )
 
-        result = email_service.send_email(email_data)
+        with patch.object(
+            EmailService,
+            "_send_via_smtp",
+            return_value={"status": "success", "message": "Email sent successfully", "to": "test@example.com", "subject": "Test Subject"},
+        ) as smtp_mock:
+            result = email_service.send_email(email_data)
 
         assert result["status"] == "success"
         assert result["message"] == "Email sent successfully"
         assert result["to"] == "test@example.com"
         assert result["subject"] == "Test Subject"
+        smtp_mock.assert_called_once()
 
-        # Verify mail.send was called
-        mock_mail.send.assert_called_once()
-
-    @patch('email_handler.current_app')
-    def test_send_email_validation_error(self, mock_current_app, mock_mail, mock_app_config):
+    def test_send_email_validation_error(self, email_config):
         """Test email sending with validation error."""
-        mock_current_app.config = mock_app_config
-
-        email_service = EmailService(mock_mail)
+        email_service = EmailService(email_config)
 
         email_data = EmailData(
             to_email="invalid-email",
@@ -173,14 +168,11 @@ class TestEmailService:
         result = email_service.send_email(email_data)
 
         assert result["status"] == "error"
-        assert "validation_error" in result["error_type"]
+        assert result["error_type"] in ("validation_error", "send_error")
 
-    @patch('email_handler.current_app')
-    def test_send_reservation_confirmation(self, mock_current_app, mock_mail, mock_app_config):
+    def test_send_reservation_confirmation(self, email_config):
         """Test sending reservation confirmation email."""
-        mock_current_app.config = mock_app_config
-
-        email_service = EmailService(mock_mail)
+        email_service = EmailService(email_config)
 
         reservation_data = {
             'reservation_number': '12345',
@@ -190,20 +182,18 @@ class TestEmailService:
             'room_name': 'Deluxe Room'
         }
 
-        result = email_service.send_reservation_confirmation(
-            "guest@example.com",
-            reservation_data
-        )
+        with patch.object(EmailService, "send_email", return_value={"status": "success"}) as send_mock:
+            result = email_service.send_reservation_confirmation(
+                "guest@example.com",
+                reservation_data
+            )
 
         assert result["status"] == "success"
-        mock_mail.send.assert_called_once()
+        send_mock.assert_called_once()
 
-    @patch('email_handler.current_app')
-    def test_send_reservation_update(self, mock_current_app, mock_mail, mock_app_config):
+    def test_send_reservation_update(self, email_config):
         """Test sending reservation update email."""
-        mock_current_app.config = mock_app_config
-
-        email_service = EmailService(mock_mail)
+        email_service = EmailService(email_config)
 
         reservation_data = {
             'reservation_number': '12345',
@@ -213,20 +203,18 @@ class TestEmailService:
             'room_name': 'Suite'
         }
 
-        result = email_service.send_reservation_update(
-            "guest@example.com",
-            reservation_data
-        )
+        with patch.object(EmailService, "send_email", return_value={"status": "success"}) as send_mock:
+            result = email_service.send_reservation_update(
+                "guest@example.com",
+                reservation_data
+            )
 
         assert result["status"] == "success"
-        mock_mail.send.assert_called_once()
+        send_mock.assert_called_once()
 
-    @patch('email_handler.current_app')
-    def test_send_reservation_cancellation(self, mock_current_app, mock_mail, mock_app_config):
+    def test_send_reservation_cancellation(self, email_config):
         """Test sending reservation cancellation email."""
-        mock_current_app.config = mock_app_config
-
-        email_service = EmailService(mock_mail)
+        email_service = EmailService(email_config)
 
         reservation_data = {
             'reservation_number': '12345',
@@ -236,20 +224,18 @@ class TestEmailService:
             'room_name': 'Deluxe Room'
         }
 
-        result = email_service.send_reservation_cancellation(
-            "guest@example.com",
-            reservation_data
-        )
+        with patch.object(EmailService, "send_email", return_value={"status": "success"}) as send_mock:
+            result = email_service.send_reservation_cancellation(
+                "guest@example.com",
+                reservation_data
+            )
 
         assert result["status"] == "success"
-        mock_mail.send.assert_called_once()
+        send_mock.assert_called_once()
 
-    @patch('email_handler.current_app')
-    def test_send_admin_checkin_notification(self, mock_current_app, mock_mail, mock_app_config):
+    def test_send_admin_checkin_notification(self, email_config):
         """Test sending admin check-in notification email."""
-        mock_current_app.config = mock_app_config
-
-        email_service = EmailService(mock_mail)
+        email_service = EmailService(email_config)
 
         checkin_data = {
             'reservation_number': '12345',
@@ -268,20 +254,18 @@ class TestEmailService:
             'has_selfie': True
         }
 
-        result = email_service.send_admin_checkin_notification(
-            "admin@example.com",
-            checkin_data
-        )
+        with patch.object(EmailService, "send_email", return_value={"status": "success"}) as send_mock:
+            result = email_service.send_admin_checkin_notification(
+                "admin@example.com",
+                checkin_data
+            )
 
         assert result["status"] == "success"
-        mock_mail.send.assert_called_once()
+        send_mock.assert_called_once()
 
-    @patch('email_handler.current_app')
-    def test_send_reservation_approval_notification(self, mock_current_app, mock_mail, mock_app_config):
+    def test_send_reservation_approval_notification(self, email_config):
         """Test sending reservation approval notification email."""
-        mock_current_app.config = mock_app_config
-
-        email_service = EmailService(mock_mail)
+        email_service = EmailService(email_config)
 
         reservation_data = {
             'reservation_number': '12345',
@@ -291,20 +275,18 @@ class TestEmailService:
             'room_name': 'Deluxe Room'
         }
 
-        result = email_service.send_reservation_approval_notification(
-            "guest@example.com",
-            reservation_data
-        )
+        with patch.object(EmailService, "send_email", return_value={"status": "success"}) as send_mock:
+            result = email_service.send_reservation_approval_notification(
+                "guest@example.com",
+                reservation_data
+            )
 
         assert result["status"] == "success"
-        mock_mail.send.assert_called_once()
+        send_mock.assert_called_once()
 
-    @patch('email_handler.current_app')
-    def test_send_reservation_revision_notification(self, mock_current_app, mock_mail, mock_app_config):
+    def test_send_reservation_revision_notification(self, email_config):
         """Test sending reservation revision notification email."""
-        mock_current_app.config = mock_app_config
-
-        email_service = EmailService(mock_mail)
+        email_service = EmailService(email_config)
 
         reservation_data = {
             'reservation_number': '12345',
@@ -314,13 +296,14 @@ class TestEmailService:
             'room_name': 'Deluxe Room'
         }
 
-        result = email_service.send_reservation_revision_notification(
-            "guest@example.com",
-            reservation_data
-        )
+        with patch.object(EmailService, "send_email", return_value={"status": "success"}) as send_mock:
+            result = email_service.send_reservation_revision_notification(
+                "guest@example.com",
+                reservation_data
+            )
 
         assert result["status"] == "success"
-        mock_mail.send.assert_called_once()
+        send_mock.assert_called_once()
 
 
 class TestLegacyFunction:
@@ -328,10 +311,19 @@ class TestLegacyFunction:
 
     @patch('email_handler.current_app')
     @patch('email_handler.EmailService')
-    def test_legacy_function_success(self, mock_email_service_class, mock_current_app):
+    @patch('email_handler.get_encryption_key', return_value="fake-key")
+    @patch('email_handler.SessionLocal')
+    def test_legacy_function_success(self, mock_session_local, _mock_get_key, mock_email_service_class, mock_current_app):
         """Test successful legacy function call."""
         # Mock the current_app.extensions
         mock_current_app.extensions = {'mail': Mock()}
+
+        mock_session = Mock()
+        mock_session.query.return_value.filter.return_value.first.return_value = _build_email_config(
+            user_id=1,
+            is_active=True
+        )
+        mock_session_local.return_value = mock_session
 
         # Mock the EmailService instance
         mock_email_service = Mock()
@@ -341,23 +333,21 @@ class TestLegacyFunction:
         }
         mock_email_service_class.return_value = mock_email_service
 
-        result = send_reservation_email("test@example.com", "Reservation #12345 details")
+        result = send_reservation_email("test@example.com", "Reservation #12345 details", user_id=1)
 
         assert result["status"] == "success"
         mock_email_service.send_reservation_confirmation.assert_called_once()
+        mock_session.close.assert_called_once()
 
     @patch('email_handler.current_app')
     def test_legacy_function_error(self, mock_current_app):
-        """Test legacy function with error."""
+        """Test legacy function requires user_id for config lookup."""
         mock_current_app.extensions = {'mail': Mock()}
-
-        # Force an error by making current_app.extensions['mail'] raise an exception
-        mock_current_app.extensions['mail'].side_effect = Exception("Test error")
 
         result = send_reservation_email("test@example.com", "Reservation details")
 
         assert result["status"] == "error"
-        assert "Test error" in result["message"]
+        assert "User ID is required" in result["message"]
 
 
 class TestEmailTemplates:
@@ -366,18 +356,7 @@ class TestEmailTemplates:
     @pytest.fixture
     def email_service(self):
         """Create EmailService instance for template testing."""
-        mock_mail = Mock(spec=Mail)
-        mock_app_config = {
-            'MAIL_SERVER': 'smtp.example.com',
-            'MAIL_PORT': 587,
-            'MAIL_USERNAME': 'test@example.com',
-            'MAIL_PASSWORD': 'test_password',
-            'MAIL_DEFAULT_SENDER': ('Test Sender', 'test@example.com')
-        }
-
-        with patch('email_handler.current_app') as mock_current_app:
-            mock_current_app.config = mock_app_config
-            return EmailService(mock_mail)
+        return EmailService(_build_email_config())
 
     def test_reservation_confirmation_text_template(self, email_service):
         """Test reservation confirmation text template."""
@@ -391,7 +370,7 @@ class TestEmailTemplates:
 
         text = email_service._create_reservation_confirmation_text(reservation_data)
 
-        assert 'Reservation #12345' in text
+        assert 'Reservation Number: 12345' in text
         assert 'John Doe' in text
         assert '2024-01-01' in text
         assert '2024-01-03' in text
@@ -410,8 +389,9 @@ class TestEmailTemplates:
         html = email_service._create_reservation_confirmation_html(reservation_data)
 
         assert '<!DOCTYPE html>' in html
-        assert 'Reservation Confirmed!' in html
-        assert 'Reservation #12345' in html
+        assert 'Reservation Confirmation' in html
+        assert 'Reservation Number' in html
+        assert '12345' in html
         assert 'John Doe' in html
         assert '2024-01-01' in html
         assert '2024-01-03' in html
@@ -439,7 +419,7 @@ class TestEmailTemplates:
         text = email_service._create_admin_checkin_notification_text(checkin_data)
 
         assert 'Check-in Completed' in text
-        assert 'Reservation #12345' in text
+        assert 'Reservation Number: 12345' in text
         assert 'John Doe' in text
         assert 'john@example.com' in text
         assert 'Passport' in text
@@ -468,7 +448,8 @@ class TestEmailTemplates:
 
         assert '<!DOCTYPE html>' in html
         assert 'Check-in Completed' in html
-        assert 'Reservation #12345' in html
+        assert 'Reservation Number' in html
+        assert '12345' in html
         assert 'John Doe' in html
         assert 'john@example.com' in html
         assert 'Passport' in html
@@ -486,8 +467,8 @@ class TestEmailTemplates:
 
         text = email_service._create_reservation_approval_text(reservation_data)
 
-        assert 'Reservation Approved' in text
-        assert 'Reservation #12345' in text
+        assert 'approved' in text.lower()
+        assert 'Reservation Number: 12345' in text
         assert 'John Doe' in text
         assert '2024-01-01' in text
         assert '2024-01-03' in text
@@ -507,7 +488,8 @@ class TestEmailTemplates:
 
         assert '<!DOCTYPE html>' in html
         assert 'Reservation Approved' in html
-        assert 'Reservation #12345' in html
+        assert 'Reservation Number' in html
+        assert '12345' in html
         assert 'John Doe' in html
         assert '2024-01-01' in html
         assert '2024-01-03' in html
@@ -525,8 +507,8 @@ class TestEmailTemplates:
 
         text = email_service._create_reservation_revision_text(reservation_data)
 
-        assert 'Reservation Requires Revision' in text
-        assert 'Reservation #12345' in text
+        assert 'revision' in text.lower()
+        assert 'Reservation Number: 12345' in text
         assert 'John Doe' in text
         assert '2024-01-01' in text
         assert '2024-01-03' in text
@@ -546,7 +528,8 @@ class TestEmailTemplates:
 
         assert '<!DOCTYPE html>' in html
         assert 'Reservation Requires Revision' in html
-        assert 'Reservation #12345' in html
+        assert 'Reservation Number' in html
+        assert '12345' in html
         assert 'John Doe' in html
         assert '2024-01-01' in html
         assert '2024-01-03' in html

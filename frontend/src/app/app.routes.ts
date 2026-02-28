@@ -19,6 +19,9 @@ import { SuperadminUsersComponent } from './admin/superadmin/users/users.compone
 import { SuperadminAssociationsComponent } from './admin/superadmin/associations/associations.component';
 import { CheckinCompleteComponent } from './checkin-complete/checkin-complete.component';
 import { ChangePasswordComponent } from './admin/change-password/change-password.component';
+import { ActivityTimelineComponent } from './admin/activity-timeline/activity-timeline.component';
+import { JobsMonitorComponent } from './admin/jobs-monitor/jobs-monitor.component';
+import { jobsFeatureGuard } from './guards/jobs-feature.guard';
 
 export const routes: Routes = [
     {
@@ -53,6 +56,8 @@ export const routes: Routes = [
             { path: 'admin-info', component: AdminInfoComponent, canActivate: [authGuard] },
             { path: 'change-password', component: ChangePasswordComponent, canActivate: [authGuard] },
             { path: 'settings', component: SettingsComponent, canActivate: [authGuard] },
+            { path: 'activity', component: ActivityTimelineComponent, canActivate: [authGuard] },
+            { path: 'jobs', component: JobsMonitorComponent, canActivate: [authGuard, jobsFeatureGuard] },
             {
                 path: 'superadmin',
                 component: SuperadminComponent,
@@ -60,6 +65,8 @@ export const routes: Routes = [
                 children: [
                     { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
                     { path: 'dashboard', component: SuperadminDashboardComponent },
+                    { path: 'activity', component: ActivityTimelineComponent },
+                    { path: 'jobs', component: JobsMonitorComponent, canActivate: [jobsFeatureGuard] },
                     { path: 'structures', component: SuperadminStructuresComponent },
                     { path: 'users', component: SuperadminUsersComponent },
                     { path: 'associations', component: SuperadminAssociationsComponent },
