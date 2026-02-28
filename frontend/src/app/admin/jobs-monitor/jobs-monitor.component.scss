@@ -1,0 +1,102 @@
+.jobs-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.jobs-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  border: 1px solid var(--surface-300);
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
+
+  h2 {
+    margin: 0 0 0.25rem 0;
+  }
+
+  p {
+    margin: 0;
+    color: var(--ink-500);
+  }
+}
+
+.jobs-filters {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto auto;
+  gap: 0.5rem;
+
+  select,
+  input,
+  button {
+    border: 1px solid var(--surface-300);
+    border-radius: 8px;
+    padding: 0.55rem 0.7rem;
+    font-size: 0.9rem;
+  }
+
+  button {
+    background: var(--ink-900);
+    color: #fff;
+    cursor: pointer;
+  }
+
+  button.secondary {
+    background: #fff;
+    color: var(--ink-800);
+  }
+}
+
+.jobs-table {
+  background: #fff;
+  border: 1px solid var(--surface-300);
+  border-radius: 12px;
+  overflow: auto;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th,
+  td {
+    text-align: left;
+    padding: 0.7rem 0.8rem;
+    border-bottom: 1px solid var(--surface-200);
+    vertical-align: top;
+  }
+
+  th {
+    background: var(--surface-100);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+}
+
+.jobs-pagination {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: flex-end;
+}
+
+.jobs-error,
+.jobs-empty,
+.jobs-loading {
+  background: #fff;
+  border: 1px solid var(--surface-300);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.jobs-error {
+  color: #b42318;
+}
+
+@media (max-width: 900px) {
+  .jobs-filters {
+    grid-template-columns: 1fr;
+  }
+}

@@ -88,6 +88,10 @@
           <i class="pi pi-sitemap"></i>
           {{ 'superadmin-dashboard-action-associations' | transloco }}
         </a>
+        <a routerLink="/admin/superadmin/jobs" class="panel-action" *ngIf="enableJobsMonitor">
+          <i class="pi pi-briefcase"></i>
+          {{ 'admin-jobs-label' | transloco }}
+        </a>
       </div>
     </section>
 
@@ -103,7 +107,7 @@
       </ul>
     </section>
 
-    <section class="panel-card">
+    <section class="panel-card" *ngIf="enableJobsMonitor">
       <div class="panel-header">
         <h3>{{ 'timeline-title' | transloco }}</h3>
         <span class="panel-caption">{{ 'timeline-subtitle' | transloco }}</span>
@@ -117,6 +121,51 @@
         {{ 'timeline-empty' | transloco }}
       </p>
       <div class="loading" *ngIf="loadingTimeline">
+        <div class="skeleton-row" *ngFor="let n of [1,2,3]"></div>
+      </div>
+    </section>
+
+    <section class="panel-card">
+      <div class="panel-header">
+        <h3>{{ 'dashboard-jobs-title' | transloco }}</h3>
+        <span class="panel-caption">{{ 'dashboard-jobs-subtitle' | transloco }}</span>
+      </div>
+      <div class="jobs-filters">
+        <select [(ngModel)]="jobStatusFilter" (change)="applyJobFilters()">
+          <option value="">{{ 'dashboard-jobs-filter-all-status' | transloco }}</option>
+          <option value="queued">{{ 'dashboard-jobs-status-queued' | transloco }}</option>
+          <option value="running">{{ 'dashboard-jobs-status-running' | transloco }}</option>
+          <option value="retrying">{{ 'dashboard-jobs-status-retrying' | transloco }}</option>
+          <option value="succeeded">{{ 'dashboard-jobs-status-succeeded' | transloco }}</option>
+          <option value="failed">{{ 'dashboard-jobs-status-failed' | transloco }}</option>
+        </select>
+        <input type="text" [(ngModel)]="jobTypeFilter" [placeholder]="'dashboard-jobs-filter-job-type' | transloco" />
+        <div class="jobs-actions">
+          <button type="button" (click)="applyJobFilters()">{{ 'dashboard-jobs-filter-apply' | transloco }}</button>
+          <button type="button" class="secondary" (click)="clearJobFilters()">
+            {{ 'dashboard-jobs-filter-clear' | transloco }}
+          </button>
+        </div>
+      </div>
+      <ul class="panel-list jobs-list" *ngIf="!loadingJobs && recentJobs.length > 0">
+        <li *ngFor="let item of recentJobs">
+          <span class="job-line">
+            <i class="pi pi-cog"></i>
+            {{ item.jobType }}
+          </span>
+          <span class="job-meta">
+            {{ getJobStatusLabelKey(item.status) | transloco }} ·
+            {{ 'dashboard-jobs-attempts' | transloco:{ attempts: item.attempts, max: item.maxAttempts } }}
+          </span>
+        </li>
+      </ul>
+      <p class="panel-caption" *ngIf="!loadingJobs && !errorJobs && recentJobs.length === 0">
+        {{ 'dashboard-jobs-empty' | transloco }}
+      </p>
+      <p class="panel-caption" *ngIf="!loadingJobs && errorJobs">
+        {{ errorJobs }}
+      </p>
+      <div class="loading" *ngIf="loadingJobs">
         <div class="skeleton-row" *ngFor="let n of [1,2,3]"></div>
       </div>
     </section>
