@@ -5,7 +5,7 @@
       <p>{{ 'dashboard-jobs-subtitle' | transloco }}</p>
     </div>
     <div class="jobs-page__meta">
-      <span>{{ offset + 1 }}-{{ offset + items.length }} / {{ total }}</span>
+      <span>{{ items.length ? (offset + 1) : 0 }}-{{ offset + items.length }} / {{ total }}</span>
     </div>
   </header>
 
