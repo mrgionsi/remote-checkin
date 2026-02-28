@@ -2,16 +2,12 @@
     <div class="header__brand">
         <ng-container *ngIf="brandRouterLink; else brandWithoutLink">
             <a [routerLink]="brandRouterLink" class="brand__link">
-                <img class="brand__logo" src="/assets/brand/logo-256.png" alt="Remote Check-in logo" />
-                <span class="brand__mark">{{ 'landing.brand.title' | transloco }}</span>
-                <span class="brand__tagline">{{ 'landing.brand.tagline' | transloco }}</span>
+                <img class="brand__logo" src="/assets/brand/logo-horizontal.png" alt="Remote Check-in logo" />
             </a>
         </ng-container>
         <ng-template #brandWithoutLink>
             <div class="brand__link brand__link--static">
-                <img class="brand__logo" src="/assets/brand/logo-256.png" alt="Remote Check-in logo" />
-                <span class="brand__mark">{{ 'landing.brand.title' | transloco }}</span>
-                <span class="brand__tagline">{{ 'landing.brand.tagline' | transloco }}</span>
+                <img class="brand__logo" src="/assets/brand/logo-horizontal.png" alt="Remote Check-in logo" />
             </div>
         </ng-template>
     </div>
