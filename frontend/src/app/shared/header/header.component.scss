@@ -28,11 +28,8 @@
 
 .brand__link {
     text-decoration: none;
-    display: grid;
-    grid-template-columns: auto 1fr;
-    grid-template-rows: auto auto;
-    column-gap: 0.65rem;
-    row-gap: 0.1rem;
+    display: inline-flex;
+    align-items: center;
     transition: opacity 0.2s ease;
 
     &:hover {
@@ -45,25 +42,9 @@
 }
 
 .brand__logo {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    border: 1px solid #e6e9ee;
-    grid-row: 1 / span 2;
-    align-self: center;
-    background: #ffffff;
-}
-
-.brand__mark {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--ink-900);
-    font-family: var(--font-display);
-}
-
-.brand__tagline {
-    font-size: 0.85rem;
-    color: var(--ink-500);
+    width: 210px;
+    height: auto;
+    display: block;
 }
 
 .header__nav {
@@ -224,6 +205,10 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+    .brand__logo {
+        width: 170px;
+    }
+
     .app-header {
         grid-template-columns: 1fr;
         gap: 1rem;
