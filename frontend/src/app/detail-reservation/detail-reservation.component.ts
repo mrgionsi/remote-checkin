@@ -40,6 +40,7 @@ export class DetailReservationComponent implements OnInit {
   private subscriptions: Subscription[] = [];
   people: any[] = [];  // Initialize as an empty array
   reservation_details: any = {}; // Initialize as an empty object
+  noClientDataYet = false;
   reservationId: any;
   reservation_status: any;
   loading = true;
@@ -138,6 +139,13 @@ export class DetailReservationComponent implements OnInit {
 
           this.client_reservationService.getClientByReservationId(this.reservation_details.id).subscribe({
             next: (r) => {
+              if (!Array.isArray(r) || r.length === 0) {
+                this.people = [];
+                this.noClientDataYet = true;
+                return;
+              }
+
+              this.noClientDataYet = false;
               this.people = r;
               this.people.forEach(person => {
                 const photoSub = this.client_reservationService.getUserPhoto(this.reservation_details.id_reference, person.name, person.surname, person.cf).subscribe({
@@ -180,8 +188,20 @@ export class DetailReservationComponent implements OnInit {
               })
 
             },
-            error: (err) => {
-              this.messageService.add({ severity: 'warn', summary: 'Error', detail: 'Error fetching client details.' });
+            error: (err: any) => {
+              const noDataYet = err?.status === 404 && String(err?.error?.error || '').includes('No clients found');
+              if (noDataYet) {
+                this.people = [];
+                this.noClientDataYet = true;
+                return;
+              }
+
+              this.noClientDataYet = false;
+              this.messageService.add({
+                severity: 'error',
+                summary: this.translocoService.translate('error'),
+                detail: this.translocoService.translate('reservation-client-details-fetch-error')
+              });
             },
             complete: () => {
 

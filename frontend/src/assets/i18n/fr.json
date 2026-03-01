@@ -150,6 +150,8 @@
   "name-header": "Nom",
   "not-found-label": "Non trouvé",
   "people-associated-title": "Personnes associées à cette réserve",
+  "reservation-client-details-no-data-yet": "Aucune donnée pour le moment. Le client n'a pas encore terminé l'enregistrement.",
+  "reservation-client-details-fetch-error": "Erreur lors de la récupération des détails client.",
   "province-header": "Province",
   "remove-btn": "Retirer",
   "rooms-label": "Traitement des chambres",

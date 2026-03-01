@@ -188,6 +188,8 @@
   "status-pending": "In attesa",
   "remove-btn": "Elimina",
   "people-associated-title": "Persone associate a questa prenotazione",
+  "reservation-client-details-no-data-yet": "Nessun dato ancora disponibile. L'ospite non ha ancora completato il check-in.",
+  "reservation-client-details-fetch-error": "Errore durante il recupero dei dettagli cliente.",
   "front-photo-header": "Foto fronte",
   "back-photo-header": "Foto Retro",
   "selfie-photo-header": "Selfie",

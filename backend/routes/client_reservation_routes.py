@@ -11,7 +11,7 @@ Endpoints:
 1. GET /api/v1/reservations/<int:reservation_id>/clients
    - Retrieves all clients associated with a given reservation ID.
    - Returns a list of client details in JSON format.
-   - Returns 404 if no clients are found.
+   - Returns 200 with an empty list if no clients are found yet.
 
 2. POST /api/v1/reservations/<int:reservation_id>/client-images
    - Checks for the existence of a client's identity images (front, back, selfie) for a reservation.
@@ -71,7 +71,7 @@ def get_clients_by_reservation(reservation_id):
         reservation_id (int): The ID of the reservation.
 
     Returns:
-        flask.Response: JSON array containing client details or a 404 error if no clients found.
+        flask.Response: JSON array containing client details. Returns 200 with an empty list when no clients are found.
     """
     db = SessionLocal()
     try:
@@ -100,7 +100,7 @@ def get_clients_by_reservation(reservation_id):
         )
 
         if not client_reservations:
-            return jsonify({"error": f"No clients found for reservation ID {reservation_id}"}), 404
+            return jsonify([]), 200
 
         return jsonify([client.to_dict() for client in client_reservations])
 

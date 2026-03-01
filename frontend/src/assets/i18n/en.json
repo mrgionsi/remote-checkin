@@ -188,6 +188,8 @@
   "status-pending": "Pending",
   "remove-btn": "Remove",
   "people-associated-title": "People Associated with this Reservation",
+  "reservation-client-details-no-data-yet": "No data yet. The guest has not completed check-in.",
+  "reservation-client-details-fetch-error": "Error fetching client details.",
   "front-photo-header": "Front Photo",
   "back-photo-header": "Back Photo",
   "selfie-photo-header": "Selfie Photo",

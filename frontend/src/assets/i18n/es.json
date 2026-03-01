@@ -60,6 +60,8 @@
   "success": "Éxito",
   "room-header": "Habitación",
   "people-associated-title": "Personas asociadas a esta reserva",
+  "reservation-client-details-no-data-yet": "Aún no hay datos. El huésped todavía no ha completado el check-in.",
+  "reservation-client-details-fetch-error": "Error al obtener los datos del cliente.",
   "front-photo-header": "Foto frontal",
   "back-photo-header": "Foto trasera",
   "selfie-photo-header": "Foto selfie",

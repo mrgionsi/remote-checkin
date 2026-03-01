@@ -53,6 +53,8 @@
   "end-date-error": "Das Enddatum muss nach dem Startdatum liegen.",
   "status-label": "Status",
   "people-associated-title": "Mit dieser Reservierung verbundene Personen",
+  "reservation-client-details-no-data-yet": "Noch keine Daten. Der Gast hat den Check-in noch nicht abgeschlossen.",
+  "reservation-client-details-fetch-error": "Fehler beim Abrufen der Kundendaten.",
   "front-photo-header": "Vorderes Foto",
   "back-photo-header": "Rückseitiges Foto",
   "selfie-photo-header": "Selfie-Foto",

@@ -257,6 +257,80 @@ test.describe('Frontend smoke', () => {
     await expect(page).toHaveURL(/\/admin\/dashboard/);
   });
 
+  test('reservation details shows no-data message when guest has not checked in yet', async ({ page }) => {
+    await seedAuthSession(page, 'admin', {
+      selectedStructureId: '1',
+      structures: [{ id: 1, name: 'Main Structure' }]
+    });
+
+    await page.route('**/api/v1/reservations/admin/128', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 128,
+          id_reference: 'RES-128',
+          name_reference: 'No Check-in Yet',
+          status: 'Pending',
+          room: {
+            id: 31,
+            id_structure: 1,
+            name: 'Room Y'
+          }
+        })
+      });
+    });
+    await page.route('**/api/v1/rooms**', async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+    });
+    await page.route('**/api/v1/reservations/128/clients', async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+    });
+
+    await page.goto('/admin/reservation-details/128');
+    await expect(page.getByText('No data yet. The guest has not completed check-in.')).toBeVisible();
+    await expect(page.locator('.p-toast-message.p-toast-message-error')).toHaveCount(0);
+  });
+
+  test('reservation details shows error message when client details fetch fails', async ({ page }) => {
+    await seedAuthSession(page, 'admin', {
+      selectedStructureId: '1',
+      structures: [{ id: 1, name: 'Main Structure' }]
+    });
+
+    await page.route('**/api/v1/reservations/admin/129', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 129,
+          id_reference: 'RES-129',
+          name_reference: 'Broken Data',
+          status: 'Pending',
+          room: {
+            id: 32,
+            id_structure: 1,
+            name: 'Room Z'
+          }
+        })
+      });
+    });
+    await page.route('**/api/v1/rooms**', async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+    });
+    await page.route('**/api/v1/reservations/129/clients', async (route) => {
+      await route.fulfill({
+        status: 500,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'Database error' })
+      });
+    });
+
+    await page.goto('/admin/reservation-details/129');
+    await expect(page.locator('.p-toast-message.p-toast-message-error')).toBeVisible();
+    await expect(page.getByText('Error fetching client details.')).toBeVisible();
+  });
+
   test('superadmin route is denied for admin role and allowed for superadmin role', async ({ page }) => {
     await seedAuthSession(page, 'admin');
     await page.route('**/api/v1/reservations/structure/*', async (route) => {

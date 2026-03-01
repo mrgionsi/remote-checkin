@@ -181,7 +181,10 @@
 </p-card>
 
 <h3>{{ 'people-associated-title' | transloco }}</h3>
-<p-table [value]="people" responsiveLayout="scroll">
+<div *ngIf="noClientDataYet" class="client-empty-message">
+    {{ 'reservation-client-details-no-data-yet' | transloco }}
+</div>
+<p-table *ngIf="!noClientDataYet" [value]="people" responsiveLayout="scroll">
     <ng-template pTemplate="header">
         <tr>
             <th scope="col">{{ 'status-header' | transloco }}</th>
